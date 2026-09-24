@@ -274,6 +274,23 @@ function outsideError(sourcePath: string, chunksDir: string, remedy: string): st
   return `Error: the source file ${sourcePath} is outside ${dirname(chunksDir)}, the parent folder of the chunk folder. ${remedy}\n`;
 }
 
+/**
+ * Reads the chunk file `filename` of the chunk folder `chunksDir`. Returns undefined when the file
+ * does not exist. Throws when the path is not a regular file (a symbolic link, a junction or a
+ * folder) or when its real path is outside the real chunk folder: a link would let a manifest
+ * read any file into the merged source.
+ */
+function readChunk(chunksDir: string, filename: string): string | undefined {
+  const chunkPath = join(chunksDir, filename);
+  const stat = lstatSync(chunkPath, { throwIfNoEntry: false });
+  if (!stat) return undefined;
+  if (!stat.isFile()) throw new Error(`the chunk ${chunkPath} is not a regular file`);
+  if (isOutsideText(realpathSync.native(chunksDir), realpathSync.native(chunkPath))) {
+    throw new Error(`the chunk ${chunkPath} is outside the chunk folder`);
+  }
+  return readFileSync(chunkPath, "utf8");
+}
+
 /** A line writer on top of `io.stdout`, in the style of `console.log`. */
 function lineWriter(io: Io): (text?: string) => void {
   return (text = "") => io.stdout(`${text}\n`);
@@ -436,12 +453,11 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   const chunkContents: string[] = [];
   let modifiedCount = 0;
   for (const chunk of manifest.chunks) {
-    const chunkPath = join(chunksDir, chunk.filename);
-    if (!existsSync(chunkPath)) {
-      io.stderr(`Error: Missing chunk file: ${chunkPath}\n`);
+    const content = readChunk(chunksDir, chunk.filename);
+    if (content === undefined) {
+      io.stderr(`Error: Missing chunk file: ${join(chunksDir, chunk.filename)}\n`);
       return 1;
     }
-    const content = readFileSync(chunkPath, "utf8");
     const modified = hash(content) !== chunk.hash;
     if (modified) modifiedCount++;
     log(
@@ -547,14 +563,13 @@ function status(manifestFile: string, options: Options, io: Io): number {
   log(`  ${"─".repeat(70)}`);
 
   for (const chunk of manifest.chunks) {
-    const chunkPath = join(chunksDir, chunk.filename);
+    const content = readChunk(chunksDir, chunk.filename);
     let state: string;
     let lines = chunk.lineCount;
-    if (!existsSync(chunkPath)) {
+    if (content === undefined) {
       state = "MISSING";
       missingCount++;
     } else {
-      const content = readFileSync(chunkPath, "utf8");
       lines = content.split("\n").length;
       if (hash(content) !== chunk.hash) {
         state = "MODIFIED";

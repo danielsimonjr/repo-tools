@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `chunk merge` and `chunk status` read only regular chunk files in the chunk folder. A chunk
+  file that is a symbolic link, a junction or a folder, or whose real path is outside the real
+  chunk folder, gives exit 1 with a message. Before, a chunk file that was a symbolic link read
+  any file into the merged source.
 - `chunk merge` and `chunk status` compare the real paths when they check that the source file
   is in the parent folder of the chunk folder. Before, the check compared the path text only:
   a `sourceFile` such as `../link/t.md`, where `link` is a junction or a symbolic link to an

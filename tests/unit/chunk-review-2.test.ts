@@ -10,6 +10,7 @@ import {
   rmdirSync,
   rmSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -125,4 +126,53 @@ describe("chunk: a link in the source path does not escape the parent folder (fi
       expect(readFileSync(join(inside, "doc.md"), "utf8")).toBe("# Part\n\nNew text.\n");
     });
   });
+});
+
+/**
+ * Creates a file symbolic link at `link` to `target`, runs `body`, and removes the link. Returns
+ * false, and runs nothing, when this machine does not allow the link (EPERM on Windows without
+ * the privilege).
+ */
+async function withFileLink(target: string, link: string, body: () => Promise<void>) {
+  try {
+    symlinkSync(target, link, "file");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EPERM") return false;
+    throw error;
+  }
+  try {
+    await body();
+  } finally {
+    unlinkSync(link);
+  }
+  return true;
+}
+
+describe("chunk: a chunk file must be a regular file in the chunk folder (finding 2)", () => {
+  for (const action of ["merge", "status"]) {
+    test(`${action} refuses a chunk file that is a symbolic link`, async () => {
+      const p = plant(`chunk-link-${action}`, manifestOf("../doc.md"));
+      put(join(p.b, "doc.md"), "old\n");
+      const secret = put(join(p.victim, "secret.txt"), "SECRET TEXT\n");
+      rmSync(join(p.chunks, "001-part.md"));
+      const ran = await withFileLink(secret, join(p.chunks, "001-part.md"), async () => {
+        const r = await chunk([action, p.manifest]);
+        expect(r.code).toBe(1);
+        expect(r.err).toContain("not a regular file");
+        expect(readFileSync(join(p.b, "doc.md"), "utf8")).toBe("old\n");
+      });
+      if (!ran) console.warn(`skipped: this machine does not allow a file symbolic link`);
+    });
+
+    test(`${action} refuses a chunk file that is a junction`, async () => {
+      const p = plant(`chunk-junction-${action}`, manifestOf("../doc.md"));
+      put(join(p.b, "doc.md"), "old\n");
+      rmSync(join(p.chunks, "001-part.md"));
+      await withJunction(p.victim, join(p.chunks, "001-part.md"), async () => {
+        const r = await chunk([action, p.manifest]);
+        expect(r.code).toBe(1);
+        expect(r.err).toContain("not a regular file");
+      });
+    });
+  }
 });
