@@ -43,6 +43,8 @@ Options:
                        name without ".compact". A folder name does not change.
                        This version restores JSON only. -d on any other format
                        exits 1 and writes no file.
+  --yes                With -d: write over an existing output file. Without --yes, -d
+                       exits 1 when the output file exists, so edits are not lost.
 
 Batch options:
   -b, --batch          Process many files.
@@ -87,6 +89,7 @@ interface Options {
   decompress: boolean;
   recursive: boolean;
   pattern: string;
+  yes: boolean;
 }
 
 interface BatchResult {
@@ -110,6 +113,7 @@ function parseArgs(args: readonly string[]): Options {
     decompress: false,
     recursive: false,
     pattern: "",
+    yes: false,
   };
   // Returns the value after the option at `i`. A missing value, or a value that starts with "-",
   // is an error: the original tool used a default value without a message.
@@ -138,6 +142,8 @@ function parseArgs(args: readonly string[]): Options {
       o.batch = true;
     } else if (arg === "-d" || arg === "--decompress") {
       o.decompress = true;
+    } else if (arg === "--yes") {
+      o.yes = true;
     } else if (arg === "-r" || arg === "--recursive") {
       o.recursive = true;
     } else if (arg === "-p" || arg === "--pattern") {
@@ -290,6 +296,16 @@ function restoredName(file: string): string {
   return join(dirname(file), `${basename(file, ext)}.restored${ext}`);
 }
 
+/**
+ * Throws when `-d` would write over the existing file `output` without `--yes`. The file can hold
+ * edits made after the compression, and `-d` keeps no backup.
+ */
+function assertCanRestore(output: string, o: Options): void {
+  if (!o.dryRun && !o.yes && existsSync(output)) {
+    throw new Error(`${output} exists. Nothing was written. Use --yes to write over it.`);
+  }
+}
+
 // A compact file is written byte for byte (a plain write, not `writeLf`): the output keeps the
 // line endings of the input, so a restored file can equal its original.
 function writeExact(path: string, text: string): void {
@@ -304,6 +320,7 @@ function processBatch(files: readonly string[], o: Options): BatchResult[] {
       if (o.decompress) {
         const restored = decompress(content, format);
         const outputFile = restoredName(file);
+        assertCanRestore(outputFile, o);
         if (!o.dryRun) writeExact(outputFile, restored);
         return { file, success: true, outputFile, stats: calculateStats(content, restored) };
       }
@@ -390,6 +407,7 @@ function preview(text: string): string {
 function runDecompress(o: Options, format: FileFormat, io: Io): number {
   const content = readFileSync(o.input, "utf8");
   const output = o.output || restoredName(o.input);
+  assertCanRestore(output, o);
   io.stdout(`Decompressing: ${o.input}\nFormat: ${format}\n`);
   const restored = decompress(content, format);
   const s = calculateStats(content, restored);

@@ -100,13 +100,15 @@ describe("the CLI output matches the goldens", () => {
         expect(read(compactFile)).toBe(read(join(golden, `${name}.${level}.compact${ext}`)));
 
         const restoreArgs = ["-d", `sample.compact${ext}`];
+        // -d does not write over an existing file without --yes (second review, finding 7), and
+        // the goldens hold runs without --yes. So the restore writes a new file.
+        rmSync(join(dir, file));
         if (ext === ".json") {
           const restore = runs[`-d ${file} (${level})`];
           expect(await runIn(dir, restoreArgs)).toEqual(restore as GoldenRun);
           expect(read(join(dir, file))).toBe(read(join(golden, `${name}.${level}.restored${ext}`)));
         } else {
           // K9: -d exits 1 on a format that is not JSON, and writes no file.
-          rmSync(join(dir, file));
           const r = await runIn(dir, restoreArgs);
           expect(r.exit).toBe(1);
           expect(r.stderr).toContain("decompress supports JSON only in this version");

@@ -139,7 +139,15 @@ describe("batch mode does not compress its own output", () => {
   test("batch decompress still selects the .compact files", async () => {
     const dir = folder("sample.json");
     await compressIn(dir, ["sample.json", "--no-stats"]);
-    const r = await compressIn(dir, ["-d", "-b", "-p", "*.compact.json", ".", "--no-stats"]);
+    const r = await compressIn(dir, [
+      "-d",
+      "-b",
+      "-p",
+      "*.compact.json",
+      ".",
+      "--no-stats",
+      "--yes",
+    ]);
     expect(r.code).toBe(0);
     expect(r.out).toContain("sample.compact.json → sample.json");
   });
@@ -431,7 +439,8 @@ describe("-d changes only the base name", () => {
       ["-d", name],
       ["-b", "-d", name],
     ]) {
-      const r = await compressIn(dir, [...args, "--no-stats"]);
+      // The second run writes over the file of the first run, so it needs --yes.
+      const r = await compressIn(dir, [...args, "--no-stats", "--yes"]);
       expect(r.code).toBe(0);
       expect(readFileSync(join(dir, name), "utf8")).toBe(COMPACT);
       expect(snapshot(dir).map(([n]) => n)).toEqual([name, "a.compact-old.restored.json"]);
@@ -629,5 +638,38 @@ describe("JSON: a number that JSON.parse would change is refused (second review,
     const r = await compressIn(dir, ["s.json", "--no-stats"]);
     expect(r.err).toBe("");
     expect(r.code).toBe(0);
+  });
+});
+
+describe("-d does not overwrite an existing file without --yes (second review, finding 7)", () => {
+  const COMPACT = '{"_legend":{},"a":1}';
+  const EDITED = '{"a": 2, "edited": true}\n';
+
+  for (const [mode, args] of [
+    ["single", ["-d", "a.compact.json", "--no-stats"]],
+    ["single -o", ["-d", "a.compact.json", "-o", "a.json", "--no-stats"]],
+    ["batch", ["-b", "-d", "a.compact.json", "--no-stats"]],
+  ] as const) {
+    test(`${mode}: exits 1 and keeps the file; --yes writes it`, async () => {
+      const dir = folder();
+      writeFileSync(join(dir, "a.compact.json"), COMPACT);
+      writeFileSync(join(dir, "a.json"), EDITED);
+      const r = await compressIn(dir, [...args]);
+      expect(r.code).toBe(1);
+      expect(`${r.out}${r.err}`).toContain("--yes");
+      expect(readFileSync(join(dir, "a.json"), "utf8")).toBe(EDITED);
+      const y = await compressIn(dir, [...args, "--yes"]);
+      expect(y.code).toBe(0);
+      expect(JSON.parse(readFileSync(join(dir, "a.json"), "utf8"))).toEqual({ a: 1 });
+    });
+  }
+
+  test("--dry-run needs no --yes", async () => {
+    const dir = folder();
+    writeFileSync(join(dir, "a.compact.json"), COMPACT);
+    writeFileSync(join(dir, "a.json"), EDITED);
+    const r = await compressIn(dir, ["-d", "a.compact.json", "--dry-run", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(readFileSync(join(dir, "a.json"), "utf8")).toBe(EDITED);
   });
 });

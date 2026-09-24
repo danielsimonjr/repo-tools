@@ -20,6 +20,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `compress -d` does not write over an existing output file without `--yes`, in single mode
+  (also with `-o`) and in batch mode. It exits 1 with a message, and the file does not change.
+  `--dry-run` needs no `--yes`. Before, `-d` wrote over the file with no backup, so edits made
+  after the compression were lost. The unit golden test removes the original file before the
+  `-d` run, because the goldens hold runs without `--yes`; the golden files do not change.
 - `compress` JSON refuses every number whose value `JSON.parse` changes, not only an unsafe
   integer. Compression and `-d` exit 1 with a message that names the number, and write no file,
   for a number that is not finite (`1e400`, which became `null`), a number with a fraction or
