@@ -1,0 +1,15 @@
+{
+  "projectName": "inventory-service",
+  "description": "Sample inventory data for the compressor",
+  "items": [
+    { "itemName": "bolt", "itemCategory": "hardware", "quantity": 120, "unitPrice": 0.25, "isAvailable": true },
+    { "itemName": "nut", "itemCategory": "hardware", "quantity": 340, "unitPrice": 0.1, "isAvailable": true },
+    { "itemName": "washer", "itemCategory": "hardware", "quantity": 0, "unitPrice": 0.05, "isAvailable": false },
+    { "itemName": "cable", "itemCategory": "electrical", "quantity": 15, "unitPrice": 4.5, "isAvailable": true }
+  ],
+  "warehouseLocations": [
+    { "locationName": "north", "shelfCount": 12, "id": 1 },
+    { "locationName": "south", "shelfCount": 8, "id": 2 }
+  ],
+  "metadata": { "schemaVersion": 3, "generatedBy": "fixture", "tags": ["a", "b"], "empty": null }
+}

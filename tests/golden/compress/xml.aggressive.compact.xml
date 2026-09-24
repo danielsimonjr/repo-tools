@@ -1,0 +1,2 @@
+<!-- Legend: i=inventory, w=warehouse, ii=inventoryItem, d=description, q=quantity -->
+<?xml version="1.0" encoding="UTF-8"?><i><w name="north"><ii sku="A1"><d>Bolt</d><q>120</q></ii><ii sku="A2"><d>Nut</d><q>340</q></ii></w><w name="south"><ii sku="B1"><d>Cable</d><q>15</q></ii></w></i>

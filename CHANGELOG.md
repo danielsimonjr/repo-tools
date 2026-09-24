@@ -8,6 +8,16 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- Subcommand `compress` (design 3.4 and 4): a port of the CTON context compressor. It writes a
+  compact copy of a file for a model context, or restores a compact file with `-d`. Single-file
+  mode and batch mode (`-b`, `-p`, `-r`) are available. The code is in `src/compress/`:
+  `formats.ts` holds one compressor for each of the 11 formats, `legend.ts` builds and parses the
+  legends, and `index.ts` holds the arguments, the help and the batch walk. The CTON format and
+  the legend syntax do not change. Characterization goldens in `tests/golden/compress/` come from
+  the original tool, run on the fixtures in `tests/fixtures/compress/`, and the port gives the
+  same bytes and the same console output. An error now returns exit code 1 with a message; the
+  original tool stopped with a stack trace. `Io` moves to `src/io-types.ts`, so a subcommand
+  module does not import `cli.ts`; `cli.ts` exports it again.
 - Subcommand `repo-tools chunk` (design 3.3, section 4): `split <file>`, `merge <manifest.json>`
   and `status <manifest.json>`, with `-o`, `-l`, `-m`, `-t` and `--dry-run`. The code is a port
   of the original chunker in `src/chunk/` (`index.ts`, `splitters.ts`, `manifest.ts`). Goldens

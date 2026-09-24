@@ -1,0 +1,8 @@
+orderId	customerRegion	productCategory	orderStatus	quantity
+1001	northeast	electronics	delivered	2
+1002	southwest	electronics	delivered	1
+1003	northeast	home goods	pending	5
+1004	northeast	electronics	delivered	3
+1005	southwest	home goods	cancelled	1
+1006	midwest	electronics	pending	4
+1007	northeast	home goods	delivered	2

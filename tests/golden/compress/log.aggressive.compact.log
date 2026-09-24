@@ -1,0 +1,27 @@
+=== Legend ===
+@t0 = 2025-12-15T10:30:45.123Z
+@t1 = 2025-12-15T10:30:45.456Z
+@t2 = 2025-12-15T10:30:46.001Z
+@t3 = 2025-12-15T10:30:47.250Z
+@t4 = 2025-12-15T10:30:48.900Z
+@t5 = 2025-12-15T10:30:49.000Z
+@t6 = 2025-12-15T10:30:50.000Z
+@E = ERROR
+@W = WARN
+@I = INFO
+@D = DEBUG
+@T = TRACE
+§0 =  queue=inventory-import
+§1 =  worker 
+§2 =  job id=
+=============
+
+@t0 @I§1started:§0
+@t1 @D§1polling§0
+@t2 @I§1processed§217§0
+@t2 @W§1slow§217§0 took=950ms
+@t3 @E§1failed§218§0 reason=timeout
+@t3 @I§1retrying§218§0
+@t4 @W§1queue depth high§0 depth=42
+@t5 @T§1heartbeat§0
+@t6 @I§1stopped:§0

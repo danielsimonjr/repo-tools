@@ -6,6 +6,7 @@
  */
 import pkg from "../package.json" with { type: "json" };
 import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
+import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
 import type { Io } from "./io-types.ts";
 
 export type { Io } from "./io-types.ts";
@@ -30,7 +31,8 @@ const REGISTRY = {
   },
   compress: {
     summary: "Write a compact copy of a file for a model context, or restore it.",
-    help: "Usage: repo-tools compress <input...> [options]\n",
+    help: compressHelp,
+    run: compressRun,
   },
 } satisfies Record<string, Subcommand>;
 

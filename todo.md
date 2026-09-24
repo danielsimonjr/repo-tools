@@ -7,6 +7,13 @@
 - [x] T3 Bundle, compiled executables and the smoke test (design 11.1-11.3, 13.3).
 - [x] T4 `chunk` port with fixes K1-K4 (design 3.3, 6.3).
 - [ ] T5 `compress` port with fixes K5 and K6 (design 3.4, 6.4).
+  - [x] Port with characterization goldens from the original tool.
+  - [ ] K5: validate `--level` and `--format`.
+  - [ ] K6: sort the batch walk in code-unit order.
+  - [ ] Batch mode skips `.compact` files.
+  - [ ] A directory without `--batch`, and `--batch` without a directory, exit 1 with a message.
+  - [ ] JSON `-d` restores keys by structure (the original corrupts values).
+  - [ ] Round trip tests and a smoke step.
 - [ ] T6 Public design document `docs/design.md`.
 
 ## Part 2

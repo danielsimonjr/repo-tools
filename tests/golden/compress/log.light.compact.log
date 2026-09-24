@@ -1,0 +1,15 @@
+=== Legend ===
+§0 = =inventory-import
+2025-12-15T10:30
+§1 = inventory-import
+2025-12-15T10:30:
+§2 =  queue=inventory-import
+§3 =  job id=
+§4 = worker 
+§5 =  INFO  
+=============
+
+2025-12-15T10:30:45.123Z§5§4started: queue§0:45.456Z DEBUG §4polling queue§0:46.001Z§5§4processed§317 queue§0:46.001Z WARN  §4slow§317§2 took=950ms
+2025-12-15T10:30:47.250Z ERROR §4failed§318§2 reason=timeout
+2025-12-15T10:30:47.250Z§5§4retrying§318 queue§0:48.900Z WARNING §4queue depth high§2 depth=42
+2025-12-15T10:30:49.000Z TRACE §4heartbeat queue§0:50.000Z§5§4stopped:§2

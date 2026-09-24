@@ -1,0 +1,38 @@
+# sn: serviceName
+# e: environment
+# d: database
+# hn: hostName
+# pn: portNumber
+# cp: connectionPool
+# mc: maxConnections
+# mi: minConnections
+# it: idleTimeout
+# cs: cacheSettings
+# w: workers
+# c: concurrency
+# rl: retryLimit
+---
+# Service configuration
+sn: inventory
+e: staging
+d:
+  hn: db-primary
+  pn: 5432
+  cp:
+    mc: 20
+    mi: 2
+    it: 30000
+cs:
+  hn: cache-primary
+  pn: 6379
+  mc: 50
+w:
+  - workerName: indexer
+    c: 4
+    rl: 3
+  - workerName: mailer
+    c: 2
+    rl: 5
+  - workerName: reporter
+    c: 1
+    rl: 3

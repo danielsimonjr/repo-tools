@@ -1,0 +1,1 @@
+export interface Item{name: string;quantity: number;}export function total(items: Item[]): number{let sum = 0;for (const item of items){sum += item.quantity;}return sum;}export function names(items: Item[]): string[]{return items.map((item) => item.name);}

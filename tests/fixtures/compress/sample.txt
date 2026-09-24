@@ -1,0 +1,13 @@
+Release notes for the inventory service.
+
+
+The inventory service    now supports batch import.   The inventory service
+reads the batch file and writes one record for each line.
+The inventory service   rejects a line that has no item name.
+
+
+
+Known problems in the inventory service:
+- The inventory service does not retry a failed batch import.
+- The inventory service logs each rejected line at the warning level.
+- The inventory service stops when the batch file is empty.

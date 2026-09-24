@@ -1,0 +1,21 @@
+=== Legend ===
+§0 =  inventory service
+§1 = The inventory 
+§2 =  batch import.
+§3 = 
+- The 
+=============
+
+Release notes for the§0.
+
+
+The§0    now supports§2   The§0
+reads the batch file and writes one record for each line.
+The§0   rejects a line that has no item name.
+
+
+
+Known problems in the§0:
+- The§0 does not retry a failed§2
+- The§0 logs each rejected line at the warning level.
+- The§0 stops when the batch file is empty.

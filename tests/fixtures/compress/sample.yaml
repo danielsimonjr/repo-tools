@@ -1,0 +1,24 @@
+# Service configuration
+serviceName: inventory
+environment: staging
+database:
+  hostName: db-primary
+  portNumber: 5432
+  connectionPool:
+    maxConnections: 20
+    minConnections: 2
+    idleTimeout: 30000
+cacheSettings:
+  hostName: cache-primary
+  portNumber: 6379
+  maxConnections: 50
+workers:
+  - workerName: indexer
+    concurrency: 4
+    retryLimit: 3
+  - workerName: mailer
+    concurrency: 2
+    retryLimit: 5
+  - workerName: reporter
+    concurrency: 1
+    retryLimit: 3

@@ -1,0 +1,17 @@
+# oi=orderId
+# cr=customerRegion
+# pc=productCategory
+# os=orderStatus
+# q=quantity
+# n=northeast
+# e=electronics
+# hg=home goods
+# d=delivered
+oi	cr	pc	os	q
+1001	n	e	d	2
+1002	southwest	e	d	1
+1003	n	hg	pending	5
+1004	n	e	d	3
+1005	southwest	hg	cancelled	1
+1006	midwest	e	pending	4
+1007	n	hg	d	2

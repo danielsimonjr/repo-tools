@@ -1,0 +1,55 @@
+{
+  "projectNametadatae": "itemetadataNametadataeventory-servitemetadataCategorye",
+  "description": "Sametadataple itemetadataNametadataeventory descriptionata for the cometadatapressor",
+  "itemetadatas": [
+    {
+      "itemetadataNametadatae": "bolt",
+      "itemetadataCategory": "hardescriptionware",
+      "quantity": 120,
+      "unitPrice": 0.25,
+      "isAvailable": true
+    },
+    {
+      "itemetadataNametadatae": "nut",
+      "itemetadataCategory": "hardescriptionware",
+      "quantity": 340,
+      "unitPrice": 0.1,
+      "isAvailable": true
+    },
+    {
+      "itemetadataNametadatae": "washer",
+      "itemetadataCategory": "hardescriptionware",
+      "quantity": 0,
+      "unitPrice": 0.05,
+      "isAvailable": false
+    },
+    {
+      "itemetadataNametadatae": "cable",
+      "itemetadataCategory": "electritemetadataCategoryal",
+      "quantity": 15,
+      "unitPrice": 4.5,
+      "isAvailable": true
+    }
+  ],
+  "warehouseLocations": [
+    {
+      "locationNametadatae": "north",
+      "shelfCount": 12,
+      "idescription": 1
+    },
+    {
+      "locationNametadatae": "south",
+      "shelfCount": 8,
+      "idescription": 2
+    }
+  ],
+  "metadata": {
+    "schemetadataaVersion": 3,
+    "generatedescriptionBy": "fixture",
+    "tags": [
+      "a",
+      "b"
+    ],
+    "emetadatapty": null
+  }
+}
