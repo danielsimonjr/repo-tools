@@ -8,6 +8,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph API-surface module (task D9): `src/depgraph/api-surface.ts`, ported from the
+  universal-physics-tensor dependency-graph tool with its behaviour unchanged. It reads source
+  text without a compiler API and exports `maskNonCode`, `extractExportDetails`,
+  `extractReExports`, `resolveSurface`, `createTsResolver`, `buildApiSurfaceReport` and
+  `DEFAULT_STABILITY_TAGS`. The only code changes are `as string` type assertions that satisfy
+  `noUncheckedIndexedAccess`; they emit no JavaScript. No CLI flag uses the module yet.
+  `tests/unit/api-surface.test.ts` holds the 20 original tests, moved to `bun:test`.
 - depgraph test base (task D0): two fixture repositories (`mini-repo`, a single package with
   case-order names, an exports subpath, a bin, a barrel, a dynamic import, a runtime cycle, a
   type-only cycle, an orphan, a `.d.ts` and a `.tsx` file; `mono-repo`, npm workspaces with an
