@@ -13,6 +13,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { withOneLf, writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
+import { sortCodeUnits } from "../sort.ts";
 import {
   buildDependencyMatrix,
   categorizeFiles,
@@ -24,6 +25,7 @@ import {
 } from "./analysis.ts";
 import { analyzeTestCoverage, type TestCoverageAnalysis } from "./coverage.ts";
 import { detectCyclicComponents } from "./cycles.ts";
+import { linkLog } from "./dirlist.ts";
 import { buildDuplicateReport, detectDuplicateSymbols } from "./duplicates.ts";
 import {
   buildFileInventory,
@@ -32,7 +34,7 @@ import {
   checkCensusNoRegen,
 } from "./inventory.ts";
 import { parseFile } from "./parser.ts";
-import { OUTPUT_SUBDIR, outputDirOf, srcDirOf } from "./paths.ts";
+import { OUTPUT_SUBDIR, outputDirOf, relativePosix, srcDirOf } from "./paths.ts";
 import { withBanner } from "./reporters/banner.ts";
 import { generateTestCoverageJson, generateTestCoverageMarkdown } from "./reporters/coverage.ts";
 import {
@@ -139,9 +141,12 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const out = (name: string): string => `${OUTPUT_SUBDIR}/${name}`;
   // Every report ends with exactly one LF (rule R1).
   const write = (name: string, text: string): void => writeReport(join(outputDir, name), text);
+  // Fix F34: the walks record each link that they do not follow; this run starts a new list.
+  linkLog.skipped.clear();
 
   if (options.checkCensus) {
     const failure = checkCensusNoRegen(root, outputDir);
+    logSkippedLinks(log, skippedLinks(root));
     if (failure) {
       io.stderr(failure);
       return 1;
@@ -330,6 +335,9 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
       reachableSet,
       dormant.testReachable,
     );
+    // The self-check runs before the write: its maximal walk can meet more links (fix F34).
+    const failure = censusFailure(root, inventory);
+    inventory.skippedLinks = skippedLinks(root);
     write("file-inventory.json", generateFileInventoryJson(inventory));
     write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory)));
     log(
@@ -339,12 +347,14 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
           .join(", ") +
         ")",
     );
-    const failure = censusFailure(root, inventory);
+    logSkippedLinks(log, inventory.skippedLinks);
     if (failure) {
       io.stderr(failure);
       return 1;
     }
     log(censusPassLine(inventory));
+  } else {
+    logSkippedLinks(log, skippedLinks(root));
   }
 
   // The pre-port WASM, parallel and WebGPU pairing reports ran here (see the module comment).
@@ -369,6 +379,18 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     }
   }
   return 0;
+}
+
+/** The links that the walks of this run did not follow, root-relative and sorted (fix F34). */
+function skippedLinks(root: string): string[] {
+  return sortCodeUnits([...linkLog.skipped].map((p) => relativePosix(root, p)));
+}
+
+/** Lists the skipped links on standard output (fix F34). Writes nothing when there is none. */
+function logSkippedLinks(log: (line: string) => void, links: string[]): void {
+  if (links.length === 0) return;
+  log(`Skipped ${links.length} link${links.length === 1 ? "" : "s"} (not followed):`);
+  for (const link of links) log(`  - ${link}`);
 }
 
 /** `N cyclic component` or `N cyclic components` (fix F26). */

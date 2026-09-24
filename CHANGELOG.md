@@ -20,6 +20,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F34: no walk follows a link (a symbolic link or a junction). A link can point to
+  another repository, to a missing path or to its own parent: the port counted the files of a
+  linked sibling tree as its own, crashed with ENOENT on a dangling link, and failed on a
+  self-loop. Each walk (source, test, census, maximal and workspace discovery) now checks
+  `lstat` and skips a link. The run lists each skipped link on standard output
+  (`Skipped N links (not followed):`), and `file-inventory.json` (`skippedLinks`) and
+  `FILE_INVENTORY.md` (section "Skipped links") list them too. Goldens: the two inventory
+  reports of the `mono-repo` sets gain the empty list and the section.
 - depgraph F33: a `node [--flag ...] ./dist/x.js` package script seeds `src/x.ts` as a build
   root. The pre-port pattern held a backspace byte (0x08) where a word boundary was meant, so
   it never matched, and the port kept the byte on purpose. A script-run file was then an

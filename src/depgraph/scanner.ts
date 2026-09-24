@@ -2,11 +2,11 @@
  * Directory walks of the depgraph pipeline.
  *
  * Every walk lists folders through `dirlist.ts`, in code-unit order (fix F2). The graph
- * walk keeps `.d.ts` files. The census walks skip them.
+ * walk keeps `.d.ts` files. The census walks skip them. No walk follows a link (fix F34).
  */
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { listEntries, listNames } from "./dirlist.ts";
+import { isLink, isLinkEntry, isWalkable, listEntries, listNames } from "./dirlist.ts";
 import { relativePosix, srcDirOf } from "./paths.ts";
 import type { WorkspacePackage } from "./types.ts";
 
@@ -36,10 +36,11 @@ const NOT_SOURCE = new Set([
  * `.d.ts` files. Skips `node_modules`. Returns absolute paths in listing order.
  */
 export function getAllTsFiles(dir: string, files: string[] = []): string[] {
-  if (!existsSync(dir)) return files;
+  if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
     if (entry === "node_modules") continue;
     const fullPath = join(dir, entry);
+    if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
       getAllTsFiles(fullPath, files);
     } else if (
@@ -55,10 +56,11 @@ export function getAllTsFiles(dir: string, files: string[] = []): string[] {
 
 /** Collects the `.ts` source files under `dir`: no test file and no `.d.ts` file. */
 export function getAllSourceTsFiles(dir: string, files: string[] = []): string[] {
-  if (!existsSync(dir)) return files;
+  if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
     if (entry === "node_modules") continue;
     const fullPath = join(dir, entry);
+    if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
       getAllSourceTsFiles(fullPath, files);
     } else if (
@@ -75,10 +77,11 @@ export function getAllSourceTsFiles(dir: string, files: string[] = []): string[]
 
 /** Collects the `.test.ts` and `.spec.ts` files under `dir`. Skips `node_modules`. */
 export function getAllTestFiles(dir: string, files: string[] = []): string[] {
-  if (!existsSync(dir)) return files;
+  if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
     if (entry === "node_modules") continue;
     const fullPath = join(dir, entry);
+    if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
       getAllTestFiles(fullPath, files);
     } else if (entry.endsWith(".test.ts") || entry.endsWith(".spec.ts")) {
@@ -98,8 +101,8 @@ export function resolveSourceDirs(root: string): string[] {
   if (existsSync(src)) return [src];
   const roots: string[] = [];
   for (const entry of listEntries(root)) {
-    if (!entry.isDirectory()) continue;
     if (entry.name.startsWith(".") || NOT_SOURCE.has(entry.name)) continue;
+    if (isLinkEntry(root, entry) || !entry.isDirectory()) continue;
     const dir = join(root, entry.name);
     if (getAllTsFiles(dir).length > 0) roots.push(dir);
   }
@@ -119,7 +122,7 @@ export function walkRepoTsFiles(root: string): string[] {
   const out: string[] = [];
   const walk = (dir: string): void => {
     for (const e of listEntries(dir)) {
-      if (censusSkips(e.name)) continue;
+      if (censusSkips(e.name) || isLinkEntry(dir, e)) continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
       else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts"))
@@ -144,9 +147,9 @@ export function collectCensusFiles(
 ): string[] {
   const set = new Set<string>();
   const walk = (dir: string): void => {
-    if (!existsSync(dir)) return;
+    if (!isWalkable(dir)) return;
     for (const e of listEntries(dir)) {
-      if (censusSkips(e.name)) continue;
+      if (censusSkips(e.name) || isLinkEntry(dir, e)) continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
       else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) set.add(relativePosix(root, p));
@@ -155,6 +158,7 @@ export function collectCensusFiles(
   for (const [, ws] of workspaces) walk(join(root, ws.directory));
   for (const d of CENSUS_DIRS) walk(join(root, d));
   for (const e of listEntries(root)) {
+    if (isLinkEntry(root, e)) continue;
     if (e.isFile() && e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) set.add(e.name);
   }
   return [...set];

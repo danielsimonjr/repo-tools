@@ -80,5 +80,16 @@ export function generateFileInventoryMarkdown(inv: FileInventory): string {
     lines.push(`| \`${r.file}\` | ${r.package} | ${r.area} | ${r.disposition} |`);
   }
   lines.push("");
+  // Fix F34: a walk does not follow a link, and the report lists each one.
+  lines.push("## Skipped links");
+  lines.push("");
+  lines.push(
+    "Links (symbolic links and junctions) that the walks did not follow. A link can point " +
+      "to another repository, so no file behind a link is in this inventory or in the graph.",
+  );
+  lines.push("");
+  if (inv.skippedLinks.length === 0) lines.push("_None._");
+  for (const link of inv.skippedLinks) lines.push(`- \`${link}\``);
+  lines.push("");
   return lines.join("\n");
 }

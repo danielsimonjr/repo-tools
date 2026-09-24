@@ -52,3 +52,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/core/src/worker.ts` | @scope/core | src | build-entry |
 | `packages/core/tests/math.test.ts` | @scope/core | tests | test |
 | `packages/core/tsup.config.ts` | @scope/core | config | config |
+
+## Skipped links
+
+Links (symbolic links and junctions) that the walks did not follow. A link can point to another repository, so no file behind a link is in this inventory or in the graph.
+
+_None._

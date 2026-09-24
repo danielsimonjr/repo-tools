@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { load } from "js-yaml";
-import { listEntries, listNames } from "./dirlist.ts";
+import { isLink, isLinkEntry, listEntries, listNames } from "./dirlist.ts";
 import { toPosix } from "./paths.ts";
 import { exportsSubpathEntries } from "./roots.ts";
 import type { WorkspacePackage } from "./types.ts";
@@ -41,8 +41,9 @@ export function readWorkspacePatterns(root: string): string[] {
 
   const detected: string[] = [];
   for (const entry of listEntries(root)) {
-    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+    if (entry.name.startsWith(".")) continue;
     if (entry.name === "node_modules" || entry.name === "tools") continue;
+    if (isLinkEntry(root, entry) || !entry.isDirectory()) continue;
     const dir = join(root, entry.name);
     if (existsSync(join(dir, "package.json")) && existsSync(join(dir, "src"))) {
       detected.push(entry.name);
@@ -52,8 +53,12 @@ export function readWorkspacePatterns(root: string): string[] {
   return [];
 }
 
-/** Reads `<root>/<pkgDir>/package.json` into `workspaces` when it has a name. */
+/**
+ * Reads `<root>/<pkgDir>/package.json` into `workspaces` when it has a name. A package folder
+ * that is a link is not read (fix F34): it can hold the files of another repository.
+ */
 function addPackage(root: string, pkgDir: string, workspaces: Map<string, WorkspacePackage>): void {
+  if (isLink(join(root, pkgDir))) return;
   const pkgJsonPath = join(root, pkgDir, "package.json");
   if (!existsSync(pkgJsonPath)) return;
   try {

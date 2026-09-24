@@ -42,6 +42,8 @@ export interface FileInventory {
   byArea: Record<string, number>;
   byPackage: Record<string, number>;
   files: FileInventoryRow[];
+  /** The links that the walks did not follow, root-relative, in code-unit order (fix F34). */
+  skippedLinks: string[];
 }
 
 /**
@@ -141,6 +143,7 @@ export function buildFileInventory(
     byArea,
     byPackage,
     files: rows,
+    skippedLinks: [],
   };
 }
 
