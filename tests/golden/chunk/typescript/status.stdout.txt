@@ -3,7 +3,6 @@ chunker - Chunk Status
 ==================================================
 Source:    <DIR>/parser.ts
 File Type: typescript
-Created:   <createdAt>
 
 Chunks:
 

@@ -3,7 +3,6 @@ chunker - Chunk Status
 ==================================================
 Source:    <DIR>/config.json
 File Type: json
-Created:   <createdAt>
 
 Chunks:
 

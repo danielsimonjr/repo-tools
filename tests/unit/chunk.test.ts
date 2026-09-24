@@ -184,4 +184,13 @@ describe("chunk fixes", () => {
     expect(m.out).toContain(`Merged file written: ${join(moved, "guide.md")}`);
     expect(readText(join(moved, "guide.md"))).toBe(readText(join(FIXTURES, "guide.md")));
   });
+
+  test("K2: two splits of one file give byte-identical manifests (no createdAt)", async () => {
+    const s = await splitGuide("k2");
+    const first = readFileSync(s.manifest);
+    await Bun.sleep(5);
+    expect((await chunk(["split", s.src])).code).toBe(0);
+    expect(readFileSync(s.manifest).equals(first)).toBe(true);
+    expect(JSON.parse(first.toString())).not.toHaveProperty("createdAt");
+  });
 });

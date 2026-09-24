@@ -4,7 +4,6 @@ chunker - Merging Chunks
 Manifest:    <DIR>/guide_chunks/manifest.json
 Source:      <DIR>/guide.md
 File Type:   markdown
-Created:     <createdAt>
 Chunks:      5
 
    1. 001-preamble.md                               [unchanged]

@@ -85,3 +85,6 @@ All notable changes to this project are recorded in this file. The format follow
   separators. You can move the source file and the chunk folder together, and `merge` still
   finds the source. The manifest holds no absolute path. `merge` and `status` print the
   resolved source path.
+- `chunk` (fix K2): the manifest has no `createdAt` field. Two splits of one file give
+  byte-identical manifests. `merge` and `status` print the `Created:` line only for an old
+  manifest that has the field.

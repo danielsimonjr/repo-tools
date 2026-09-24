@@ -173,7 +173,6 @@ function split(inputFile: string, options: Options, io: Io): number {
     version: MANIFEST_VERSION,
     sourceFile: relativeSource(outputDir, absoluteInput),
     sourceHash,
-    createdAt: new Date().toISOString(),
     fileType,
     splitLevel,
     chunks,
@@ -218,7 +217,7 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   log(`Manifest:    ${absoluteManifest}`);
   log(`Source:      ${sourcePath}`);
   log(`File Type:   ${fileType}`);
-  log(`Created:     ${manifest.createdAt}`);
+  if (manifest.createdAt !== undefined) log(`Created:     ${manifest.createdAt}`);
   log(`Chunks:      ${manifest.chunks.length}`);
   log();
 
@@ -288,7 +287,7 @@ function status(manifestFile: string, io: Io): number {
   log("=".repeat(50));
   log(`Source:    ${sourcePath}`);
   log(`File Type: ${fileType}`);
-  log(`Created:   ${manifest.createdAt}`);
+  if (manifest.createdAt !== undefined) log(`Created:   ${manifest.createdAt}`);
   if (fileType === "markdown") log(`Level:     h${manifest.splitLevel}`);
   log();
 

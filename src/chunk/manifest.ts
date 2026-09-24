@@ -28,7 +28,8 @@ export interface Manifest {
   version: string;
   sourceFile: string;
   sourceHash: string;
-  createdAt: string;
+  /** Only in manifests of version 1.1.0. `split` no longer writes it (fix K2). */
+  createdAt?: string;
   fileType: FileType;
   splitLevel: number;
   chunks: ChunkInfo[];
