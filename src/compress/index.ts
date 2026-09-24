@@ -39,7 +39,8 @@ Options:
   --no-legend          Accepted for compatibility. The legend is always written.
   --no-stats           Do not show the statistics.
   --dry-run            Show a preview. Do not write a file.
-  -d, --decompress     Restore a compact file. The output name removes ".compact".
+  -d, --decompress     Restore a compact file. The output file name is the input file
+                       name without ".compact". A folder name does not change.
                        This version restores JSON only. -d on any other format
                        exits 1 and writes no file.
 
@@ -241,11 +242,14 @@ function compactName(file: string): string {
 }
 
 /**
- * Returns the output name of `-d` for `file`: the name without ".compact". When that name is
- * the input name, it returns `<dir>/<base>.restored<ext>`, so `-d` never writes to its input.
+ * Returns the output name of `-d` for `file`: the base name without the ".compact" before the
+ * extension (or at the end). A folder name does not change. When the result is the input name,
+ * it returns `<dir>/<base>.restored<ext>`, so `-d` never writes to its input.
  */
 function restoredName(file: string): string {
-  const output = file.replace(".compact", "");
+  const base = basename(file);
+  const stripped = base.replace(/\.compact(?=\.[^.]*$|$)/, "");
+  const output = stripped === base ? file : join(dirname(file), stripped);
   if (output !== file) return output;
   const ext = extname(file);
   return join(dirname(file), `${basename(file, ext)}.restored${ext}`);

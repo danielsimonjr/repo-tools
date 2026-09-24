@@ -391,3 +391,58 @@ describe("batch -d never writes to its input", () => {
     expect([...after.keys()]).toContain("sample.json");
   });
 });
+
+describe("-d changes only the base name", () => {
+  const COMPACT = '{"_legend":{"n":"name"},"n":1}';
+
+  /** A folder `x.compact` that holds `r.compact.json`. Returns the parent folder. */
+  function compactFolder(): string {
+    const dir = folder();
+    mkdirSync(join(dir, "x.compact"));
+    writeFileSync(join(dir, "x.compact", "r.compact.json"), COMPACT);
+    return dir;
+  }
+
+  test("single mode in a folder named x.compact writes x.compact/r.json", async () => {
+    const dir = compactFolder();
+    const r = await compressIn(dir, ["-d", "x.compact/r.compact.json", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(snapshot(dir).map(([name]) => name)).toEqual([
+      "x.compact/r.compact.json",
+      "x.compact/r.json",
+    ]);
+  });
+
+  test("batch mode in a folder named x.compact writes x.compact/r.json", async () => {
+    const dir = compactFolder();
+    const r = await compressIn(dir, ["-b", "-d", "-p", "*.json", "x.compact", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(snapshot(dir).map(([name]) => name)).toEqual([
+      "x.compact/r.compact.json",
+      "x.compact/r.json",
+    ]);
+  });
+
+  test('a name with ".compact" before other text is written to .restored', async () => {
+    const dir = folder();
+    const name = "a.compact-old.json";
+    writeFileSync(join(dir, name), COMPACT);
+    for (const args of [
+      ["-d", name],
+      ["-b", "-d", name],
+    ]) {
+      const r = await compressIn(dir, [...args, "--no-stats"]);
+      expect(r.code).toBe(0);
+      expect(readFileSync(join(dir, name), "utf8")).toBe(COMPACT);
+      expect(snapshot(dir).map(([n]) => n)).toEqual([name, "a.compact-old.restored.json"]);
+    }
+  });
+
+  test('a name that ends in ".compact" loses the suffix', async () => {
+    const dir = folder();
+    writeFileSync(join(dir, "data.compact"), COMPACT);
+    const r = await compressIn(dir, ["-d", "-f", "json", "data.compact", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(JSON.parse(readFileSync(join(dir, "data"), "utf8"))).toEqual({ name: 1 });
+  });
+});

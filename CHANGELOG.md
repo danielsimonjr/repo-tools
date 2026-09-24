@@ -35,6 +35,10 @@ All notable changes to this project are recorded in this file. The format follow
   it writes `<name>.restored<ext>`, as single mode does. Before, `compress -b -d -p "*.*" dir`
   restored every matched file and wrote the result over the input when the name had no
   `.compact` (for example `conf.yaml` and `d.csv`).
+- `compress -d` removes `.compact` from the file base name only, where it comes before the
+  extension or at the end. A folder name does not change. Before, `-d` removed the first
+  `.compact` anywhere in the path: `p.compact/r.compact.md` gave `p/r.compact.md`. A base name
+  with `.compact` in another place (`a.compact-old.json`) gives `a.compact-old.restored.json`.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the
