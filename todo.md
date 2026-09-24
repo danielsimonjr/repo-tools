@@ -32,7 +32,7 @@
 - [x] depgraph batch 3 follow-ups before push: the `benchmarks/` census folder (a `bench`
   disposition), F41 (both census walks skip folders that a negated workspace pattern excludes),
   F42 (a census gap warns and exits 0; `--strict-census` makes it fail).
-- [ ] depgraph fixes, batch 4: F38 (a runtime `import()` edge records `["*"]`), F39 (a
+- [x] depgraph fixes, batch 4: F38 (a runtime `import()` edge records `["*"]`), F39 (a
   regex-aware comment stripper), F40 (`import().then<T>(...)` is a runtime edge), F43
   (self-imports in single-package mode), F44 (a `.d.ts` file never counts as an unused file).
 
@@ -40,6 +40,16 @@
 
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
 data. Other findings are filed here.
+
+- [ ] A type-position `import('./c').C` records no names, so an export used only that way reads
+  as unreferenced.
+- [ ] Single-package mode: the `exports "."` target or `main` is a root only when it is
+  `src/index.ts`; subpath roots come from the export key, not its target.
+- [ ] Test coverage does not follow package-name imports (self or workspace), in either mode.
+- [ ] Monorepo workspace subpaths ignore `exports` targets and do not try `<sub>/index.ts`.
+- [ ] Import edges by package name (self or workspace) are not in the cycle detection.
+- [ ] The regex rule of the comment stripper misreads `a++ / b / c` and `if (x) /re/.test(s)`.
+- [ ] With a bare `import './x'` and an `import('./x')` in one file, the `*` goes on the bare edge.
 - [ ] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
   created; standard error shows the root as `<root>`, never an absolute path.
 
