@@ -29,6 +29,8 @@
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
   walk), F35 (package.json guards), F36 (negated workspace patterns), F37 (tsup object-form
   `entry`), M1.
+- [ ] depgraph fixes, batch 4: F38 (a runtime `import()` edge records `["*"]`), F39 (a
+  regex-aware comment stripper), F40 (`import().then<T>(...)` is a runtime edge).
 - [ ] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
   created; standard error shows the root as `<root>`, never an absolute path.
 
