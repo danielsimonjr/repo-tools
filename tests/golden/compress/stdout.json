@@ -9,15 +9,6 @@
     "stdout": "Compressing: sample.csv\nFormat: csv\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     363 B\nCompressed size:   398 B\nSize reduction:    -9.6%\n\nEst. tokens before: 39\nEst. tokens after:  53\nToken savings:      -14 (-35.9%)\n==============================\n\nOutput written to: sample.compact.csv\n",
     "stderr": ""
   },
-  "-d sample.csv (light)": {
-    "args": [
-      "-d",
-      "sample.compact.csv"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.csv\nFormat: csv\n\n=== Decompression Statistics ===\nCompressed size:   398 B\nRestored size:     360 B\nSize increase:     -9.5%\n================================\n\nOutput written to: sample.csv\n",
-    "stderr": ""
-  },
   "sample.csv -l medium": {
     "args": [
       "sample.csv",
@@ -26,15 +17,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.csv\nFormat: csv\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     363 B\nCompressed size:   398 B\nSize reduction:    -9.6%\n\nEst. tokens before: 39\nEst. tokens after:  53\nToken savings:      -14 (-35.9%)\n==============================\n\nOutput written to: sample.compact.csv\n",
-    "stderr": ""
-  },
-  "-d sample.csv (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.csv"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.csv\nFormat: csv\n\n=== Decompression Statistics ===\nCompressed size:   398 B\nRestored size:     360 B\nSize increase:     -9.5%\n================================\n\nOutput written to: sample.csv\n",
     "stderr": ""
   },
   "sample.csv -l aggressive": {
@@ -47,15 +29,6 @@
     "stdout": "Compressing: sample.csv\nFormat: csv\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     363 B\nCompressed size:   312 B\nSize reduction:    14.0%\n\nEst. tokens before: 39\nEst. tokens after:  63\nToken savings:      -24 (-61.5%)\n==============================\n\nOutput written to: sample.compact.csv\n",
     "stderr": ""
   },
-  "-d sample.csv (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.csv"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.csv\nFormat: csv\n\n=== Decompression Statistics ===\nCompressed size:   312 B\nRestored size:     782 B\nSize increase:     150.6%\n================================\n\nOutput written to: sample.csv\n",
-    "stderr": ""
-  },
   "sample.html -l light": {
     "args": [
       "sample.html",
@@ -64,15 +37,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.html\nFormat: html\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     413 B\nCompressed size:   413 B\nSize reduction:    0.0%\n\nEst. tokens before: 65\nEst. tokens after:  65\nToken savings:      0 (0.0%)\n==============================\n\nOutput written to: sample.compact.html\n",
-    "stderr": ""
-  },
-  "-d sample.html (light)": {
-    "args": [
-      "-d",
-      "sample.compact.html"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.html\nFormat: html\n\n=== Decompression Statistics ===\nCompressed size:   413 B\nRestored size:     413 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.html\n",
     "stderr": ""
   },
   "sample.html -l medium": {
@@ -85,15 +49,6 @@
     "stdout": "Compressing: sample.html\nFormat: html\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     413 B\nCompressed size:   284 B\nSize reduction:    31.2%\n\nEst. tokens before: 65\nEst. tokens after:  39\nToken savings:      26 (40.0%)\n==============================\n\nOutput written to: sample.compact.html\n",
     "stderr": ""
   },
-  "-d sample.html (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.html"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.html\nFormat: html\n\n=== Decompression Statistics ===\nCompressed size:   284 B\nRestored size:     284 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.html\n",
-    "stderr": ""
-  },
   "sample.html -l aggressive": {
     "args": [
       "sample.html",
@@ -102,15 +57,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.html\nFormat: html\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     413 B\nCompressed size:   267 B\nSize reduction:    35.4%\n\nEst. tokens before: 65\nEst. tokens after:  51\nToken savings:      14 (21.5%)\n==============================\n\nOutput written to: sample.compact.html\n",
-    "stderr": ""
-  },
-  "-d sample.html (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.html"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.html\nFormat: html\n\n=== Decompression Statistics ===\nCompressed size:   267 B\nRestored size:     267 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.html\n",
     "stderr": ""
   },
   "sample.js -l light": {
@@ -123,15 +69,6 @@
     "stdout": "Compressing: sample.js\nFormat: javascript\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     396 B\nCompressed size:   396 B\nSize reduction:    0.0%\n\nEst. tokens before: 92\nEst. tokens after:  92\nToken savings:      0 (0.0%)\n==============================\n\nOutput written to: sample.compact.js\n",
     "stderr": ""
   },
-  "-d sample.js (light)": {
-    "args": [
-      "-d",
-      "sample.compact.js"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.js\nFormat: javascript\n\n=== Decompression Statistics ===\nCompressed size:   396 B\nRestored size:     396 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.js\n",
-    "stderr": ""
-  },
   "sample.js -l medium": {
     "args": [
       "sample.js",
@@ -142,15 +79,6 @@
     "stdout": "Compressing: sample.js\nFormat: javascript\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     396 B\nCompressed size:   274 B\nSize reduction:    30.8%\n\nEst. tokens before: 92\nEst. tokens after:  62\nToken savings:      30 (32.6%)\n==============================\n\nOutput written to: sample.compact.js\n",
     "stderr": ""
   },
-  "-d sample.js (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.js"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.js\nFormat: javascript\n\n=== Decompression Statistics ===\nCompressed size:   274 B\nRestored size:     274 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.js\n",
-    "stderr": ""
-  },
   "sample.js -l aggressive": {
     "args": [
       "sample.js",
@@ -159,15 +87,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.js\nFormat: javascript\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     396 B\nCompressed size:   240 B\nSize reduction:    39.4%\n\nEst. tokens before: 92\nEst. tokens after:  45\nToken savings:      47 (51.1%)\n==============================\n\nOutput written to: sample.compact.js\n",
-    "stderr": ""
-  },
-  "-d sample.js (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.js"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.js\nFormat: javascript\n\n=== Decompression Statistics ===\nCompressed size:   240 B\nRestored size:     240 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.js\n",
     "stderr": ""
   },
   "sample.json -l light": {
@@ -237,15 +156,6 @@
     "stdout": "Compressing: sample.log\nFormat: log\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     710 B\nCompressed size:   588 B\nSize reduction:    17.2%\n\nEst. tokens before: 129\nEst. tokens after:  143\nToken savings:      -14 (-10.9%)\n==============================\n\nOutput written to: sample.compact.log\n",
     "stderr": ""
   },
-  "-d sample.log (light)": {
-    "args": [
-      "-d",
-      "sample.compact.log"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.log\nFormat: log\n\n=== Decompression Statistics ===\nCompressed size:   588 B\nRestored size:     596 B\nSize increase:     1.4%\n================================\n\nOutput written to: sample.log\n",
-    "stderr": ""
-  },
   "sample.log -l medium": {
     "args": [
       "sample.log",
@@ -254,15 +164,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.log\nFormat: log\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     710 B\nCompressed size:   577 B\nSize reduction:    18.7%\n\nEst. tokens before: 129\nEst. tokens after:  133\nToken savings:      -4 (-3.1%)\n==============================\n\nOutput written to: sample.compact.log\n",
-    "stderr": ""
-  },
-  "-d sample.log (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.log"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.log\nFormat: log\n\n=== Decompression Statistics ===\nCompressed size:   577 B\nRestored size:     594 B\nSize increase:     2.9%\n================================\n\nOutput written to: sample.log\n",
     "stderr": ""
   },
   "sample.log -l aggressive": {
@@ -275,15 +176,6 @@
     "stdout": "Compressing: sample.log\nFormat: log\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     710 B\nCompressed size:   607 B\nSize reduction:    14.5%\n\nEst. tokens before: 129\nEst. tokens after:  185\nToken savings:      -56 (-43.4%)\n==============================\n\nOutput written to: sample.compact.log\n",
     "stderr": ""
   },
-  "-d sample.log (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.log"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.log\nFormat: log\n\n=== Decompression Statistics ===\nCompressed size:   607 B\nRestored size:     671 B\nSize increase:     10.5%\n================================\n\nOutput written to: sample.log\n",
-    "stderr": ""
-  },
   "sample.md -l light": {
     "args": [
       "sample.md",
@@ -292,15 +184,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.md\nFormat: markdown\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     1.0 KB\nCompressed size:   904 B\nSize reduction:    12.3%\n\nEst. tokens before: 188\nEst. tokens after:  193\nToken savings:      -5 (-2.7%)\n==============================\n\nOutput written to: sample.compact.md\n",
-    "stderr": ""
-  },
-  "-d sample.md (light)": {
-    "args": [
-      "-d",
-      "sample.compact.md"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.md\nFormat: markdown\n\n=== Decompression Statistics ===\nCompressed size:   904 B\nRestored size:     1.0 KB\nSize increase:     14.3%\n================================\n\nOutput written to: sample.md\n",
     "stderr": ""
   },
   "sample.md -l medium": {
@@ -313,15 +196,6 @@
     "stdout": "Compressing: sample.md\nFormat: markdown\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     1.0 KB\nCompressed size:   924 B\nSize reduction:    10.4%\n\nEst. tokens before: 188\nEst. tokens after:  218\nToken savings:      -30 (-16.0%)\n==============================\n\nOutput written to: sample.compact.md\n",
     "stderr": ""
   },
-  "-d sample.md (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.md"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.md\nFormat: markdown\n\n=== Decompression Statistics ===\nCompressed size:   924 B\nRestored size:     1.0 KB\nSize increase:     11.0%\n================================\n\nOutput written to: sample.md\n",
-    "stderr": ""
-  },
   "sample.md -l aggressive": {
     "args": [
       "sample.md",
@@ -330,15 +204,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.md\nFormat: markdown\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     1.0 KB\nCompressed size:   897 B\nSize reduction:    13.0%\n\nEst. tokens before: 188\nEst. tokens after:  210\nToken savings:      -22 (-11.7%)\n==============================\n\nOutput written to: sample.compact.md\n",
-    "stderr": ""
-  },
-  "-d sample.md (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.md"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.md\nFormat: markdown\n\n=== Decompression Statistics ===\nCompressed size:   897 B\nRestored size:     979 B\nSize increase:     9.1%\n================================\n\nOutput written to: sample.md\n",
     "stderr": ""
   },
   "sample.ts -l light": {
@@ -351,15 +216,6 @@
     "stdout": "Compressing: sample.ts\nFormat: typescript\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     458 B\nCompressed size:   458 B\nSize reduction:    0.0%\n\nEst. tokens before: 105\nEst. tokens after:  105\nToken savings:      0 (0.0%)\n==============================\n\nOutput written to: sample.compact.ts\n",
     "stderr": ""
   },
-  "-d sample.ts (light)": {
-    "args": [
-      "-d",
-      "sample.compact.ts"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.ts\nFormat: typescript\n\n=== Decompression Statistics ===\nCompressed size:   458 B\nRestored size:     458 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.ts\n",
-    "stderr": ""
-  },
   "sample.ts -l medium": {
     "args": [
       "sample.ts",
@@ -368,15 +224,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.ts\nFormat: typescript\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     458 B\nCompressed size:   294 B\nSize reduction:    35.8%\n\nEst. tokens before: 105\nEst. tokens after:  66\nToken savings:      39 (37.1%)\n==============================\n\nOutput written to: sample.compact.ts\n",
-    "stderr": ""
-  },
-  "-d sample.ts (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.ts"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.ts\nFormat: typescript\n\n=== Decompression Statistics ===\nCompressed size:   294 B\nRestored size:     294 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.ts\n",
     "stderr": ""
   },
   "sample.ts -l aggressive": {
@@ -389,15 +236,6 @@
     "stdout": "Compressing: sample.ts\nFormat: typescript\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     458 B\nCompressed size:   256 B\nSize reduction:    44.1%\n\nEst. tokens before: 105\nEst. tokens after:  49\nToken savings:      56 (53.3%)\n==============================\n\nOutput written to: sample.compact.ts\n",
     "stderr": ""
   },
-  "-d sample.ts (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.ts"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.ts\nFormat: typescript\n\n=== Decompression Statistics ===\nCompressed size:   256 B\nRestored size:     256 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.ts\n",
-    "stderr": ""
-  },
   "sample.tsv -l light": {
     "args": [
       "sample.tsv",
@@ -406,15 +244,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.tsv\nFormat: tsv\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     324 B\nCompressed size:   361 B\nSize reduction:    -11.4%\n\nEst. tokens before: 50\nEst. tokens after:  65\nToken savings:      -15 (-30.0%)\n==============================\n\nOutput written to: sample.compact.tsv\n",
-    "stderr": ""
-  },
-  "-d sample.tsv (light)": {
-    "args": [
-      "-d",
-      "sample.compact.tsv"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.tsv\nFormat: tsv\n\n=== Decompression Statistics ===\nCompressed size:   361 B\nRestored size:     323 B\nSize increase:     -10.5%\n================================\n\nOutput written to: sample.tsv\n",
     "stderr": ""
   },
   "sample.tsv -l medium": {
@@ -427,15 +256,6 @@
     "stdout": "Compressing: sample.tsv\nFormat: tsv\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     324 B\nCompressed size:   361 B\nSize reduction:    -11.4%\n\nEst. tokens before: 50\nEst. tokens after:  65\nToken savings:      -15 (-30.0%)\n==============================\n\nOutput written to: sample.compact.tsv\n",
     "stderr": ""
   },
-  "-d sample.tsv (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.tsv"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.tsv\nFormat: tsv\n\n=== Decompression Statistics ===\nCompressed size:   361 B\nRestored size:     323 B\nSize increase:     -10.5%\n================================\n\nOutput written to: sample.tsv\n",
-    "stderr": ""
-  },
   "sample.tsv -l aggressive": {
     "args": [
       "sample.tsv",
@@ -444,15 +264,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.tsv\nFormat: tsv\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     324 B\nCompressed size:   293 B\nSize reduction:    9.6%\n\nEst. tokens before: 50\nEst. tokens after:  75\nToken savings:      -25 (-50.0%)\n==============================\n\nOutput written to: sample.compact.tsv\n",
-    "stderr": ""
-  },
-  "-d sample.tsv (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.tsv"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.tsv\nFormat: tsv\n\n=== Decompression Statistics ===\nCompressed size:   293 B\nRestored size:     727 B\nSize increase:     148.1%\n================================\n\nOutput written to: sample.tsv\n",
     "stderr": ""
   },
   "sample.txt -l light": {
@@ -465,15 +276,6 @@
     "stdout": "Compressing: sample.txt\nFormat: text\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     475 B\nCompressed size:   444 B\nSize reduction:    6.5%\n\nEst. tokens before: 84\nEst. tokens after:  109\nToken savings:      -25 (-29.8%)\n==============================\n\nOutput written to: sample.compact.txt\n",
     "stderr": ""
   },
-  "-d sample.txt (light)": {
-    "args": [
-      "-d",
-      "sample.compact.txt"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.txt\nFormat: text\n\n=== Decompression Statistics ===\nCompressed size:   444 B\nRestored size:     465 B\nSize increase:     4.7%\n================================\n\nOutput written to: sample.txt\n",
-    "stderr": ""
-  },
   "sample.txt -l medium": {
     "args": [
       "sample.txt",
@@ -482,15 +284,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.txt\nFormat: text\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     475 B\nCompressed size:   434 B\nSize reduction:    8.6%\n\nEst. tokens before: 84\nEst. tokens after:  109\nToken savings:      -25 (-29.8%)\n==============================\n\nOutput written to: sample.compact.txt\n",
-    "stderr": ""
-  },
-  "-d sample.txt (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.txt"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.txt\nFormat: text\n\n=== Decompression Statistics ===\nCompressed size:   434 B\nRestored size:     455 B\nSize increase:     4.8%\n================================\n\nOutput written to: sample.txt\n",
     "stderr": ""
   },
   "sample.txt -l aggressive": {
@@ -503,15 +296,6 @@
     "stdout": "Compressing: sample.txt\nFormat: text\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     475 B\nCompressed size:   434 B\nSize reduction:    8.6%\n\nEst. tokens before: 84\nEst. tokens after:  109\nToken savings:      -25 (-29.8%)\n==============================\n\nOutput written to: sample.compact.txt\n",
     "stderr": ""
   },
-  "-d sample.txt (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.txt"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.txt\nFormat: text\n\n=== Decompression Statistics ===\nCompressed size:   434 B\nRestored size:     455 B\nSize increase:     4.8%\n================================\n\nOutput written to: sample.txt\n",
-    "stderr": ""
-  },
   "sample.xml -l light": {
     "args": [
       "sample.xml",
@@ -520,15 +304,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.xml\nFormat: xml\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     530 B\nCompressed size:   530 B\nSize reduction:    0.0%\n\nEst. tokens before: 82\nEst. tokens after:  82\nToken savings:      0 (0.0%)\n==============================\n\nOutput written to: sample.compact.xml\n",
-    "stderr": ""
-  },
-  "-d sample.xml (light)": {
-    "args": [
-      "-d",
-      "sample.compact.xml"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.xml\nFormat: xml\n\n=== Decompression Statistics ===\nCompressed size:   530 B\nRestored size:     530 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.xml\n",
     "stderr": ""
   },
   "sample.xml -l medium": {
@@ -541,15 +316,6 @@
     "stdout": "Compressing: sample.xml\nFormat: xml\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     530 B\nCompressed size:   418 B\nSize reduction:    21.1%\n\nEst. tokens before: 82\nEst. tokens after:  56\nToken savings:      26 (31.7%)\n==============================\n\nOutput written to: sample.compact.xml\n",
     "stderr": ""
   },
-  "-d sample.xml (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.xml"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.xml\nFormat: xml\n\n=== Decompression Statistics ===\nCompressed size:   418 B\nRestored size:     418 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.xml\n",
-    "stderr": ""
-  },
   "sample.xml -l aggressive": {
     "args": [
       "sample.xml",
@@ -558,15 +324,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.xml\nFormat: xml\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     530 B\nCompressed size:   289 B\nSize reduction:    45.5%\n\nEst. tokens before: 82\nEst. tokens after:  73\nToken savings:      9 (11.0%)\n==============================\n\nOutput written to: sample.compact.xml\n",
-    "stderr": ""
-  },
-  "-d sample.xml (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.xml"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.xml\nFormat: xml\n\n=== Decompression Statistics ===\nCompressed size:   289 B\nRestored size:     289 B\nSize increase:     0.0%\n================================\n\nOutput written to: sample.xml\n",
     "stderr": ""
   },
   "sample.yaml -l light": {
@@ -579,15 +336,6 @@
     "stdout": "Compressing: sample.yaml\nFormat: yaml\nLevel: light\n\n=== Compression Statistics ===\nOriginal size:     479 B\nCompressed size:   530 B\nSize reduction:    -10.6%\n\nEst. tokens before: 69\nEst. tokens after:  123\nToken savings:      -54 (-78.3%)\n==============================\n\nOutput written to: sample.compact.yaml\n",
     "stderr": ""
   },
-  "-d sample.yaml (light)": {
-    "args": [
-      "-d",
-      "sample.compact.yaml"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.yaml\nFormat: yaml\n\n=== Decompression Statistics ===\nCompressed size:   530 B\nRestored size:     968 B\nSize increase:     82.6%\n================================\n\nOutput written to: sample.yaml\n",
-    "stderr": ""
-  },
   "sample.yaml -l medium": {
     "args": [
       "sample.yaml",
@@ -598,15 +346,6 @@
     "stdout": "Compressing: sample.yaml\nFormat: yaml\nLevel: medium\n\n=== Compression Statistics ===\nOriginal size:     479 B\nCompressed size:   530 B\nSize reduction:    -10.6%\n\nEst. tokens before: 69\nEst. tokens after:  123\nToken savings:      -54 (-78.3%)\n==============================\n\nOutput written to: sample.compact.yaml\n",
     "stderr": ""
   },
-  "-d sample.yaml (medium)": {
-    "args": [
-      "-d",
-      "sample.compact.yaml"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.yaml\nFormat: yaml\n\n=== Decompression Statistics ===\nCompressed size:   530 B\nRestored size:     968 B\nSize increase:     82.6%\n================================\n\nOutput written to: sample.yaml\n",
-    "stderr": ""
-  },
   "sample.yaml -l aggressive": {
     "args": [
       "sample.yaml",
@@ -615,15 +354,6 @@
     ],
     "exit": 0,
     "stdout": "Compressing: sample.yaml\nFormat: yaml\nLevel: aggressive\n\n=== Compression Statistics ===\nOriginal size:     479 B\nCompressed size:   530 B\nSize reduction:    -10.6%\n\nEst. tokens before: 69\nEst. tokens after:  123\nToken savings:      -54 (-78.3%)\n==============================\n\nOutput written to: sample.compact.yaml\n",
-    "stderr": ""
-  },
-  "-d sample.yaml (aggressive)": {
-    "args": [
-      "-d",
-      "sample.compact.yaml"
-    ],
-    "exit": 0,
-    "stdout": "Decompressing: sample.compact.yaml\nFormat: yaml\n\n=== Decompression Statistics ===\nCompressed size:   530 B\nRestored size:     968 B\nSize increase:     82.6%\n================================\n\nOutput written to: sample.yaml\n",
     "stderr": ""
   },
   "sample.md --dry-run": {

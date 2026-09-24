@@ -18,13 +18,13 @@ import {
   getCompressor,
   LEVELS,
 } from "./formats.ts";
-import { decompress } from "./legend.ts";
+import { decompress, JSON_ONLY_MESSAGE } from "./legend.ts";
 
 /** The help text of the subcommand. */
 export const HELP = `Usage: repo-tools compress <input...> [options]
        repo-tools compress --batch --pattern <glob> [<directory>] [options]
 
-Writes a compact copy of each input file (the CTON format), or restores a compact file.
+Writes a compact copy of each input file (the CTON format), or restores a compact JSON file.
 
 Arguments:
   <input>              The file to compress. In batch mode with --pattern, the directory
@@ -40,6 +40,8 @@ Options:
   --no-stats           Do not show the statistics.
   --dry-run            Show a preview. Do not write a file.
   -d, --decompress     Restore a compact file. The output name removes ".compact".
+                       This version restores JSON only. -d on any other format
+                       exits 1 and writes no file.
 
 Batch options:
   -b, --batch          Process many files.
@@ -419,6 +421,10 @@ export async function run(
       return 1;
     }
     const format = o.format === "auto" ? detectFormat(o.input) : o.format;
+    if (o.decompress && format !== "json") {
+      io.stderr(`Error: ${JSON_ONLY_MESSAGE}. The format '${format}' cannot be restored.\n`);
+      return 1;
+    }
     return o.decompress ? runDecompress(o, format, io) : runCompress(o, format, io);
   } catch (error) {
     io.stderr(`Error: ${error instanceof Error ? error.message : String(error)}\n`);

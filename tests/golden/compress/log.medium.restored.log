@@ -1,4 +1,0 @@
-2025-12-15T10:30:45.123Z INFOworkerstarted: queue=inventory-import:45.456Z DEBUGworkerpolling queue=inventory-import:46.001Z INFOworkerprocessedjob id=17 queue=inventory-import:46.001Z WARNworkerslowjob id=17queue=inventory-import took=950ms
-2025-12-15T10:30:47.250Z ERRORworkerfailedjob id=18queue=inventory-import reason=timeout
-2025-12-15T10:30:47.250Z INFOworkerretryingjob id=18 queue=inventory-import:48.900Z WARNINGworkerqueue depth highqueue=inventory-import depth=42
-2025-12-15T10:30:49.000Z TRACEworkerheartbeat queue=inventory-import:50.000Z INFOworkerstopped:queue=inventory-import

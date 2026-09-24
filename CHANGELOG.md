@@ -6,6 +6,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- `compress -d` (K9) restores JSON only in this version. `-d` on any other format (yaml, csv,
+  tsv, text, log, typescript, javascript, xml, html, markdown) exits 1 with the message
+  "decompress supports JSON only in this version" and writes no file. In batch mode, each such
+  file fails with the same message, and the exit code is 1. The original tool replaced text in
+  the other formats: this corrupted YAML, CSV and TSV data, and the XML and HTML legend was not
+  read. The library function `decompress` throws for a format that is not JSON. The help text
+  tells the limit. The compact formats do not change. Removed goldens: the 30 non-JSON
+  `tests/golden/compress/*.restored.*` files, and the 30 non-JSON `-d` runs in
+  `tests/golden/compress/stdout.json`.
+
 ### Fixed
 
 - `compress` JSON: an abbreviation does not equal a key in the data. The set of used

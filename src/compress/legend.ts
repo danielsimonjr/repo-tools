@@ -2,9 +2,9 @@
  * Legend build and parse for `repo-tools compress` (design section 4).
  *
  * A legend maps a short abbreviation to the full text that it replaces. The compressors build
- * legends with the helpers here, and `decompress` reads a legend back from a compact file and
- * restores the full text. The legend syntax of each format is part of the CTON format and does
- * not change.
+ * legends with the helpers here, and `decompress` reads the legend back from a compact JSON file
+ * and restores the full keys. The legend syntax of each format is part of the CTON format and
+ * does not change.
  */
 import type { FileFormat } from "./formats.ts";
 
@@ -141,64 +141,6 @@ export function applySubstringCompression(
   return { compressed, legend };
 }
 
-/** Removes the legend from `content` and returns the body and the parsed legend. */
-function parseLegend(
-  content: string,
-  format: FileFormat,
-): { body: string; legend: Record<string, string> } {
-  let result = content;
-  const legend: Record<string, string> = {};
-
-  if (format === "markdown" || format === "html" || format === "xml") {
-    const legendMatch = result.match(/<!--\s*§:\s*([^>]+)\s*-->\n?/);
-    if (legendMatch) {
-      result = result.replace(legendMatch[0], "");
-      // Split on " | " only. A value keeps its spaces.
-      for (const entry of (legendMatch[1] ?? "").split(" | ")) {
-        const eq = entry.indexOf("=");
-        if (eq > 0) {
-          const abbrev = entry.slice(0, eq).trim();
-          const value = entry.slice(eq + 1);
-          if (abbrev && value) legend[abbrev] = value;
-        }
-      }
-    }
-  } else if (format === "yaml") {
-    const lines = result.split("\n");
-    let i = 0;
-    while (i < lines.length && (lines[i] ?? "").startsWith("#")) {
-      const match = (lines[i] ?? "").match(/^#\s*(\S+):\s*(.+)$/);
-      if (match?.[1] !== undefined && match[2] !== undefined) legend[match[1]] = match[2];
-      i++;
-    }
-    if (lines[i] === "---") i++;
-    result = lines.slice(i).join("\n");
-  } else if (format === "text" || format === "log") {
-    const legendMatch = result.match(/=== Legend ===\n([\s\S]*?)\n=+\n\n?/);
-    if (legendMatch) {
-      result = result.replace(legendMatch[0], "");
-      for (const entry of (legendMatch[1] ?? "").split("\n")) {
-        const [abbrev, ...valueParts] = entry.split(" = ");
-        if (abbrev && valueParts.length > 0) {
-          legend[abbrev.trim()] = valueParts.join(" = ").trim();
-        }
-      }
-    }
-  } else if (format === "csv" || format === "tsv") {
-    const data: string[] = [];
-    for (const line of result.split("\n")) {
-      if (line.startsWith("#")) {
-        const match = line.match(/^#\s*(\S+)=(.+)$/);
-        if (match?.[1] !== undefined && match[2] !== undefined) legend[match[1]] = match[2];
-      } else {
-        data.push(line);
-      }
-    }
-    result = data.join("\n");
-  }
-  return { body: result, legend };
-}
-
 /** Returns a copy of `value` with each object key renamed through `keyMap`. */
 export function renameKeys(value: unknown, keyMap: ReadonlyMap<string, string>): unknown {
   if (Array.isArray(value)) return value.map((item) => renameKeys(item, keyMap));
@@ -236,19 +178,21 @@ function decompressJson(content: string): string {
   return JSON.stringify(renameKeys(wrapped ? rest.data : rest, keyMap), null, 2);
 }
 
+/** The start of the message for a `-d` on a format that is not JSON (K9). */
+export const JSON_ONLY_MESSAGE = "decompress supports JSON only in this version";
+
 /**
- * Restores a compact file: removes the legend and replaces each abbreviation with its full
- * text. Content in the `json` format that does not parse, or has no legend, is returned
- * unchanged.
+ * Restores a compact JSON file: removes the legend and renames each abbreviated key. Content
+ * that does not parse, or has no legend, is returned unchanged.
+ *
+ * K9: this version restores JSON only. The original tool replaced text in the other formats,
+ * which corrupted YAML, CSV and TSV data, and it did not read the XML and HTML legend.
+ *
+ * @throws Error when `format` is not `json`.
  */
 export function decompress(content: string, format: FileFormat): string {
-  if (format === "json") return decompressJson(content);
-  const parsed = parseLegend(content, format);
-  let result = parsed.body;
-  // Longer abbreviations first, so §10 is replaced before §1.
-  const entries = Object.entries(parsed.legend).sort((a, b) => b[0].length - a[0].length);
-  for (const [abbrev, original] of entries) {
-    result = result.split(abbrev).join(original);
+  if (format !== "json") {
+    throw new Error(`${JSON_ONLY_MESSAGE}. The format '${format}' cannot be restored.`);
   }
-  return result;
+  return decompressJson(content);
 }

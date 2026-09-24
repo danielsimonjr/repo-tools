@@ -5,7 +5,15 @@
  * fixtures in tests/fixtures/compress. The port must give the same bytes and the same output.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
@@ -63,9 +71,14 @@ describe("compressors and decompress match the goldens", () => {
       test(`${file} at ${level}`, () => {
         const compact = read(join(golden, `${name}.${level}.compact${ext}`));
         expect(getCompressor(format)(read(join(fixtures, file)), level).compressed).toBe(compact);
-        expect(decompress(compact, format)).toBe(
-          read(join(golden, `${name}.${level}.restored${ext}`)),
-        );
+        // K9: -d restores JSON only, so only JSON has a restored golden.
+        if (format === "json") {
+          expect(decompress(compact, format)).toBe(
+            read(join(golden, `${name}.${level}.restored${ext}`)),
+          );
+        } else {
+          expect(existsSync(join(golden, `${name}.${level}.restored${ext}`))).toBe(false);
+        }
       });
     }
   }
@@ -86,9 +99,19 @@ describe("the CLI output matches the goldens", () => {
         const compactFile = join(dir, `sample.compact${ext}`);
         expect(read(compactFile)).toBe(read(join(golden, `${name}.${level}.compact${ext}`)));
 
-        const restore = runs[`-d ${file} (${level})`];
-        expect(await runIn(dir, ["-d", `sample.compact${ext}`])).toEqual(restore as GoldenRun);
-        expect(read(join(dir, file))).toBe(read(join(golden, `${name}.${level}.restored${ext}`)));
+        const restoreArgs = ["-d", `sample.compact${ext}`];
+        if (ext === ".json") {
+          const restore = runs[`-d ${file} (${level})`];
+          expect(await runIn(dir, restoreArgs)).toEqual(restore as GoldenRun);
+          expect(read(join(dir, file))).toBe(read(join(golden, `${name}.${level}.restored${ext}`)));
+        } else {
+          // K9: -d exits 1 on a format that is not JSON, and writes no file.
+          rmSync(join(dir, file));
+          const r = await runIn(dir, restoreArgs);
+          expect(r.exit).toBe(1);
+          expect(r.stderr).toContain("decompress supports JSON only in this version");
+          expect(readdirSync(dir)).toEqual([`sample.compact${ext}`]);
+        }
       });
     }
   }
@@ -111,6 +134,7 @@ describe("the CLI output matches the goldens", () => {
   });
 
   test("every golden run is used by a test", () => {
-    expect(Object.keys(runs).length).toBe(files.length * LEVELS.length * 2 + 2);
+    // One compress run for each fixture and level, one -d run for each JSON level, and two more.
+    expect(Object.keys(runs).length).toBe(files.length * LEVELS.length + LEVELS.length + 2);
   });
 });

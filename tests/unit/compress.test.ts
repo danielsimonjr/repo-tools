@@ -9,7 +9,6 @@ import { decompress } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
-const goldens = join(import.meta.dir, "../golden/compress");
 const work = mkdtempSync(join(tmpdir(), "repo-tools-compress-"));
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
@@ -130,11 +129,11 @@ describe("batch mode does not compress its own output", () => {
   });
 
   test("batch decompress still selects the .compact files", async () => {
-    const dir = folder("sample.md");
-    await compressIn(dir, ["sample.md", "--no-stats"]);
-    const r = await compressIn(dir, ["-d", "-b", "-p", "*.compact.md", ".", "--no-stats"]);
+    const dir = folder("sample.json");
+    await compressIn(dir, ["sample.json", "--no-stats"]);
+    const r = await compressIn(dir, ["-d", "-b", "-p", "*.compact.json", ".", "--no-stats"]);
     expect(r.code).toBe(0);
-    expect(r.out).toContain("sample.compact.md → sample.md");
+    expect(r.out).toContain("sample.compact.json → sample.json");
   });
 });
 
@@ -197,19 +196,7 @@ describe("round trip (design 13.3 step 5)", () => {
     });
   }
 
-  // The other formats do not restore the input exactly (see the goldens): they are compared with
-  // the golden restored file, through the full chain from the fixture.
-  for (const file of readdirSync(fixtures).filter((f) => extname(f) !== ".json")) {
-    for (const level of LEVELS) {
-      test(`${file} at ${level}: compress then decompress gives the golden restored file`, () => {
-        const format = detectFormat(file);
-        const compact = getCompressor(format)(readFileSync(join(fixtures, file), "utf8"), level);
-        const name = extname(file).slice(1);
-        const expected = readFileSync(join(goldens, `${name}.${level}.restored${extname(file)}`));
-        expect(decompress(compact.compressed, format)).toBe(expected.toString("utf8"));
-      });
-    }
-  }
+  // K9: -d restores JSON only. The other formats are tested in "K9: -d supports JSON only".
 
   test("JSON: a value that equals an abbreviation is not changed", () => {
     const input = JSON.stringify({ name: "n", items: [{ name: "i", count: "name" }] });
@@ -308,5 +295,56 @@ describe("JSON: the shape of the top-level value does not change", () => {
   test("the compact file wraps an array as the value of `data`", () => {
     const compact = JSON.parse(jsonRoundTrip([{ itemName: "a" }], "medium").compact);
     expect(compact).toEqual({ _legend: { in: "itemName" }, data: [{ in: "a" }] });
+  });
+});
+
+describe("K9: -d supports JSON only", () => {
+  const JSON_ONLY = "decompress supports JSON only in this version";
+  const others = readdirSync(fixtures).filter((f) => extname(f) !== ".json");
+
+  test("there is one fixture for each of the 10 other formats", () => {
+    expect(new Set(others.map(detectFormat)).size).toBe(10);
+  });
+
+  for (const file of others) {
+    test(`-d on ${file} exits 1 with a message and writes nothing`, async () => {
+      const dir = folder(file);
+      const compact = `sample.compact${extname(file)}`;
+      expect((await compressIn(dir, [file, "-l", "aggressive", "--no-stats"])).code).toBe(0);
+      const before = snapshot(dir);
+      const r = await compressIn(dir, ["-d", compact]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(JSON_ONLY);
+      expect(snapshot(dir)).toEqual(before);
+    });
+  }
+
+  test("-d with --format yaml on a JSON file exits 1", async () => {
+    const dir = folder("sample.json");
+    await compressIn(dir, ["sample.json", "--no-stats"]);
+    const before = snapshot(dir);
+    const r = await compressIn(dir, ["-d", "-f", "yaml", "sample.compact.json"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain(JSON_ONLY);
+    expect(snapshot(dir)).toEqual(before);
+  });
+
+  test("batch -d on a compact Markdown file exits 1 and writes nothing", async () => {
+    const dir = folder("sample.md");
+    await compressIn(dir, ["sample.md", "--no-stats"]);
+    const before = snapshot(dir);
+    const r = await compressIn(dir, ["-d", "-b", "-p", "*.compact.md", ".", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain(JSON_ONLY);
+    expect(snapshot(dir)).toEqual(before);
+  });
+
+  test("the library function decompress throws for a format that is not JSON", () => {
+    expect(() => decompress("# a: b\n---\nb: 1\n", "yaml")).toThrow(JSON_ONLY);
+  });
+
+  test("the help says that -d supports JSON only", async () => {
+    const r = await compress([]);
+    expect(r.out).toContain("JSON only");
   });
 });

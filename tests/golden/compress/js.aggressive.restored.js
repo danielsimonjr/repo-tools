@@ -1,1 +1,0 @@
-const DOCS_URL = "https://example.com/docs";function total(items){let sum = 0;for (const item of items){sum += item.quantity;}return sum;}function names(items){return items.map((item) => item.name);}module.exports ={total, names, DOCS_URL};
