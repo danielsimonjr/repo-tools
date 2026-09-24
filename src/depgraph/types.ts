@@ -145,6 +145,11 @@ export interface WorkspacePackage {
    * ".", `bin` targets, script entries and tsup config entries. Paths are relative to the root.
    */
   extraEntries: string[];
+  /**
+   * Set for the root package of single-package mode only (fix F43): the source file of each
+   * entry, keyed by subpath ("." and each `./x` key of `exports`), for self-imports.
+   */
+  entryFiles?: Record<string, string>;
 }
 
 /** One strongly connected component of the import graph that holds a cycle (fix F26). */

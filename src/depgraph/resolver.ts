@@ -75,6 +75,31 @@ export function workspaceEntryPath(
 }
 
 /**
+ * The file that a workspace import of `packageName` (with an optional `subpath`) reaches, or
+ * undefined when the package is not known: the subpath file when `known` holds it, else the
+ * package entry. For a package with `entryFiles` (the root package of single-package mode, fix
+ * F43) the `entryFiles` path comes first, and a subpath also tries `<srcDir>/<subpath>/index.ts`.
+ */
+export function workspaceTarget(
+  workspaces: Map<string, WorkspacePackage>,
+  packageName: string,
+  subpath: string | undefined,
+  known: KnownFiles,
+): string | undefined {
+  const ws = workspaces.get(packageName);
+  if (!ws) return undefined;
+  const mapped = ws.entryFiles?.[subpath === undefined ? "." : `./${subpath}`];
+  if (mapped) return mapped;
+  if (subpath !== undefined) {
+    const file = workspaceEntryPath(workspaces, packageName, subpath) as string;
+    if (known.has(file)) return file;
+    const folder = `${ws.srcDir}/${subpath}/index.ts`;
+    if (ws.entryFiles && known.has(folder)) return folder;
+  }
+  return ws.entryFiles?.["."] ?? workspaceEntryPath(workspaces, packageName);
+}
+
+/**
  * Resolves a package specifier to a workspace package: the exact name, or `<name>/<subpath>`
  * for an `exports` subpath. Returns undefined for a relative specifier or a package that is
  * not a workspace member.

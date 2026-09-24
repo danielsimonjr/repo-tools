@@ -188,7 +188,8 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
 
   let detectedPackageName: string | null = null;
   for (const [name, ws] of ctx.workspaces) {
-    if (relativePath.startsWith(`${ws.directory}/`)) {
+    // Fix F43: the root package of single-package mode (directory "") names no file's package.
+    if (ws.directory !== "" && relativePath.startsWith(`${ws.directory}/`)) {
       detectedPackageName = name;
       break;
     }

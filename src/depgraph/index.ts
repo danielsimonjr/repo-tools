@@ -53,7 +53,7 @@ import {
 import { generateSurfacesJson } from "./reporters/surfaces.ts";
 import { generateUnusedReport } from "./reporters/unused.ts";
 import { generateYaml } from "./reporters/yaml.ts";
-import { collectEntryPoints, isJsonObject, rootPackageEntries } from "./roots.ts";
+import { collectEntryPoints, isJsonObject, rootPackageEntries, selfPackage } from "./roots.ts";
 import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, TEST_DIR_NAMES } from "./scanner.ts";
 import type { PackageJson, ParsedFile, Statistics, UnusedExport } from "./types.ts";
 import { detectWorkspaces } from "./workspaces.ts";
@@ -195,6 +195,10 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const isMonorepo = workspaces.size > 0;
   // Fix M1: in single-package mode the root package.json names the extra build roots.
   const rootEntries = isMonorepo ? [] : rootPackageEntries(root, warn);
+  // Fix F43: in single-package mode an import of the package's own name resolves to its source.
+  // `resolveWorkspaces` holds the root package then; the mode checks keep using `workspaces`.
+  const self = isMonorepo ? undefined : selfPackage(root);
+  const resolveWorkspaces = self ? new Map([[self.name, self]]) : workspaces;
   if (isMonorepo) {
     log(`Monorepo detected: ${workspaces.size} workspace packages`);
     for (const [name, ws] of workspaces) log(`  - ${name} (${ws.directory}/)`);
@@ -225,7 +229,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   }
 
   // Parse.
-  const parseCtx = { root, workspaces };
+  const parseCtx = { root, workspaces: resolveWorkspaces };
   const parsedFiles = tsFiles.map((f) => parseFile(parseCtx, f));
   log("Parsed all files");
 
@@ -235,7 +239,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const entryPoints = collectEntryPoints(root, workspaces, parsedFiles, rootEntries);
   log(`Entry points: ${entryPoints.length}`);
   const censusRoots = new Set(entryPoints);
-  const reachableSet = findReachableFiles(entryPoints, parsedFiles, workspaces);
+  const reachableSet = findReachableFiles(entryPoints, parsedFiles, resolveWorkspaces);
   const dormantSet = new Set(
     parsedFiles.filter((f) => !reachableSet.has(f.path)).map((f) => f.path),
   );
@@ -287,7 +291,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     activeParsedFiles,
     parsedTestFiles,
     root,
-    workspaces,
+    resolveWorkspaces,
     rootEntries,
   );
   const stats = generateStatistics(activeParsedFiles, modules, cycles, unusedAnalysis, root);
@@ -364,7 +368,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     unusedExports: unusedAnalysis.unusedExports,
   });
 
-  const dormant = splitDormant(dormantSet, parsedFiles, parsedTestFiles, workspaces);
+  const dormant = splitDormant(dormantSet, parsedFiles, parsedTestFiles, resolveWorkspaces);
   write(
     "unused-analysis.md",
     withBanner(generateUnusedReport(unusedAnalysis, dormant, workspaces)),

@@ -11,7 +11,7 @@ import { stripComments } from "../mask.ts";
 import { filesInCycles } from "./cycles.ts";
 import { escapeRegExpLiteral } from "./duplicates.ts";
 import { isSrcIndex } from "./paths.ts";
-import { resolvePath, workspaceEntryPath } from "./resolver.ts";
+import { resolvePath, workspaceTarget } from "./resolver.ts";
 import { configReferencedEntries } from "./roots.ts";
 import type {
   CyclicComponents,
@@ -131,8 +131,7 @@ export function findReachableFiles(
       if (fileMap.has(resolved) && !reachable.has(resolved)) queue.push(resolved);
     }
     for (const ws of file.workspaceDependencies) {
-      const sub = ws.subpath ? workspaceEntryPath(workspaces, ws.package, ws.subpath) : undefined;
-      const target = sub && fileMap.has(sub) ? sub : workspaceEntryPath(workspaces, ws.package);
+      const target = workspaceTarget(workspaces, ws.package, ws.subpath || undefined, fileMap);
       if (target && fileMap.has(target) && !reachable.has(target)) queue.push(target);
     }
   }
@@ -216,8 +215,7 @@ export function detectUnused(
       addImported(symbolsOf(resolved), dep.imports);
     }
     for (const ws of file.workspaceDependencies) {
-      const sub = ws.subpath ? workspaceEntryPath(workspaces, ws.package, ws.subpath) : undefined;
-      const target = sub && filePaths.has(sub) ? sub : workspaceEntryPath(workspaces, ws.package);
+      const target = workspaceTarget(workspaces, ws.package, ws.subpath || undefined, filePaths);
       if (!target || !filePaths.has(target)) continue;
       importedFiles.add(target);
       addImported(symbolsOf(target), ws.imports);

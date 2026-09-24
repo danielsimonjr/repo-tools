@@ -20,6 +20,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F43: in single-package mode, an import of the package's own npm name (`'my-pkg'`,
+  `'my-pkg/sub'`) resolves to its own source. The target of the `exports` entry (the first
+  condition that is not `types`), else `main`, maps from `dist/` to `src/` and from `.js` to
+  `.ts`; when that file does not exist, `'my-pkg'` gives `src/index.ts` and `'my-pkg/sub'` gives
+  `src/sub.ts`, else `src/sub/index.ts`. The port classed a self-import as an external package,
+  so the files that only a self-import reached were orphans and their exports were unused. The
+  edge is now a workspace dependency with `directory: ""` in the JSON and YAML reports. No
+  golden changes.
 - depgraph F40 (corrects F25): a member call on a dynamic import is a runtime edge also when a
   type-argument list comes before the call. `import('./x').then<T>(cb)` was a type-only edge;
   it is now runtime, as `import('./x').then(cb)` is. `type T = import('./x').Name` and

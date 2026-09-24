@@ -10,6 +10,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { listNames } from "./dirlist.ts";
 import { relativePosix, toPosix } from "./paths.ts";
+import { distToSrc } from "./resolver.ts";
 import { getAllSourceTsFiles } from "./scanner.ts";
 import type { ParsedFile, WorkspacePackage } from "./types.ts";
 
@@ -170,6 +171,62 @@ export function exportsSubpathEntries(
 }
 
 /**
+ * The first file target of one `exports` value: the string itself, else the first target of
+ * its conditions in their order. A `types` condition names a declaration file, so it is skipped.
+ */
+function exportTarget(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (!isJsonObject(value)) return undefined;
+  for (const [condition, inner] of Object.entries(value)) {
+    if (condition === "types") continue;
+    const target = exportTarget(inner);
+    if (target !== undefined) return target;
+  }
+  return undefined;
+}
+
+/**
+ * The source files of the entries of the root package (fix F43), keyed by subpath: "." and each
+ * `./x` key of `exports` (a `*` pattern key is skipped). Each value is a root-relative path that
+ * exists on disk. A target maps to its source: `dist/` to `src/` (as `distToSrc` does) and
+ * `.js`, `.mjs` or `.cjs` to `.ts`. When the source of a target does not exist, "." gives
+ * `src/index.ts`, and `./x` gives `src/x.ts`, else `src/x/index.ts` (the rule of
+ * `exportsSubpathEntries`). Without a "." export, `main` names the "." entry.
+ */
+export function packageEntryFiles(
+  root: string,
+  pkg: PackageRootFields & { main?: unknown },
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  const exists = (rel: string): boolean => existsSync(join(root, rel));
+  const sourceOf = (target: string | undefined): string | undefined => {
+    if (target === undefined || target.endsWith(".d.ts")) return undefined;
+    const rel = distToSrc(toPosix(join(".", target))).replace(/\.[cm]?js$/, ".ts");
+    return rel.endsWith(".ts") && exists(rel) ? rel : undefined;
+  };
+  const targets: Record<string, string | undefined> = {};
+  const exp = pkg.exports;
+  if (typeof exp === "string") targets["."] = exp;
+  else if (isJsonObject(exp)) {
+    const keys = Object.keys(exp);
+    if (keys.length > 0 && keys.every((k) => !k.startsWith("."))) targets["."] = exportTarget(exp);
+    else for (const key of keys) targets[key] = exportTarget(exp[key]);
+  }
+  if (!("." in targets) && typeof pkg.main === "string") targets["."] = pkg.main;
+  const index = "src/index.ts";
+  const rootSource = sourceOf(targets["."]) ?? (exists(index) ? index : undefined);
+  if (rootSource) out["."] = rootSource;
+  for (const [key, target] of Object.entries(targets)) {
+    if (key === "." || !key.startsWith("./") || key.includes("*")) continue;
+    const file = `src/${key.slice(2)}.ts`;
+    const folder = `src/${key.slice(2)}/index.ts`;
+    const source = sourceOf(target) ?? (exists(file) ? file : exists(folder) ? folder : undefined);
+    if (source) out[key] = source;
+  }
+  return out;
+}
+
+/**
  * The extra build roots of the root package in single-package mode (fix M1): the
  * `exportsSubpathEntries` of the root `package.json`. Returns an empty list when the file is
  * missing, is not valid JSON, or is not a JSON object.
@@ -182,6 +239,28 @@ export function rootPackageEntries(root: string, warn: Warn = () => {}): string[
     return [];
   }
   return isJsonObject(pkg) ? exportsSubpathEntries(root, "", pkg, warn) : [];
+}
+
+/**
+ * The root package of single-package mode as a package that an import can name (fix F43), so a
+ * self-import (`'my-pkg'`, `'my-pkg/sub'`) resolves to its own source through `entryFiles`.
+ * Returns undefined when `package.json` is missing, is not a JSON object, or has no name.
+ */
+export function selfPackage(root: string): WorkspacePackage | undefined {
+  let pkg: unknown;
+  try {
+    pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf-8"));
+  } catch {
+    return undefined;
+  }
+  if (!isJsonObject(pkg) || typeof pkg.name !== "string" || !pkg.name) return undefined;
+  return {
+    name: pkg.name,
+    directory: "",
+    srcDir: "src",
+    extraEntries: [],
+    entryFiles: packageEntryFiles(root, pkg),
+  };
 }
 
 /**
