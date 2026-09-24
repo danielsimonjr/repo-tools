@@ -123,8 +123,13 @@ const compressJson: Compressor = (content, level) => {
   }
 
   const transformed = renameKeys(data, keyMap);
+  // An array, a single value and an object with the one key `data` are wrapped as the value of
+  // `data`. `-d` unwraps a compact file whose only keys are `_legend` and `data`.
+  const isObject =
+    typeof transformed === "object" && transformed !== null && !Array.isArray(transformed);
+  const onlyData = isObject && Object.keys(transformed).join("\n") === "data";
   const output =
-    typeof transformed === "object" && transformed !== null
+    isObject && !onlyData
       ? { _legend: legend, ...(transformed as Record<string, unknown>) }
       : { _legend: legend, data: transformed };
   return result(content, JSON.stringify(output), legend);

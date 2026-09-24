@@ -13,6 +13,11 @@ All notable changes to this project are recorded in this file. The format follow
   and `data`. Before, the input `{"name":"a","n":"b"}` at `medium` gave the compact file
   `{"_legend":{"n":"name"},"n":"b"}`: the value `"a"` was lost in the compact file, and `-d`
   gave `{"name":"b"}`. The compact format does not change.
+- `compress` JSON keeps the shape of the top-level value. The compressor writes an array, a
+  single value (a string, a number, `true`, `false` or `null`) and an object with the one key
+  `data` as `{"_legend":{...},"data":<value>}`. `-d` unwraps `data` when `_legend` and `data`
+  are the only keys. Before, a top-level array became an object with the keys `"0"`, `"1"`, ...,
+  and a single value came back as `{"data":<value>}`.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the

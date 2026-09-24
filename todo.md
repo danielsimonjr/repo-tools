@@ -42,7 +42,7 @@
   including top-level TypeScript statements and `export default`.
 - [ ] chunk: keep a `__proto__` key on JSON merge; restore CRLF line endings on merge.
 - [x] compress: no key collision between an abbreviation and an existing short key.
-- [ ] compress: keep the shape of a top-level JSON array or single value.
+- [x] compress: keep the shape of a top-level JSON array or single value.
 - [ ] compress K9: `-d` supports JSON only; other formats exit 1 with a message.
 - [ ] compress: batch `-d` never writes to its input; `-d` changes only the file base name.
 - [ ] compress: keep a `__proto__` key; escape every glob metacharacter; refuse an unsafe integer.

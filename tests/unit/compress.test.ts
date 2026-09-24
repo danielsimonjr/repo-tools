@@ -284,3 +284,29 @@ describe("JSON: an abbreviation does not collide with a key in the data", () => 
     });
   }
 });
+
+describe("JSON: the shape of the top-level value does not change", () => {
+  const values: [string, unknown][] = [
+    ["an array", [{ itemName: "a" }, { itemName: "b" }]],
+    ["a nested array", [[1, 2], [{ quantity: 3 }], []]],
+    ["an empty array", []],
+    ["a string", "text"],
+    ["a number", 42],
+    ["null", null],
+    ["true", true],
+    ['an object with the one key "data"', { data: [1, 2] }],
+    ['an object with the keys "_legend" and "data"', { _legend: 1, data: 2 }],
+  ];
+  for (const [name, value] of values) {
+    for (const level of LEVELS) {
+      test(`${name} at ${level}`, () => {
+        expect(jsonRoundTrip(value, level).restored).toEqual(value);
+      });
+    }
+  }
+
+  test("the compact file wraps an array as the value of `data`", () => {
+    const compact = JSON.parse(jsonRoundTrip([{ itemName: "a" }], "medium").compact);
+    expect(compact).toEqual({ _legend: { in: "itemName" }, data: [{ in: "a" }] });
+  });
+});

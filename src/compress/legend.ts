@@ -224,14 +224,16 @@ function decompressJson(content: string): string {
   } catch {
     return content;
   }
-  if (data === null || typeof data !== "object") return content;
+  if (data === null || typeof data !== "object" || Array.isArray(data)) return content;
   const { _legend: legend, ...rest } = data as Record<string, unknown>;
   if (!legend || typeof legend !== "object") return content;
   const keyMap = new Map<string, string>();
   for (const [abbrev, key] of Object.entries(legend)) {
     if (typeof key === "string") keyMap.set(abbrev, key);
   }
-  return JSON.stringify(renameKeys(rest, keyMap), null, 2);
+  // The compressor wraps an array, a single value and an object with the one key `data`.
+  const wrapped = Object.keys(rest).join("\n") === "data";
+  return JSON.stringify(renameKeys(wrapped ? rest.data : rest, keyMap), null, 2);
 }
 
 /**
