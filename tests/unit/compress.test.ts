@@ -673,3 +673,28 @@ describe("-d does not overwrite an existing file without --yes (second review, f
     expect(readFileSync(join(dir, "a.json"), "utf8")).toBe(EDITED);
   });
 });
+
+describe("the .compact check ignores case (second review, finding 10)", () => {
+  test("batch compress skips X.COMPACT.md", async () => {
+    const dir = folder("sample.md");
+    copyFileSync(join(dir, "sample.md"), join(dir, "X.COMPACT.md"));
+    const r = await compressIn(dir, ["-b", "-p", "*.md", ".", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("Skipped 1 file(s)");
+    expect(readdirSync(dir).sort(compareCodeUnits)).toEqual([
+      "X.COMPACT.md",
+      "sample.compact.md",
+      "sample.md",
+    ]);
+  });
+
+  test("-d on B.COMPACT.json writes B.json, in single and batch mode", async () => {
+    for (const args of [["-d"], ["-b", "-d"]]) {
+      const dir = folder();
+      writeFileSync(join(dir, "B.COMPACT.json"), '{"_legend":{},"a":1}');
+      const r = await compressIn(dir, [...args, "B.COMPACT.json", "--no-stats"]);
+      expect(r.code).toBe(0);
+      expect(readdirSync(dir).sort(compareCodeUnits)).toEqual(["B.COMPACT.json", "B.json"]);
+    }
+  });
+});

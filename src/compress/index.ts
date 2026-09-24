@@ -283,13 +283,13 @@ function compactName(file: string): string {
 }
 
 /**
- * Returns the output name of `-d` for `file`: the base name without the ".compact" before the
- * extension (or at the end). A folder name does not change. When the result is the input name,
- * it returns `<dir>/<base>.restored<ext>`, so `-d` never writes to its input.
+ * Returns the output name of `-d` for `file`: the base name without the ".compact" (in any case)
+ * before the extension (or at the end). A folder name does not change. When the result is the
+ * input name, it returns `<dir>/<base>.restored<ext>`, so `-d` never writes to its input.
  */
 function restoredName(file: string): string {
   const base = basename(file);
-  const stripped = base.replace(/\.compact(?=\.[^.]*$|$)/, "");
+  const stripped = base.replace(/\.compact(?=\.[^.]*$|$)/i, "");
   const output = stripped === base ? file : join(dirname(file), stripped);
   if (output !== file) return output;
   const ext = extname(file);
@@ -371,7 +371,8 @@ function runBatch(o: Options, io: Io, deps: CompressDeps): number {
   // (README.compact.compact.md). Decompression takes only the .compact files: the original tool
   // restored any matched file, and wrote the result over the input when the name had no
   // ".compact" (conf.yaml, d.csv).
-  const isCompact = (f: string) => basename(f).includes(".compact");
+  // The check ignores case, as the name change of -d does: X.COMPACT.md is a compact file.
+  const isCompact = (f: string) => basename(f).toLowerCase().includes(".compact");
   const skipped = files.filter((f) => isCompact(f) !== o.decompress);
   if (skipped.length > 0) {
     files = files.filter((f) => isCompact(f) === o.decompress);

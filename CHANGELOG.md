@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `compress --batch` finds a compact file by its name in any case: `X.COMPACT.md` is skipped
+  in compression and selected by `-d`. `-d` removes `.compact` in any case from the base name
+  (`B.COMPACT.json` gives `B.json`). Before, batch compression wrote `X.COMPACT.compact.md`.
 - `compress -d` does not write over an existing output file without `--yes`, in single mode
   (also with `-o`) and in batch mode. It exits 1 with a message, and the file does not change.
   `--dry-run` needs no `--yes`. Before, `-d` wrote over the file with no backup, so edits made
