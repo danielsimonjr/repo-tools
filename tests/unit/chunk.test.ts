@@ -264,6 +264,46 @@ describe("chunk fixes", () => {
     });
   }
 
+  for (const [what, flags, needle] of [
+    ["an invalid --type", ["-t", "yaml"], "--type"],
+    ["a NaN --level", ["-l", "two"], "--level"],
+    ["a zero --level", ["--level", "0"], "--level"],
+    ["a NaN --max-lines", ["-m", "many"], "--max-lines"],
+    ["a --level without a value", ["-l"], "--level"],
+  ] as const) {
+    test(`split with ${what} exits 1 with a message and writes nothing`, async () => {
+      const dir = join(work, "invalid", what.replace(/\W+/g, "-"));
+      const src = stageFixture(CASES[0] as GoldenCase, dir);
+      const r = await chunk(["split", src, ...flags]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(needle);
+      expect(r.out).toBe("");
+      expect(() => readFileSync(join(dir, "guide_chunks", "manifest.json"))).toThrow();
+    });
+  }
+
+  for (const action of ["split", "merge", "status"]) {
+    test(`${action} with a directory as the file exits 1 with a message`, async () => {
+      const r = await chunk([action, work]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain("is a directory");
+    });
+  }
+
+  for (const [file, level] of [
+    ["guide.md", 2],
+    ["config.json", 1],
+    ["parser.ts", 1],
+  ] as const) {
+    test(`the default split level of ${file} is ${level}`, async () => {
+      const c = CASES.find((x) => x.file === file) as GoldenCase;
+      const dir = join(work, "level", file);
+      expect((await chunk(["split", stageFixture(c, dir)])).code).toBe(0);
+      const name = `${file.slice(0, -extname(file).length)}_chunks`;
+      expect(JSON.parse(readText(join(dir, name, "manifest.json"))).splitLevel).toBe(level);
+    });
+  }
+
   test("a manifest of an unknown major version exits 1", async () => {
     const s = await splitGuide("v3");
     writeFileSync(s.manifest, readText(s.manifest).replace('"2.0.0"', '"3.0.0"'));

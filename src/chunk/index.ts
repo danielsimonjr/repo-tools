@@ -4,7 +4,7 @@
  *
  * Output goes to `io`. Errors return exit code 1; this module never ends the process.
  */
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { writeLf } from "../io.ts";
 import type { Io } from "../io-types.ts";
@@ -89,6 +89,27 @@ function parseOptions(args: string[]): Options {
   return options;
 }
 
+const FILE_TYPES = ["auto", "markdown", "json", "typescript"];
+
+/** Returns an error message for an invalid flag value, or undefined when all values are valid. */
+function invalidOption(options: Options): string | undefined {
+  if (options.type !== undefined && !FILE_TYPES.includes(options.type)) {
+    return `invalid --type '${options.type}' (use auto, markdown, json or typescript)`;
+  }
+  if (options.level !== undefined && !(options.level >= 1)) {
+    return "--level needs a whole number of 1 or more";
+  }
+  if (options.maxLines !== undefined && !(options.maxLines >= 0)) {
+    return "--max-lines needs a whole number of 0 or more";
+  }
+  return undefined;
+}
+
+/** Returns an error message when `path` is a directory, or undefined. */
+function directoryError(path: string): string | undefined {
+  return statSync(path).isDirectory() ? `${path} is a directory, not a file` : undefined;
+}
+
 /** A line writer on top of `io.stdout`, in the style of `console.log`. */
 function lineWriter(io: Io): (text?: string) => void {
   return (text = "") => io.stdout(`${text}\n`);
@@ -117,6 +138,11 @@ function split(inputFile: string, options: Options, io: Io): number {
   const absoluteInput = resolve(inputFile);
   if (!existsSync(absoluteInput)) {
     io.stderr(`Error: File not found: ${absoluteInput}\n`);
+    return 1;
+  }
+  const inputError = directoryError(absoluteInput);
+  if (inputError) {
+    io.stderr(`Error: ${inputError}\n`);
     return 1;
   }
   const fileType: FileType =
@@ -208,6 +234,11 @@ function merge(manifestFile: string, options: Options, io: Io): number {
     io.stderr(`Error: Manifest not found: ${absoluteManifest}\n`);
     return 1;
   }
+  const manifestError = directoryError(absoluteManifest);
+  if (manifestError) {
+    io.stderr(`Error: ${manifestError}\n`);
+    return 1;
+  }
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
@@ -278,6 +309,11 @@ function status(manifestFile: string, io: Io): number {
   const absoluteManifest = resolve(manifestFile);
   if (!existsSync(absoluteManifest)) {
     io.stderr(`Error: Manifest not found: ${absoluteManifest}\n`);
+    return 1;
+  }
+  const manifestError = directoryError(absoluteManifest);
+  if (manifestError) {
+    io.stderr(`Error: ${manifestError}\n`);
     return 1;
   }
   const manifest = readManifest(absoluteManifest);
@@ -352,6 +388,11 @@ export async function run(argv: string[], io: Io): Promise<number> {
     return 0;
   }
   const options = parseOptions(flags);
+  const optionError = invalidOption(options);
+  if (optionError) {
+    io.stderr(`Error: ${optionError}\n`);
+    return 1;
+  }
   try {
     switch (action) {
       case "split":

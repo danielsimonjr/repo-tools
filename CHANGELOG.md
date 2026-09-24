@@ -95,3 +95,9 @@ All notable changes to this project are recorded in this file. The format follow
   that a 1.1.0 reader expects. The manifest file ends with one LF. `merge` and `status` still
   read a 1.1.0 manifest, with an absolute or a relative `sourceFile`, and compare its chunks
   with the old 32-bit hash. A manifest of another major version exits 1 with a message.
+- `chunk`: invalid flag values exit 1 with a message and write no files. This applies to a
+  `--type` other than `auto`, `markdown`, `json` or `typescript`, a `--level` that is not a
+  number of 1 or more, and a `--max-lines` that is not a number of 0 or more. The original
+  wrote chunk files named `...undefined` for an unknown type, ignored a NaN level or max-lines,
+  and crashed on level 0. A directory given as the file or the manifest exits 1 with a message;
+  the original crashed with `EISDIR`.
