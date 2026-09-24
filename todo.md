@@ -29,8 +29,17 @@
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
   walk), F35 (package.json guards), F36 (negated workspace patterns), F37 (tsup object-form
   `entry`), M1.
+- [ ] depgraph batch 3 follow-ups before push: the `benchmarks/` census folder (a `bench`
+  disposition), F41 (both census walks skip folders that a negated workspace pattern excludes),
+  F42 (a census gap warns and exits 0; `--strict-census` makes it fail).
 - [ ] depgraph fixes, batch 4: F38 (a runtime `import()` edge records `["*"]`), F39 (a
-  regex-aware comment stripper), F40 (`import().then<T>(...)` is a runtime edge).
+  regex-aware comment stripper), F40 (`import().then<T>(...)` is a runtime edge), F43
+  (self-imports in single-package mode), F44 (a `.d.ts` file never counts as an unused file).
+
+## Post-release list (filed, not worked in v1)
+
+Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
+data. Other findings are filed here.
 - [ ] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
   created; standard error shows the root as `<root>`, never an absolute path.
 
