@@ -34,6 +34,53 @@ export function detectLineEnding(content: string): "lf" | "crlf" | "mixed" {
   return lf === crlf && cr === crlf ? "crlf" : "mixed";
 }
 
+/** The kinds of line break that `lineBreakRuns` records. */
+const BREAKS = { lf: "\n", crlf: "\r\n", cr: "\r" } as const;
+type LineBreak = keyof typeof BREAKS;
+
+/** The pattern of a `lineBreaks` value: runs such as `crlf*3`, joined by commas. */
+export const LINE_BREAK_RUNS = /^(?:(?:lf|crlf|cr)\*[1-9]\d*(?:,(?:lf|crlf|cr)\*[1-9]\d*)*)?$/;
+
+/**
+ * Returns each line break of `content`, in order, as runs of one kind: for example
+ * "crlf*2,lf*1,crlf*5". `restoreLineBreaks` puts them back after the text is normalized to LF.
+ */
+export function lineBreakRuns(content: string): string {
+  const runs: [LineBreak, number][] = [];
+  for (const match of content.matchAll(/\r\n|\r|\n/g)) {
+    const kind: LineBreak = match[0] === "\r\n" ? "crlf" : match[0] === "\r" ? "cr" : "lf";
+    const last = runs[runs.length - 1];
+    if (last?.[0] === kind) last[1]++;
+    else runs.push([kind, 1]);
+  }
+  return runs.map(([kind, count]) => `${kind}*${count}`).join(",");
+}
+
+/**
+ * Gives the line breaks recorded in `runs` back to `text`. Each line break of `text` (CRLF, CR or
+ * LF) takes the recorded kind at its position when the counts agree, so an unchanged text comes
+ * back byte for byte. When an edit changed the number of line breaks, the positions no longer
+ * agree: each line break then takes the most common recorded kind, and `exact` is false.
+ */
+export function restoreLineBreaks(text: string, runs: string): { text: string; exact: boolean } {
+  const kinds: LineBreak[] = [];
+  const totals: Record<LineBreak, number> = { lf: 0, crlf: 0, cr: 0 };
+  for (const run of runs === "" ? [] : runs.split(",")) {
+    const [kind, count] = run.split("*") as [LineBreak, string];
+    for (let i = 0; i < Number(count); i++) kinds.push(kind);
+    totals[kind] += Number(count);
+  }
+  const lines = normalizeLineEndings(text).split("\n");
+  const exact = kinds.length === lines.length - 1;
+  const kindsByCount = Object.keys(totals) as LineBreak[];
+  const common = kindsByCount.reduce((a, b) => (totals[b] > totals[a] ? b : a));
+  let out = lines[0] ?? "";
+  for (let i = 1; i < lines.length; i++) {
+    out += BREAKS[exact ? (kinds[i - 1] ?? common) : common] + lines[i];
+  }
+  return { text: out, exact };
+}
+
 /** Returns the file type for the extension of `filePath`. Unknown extensions give Markdown. */
 export function detectFileType(filePath: string): FileType {
   switch (extname(filePath).toLowerCase()) {

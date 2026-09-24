@@ -20,6 +20,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `chunk` keeps mixed and CR line breaks. `split` records each line break of a file with mixed
+  or CR-only line breaks in the manifest, as runs such as `"lineBreaks": "crlf*2,lf*1"`, and
+  `merge` puts each one back. The shrink guard compares the restored bytes. A merge of the
+  unchanged chunks gives the file byte for byte, also without a final line break. When an edit
+  changes the number of lines, every line break uses the most common original one, and `merge`
+  shows a note. A manifest without the field merges as before. Before, a mixed file split and
+  merged without edits exited 1 on the shrink guard, and a CR-only file silently became LF.
 - `chunk split -o` refuses a chunk folder on another volume (another drive or share) than the
   source file. It exits 1 with a message and writes nothing. Before, split wrote an absolute
   `sourceFile` in the manifest, and `merge` and `status` then refused that manifest, so the

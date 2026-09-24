@@ -193,3 +193,73 @@ describe("chunk split: the chunk folder must be on the volume of the source (fin
     expect(r.out).toBe("");
   });
 });
+
+/** Splits `text` as `file`, merges the unchanged chunks into a new file, and returns its bytes. */
+async function roundTrip(name: string, file: string, text: string) {
+  const dir = join(work, name);
+  const src = put(join(dir, file), text);
+  const s = await chunk(["split", src]);
+  expect(s.code).toBe(0);
+  const base = file.slice(0, file.lastIndexOf("."));
+  const manifest = join(dir, `${base}_chunks`, "manifest.json");
+  const out = join(dir, `merged-${file}`);
+  const m = await chunk(["merge", manifest, "-o", out]);
+  return { manifest, merge: m, bytes: readFileSync(out) };
+}
+
+const LINE_BREAK_CASES: [string, string, string][] = [
+  ["mixed CRLF and LF", "doc.md", "# A\r\n\r\ntext\n## B\nmore\r\n\r\n## C\r\nend\n"],
+  ["CR only", "doc.md", "# A\r\rtext\r## B\rmore\r"],
+  ["no final line break", "doc.md", "# A\r\ntext\n## B\r\nend"],
+  [
+    "mixed TypeScript",
+    "code.ts",
+    "import a from 'a';\r\n\nexport const x = 1;\r\nfunction f() {\n  return 2;\r\n}\n",
+  ],
+  ["CR-only TypeScript", "code.ts", "const a = 1;\rconst b = 2;\r"],
+  ["mixed JSON object", "data.json", '{\r\n  "a": 1,\n  "b": [\r\n    2\n  ]\r\n}'],
+  ["CR-only JSON array", "list.json", "[\r  1,\r  2\r]\r"],
+];
+
+describe("chunk: split then merge keeps every line break (finding 4)", () => {
+  for (const [what, file, text] of LINE_BREAK_CASES) {
+    test(`${what} (${file}) is byte-identical after split and merge`, async () => {
+      const r = await roundTrip(`breaks-${what.replace(/\W+/g, "-")}`, file, text);
+      expect(r.merge.err).toBe("");
+      expect(r.merge.code).toBe(0);
+      expect(r.bytes.equals(Buffer.from(text))).toBe(true);
+    });
+  }
+
+  test("a merge over the mixed source itself passes the shrink guard", async () => {
+    const dir = join(work, "breaks-in-place");
+    const text = "# A\r\n\r\ntext\n## B\nmore\r\n";
+    const src = put(join(dir, "doc.md"), text);
+    expect((await chunk(["split", src])).code).toBe(0);
+    const m = await chunk(["merge", join(dir, "doc_chunks", "manifest.json")]);
+    expect(m.err).toBe("");
+    expect(m.code).toBe(0);
+    expect(readFileSync(src).equals(Buffer.from(text))).toBe(true);
+  });
+
+  test("an edit that adds lines uses the most common line break, with a warning", async () => {
+    const dir = join(work, "breaks-edit");
+    const src = put(join(dir, "doc.md"), "# A\r\ntext\r\n## B\nend\r\n");
+    expect((await chunk(["split", src])).code).toBe(0);
+    const chunks = join(dir, "doc_chunks");
+    const m = JSON.parse(readFileSync(join(chunks, "manifest.json"), "utf8"));
+    writeFileSync(join(chunks, m.chunks[0].filename), "# A\ntext\nnew line");
+    const out = join(dir, "out.md");
+    const r = await chunk(["merge", join(chunks, "manifest.json"), "-o", out]);
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("line breaks");
+    expect(readFileSync(out, "utf8")).toBe("# A\r\ntext\r\nnew line\r\n## B\r\nend\r\n");
+  });
+});
+
+test("a manifest with an invalid lineBreaks value exits 1 (finding 4)", async () => {
+  const p = plant("breaks-invalid", { ...manifestOf("../doc.md"), lineBreaks: "crlf*0,xx*2" });
+  const r = await chunk(["merge", p.manifest]);
+  expect(r.code).toBe(1);
+  expect(r.err).toContain("lineBreaks");
+});

@@ -35,9 +35,11 @@ import {
   detectFileType,
   detectLineEnding,
   type JsonSplit,
+  lineBreakRuns,
   mergeJson,
   mergeJsonLayout,
   normalizeLineEndings,
+  restoreLineBreaks,
   splitJson,
   splitMarkdown,
   splitTypeScript,
@@ -361,7 +363,7 @@ function split(inputFile: string, options: Options, io: Io): number {
 
   const lineEnding = detectLineEnding(content);
   if (lineEnding === "mixed") {
-    log("WARNING: the file has mixed line endings. The chunks and a merge use LF.\n");
+    log("NOTE: the file has mixed line endings. The chunks use LF; merge restores each one.\n");
   }
   const { sections, layout } = splitSections(fileType, content, splitLevel);
   if (sections.length === 0) {
@@ -401,6 +403,7 @@ function split(inputFile: string, options: Options, io: Io): number {
     chunks,
     ...(layout ? { jsonLayout: layout } : {}),
     ...(lineEnding === "crlf" ? { lineEnding } : {}),
+    ...(lineEnding === "mixed" ? { lineBreaks: lineBreakRuns(content) } : {}),
   };
   const manifestPath = join(outputDir, MANIFEST_NAME);
   if (!dryRun) {
@@ -492,8 +495,15 @@ function merge(manifestFile: string, options: Options, io: Io): number {
     mergedContent = mergeJson(chunkContents, io.stderr);
   }
   // Split writes LF chunks; a CRLF source gets its CRLF line breaks again (item c).
+  // A mixed or CR source gets each of its original line breaks again (finding 4).
   if (manifest.lineEnding === "crlf") {
     mergedContent = normalizeLineEndings(mergedContent).replace(/\n/g, "\r\n");
+  } else if (manifest.lineBreaks !== undefined) {
+    const restored = restoreLineBreaks(mergedContent, manifest.lineBreaks);
+    mergedContent = restored.text;
+    if (!restored.exact) {
+      log("\nNOTE: the number of lines changed. All line breaks use the most common original one.");
+    }
   }
   const outputPath = options.output ? resolve(options.output) : sourcePath;
 

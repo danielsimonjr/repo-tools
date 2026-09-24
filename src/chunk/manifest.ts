@@ -8,7 +8,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { posix, relative, resolve, sep, win32 } from "node:path";
 import { toJson, writeLf } from "../io.ts";
-import type { JsonLayout } from "./splitters.ts";
+import { type JsonLayout, LINE_BREAK_RUNS } from "./splitters.ts";
 
 export type FileType = "markdown" | "json" | "typescript";
 
@@ -47,6 +47,12 @@ export interface Manifest {
    * the field writes LF, as before.
    */
   lineEnding?: "crlf";
+  /**
+   * Only when the source file has mixed or CR line breaks: each line break in order, as runs
+   * such as "crlf*2,lf*1" (see `lineBreakRuns`). Chunk files have LF line breaks; `merge` puts
+   * each original line break back. A reader that does not know the field writes LF, as before.
+   */
+  lineBreaks?: string;
 }
 
 /**
@@ -168,6 +174,12 @@ export function validateManifest(value: unknown): Manifest {
     if (typeof c.hash !== "string") fail(`chunks[${i}].hash must be a string`);
   });
   if (m.lineEnding !== undefined && m.lineEnding !== "crlf") fail('lineEnding must be "crlf"');
+  if (
+    m.lineBreaks !== undefined &&
+    (typeof m.lineBreaks !== "string" || !LINE_BREAK_RUNS.test(m.lineBreaks))
+  ) {
+    fail('lineBreaks must be runs such as "crlf*2,lf*1"');
+  }
   if (m.jsonLayout !== undefined) {
     const l = m.jsonLayout as Record<string, unknown> | null;
     const valid =
