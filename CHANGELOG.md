@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F19 (already in the port; a regression test pins it): a test that imports a barrel
+  covers each file that the barrel re-exports, through `export *`, `export { } from` and a
+  chain of barrels. A file that no barrel re-exports stays untested.
 - depgraph F18: a `.d.ts` file is not in the test coverage denominator. It declares types and
   holds no code that a test can run; the port listed it as an untested source file. The graph
   keeps the file. In the `mini-repo` fixture, `src/ambient.d.ts` leaves the coverage reports:
