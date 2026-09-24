@@ -25,11 +25,11 @@
   the extension loader.
 - [ ] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.
 - [ ] D12 Public design document and the release-candidate report.
-- [ ] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
+- [x] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
   walk), F35 (package.json guards), F36 (negated workspace patterns), F37 (tsup object-form
   `entry`), M1.
-- [ ] depgraph batch 3 follow-ups before push: the `benchmarks/` census folder (a `bench`
+- [x] depgraph batch 3 follow-ups before push: the `benchmarks/` census folder (a `bench`
   disposition), F41 (both census walks skip folders that a negated workspace pattern excludes),
   F42 (a census gap warns and exits 0; `--strict-census` makes it fail).
 - [ ] depgraph fixes, batch 4: F38 (a runtime `import()` edge records `["*"]`), F39 (a
