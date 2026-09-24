@@ -20,6 +20,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F39: the comment stripper (`src/mask.ts`) recognizes regular-expression literals. A
+  `/` starts a regex after an operator, a punctuator, `=>`, a keyword such as `return`, or at the
+  start; after a name, a number, `)` or `]` it is a division. A quote, a backtick or a `/` in a
+  regex (`/"/g`, `/a\//`, `/[/`]/`) no longer opens a string or starts a comment, so the in-file
+  reference count of an unused export (F24) no longer counts a comment after `/"/` or loses the
+  code after `/a\//`. No golden changes.
 - depgraph F38: a runtime dynamic `import()` is a namespace use. Its edge records `*`, so the
   exports of a module that only `import()` loads are no longer "unreferenced anywhere". In the
   JSON and YAML reports the edge changes from `imports: []` to `imports: ["*"]`. When a static
