@@ -27,6 +27,8 @@
   with a clear message, and the absolute-path error says to pass a root-relative path.
 - [x] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
   the extension loader.
+- [ ] The `--write-duplicate-baseline` help line says it reads the last run's
+  `duplicate-symbols.json` (run depgraph first), so a stale baseline is no surprise.
 - [ ] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
   symbol-users, is-public, node-safety, cycles, the browser-safety gate, and the derived files
   `dependency-reverse.json` and `node-safety.json`. After D10b, before D11.
@@ -37,6 +39,8 @@
   Also: the golden sets run with `--no-extensions`, and `tests/fixtures/extension/probe.mjs` moves
   to the section 5.2 extension shape when smoke step 7 runs the product.
 - [ ] D12 Public design document and the release-candidate report.
+  The design document says that the extension `ctx.write` is a convenience boundary, not a
+  security one: an extension is trusted repo code that can call the file system directly.
 - [x] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
   walk), F35 (package.json guards), F36 (negated workspace patterns), F37 (tsup object-form
