@@ -4,13 +4,13 @@ Created output directory: docs/architecture
 Found 15 TypeScript files total
 Parsed all files
 Categorized into 4 modules
-Found 2 circular dependencies (1 runtime, 1 type-only)
+Found 2 cyclic components (1 runtime, 1 type-only)
 Generated statistics
 Built dependency matrix
 Written: docs/architecture/dependency-graph.json
 Written: docs/architecture/dependency-graph.yaml
 Written: docs/architecture/DEPENDENCY_GRAPH.md
-Written: docs/architecture/dependency-summary.compact.json (0.9KB)
+Written: docs/architecture/dependency-summary.compact.json (1.0KB)
 Written: docs/architecture/package-export-surfaces.json
 Written: docs/architecture/duplicate-symbols.md (0 runtime TRUE_DUPLICATE / 0 runtime flagged, 0 type TRUE_DUPLICATE / 0 type flagged)
 
@@ -23,9 +23,9 @@ Dependency graph generation complete!
   - 15 files analyzed
   - 16 exports found (7 re-exports)
   - 3 type-only imports detected
-  - 2 circular dependencies:
-      1 runtime (require attention)
-      1 type-only (safe)
+  - 2 cyclic components:
+      1 runtime, 2 files (require attention)
+      1 type-only, 2 files (safe)
   - 4 potentially unused files
   - 2 potentially unused exports
 

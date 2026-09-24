@@ -17,13 +17,13 @@ import {
   buildDependencyMatrix,
   categorizeFiles,
   computePublicSurface,
-  detectCircularDependencies,
   detectUnused,
   findReachableFiles,
   generateStatistics,
   splitDormant,
 } from "./analysis.ts";
 import { analyzeTestCoverage, type TestCoverageAnalysis } from "./coverage.ts";
+import { detectCyclicComponents } from "./cycles.ts";
 import { buildDuplicateReport, detectDuplicateSymbols } from "./duplicates.ts";
 import {
   buildFileInventory,
@@ -51,7 +51,7 @@ import { generateUnusedReport } from "./reporters/unused.ts";
 import { generateYaml } from "./reporters/yaml.ts";
 import { collectEntryPoints } from "./roots.ts";
 import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, TEST_DIR_NAMES } from "./scanner.ts";
-import type { PackageJson, ParsedFile, UnusedExport } from "./types.ts";
+import type { PackageJson, ParsedFile, Statistics, UnusedExport } from "./types.ts";
 import { detectWorkspaces } from "./workspaces.ts";
 
 /** The help text of `repo-tools depgraph`. */
@@ -215,9 +215,10 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
 
   const modules = categorizeFiles(activeParsedFiles, isMonorepo, workspaces);
   log(`Categorized into ${Object.keys(modules).length} modules`);
-  const circularDeps = detectCircularDependencies(activeParsedFiles);
+  const cycles = detectCyclicComponents(activeParsedFiles);
   log(
-    `Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`,
+    `Found ${componentsLabel(cycles.runtime.length + cycles.typeOnly.length)} ` +
+      `(${cycles.runtime.length} runtime, ${cycles.typeOnly.length} type-only)`,
   );
 
   const testFilePaths: string[] = [];
@@ -239,21 +240,14 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   );
 
   const unusedAnalysis = detectUnused(activeParsedFiles, parsedTestFiles, root, workspaces);
-  const stats = generateStatistics(activeParsedFiles, modules, circularDeps, unusedAnalysis, root);
+  const stats = generateStatistics(activeParsedFiles, modules, cycles, unusedAnalysis, root);
   log("Generated statistics");
   const matrix = buildDependencyMatrix(activeParsedFiles);
   log("Built dependency matrix");
 
   // Report.
-  const json = generateJSON(activeParsedFiles, modules, stats, circularDeps, packageJson);
-  let markdown = generateMarkdown(
-    activeParsedFiles,
-    modules,
-    stats,
-    circularDeps,
-    matrix,
-    packageJson,
-  );
+  const json = generateJSON(activeParsedFiles, modules, stats, cycles, packageJson);
+  let markdown = generateMarkdown(activeParsedFiles, modules, stats, cycles, matrix, packageJson);
   if (isMonorepo) {
     markdown = insertPackageSection(
       markdown,
@@ -271,7 +265,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     activeParsedFiles,
     modules,
     stats,
-    circularDeps,
+    cycles,
     packageJson,
   );
   write("dependency-summary.compact.json", compactSummary);
@@ -316,7 +310,6 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     reachable: reachableSet?.size,
     dormant: dormantSet?.size,
     stats,
-    circular: circularDeps,
     unusedFiles: unusedAnalysis.unusedFiles,
     unusedExports: unusedAnalysis.unusedExports,
   });
@@ -378,6 +371,11 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   return 0;
 }
 
+/** `N cyclic component` or `N cyclic components` (fix F26). */
+function componentsLabel(count: number): string {
+  return `${count} cyclic component${count === 1 ? "" : "s"}`;
+}
+
 /** The completion summary of a run, on standard output. */
 function logSummary(
   log: (line: string) => void,
@@ -386,13 +384,7 @@ function logSummary(
     workspaceCount: number;
     reachable: number | undefined;
     dormant: number | undefined;
-    stats: {
-      totalTypeScriptFiles: number;
-      totalExports: number;
-      totalReExports: number;
-      totalTypeOnlyImports: number;
-    };
-    circular: { all: unknown[]; runtime: unknown[]; typeOnly: unknown[] };
+    stats: Statistics;
     unusedFiles: string[];
     unusedExports: UnusedExport[];
   },
@@ -407,9 +399,12 @@ function logSummary(
   log(`  - ${s.stats.totalTypeScriptFiles} files analyzed`);
   log(`  - ${s.stats.totalExports} exports found (${s.stats.totalReExports} re-exports)`);
   log(`  - ${s.stats.totalTypeOnlyImports} type-only imports detected`);
-  log(`  - ${s.circular.all.length} circular dependencies:`);
-  log(`      ${s.circular.runtime.length} runtime (require attention)`);
-  log(`      ${s.circular.typeOnly.length} type-only (safe)`);
+  const st = s.stats;
+  log(`  - ${componentsLabel(st.runtimeCyclicComponents + st.typeOnlyCyclicComponents)}:`);
+  log(
+    `      ${st.runtimeCyclicComponents} runtime, ${st.runtimeFilesInCycles} files (require attention)`,
+  );
+  log(`      ${st.typeOnlyCyclicComponents} type-only, ${st.typeOnlyFilesInCycles} files (safe)`);
   log(`  - ${s.unusedFiles.length} potentially unused files`);
   log(`  - ${s.unusedExports.length} potentially unused exports`);
   if (s.unusedFiles.length > 0) {

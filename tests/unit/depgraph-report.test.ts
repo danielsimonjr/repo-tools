@@ -6,11 +6,11 @@ import {
   buildDependencyMatrix,
   categorizeFiles,
   computePublicSurface,
-  detectCircularDependencies,
   detectUnused,
   generateStatistics,
 } from "../../src/depgraph/analysis.ts";
 import { analyzeTestCoverage } from "../../src/depgraph/coverage.ts";
+import { detectCyclicComponents } from "../../src/depgraph/cycles.ts";
 import { loadExtensions } from "../../src/depgraph/extensions.ts";
 import { DEPGRAPH_HELP, parseDepgraphArgs, run } from "../../src/depgraph/index.ts";
 import { buildFileInventory } from "../../src/depgraph/inventory.ts";
@@ -67,7 +67,7 @@ const files = ["src/index.ts", "src/a.ts", "src/b.ts", "src/lib/c.ts"].map((p) =
 );
 const tests = [parseFile({ root, workspaces: none }, join(root, "tests/a.test.ts"))];
 const modules = categorizeFiles(files, false, none);
-const cycles = detectCircularDependencies(files);
+const cycles = detectCyclicComponents(files);
 const unused = detectUnused(files, tests, root, none);
 const stats = generateStatistics(files, modules, cycles, unused, root);
 const matrix = buildDependencyMatrix(files);

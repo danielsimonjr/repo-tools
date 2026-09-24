@@ -3,12 +3,14 @@
  * graph, the statistics and (in monorepo mode) the package dependency section.
  *
  * Fix F21: an export list of more than 8 names renders as a fenced `text` block.
+ * Fix F26: the cycle section lists cyclic components, each with its members and one cycle.
  */
 import { basename } from "node:path";
 import { generateFallbackDescription } from "../parser.ts";
 import { resolvePath } from "../resolver.ts";
 import type {
-  CircularDependencyResult,
+  CyclicComponent,
+  CyclicComponents,
   DependencyMatrix,
   ModuleMap,
   PackageJson,
@@ -185,7 +187,7 @@ export function generateMarkdown(
   files: ParsedFile[],
   modules: ModuleMap,
   stats: Statistics,
-  circularDeps: CircularDependencyResult,
+  cycles: CyclicComponents,
   matrix: DependencyMatrix,
   packageJson: PackageJson,
 ): string {
@@ -260,30 +262,45 @@ export function generateMarkdown(
   lines.push('<a id="circular-dependency-analysis"></a>');
   lines.push("## Circular Dependency Analysis");
   lines.push("");
-  if (circularDeps.all.length === 0) {
+  const total = cycles.runtime.length + cycles.typeOnly.length;
+  if (total === 0) {
     lines.push("**No circular dependencies detected.**");
   } else {
-    lines.push(`**${circularDeps.all.length} circular dependencies detected:**`);
+    lines.push(
+      `**${total} cyclic component${total === 1 ? "" : "s"} detected** ` +
+        "(strongly connected components of the import graph):",
+    );
     lines.push("");
-    lines.push(`- **Runtime cycles**: ${circularDeps.runtime.length} (require attention)`);
-    lines.push(`- **Type-only cycles**: ${circularDeps.typeOnly.length} (safe, no runtime impact)`);
+    lines.push(
+      `- **Runtime components**: ${cycles.runtime.length} ` +
+        `(${filesLabel(stats.runtimeFilesInCycles)}; require attention)`,
+    );
+    lines.push(
+      `- **Type-only components**: ${cycles.typeOnly.length} ` +
+        `(${filesLabel(stats.typeOnlyFilesInCycles)}; a type-only import closes each cycle)`,
+    );
     lines.push("");
-    const cycleList = (title: string, intro: string, cycles: string[][]): void => {
-      if (cycles.length === 0) return;
+    const componentList = (title: string, intro: string, list: CyclicComponent[]): void => {
+      if (list.length === 0) return;
       lines.push(title, "", intro, "");
-      for (const cycle of cycles.slice(0, 10)) lines.push(`- ${cycle.join(" -> ")}`);
-      if (cycles.length > 10) lines.push(`- ... and ${cycles.length - 10} more`);
+      for (const c of list.slice(0, 10)) {
+        lines.push(`- ${c.cycle.join(" -> ")}`);
+        lines.push(`  - Members (${c.members.length}): \`${c.members.join("`, `")}\``);
+      }
+      if (list.length > 10) lines.push(`- ... and ${list.length - 10} more`);
       lines.push("");
     };
-    cycleList(
-      "### Runtime Circular Dependencies",
-      "These cycles involve runtime imports and may cause issues:",
-      circularDeps.runtime,
+    componentList(
+      "### Runtime Cyclic Components",
+      "Each component holds a cycle of runtime imports, and the cycle can cause issues. " +
+        "Each line shows the shortest cycle through the first member:",
+      cycles.runtime,
     );
-    cycleList(
-      "### Type-Only Circular Dependencies",
-      "These cycles only involve type imports and are safe (erased at runtime):",
-      circularDeps.typeOnly,
+    componentList(
+      "### Type-Only Cyclic Components",
+      "Each component needs a type-only import to close its cycle. Type imports are erased " +
+        "at runtime. Each line shows the shortest cycle through the first member:",
+      cycles.typeOnly,
     );
   }
   lines.push("---", "");
@@ -310,8 +327,10 @@ export function generateMarkdown(
   lines.push(`| Total Type Guards | ${stats.totalTypeGuards} |`);
   lines.push(`| Total Enums | ${stats.totalEnums} |`);
   lines.push(`| Type-only Imports | ${stats.totalTypeOnlyImports} |`);
-  lines.push(`| Runtime Circular Deps | ${stats.runtimeCircularDeps} |`);
-  lines.push(`| Type-only Circular Deps | ${stats.typeOnlyCircularDeps} |`);
+  lines.push(`| Runtime Cyclic Components | ${stats.runtimeCyclicComponents} |`);
+  lines.push(`| Type-only Cyclic Components | ${stats.typeOnlyCyclicComponents} |`);
+  lines.push(`| Files in Runtime Cycles | ${stats.runtimeFilesInCycles} |`);
+  lines.push(`| Files in Type-only Cycles | ${stats.typeOnlyFilesInCycles} |`);
   lines.push("", "---", "");
   lines.push(`*Version*: ${packageJson.version}`);
   lines.push("");

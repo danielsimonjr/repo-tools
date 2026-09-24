@@ -200,8 +200,10 @@ graph TD
 | Total Type Guards | 0 |
 | Total Enums | 0 |
 | Type-only Imports | 2 |
-| Runtime Circular Deps | 0 |
-| Type-only Circular Deps | 0 |
+| Runtime Cyclic Components | 0 |
+| Type-only Cyclic Components | 0 |
+| Files in Runtime Cycles | 0 |
+| Files in Type-only Cycles | 0 |
 
 ---
 

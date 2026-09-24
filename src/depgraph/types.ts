@@ -88,10 +88,14 @@ export interface Statistics {
   totalConstants: number;
   totalReExports: number;
   totalTypeOnlyImports: number;
-  /** Cycles that are not type-only. */
-  runtimeCircularDeps: number;
-  /** Cycles that are type-only. */
-  typeOnlyCircularDeps: number;
+  /** The number of runtime cyclic components (fix F26). */
+  runtimeCyclicComponents: number;
+  /** The number of type-only cyclic components (fix F26). */
+  typeOnlyCyclicComponents: number;
+  /** The number of distinct files in the runtime cyclic components. */
+  runtimeFilesInCycles: number;
+  /** The number of distinct files in the type-only cyclic components. */
+  typeOnlyFilesInCycles: number;
   unusedFilesCount: number;
   unusedExportsCount: number;
 }
@@ -143,13 +147,20 @@ export interface WorkspacePackage {
   extraEntries: string[];
 }
 
-/** The cycles of the import graph. */
-export interface CircularDependencyResult {
-  all: string[][];
-  /** Cycles through runtime edges. */
-  runtime: string[][];
-  /** Cycles that exist only through type-only edges. */
-  typeOnly: string[][];
+/** One strongly connected component of the import graph that holds a cycle (fix F26). */
+export interface CyclicComponent {
+  /** The files of the component, in code-unit order. */
+  members: string[];
+  /** The shortest cycle through the first member. It starts and ends with that member. */
+  cycle: string[];
+}
+
+/** The cyclic components of the import graph (fix F26), each list sorted by first member. */
+export interface CyclicComponents {
+  /** The strongly connected components of the runtime edges. */
+  runtime: CyclicComponent[];
+  /** The strongly connected components of all edges that are not identical to a runtime one. */
+  typeOnly: CyclicComponent[];
 }
 
 /** The public API surface of the packages. */

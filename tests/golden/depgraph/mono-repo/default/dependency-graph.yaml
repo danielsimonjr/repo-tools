@@ -108,12 +108,9 @@ modules:
       constants:
         - workerResult
 dependencyGraph:
-  circularDependencies:
+  cyclicComponents:
     runtime: []
     typeOnly: []
-    total: 0
-    runtimeCount: 0
-    typeOnlyCount: 0
   layers:
     - name: Packages/cli
       files:
@@ -139,7 +136,9 @@ statistics:
   totalConstants: 2
   totalReExports: 2
   totalTypeOnlyImports: 2
-  runtimeCircularDeps: 0
-  typeOnlyCircularDeps: 0
+  runtimeCyclicComponents: 0
+  typeOnlyCyclicComponents: 0
+  runtimeFilesInCycles: 0
+  typeOnlyFilesInCycles: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

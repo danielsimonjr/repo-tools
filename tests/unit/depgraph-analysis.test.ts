@@ -4,12 +4,12 @@ import {
   buildDependencyMatrix,
   categorizeFiles,
   computePublicSurface,
-  detectCircularDependencies,
   detectUnused,
   findReachableFiles,
   generateStatistics,
   splitDormant,
 } from "../../src/depgraph/analysis.ts";
+import { detectCyclicComponents } from "../../src/depgraph/cycles.ts";
 import { parseFile } from "../../src/depgraph/parser.ts";
 import type { ParsedFile, WorkspacePackage } from "../../src/depgraph/types.ts";
 import { makeTree, removeTrees } from "./tree.ts";
@@ -65,11 +65,15 @@ describe("single-package analysis", () => {
     expect(matrix["src/z/b.ts"]?.exportsTo).toEqual(["src/index.ts", "src/a.ts", "src/c.ts"]);
   });
 
-  test("detectCircularDependencies splits runtime and type-only cycles", () => {
-    const cycles = detectCircularDependencies(files);
-    expect(cycles.runtime).toEqual([["src/p.ts", "src/q.ts", "src/p.ts"]]);
-    expect(cycles.typeOnly).toEqual([["src/z/b.ts", "src/c.ts", "src/z/b.ts"]]);
-    expect(cycles.all.length).toBe(2);
+  test("detectCyclicComponents splits runtime and type-only components", () => {
+    const cycles = detectCyclicComponents(files);
+    expect(cycles.runtime).toEqual([
+      { members: ["src/p.ts", "src/q.ts"], cycle: ["src/p.ts", "src/q.ts", "src/p.ts"] },
+    ]);
+    // Fix F26: the cycle starts at the smallest member in code-unit order.
+    expect(cycles.typeOnly).toEqual([
+      { members: ["src/c.ts", "src/z/b.ts"], cycle: ["src/c.ts", "src/z/b.ts", "src/c.ts"] },
+    ]);
   });
 
   test("computePublicSurface follows export * and named re-exports", () => {
@@ -93,7 +97,7 @@ describe("single-package analysis", () => {
     const stats = generateStatistics(
       files,
       modules,
-      detectCircularDependencies(files),
+      detectCyclicComponents(files),
       detectUnused(files, tests, root, none),
       root,
     );
@@ -102,8 +106,10 @@ describe("single-package analysis", () => {
     expect(stats.totalLinesOfCode).toBe(24);
     expect(stats.totalFunctions).toBe(5);
     expect(stats.totalTypeOnlyImports).toBe(1);
-    expect(stats.runtimeCircularDeps).toBe(1);
-    expect(stats.typeOnlyCircularDeps).toBe(1);
+    expect(stats.runtimeCyclicComponents).toBe(1);
+    expect(stats.typeOnlyCyclicComponents).toBe(1);
+    expect(stats.runtimeFilesInCycles).toBe(2);
+    expect(stats.typeOnlyFilesInCycles).toBe(2);
     expect(stats.unusedExportsCount).toBe(2);
   });
 

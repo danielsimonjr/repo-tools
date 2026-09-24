@@ -238,18 +238,23 @@ modules:
       functions:
         - clamp
 dependencyGraph:
-  circularDependencies:
+  cyclicComponents:
     runtime:
-      - - src/ping.ts
-        - src/pong.ts
-        - src/ping.ts
+      - members:
+          - src/ping.ts
+          - src/pong.ts
+        cycle:
+          - src/ping.ts
+          - src/pong.ts
+          - src/ping.ts
     typeOnly:
-      - - src/Z/zed.ts
-        - src/Z/loop.ts
-        - src/Z/zed.ts
-    total: 2
-    runtimeCount: 1
-    typeOnlyCount: 1
+      - members:
+          - src/Z/loop.ts
+          - src/Z/zed.ts
+        cycle:
+          - src/Z/loop.ts
+          - src/Z/zed.ts
+          - src/Z/loop.ts
   layers:
     - name: Root
       files:
@@ -287,7 +292,9 @@ statistics:
   totalConstants: 2
   totalReExports: 7
   totalTypeOnlyImports: 3
-  runtimeCircularDeps: 1
-  typeOnlyCircularDeps: 1
+  runtimeCyclicComponents: 1
+  typeOnlyCyclicComponents: 1
+  runtimeFilesInCycles: 2
+  typeOnlyFilesInCycles: 2
   unusedFilesCount: 4
   unusedExportsCount: 2

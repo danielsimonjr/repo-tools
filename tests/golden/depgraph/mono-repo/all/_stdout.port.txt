@@ -13,7 +13,7 @@ Reachable files: 7
 Dormant files: 0
 Analyzing all 7 files (including dormant)
 Categorized into 2 modules
-Found 0 circular dependencies (0 runtime, 0 type-only)
+Found 0 cyclic components (0 runtime, 0 type-only)
 Generated statistics
 Built dependency matrix
 Written: docs/architecture/dependency-graph.json
@@ -34,9 +34,9 @@ Dependency graph generation complete!
   - 7 files analyzed
   - 7 exports found (2 re-exports)
   - 2 type-only imports detected
-  - 0 circular dependencies:
-      0 runtime (require attention)
-      0 type-only (safe)
+  - 0 cyclic components:
+      0 runtime, 0 files (require attention)
+      0 type-only, 0 files (safe)
   - 0 potentially unused files
   - 0 potentially unused exports
 

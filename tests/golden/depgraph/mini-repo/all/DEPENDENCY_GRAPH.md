@@ -236,22 +236,24 @@ The codebase is organized into the following modules:
 <a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
-**2 circular dependencies detected:**
+**2 cyclic components detected** (strongly connected components of the import graph):
 
-- **Runtime cycles**: 1 (require attention)
-- **Type-only cycles**: 1 (safe, no runtime impact)
+- **Runtime components**: 1 (2 files; require attention)
+- **Type-only components**: 1 (2 files; a type-only import closes each cycle)
 
-### Runtime Circular Dependencies
+### Runtime Cyclic Components
 
-These cycles involve runtime imports and may cause issues:
+Each component holds a cycle of runtime imports, and the cycle can cause issues. Each line shows the shortest cycle through the first member:
 
 - src/ping.ts -> src/pong.ts -> src/ping.ts
+  - Members (2): `src/ping.ts`, `src/pong.ts`
 
-### Type-Only Circular Dependencies
+### Type-Only Cyclic Components
 
-These cycles only involve type imports and are safe (erased at runtime):
+Each component needs a type-only import to close its cycle. Type imports are erased at runtime. Each line shows the shortest cycle through the first member:
 
-- src/Z/zed.ts -> src/Z/loop.ts -> src/Z/zed.ts
+- src/Z/loop.ts -> src/Z/zed.ts -> src/Z/loop.ts
+  - Members (2): `src/Z/loop.ts`, `src/Z/zed.ts`
 
 ---
 
@@ -321,8 +323,10 @@ graph TD
 | Total Type Guards | 0 |
 | Total Enums | 0 |
 | Type-only Imports | 3 |
-| Runtime Circular Deps | 1 |
-| Type-only Circular Deps | 1 |
+| Runtime Cyclic Components | 1 |
+| Type-only Cyclic Components | 1 |
+| Files in Runtime Cycles | 2 |
+| Files in Type-only Cycles | 2 |
 
 ---
 

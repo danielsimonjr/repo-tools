@@ -20,6 +20,20 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F26: cycles are reported by strongly connected component (Tarjan's algorithm, linear
+  time), not by the cycles that a depth-first search meets. The search missed cycles, and the
+  cycles that it listed depended on the file order. A runtime component is a component of the
+  runtime edges; a type-only component is a component of all edges that is not identical to a
+  runtime one. A component has 2 or more files, or 1 file that imports itself. Each component
+  lists its `members` in code-unit order and one `cycle`: the shortest cycle through the first
+  member. Renamed fields, because the meaning changes: `dependencyGraph.circularDependencies`
+  is now `dependencyGraph.cyclicComponents` (`{ runtime: [{ members, cycle }], typeOnly }`,
+  without `total`, `runtimeCount` and `typeOnlyCount`); `statistics.runtimeCircularDeps` is now
+  `runtimeCyclicComponents`, `statistics.typeOnlyCircularDeps` is now
+  `typeOnlyCyclicComponents`, and `runtimeFilesInCycles` and `typeOnlyFilesInCycles` are new.
+  In `dependency-summary.compact.json`, `c.rt` and `c.to` are now `c.rtc` and `c.toc`, and
+  `c.rtf` and `c.tof` (file counts) are new. `DEPENDENCY_GRAPH.md` and the standard output
+  name cyclic components and their file counts.
 - depgraph F25: a dynamic `import()` is a runtime edge unless it is in a type position. A type
   position is `typeof import(...)`, or `import(...).Name` with no call after it (a type alias,
   an annotation, an interface member). `await import()`, `import().then(...)`, a bare

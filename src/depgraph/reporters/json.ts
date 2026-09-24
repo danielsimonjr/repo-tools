@@ -1,25 +1,19 @@
 /**
  * dependency-graph.json and dependency-summary.compact.json.
  *
- * Port notes: `metadata.lastUpdated` and the compact `m.d` hold the date (fix F1), and neither
- * file ends with a newline (rule R1).
+ * Fix F26: the cycles are cyclic components (`dependencyGraph.cyclicComponents`, the compact
+ * `c` object).
  */
 import { cleanExportName, generateFallbackDescription } from "../parser.ts";
 import { resolvePath } from "../resolver.ts";
-import type {
-  CircularDependencyResult,
-  ModuleMap,
-  PackageJson,
-  ParsedFile,
-  Statistics,
-} from "../types.ts";
+import type { CyclicComponents, ModuleMap, PackageJson, ParsedFile, Statistics } from "../types.ts";
 
 /** The dependency-graph.json object. The key order is the report order. */
 export function generateJSON(
   files: ParsedFile[],
   modules: ModuleMap,
   stats: Statistics,
-  circularDeps: CircularDependencyResult,
+  cycles: CyclicComponents,
   packageJson: PackageJson,
 ): object {
   const modulesJson: Record<string, Record<string, object>> = {};
@@ -72,13 +66,8 @@ export function generateJSON(
       .map((f) => ({ file: f.path, type: "main", description: f.description || "Entry Point" })),
     modules: modulesJson,
     dependencyGraph: {
-      circularDependencies: {
-        runtime: circularDeps.runtime,
-        typeOnly: circularDeps.typeOnly,
-        total: circularDeps.all.length,
-        runtimeCount: circularDeps.runtime.length,
-        typeOnlyCount: circularDeps.typeOnly.length,
-      },
+      // Fix F26: strongly connected components, each with its members and one cycle.
+      cyclicComponents: { runtime: cycles.runtime, typeOnly: cycles.typeOnly },
       layers,
     },
     statistics: stats,
@@ -98,7 +87,7 @@ export function generateCompactSummary(
   files: ParsedFile[],
   modules: ModuleMap,
   stats: Statistics,
-  circularDeps: CircularDependencyResult,
+  cycles: CyclicComponents,
   packageJson: PackageJson,
 ): string {
   const summary = {
@@ -119,12 +108,16 @@ export function generateCompactSummary(
       co: stats.totalConstants,
       toi: stats.totalTypeOnlyImports,
     },
+    // Fix F26: runtime and type-only component counts, their file counts, and the
+    // representative cycles of the first 5 runtime components.
     c: {
-      rt: circularDeps.runtime.length,
-      to: circularDeps.typeOnly.length,
-      rtp: circularDeps.runtime
+      rtc: stats.runtimeCyclicComponents,
+      toc: stats.typeOnlyCyclicComponents,
+      rtf: stats.runtimeFilesInCycles,
+      tof: stats.typeOnlyFilesInCycles,
+      rtp: cycles.runtime
         .slice(0, 5)
-        .map((c) => c.map((p) => p.split("/").pop()?.replace(".ts", "")).join("→")),
+        .map((c) => c.cycle.map((p) => p.split("/").pop()?.replace(".ts", "")).join("→")),
     },
     mod: {} as Record<string, { f: number; exp: string[]; cls?: string[]; int?: string[] }>,
     hp: [] as { p: string; i: number; o: number }[],

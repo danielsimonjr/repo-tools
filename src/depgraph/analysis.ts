@@ -1,19 +1,17 @@
 /**
- * Graph analysis: modules, the dependency matrix, reachability, cycles, the public surface,
- * unused files and exports, dormancy and the statistics.
+ * Graph analysis: modules, the dependency matrix, reachability, the public surface, unused files
+ * and exports, dormancy and the statistics. The cycles are in `cycles.ts` (fix F26).
  *
- * Port notes, kept on purpose until the fixes land:
- * - `detectCircularDependencies` is a depth-first search that reports the cycles it meets, so
- *   its result depends on the listing order and can miss cycles (fix F26).
- * - Dormancy exists in monorepo mode only (fix M1).
+ * Port note, kept on purpose until the fix lands: dormancy exists in monorepo mode only (fix M1).
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "../mask.ts";
+import { filesInCycles } from "./cycles.ts";
 import { resolvePath, workspaceEntryPath } from "./resolver.ts";
 import { configReferencedEntries } from "./roots.ts";
 import type {
-  CircularDependencyResult,
+  CyclicComponents,
   DependencyMatrix,
   ModuleMap,
   ParsedFile,
@@ -133,73 +131,6 @@ export function findReachableFiles(
     }
   }
   return reachable;
-}
-
-/** The sort key that makes two cycles with the same members equal. */
-function cycleKey(cycle: string[]): string {
-  return [...cycle].sort().join("->");
-}
-
-/** The cycles that a depth-first search meets in `graph`, deduplicated by member set. */
-function findCycles(graph: Map<string, string[]>): string[][] {
-  const cycles: string[][] = [];
-  const visited = new Set<string>();
-  const inStack = new Set<string>();
-  const dfs = (node: string, path: string[]): void => {
-    if (inStack.has(node)) {
-      const cycleStart = path.indexOf(node);
-      if (cycleStart !== -1) {
-        const cycle = path.slice(cycleStart);
-        cycle.push(node);
-        const key = cycleKey(cycle);
-        if (!cycles.some((c) => cycleKey(c) === key)) cycles.push(cycle);
-      }
-      return;
-    }
-    if (visited.has(node)) return;
-    visited.add(node);
-    inStack.add(node);
-    path.push(node);
-    for (const neighbor of graph.get(node) || []) dfs(neighbor, path);
-    path.pop();
-    inStack.delete(node);
-  };
-  for (const node of graph.keys()) {
-    if (!visited.has(node)) dfs(node, []);
-  }
-  return cycles;
-}
-
-/**
- * The cycles of the relative-import graph. A runtime cycle is a cycle of the graph without
- * type-only edges. A type-only cycle is a cycle of the full graph whose member set is not a
- * runtime cycle.
- */
-export function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResult {
-  const filePaths = new Set(files.map((f) => f.path));
-  const runtimeGraph = new Map<string, string[]>();
-  const allGraph = new Map<string, string[]>();
-  for (const file of files) {
-    const runtimeDeps: string[] = [];
-    const allDeps: string[] = [];
-    for (const d of file.internalDependencies) {
-      const resolved = resolvePath(file.path, d.file);
-      if (filePaths.has(resolved)) {
-        allDeps.push(resolved);
-        if (!d.typeOnly) runtimeDeps.push(resolved);
-      }
-    }
-    runtimeGraph.set(file.path, runtimeDeps);
-    allGraph.set(file.path, allDeps);
-  }
-  const allCycles = findCycles(allGraph);
-  const runtimeCycles = findCycles(runtimeGraph);
-  const runtimeKeys = new Set(runtimeCycles.map(cycleKey));
-  return {
-    all: allCycles,
-    runtime: runtimeCycles,
-    typeOnly: allCycles.filter((c) => !runtimeKeys.has(cycleKey(c))),
-  };
 }
 
 /**
@@ -351,7 +282,7 @@ export function detectUnused(
 export function generateStatistics(
   files: ParsedFile[],
   modules: ModuleMap,
-  circularDeps: CircularDependencyResult,
+  cycles: CyclicComponents,
   unusedAnalysis: UnusedAnalysis,
   root: string,
 ): Statistics {
@@ -394,8 +325,10 @@ export function generateStatistics(
     totalConstants,
     totalReExports,
     totalTypeOnlyImports,
-    runtimeCircularDeps: circularDeps.runtime.length,
-    typeOnlyCircularDeps: circularDeps.typeOnly.length,
+    runtimeCyclicComponents: cycles.runtime.length,
+    typeOnlyCyclicComponents: cycles.typeOnly.length,
+    runtimeFilesInCycles: filesInCycles(cycles.runtime),
+    typeOnlyFilesInCycles: filesInCycles(cycles.typeOnly),
     unusedFilesCount: unusedAnalysis.unusedFiles.length,
     unusedExportsCount: unusedAnalysis.unusedExports.length,
   };
