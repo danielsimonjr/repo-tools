@@ -82,13 +82,18 @@ function plant(name: string, manifest: Record<string, unknown>) {
   return { root, b, chunks, victim, target, manifest: path };
 }
 
-/** Creates a junction at `link` to the folder `target`, runs `body`, and removes the junction. */
+/**
+ * Creates a junction at `link` to the folder `target`, runs `body`, and removes the link. On
+ * POSIX the "junction" type is ignored and the link is an ordinary symlink: it is removed with
+ * `unlinkSync`, because `rmdirSync` fails on it with ENOTDIR. A Windows junction needs `rmdirSync`.
+ */
 async function withJunction(target: string, link: string, body: () => Promise<void>) {
   symlinkSync(target, link, "junction");
   try {
     await body();
   } finally {
-    rmdirSync(link);
+    if (process.platform === "win32") rmdirSync(link);
+    else unlinkSync(link);
   }
 }
 

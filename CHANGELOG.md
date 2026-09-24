@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- The chunk link tests remove their links the right way on each system: `unlinkSync` for the
+  ordinary symlink that Linux and macOS create, `rmdirSync` for a Windows junction. Their cleanup
+  failed on Linux and macOS with ENOTDIR.
 - `compress` JSON keeps the text of every number, in the compact file and after `-d`
   (lossless passthrough). The parser keeps the source text of each number (`JSON.parse` with
   the source text of the reviver, and `JSON.rawJSON`), so a number that a JavaScript number
