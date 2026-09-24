@@ -83,6 +83,7 @@ export function categorizeFiles(
  */
 export function buildDependencyMatrix(files: ParsedFile[]): DependencyMatrix {
   const matrix: DependencyMatrix = {};
+  const known = new Set(files.map((f) => f.path));
   for (const file of files) {
     const importedFrom = new Set<string>();
     const exportsTo = new Set<string>();
@@ -90,7 +91,7 @@ export function buildDependencyMatrix(files: ParsedFile[]): DependencyMatrix {
     for (const other of files) {
       if (other.path === file.path) continue;
       for (const dep of other.internalDependencies) {
-        const resolved = resolvePath(other.path, dep.file);
+        const resolved = resolvePath(other.path, dep.file, known);
         if (resolved === file.path || resolved === file.path.replace(".ts", "")) {
           exportsTo.add(other.path);
         }
@@ -122,7 +123,7 @@ export function findReachableFiles(
     const file = fileMap.get(current);
     if (!file) continue;
     for (const dep of file.internalDependencies) {
-      const resolved = resolvePath(current, dep.file);
+      const resolved = resolvePath(current, dep.file, fileMap);
       if (fileMap.has(resolved) && !reachable.has(resolved)) queue.push(resolved);
     }
     for (const ws of file.workspaceDependencies) {
@@ -154,7 +155,7 @@ export function computePublicSurface(
     publicWildcardFiles.add(file.path);
     for (const dep of file.internalDependencies) {
       if (!dep.reExport) continue;
-      const target = byPath.get(resolvePath(file.path, dep.file));
+      const target = byPath.get(resolvePath(file.path, dep.file, byPath));
       if (!target) continue;
       if (dep.imports.includes("*")) markPublic(target, seen);
       else for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
@@ -205,7 +206,7 @@ export function detectUnused(
   };
   for (const file of [...files, ...testFiles]) {
     for (const dep of file.internalDependencies) {
-      const resolved = resolvePath(file.path, dep.file);
+      const resolved = resolvePath(file.path, dep.file, filePaths);
       if (!filePaths.has(resolved)) continue;
       importedFiles.add(resolved);
       addImported(symbolsOf(resolved), dep.imports);

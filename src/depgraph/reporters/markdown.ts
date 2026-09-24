@@ -67,7 +67,7 @@ export function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]):
     if (!sourceId) continue;
     for (const dep of file.internalDependencies) {
       if (edgeCount >= maxEdges) break;
-      const targetId = nodeIds.get(resolvePath(file.path, dep.file));
+      const targetId = nodeIds.get(resolvePath(file.path, dep.file, nodeIds));
       if (targetId && sourceId !== targetId) {
         const edgeKey = `${sourceId}-${targetId}`;
         if (!addedEdges.has(edgeKey)) {

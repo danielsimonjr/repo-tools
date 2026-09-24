@@ -139,12 +139,13 @@ export function generateCompactSummary(
     if (interfaces.length > 0) entry.int = [...new Set(interfaces)];
     summary.mod[modName] = entry;
   }
+  const known = new Set(files.map((f) => f.path));
   summary.hp = files
     .map((f) => ({
       p: f.path.split("/").slice(-2).join("/"),
       i: f.internalDependencies.length,
       o: files.filter((other) =>
-        other.internalDependencies.some((d) => resolvePath(other.path, d.file) === f.path),
+        other.internalDependencies.some((d) => resolvePath(other.path, d.file, known) === f.path),
       ).length,
     }))
     .sort((a, b) => b.i + b.o - (a.i + a.o))

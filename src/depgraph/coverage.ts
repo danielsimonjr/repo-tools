@@ -145,7 +145,7 @@ export function buildReExportMap(sourceFiles: ParsedFile[]): ReExportMap {
     const reExportedSources = new Set<string>();
     for (const dep of file.internalDependencies) {
       if (!dep.reExport) continue;
-      const resolved = resolvePath(file.path, dep.file);
+      const resolved = resolvePath(file.path, dep.file, sourceFilePaths);
       if (sourceFilePaths.has(resolved)) reExportedSources.add(resolved);
     }
     if (reExportedSources.size > 0) reExportMap.set(file.path, reExportedSources);
@@ -213,7 +213,7 @@ export function analyzeTestCoverage(
   ): void => {
     for (const dep of sourceByPath.get(fromPath)?.internalDependencies ?? []) {
       if (!dep.sideEffect) continue;
-      const target = resolvePath(fromPath, dep.file);
+      const target = resolvePath(fromPath, dep.file, sourceFilePaths);
       if (!sourceFilePaths.has(target) || visited.has(target)) continue;
       visited.add(target);
       addCoverage(target, testPath, importedSources);
@@ -235,7 +235,7 @@ export function analyzeTestCoverage(
   for (const testFile of testFiles) {
     const importedSources: string[] = [];
     for (const dep of testFile.internalDependencies) {
-      const resolvedPath = resolvePath(testFile.path, dep.file);
+      const resolvedPath = resolvePath(testFile.path, dep.file, sourceFilePaths);
       if (sourceFilePaths.has(resolvedPath))
         addTraced(resolvedPath, testFile.path, importedSources);
       const withTs = `${resolvedPath.replace(/\.ts$/, "")}.ts`;

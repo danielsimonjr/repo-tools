@@ -31,7 +31,7 @@ function buildGraphs(files: readonly ParsedFile[]): { runtime: Graph; all: Graph
   const allSets = new Map<string, Set<string>>(nodes.map((n) => [n, new Set<string>()]));
   for (const file of files) {
     for (const dep of file.internalDependencies) {
-      const target = resolvePath(file.path, dep.file);
+      const target = resolvePath(file.path, dep.file, known);
       if (!known.has(target)) continue;
       allSets.get(file.path)?.add(target);
       if (!dep.typeOnly) runtimeSets.get(file.path)?.add(target);

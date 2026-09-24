@@ -1,9 +1,9 @@
 /**
- * Specifier resolution: a relative specifier to a root-relative `.ts` path, and a package
+ * Specifier resolution: a relative specifier to a root-relative source path, and a package
  * specifier to a workspace package and its entry file.
  *
- * Port note: `resolvePath` maps every target to `<x>.ts`. A `.tsx` target and a directory index
- * are not resolved here.
+ * Fix F30: a relative specifier resolves to a `.tsx` file and to a directory index
+ * (`index.ts`, `index.tsx`) when the caller knows that file.
  */
 import { dirname, join } from "node:path";
 import { toPosix } from "./paths.ts";
@@ -23,16 +23,41 @@ export function distToSrc(path: string): string {
   return `${before}${m[1]}src/${path.slice(m.index + m[0].length)}`;
 }
 
+/** A set of root-relative file paths that a resolution may land on. */
+export interface KnownFiles {
+  has(path: string): boolean;
+}
+
 /**
- * Resolves the relative specifier `spec` of the file `fromPath` (root-relative) to a
- * root-relative POSIX path: a `.js` suffix is removed, `.ts` is added when absent, and a
+ * The candidate files of the relative specifier `spec` of `fromPath`, in order (fix F30). A
+ * `.js` specifier gives `<x>.ts`, then `<x>.tsx`. A `.ts` or `.tsx` specifier gives itself.
+ * Any other specifier gives `<x>.ts`, `<x>.tsx`, `<x>/index.ts`, then `<x>/index.tsx`. Each
  * `dist/` path maps to its `src/` source.
  */
-export function resolvePath(fromPath: string, spec: string): string {
-  let resolved = join(dirname(fromPath), spec);
-  resolved = resolved.replace(/\.js$/, "");
-  if (!resolved.endsWith(".ts")) resolved = `${resolved}.ts`;
-  return distToSrc(toPosix(resolved));
+export function resolveCandidates(fromPath: string, spec: string): string[] {
+  const base = toPosix(join(dirname(fromPath), spec));
+  let candidates: string[];
+  if (base.endsWith(".js")) {
+    const stem = base.slice(0, -3);
+    candidates = [`${stem}.ts`, `${stem}.tsx`];
+  } else if (base.endsWith(".ts") || base.endsWith(".tsx")) {
+    candidates = [base];
+  } else {
+    candidates = [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`];
+  }
+  return candidates.map(distToSrc);
+}
+
+/**
+ * Resolves the relative specifier `spec` of the file `fromPath` (root-relative) to a
+ * root-relative POSIX path: the first candidate of `resolveCandidates` that `known` holds.
+ * Without a match (or without `known`) the result is the first candidate.
+ */
+export function resolvePath(fromPath: string, spec: string, known?: KnownFiles): string {
+  const candidates = resolveCandidates(fromPath, spec);
+  const first = candidates[0] as string;
+  if (!known) return first;
+  return candidates.find((c) => known.has(c)) ?? first;
 }
 
 /**

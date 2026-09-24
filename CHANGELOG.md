@@ -20,6 +20,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F30: a relative specifier resolves to a `.tsx` file and to a directory index. The
+  candidates are, in order: for `./x.js`, `x.ts` then `x.tsx`; for `./x.ts` or `./x.tsx`, the
+  file itself; for `./x`, `x.ts`, `x.tsx`, `x/index.ts` and `x/index.tsx`. The first candidate
+  that is in the graph wins. The port mapped every specifier to `<x>.ts`, so `import './Z'`
+  pointed at a missing `Z.ts` and `Z/index.ts` looked unused. The scan still reads `.ts` files
+  only, so an edge to a `.tsx` file lands when `.tsx` input is on.
 - depgraph F29: `export { r as s } from './x.js'` records `s` only as an export of the
   re-exporting file, and `export type { T as U } from` records `U` only. The port recorded the
   source name too (`r` and `s`), so `totalExports` and the export lists were too high. The
