@@ -20,7 +20,8 @@ modules:
             - AlphaOptions
           typeOnly: true
         - file: ./dyn.js
-          imports: []
+          imports:
+            - '*'
       workspaceDependencies: []
       exports:
         - Bravo
@@ -297,4 +298,4 @@ statistics:
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 2
   unusedFilesCount: 2
-  unusedExportsCount: 2
+  unusedExportsCount: 1

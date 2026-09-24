@@ -127,8 +127,8 @@ describe("parseFile", () => {
       { file: "./t.js", imports: ["T"], typeOnly: true },
       { file: "./u.js", imports: ["U", "v"], typeOnly: false },
       { file: "./side.js", imports: [], typeOnly: false, sideEffect: true },
-      // Fix F25: `await import('./dyn.js')` is a runtime edge.
-      { file: "./dyn.js", imports: [], typeOnly: false },
+      // Fix F25: `await import('./dyn.js')` is a runtime edge. Fix F38: it records `*`.
+      { file: "./dyn.js", imports: ["*"], typeOnly: false },
       { file: "./all.js", imports: [], reExport: true },
       { file: "./r.js", imports: [], reExport: true },
       { file: "./q.js", imports: [], reExport: true },

@@ -20,6 +20,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F38: a runtime dynamic `import()` is a namespace use. Its edge records `*`, so the
+  exports of a module that only `import()` loads are no longer "unreferenced anywhere". In the
+  JSON and YAML reports the edge changes from `imports: []` to `imports: ["*"]`. When a static
+  runtime import of the same file exists, that edge gets the `*`. A type-position `import()`
+  still records no names. In the `mini-repo` fixture, `dynamicValue` of `src/dyn.ts` leaves the
+  unused exports (2 -> 1).
 - depgraph F42: a census gap (a `.ts` file that the census does not list, or a census entry that
   is not on disk) gives a warning and exit 0 by default, in both modes. The new flag
   `--strict-census` makes it fail; `--check-census` stays a strict gate. A single package with

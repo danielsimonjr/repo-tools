@@ -32,7 +32,7 @@ Dependency graph generation complete!
       1 runtime, 2 files (require attention)
       1 type-only, 2 files (safe)
   - 2 potentially unused files
-  - 2 potentially unused exports
+  - 1 potentially unused exports
 
 Potentially unused files:
   - src/ambient.d.ts
@@ -41,8 +41,6 @@ Potentially unused files:
 Potentially unused exports:
   src/a.ts:
     - unusedConstant (constant)
-  src/dyn.ts:
-    - dynamicValue (constant)
 
 Written: docs/architecture/unused-analysis.md
 Written: docs/architecture/FILE_INVENTORY.md (16 files: 10 reachable, 3 build-entry, 0 test-only, 1 orphan, 2 test, 0 tool, 0 config, 0 example, 0 bench)

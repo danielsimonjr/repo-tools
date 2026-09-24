@@ -10,8 +10,8 @@
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 1
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
   - **Test-only (exercised by a test, ships nothing)**: 0
-- **Potentially unused exports**: 2
-  - **Unreferenced anywhere (deletion candidates)**: 2
+- **Potentially unused exports**: 1
+  - **Unreferenced anywhere (deletion candidates)**: 1
   - **Referenced in-module (type contracts / helpers backing live exports)**: 0
 
 ## Dormant Files — Orphaned (delete/wire candidates)
@@ -48,10 +48,6 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 ### `src/a.ts`
 
 - `unusedConstant` (constant)
-
-### `src/dyn.ts`
-
-- `dynamicValue` (constant)
 
 
 ## Referenced In-Module (type contracts / helpers backing live exports)

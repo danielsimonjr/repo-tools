@@ -47,7 +47,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./a.js` | `AlphaOptions` | Import (type-only) |
-| `./dyn.js` | `` | Import |
+| `./dyn.js` | `*` | Import |
 
 **Exports:**
 - Classes: `Bravo`

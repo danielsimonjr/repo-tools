@@ -6,6 +6,7 @@
  * `/*` inside a string literal does not remove code.
  * Fix F23: `import()` reads a backtick specifier that holds no `${` substitution.
  * Fix F25: an `import()` is a runtime edge unless it is in a type position.
+ * Fix F38: a runtime `import()` edge records `*` (a namespace use).
  */
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
@@ -258,7 +259,9 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
   // `import('./x.js')` expressions. Fix F23: a backtick specifier counts too, unless it holds a
   // `${` substitution. Fix F25: the edge is runtime unless every `import()` of the specifier is
   // in a type position. A runtime `import()` of a file that only type-only edges name adds a
-  // runtime edge, so a runtime cycle through it is found.
+  // runtime edge, so a runtime cycle through it is found. Fix F38: a runtime `import()` gives a
+  // module namespace, so its edge records `*`. When a runtime edge of the specifier exists, that
+  // edge gets the `*`.
   const dynamicKinds = new Map<string, boolean>();
   for (const match of code.matchAll(/\bimport\s*\(\s*['"`](\.[^'"`${]+)['"`]\s*\)/g)) {
     const source = match[1] ?? "";
@@ -267,8 +270,13 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
   }
   for (const [source, typeOnly] of dynamicKinds) {
     const existing = result.internalDependencies.filter((d) => d.file === source);
-    if (existing.length > 0 && (typeOnly || existing.some((d) => !d.typeOnly))) continue;
-    result.internalDependencies.push({ file: source, imports: [], typeOnly });
+    const runtimeEdge = existing.find((d) => !d.typeOnly);
+    if (!typeOnly && runtimeEdge) {
+      if (!runtimeEdge.imports.includes("*")) runtimeEdge.imports.push("*");
+      continue;
+    }
+    if (existing.length > 0 && typeOnly) continue;
+    result.internalDependencies.push({ file: source, imports: typeOnly ? [] : ["*"], typeOnly });
   }
   // Re-export edges: `export * from`, `export * as ns from`, `export { a } from`,
   // `export type { T } from`.
