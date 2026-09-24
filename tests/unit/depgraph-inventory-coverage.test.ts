@@ -130,6 +130,7 @@ describe("inventory", () => {
   test("checkCensusNoRegen reads the committed inventory", () => {
     const out = join(root, "docs", "architecture");
     expect(checkCensusNoRegen(root, out)).toContain("not found");
+    expect(checkCensusNoRegen(root, out)?.endsWith("\n")).toBe(true);
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, "file-inventory.json"), JSON.stringify(inventory));
     expect(checkCensusNoRegen(root, out)).toContain("ORPHAN");

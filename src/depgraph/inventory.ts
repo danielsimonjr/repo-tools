@@ -193,7 +193,7 @@ export function censusPassLine(inventory: FileInventory): string {
 export function checkCensusNoRegen(root: string, outputDir: string): string | null {
   const invPath = join(outputDir, "file-inventory.json");
   if (!existsSync(invPath)) {
-    return "file-census check: file-inventory.json not found — run `repo-tools depgraph` first to generate it.";
+    return "file-census check: file-inventory.json not found — run `repo-tools depgraph` first to generate it.\n";
   }
   const inventory = JSON.parse(readFileSync(invPath, "utf-8")) as FileInventory;
   return censusFailure(root, inventory);

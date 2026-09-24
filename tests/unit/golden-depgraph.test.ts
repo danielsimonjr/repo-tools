@@ -30,7 +30,7 @@ describe("depgraph characterization goldens (D0)", () => {
       for (const f of readdirSync(join(golden, set))) {
         const text = readFileSync(join(golden, set, f), "utf8");
         expect(text).not.toMatch(/\b\d{4}-\d{2}-\d{2}\b/);
-        expect(text).not.toMatch(/[A-Za-z]:[\/]/);
+        expect(text).not.toMatch(/[A-Za-z]:[/]/);
       }
     });
   }

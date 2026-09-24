@@ -59,8 +59,11 @@ describe.skipIf(process.platform !== "win32")("depgraph port equals the goldens"
           text: readFileSync(join(expectedDir, name), "utf8"),
         });
       }
-      // Standard output names no absolute path.
+      // Standard output names no absolute path, in either separator form, and equals the port's
+      // own stdout golden. `_stdout.txt` is the pre-port reference, which held the root.
       expect(stdout).not.toContain(root);
+      expect(stdout).not.toContain(root.replace(/\\/g, "/"));
+      expect(mask(stdout, root)).toBe(readFileSync(join(expectedDir, "_stdout.port.txt"), "utf8"));
     });
   }
 });

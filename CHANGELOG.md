@@ -31,6 +31,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port review: the `node dist/x.js` script-root pattern keeps the pre-port byte that
+  stops it from matching, so the port seeds no such root (the pre-port behaviour; fix F33
+  changes it later). The `--check-census` "not found" message ends with a newline. The
+  characterization test also compares the port's standard output with a golden
+  (`_stdout.port.txt`) and checks both separator forms of the root.
 - `repo-tools depgraph` (task D8, port complete). The reporters (`reporters/markdown.ts`,
   `json.ts`, `yaml.ts`, `unused.ts`, `inventory.ts`, `coverage.ts`, `surfaces.ts`,
   `banner.ts`), an extension stub (`extensions.ts`) and the pipeline (`index.ts`: scan, parse,
