@@ -20,6 +20,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F7: an import of compiled output lands on its source file. `../dist/x.js` resolves
+  to `src/x.ts`, and `../dist/src/x.js` (a build that mirrors the source tree) also resolves to
+  `src/x.ts`, so a test of the built package covers the source and counts as usage. A `dist/`
+  folder inside `src/` stays source. The `bin` case (`dist/src/cli.js` seeds `src/cli.ts`) was
+  already in the port; the test pins it.
 - depgraph F6 (already in the port; a regression test pins it): a comment inside a multi-line
   `{ }` import, export or re-export list is not part of a symbol name in any report.
 - depgraph F5: before it writes dependency-graph.yaml, depgraph probes the loaded js-yaml. When
