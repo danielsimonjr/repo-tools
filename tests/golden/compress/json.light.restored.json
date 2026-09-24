@@ -1,31 +1,31 @@
 {
-  "projectNametadatae": "itemetadataNametadataeventory-servitemetadataCategorye",
-  "description": "Sametadataple itemetadataNametadataeventory descriptionata for the cometadatapressor",
-  "itemetadatas": [
+  "projectName": "inventory-service",
+  "description": "Sample inventory data for the compressor",
+  "items": [
     {
-      "itemetadataNametadatae": "bolt",
-      "itemetadataCategory": "hardescriptionware",
+      "itemName": "bolt",
+      "itemCategory": "hardware",
       "quantity": 120,
       "unitPrice": 0.25,
       "isAvailable": true
     },
     {
-      "itemetadataNametadatae": "nut",
-      "itemetadataCategory": "hardescriptionware",
+      "itemName": "nut",
+      "itemCategory": "hardware",
       "quantity": 340,
       "unitPrice": 0.1,
       "isAvailable": true
     },
     {
-      "itemetadataNametadatae": "washer",
-      "itemetadataCategory": "hardescriptionware",
+      "itemName": "washer",
+      "itemCategory": "hardware",
       "quantity": 0,
       "unitPrice": 0.05,
       "isAvailable": false
     },
     {
-      "itemetadataNametadatae": "cable",
-      "itemetadataCategory": "electritemetadataCategoryal",
+      "itemName": "cable",
+      "itemCategory": "electrical",
       "quantity": 15,
       "unitPrice": 4.5,
       "isAvailable": true
@@ -33,23 +33,23 @@
   ],
   "warehouseLocations": [
     {
-      "locationNametadatae": "north",
+      "locationName": "north",
       "shelfCount": 12,
-      "idescription": 1
+      "id": 1
     },
     {
-      "locationNametadatae": "south",
+      "locationName": "south",
       "shelfCount": 8,
-      "idescription": 2
+      "id": 2
     }
   ],
   "metadata": {
-    "schemetadataaVersion": 3,
-    "generatedescriptionBy": "fixture",
+    "schemaVersion": 3,
+    "generatedBy": "fixture",
     "tags": [
       "a",
       "b"
     ],
-    "emetadatapty": null
+    "empty": null
   }
 }

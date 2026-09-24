@@ -186,7 +186,7 @@
       "sample.compact.json"
     ],
     "exit": 0,
-    "stdout": "Decompressing: sample.compact.json\nFormat: json\n\n=== Decompression Statistics ===\nCompressed size:   694 B\nRestored size:     1.3 KB\nSize increase:     89.9%\n================================\n\nOutput written to: sample.json\n",
+    "stdout": "Decompressing: sample.compact.json\nFormat: json\n\n=== Decompression Statistics ===\nCompressed size:   694 B\nRestored size:     1.0 KB\nSize increase:     49.0%\n================================\n\nOutput written to: sample.json\n",
     "stderr": ""
   },
   "sample.json -l medium": {
@@ -205,7 +205,7 @@
       "sample.compact.json"
     ],
     "exit": 0,
-    "stdout": "Decompressing: sample.compact.json\nFormat: json\n\n=== Decompression Statistics ===\nCompressed size:   718 B\nRestored size:     3.0 KB\nSize increase:     330.4%\n================================\n\nOutput written to: sample.json\n",
+    "stdout": "Decompressing: sample.compact.json\nFormat: json\n\n=== Decompression Statistics ===\nCompressed size:   718 B\nRestored size:     1.0 KB\nSize increase:     44.0%\n================================\n\nOutput written to: sample.json\n",
     "stderr": ""
   },
   "sample.json -l aggressive": {
@@ -224,7 +224,7 @@
       "sample.compact.json"
     ],
     "exit": 0,
-    "stdout": "Decompressing: sample.compact.json\nFormat: json\n\n=== Decompression Statistics ===\nCompressed size:   718 B\nRestored size:     3.0 KB\nSize increase:     330.4%\n================================\n\nOutput written to: sample.json\n",
+    "stdout": "Decompressing: sample.compact.json\nFormat: json\n\n=== Decompression Statistics ===\nCompressed size:   718 B\nRestored size:     1.0 KB\nSize increase:     44.0%\n================================\n\nOutput written to: sample.json\n",
     "stderr": ""
   },
   "sample.log -l light": {

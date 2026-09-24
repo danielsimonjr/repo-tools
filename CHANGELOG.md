@@ -23,6 +23,11 @@ All notable changes to this project are recorded in this file. The format follow
   message (the original reported an `EISDIR` failure for the folder), and `--pattern` with a
   file in place of a directory exits 1 with a message (the original stopped with `ENOTDIR`).
   `--batch --pattern` without a directory searches the working folder, as before.
+- `compress -d` for JSON renames the keys by structure. The original tool replaced each
+  abbreviation everywhere in the text, so an abbreviation such as `n` also changed every `n` in
+  other keys and in values (`"items"` became `"itemetadatas"`). Now a JSON object with a
+  top-level object round-trips to a deep-equal value. The compact format does not change. The
+  three JSON restore goldens now hold the correct output.
 
 ### Added
 

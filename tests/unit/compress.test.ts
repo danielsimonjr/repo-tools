@@ -3,7 +3,9 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
+import { getCompressor } from "../../src/compress/formats.ts";
 import { type CompressDeps, run } from "../../src/compress/index.ts";
+import { decompress } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
@@ -179,6 +181,25 @@ describe("directories and --batch", () => {
     const r = await compressIn(folder(), ["-b"]);
     expect(r.code).toBe(1);
     expect(r.err).toContain("No files to process");
+  });
+});
+
+describe("round trip (design 13.3 step 5)", () => {
+  for (const level of ["light", "medium", "aggressive"]) {
+    test(`JSON at ${level}: compress then -d gives a deep-equal value`, async () => {
+      const dir = folder("sample.json");
+      const original = JSON.parse(readFileSync(join(dir, "sample.json"), "utf8"));
+      expect((await compressIn(dir, ["sample.json", "-l", level, "--no-stats"])).code).toBe(0);
+      const args = ["-d", "sample.compact.json", "-o", "restored.json", "--no-stats"];
+      expect((await compressIn(dir, args)).code).toBe(0);
+      expect(JSON.parse(readFileSync(join(dir, "restored.json"), "utf8"))).toEqual(original);
+    });
+  }
+
+  test("JSON: a value that equals an abbreviation is not changed", () => {
+    const input = JSON.stringify({ name: "n", items: [{ name: "i", count: "name" }] });
+    const compact = getCompressor("json")(input, "medium").compressed;
+    expect(JSON.parse(decompress(compact, "json"))).toEqual(JSON.parse(input));
   });
 });
 

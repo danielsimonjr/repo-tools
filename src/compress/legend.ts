@@ -145,23 +145,11 @@ export function applySubstringCompression(
 function parseLegend(
   content: string,
   format: FileFormat,
-): { body: string; legend: Record<string, string> } | undefined {
+): { body: string; legend: Record<string, string> } {
   let result = content;
-  let legend: Record<string, string> = {};
+  const legend: Record<string, string> = {};
 
-  if (format === "json") {
-    try {
-      // A `null` document throws here too, and is returned unchanged like invalid JSON.
-      const data = JSON.parse(content);
-      if (data._legend) {
-        legend = data._legend;
-        delete data._legend;
-        result = JSON.stringify(data, null, 2);
-      }
-    } catch {
-      return undefined;
-    }
-  } else if (format === "markdown" || format === "html" || format === "xml") {
+  if (format === "markdown" || format === "html" || format === "xml") {
     const legendMatch = result.match(/<!--\s*§:\s*([^>]+)\s*-->\n?/);
     if (legendMatch) {
       result = result.replace(legendMatch[0], "");
@@ -211,13 +199,49 @@ function parseLegend(
   return { body: result, legend };
 }
 
+/** Returns a copy of `value` with each object key renamed through `keyMap`. */
+export function renameKeys(value: unknown, keyMap: ReadonlyMap<string, string>): unknown {
+  if (Array.isArray(value)) return value.map((item) => renameKeys(item, keyMap));
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, v] of Object.entries(value)) {
+      out[keyMap.get(key) || key] = renameKeys(v, keyMap);
+    }
+    return out;
+  }
+  return value;
+}
+
+/**
+ * Restores a compact JSON document. The keys are renamed by structure, not by text replacement:
+ * the original tool replaced each abbreviation everywhere in the text, so an abbreviation such
+ * as `n` also changed every `n` in the keys and the values.
+ */
+function decompressJson(content: string): string {
+  let data: unknown;
+  try {
+    data = JSON.parse(content);
+  } catch {
+    return content;
+  }
+  if (data === null || typeof data !== "object") return content;
+  const { _legend: legend, ...rest } = data as Record<string, unknown>;
+  if (!legend || typeof legend !== "object") return content;
+  const keyMap = new Map<string, string>();
+  for (const [abbrev, key] of Object.entries(legend)) {
+    if (typeof key === "string") keyMap.set(abbrev, key);
+  }
+  return JSON.stringify(renameKeys(rest, keyMap), null, 2);
+}
+
 /**
  * Restores a compact file: removes the legend and replaces each abbreviation with its full
- * text. Content in the `json` format that does not parse is returned unchanged.
+ * text. Content in the `json` format that does not parse, or has no legend, is returned
+ * unchanged.
  */
 export function decompress(content: string, format: FileFormat): string {
+  if (format === "json") return decompressJson(content);
   const parsed = parseLegend(content, format);
-  if (!parsed) return content;
   let result = parsed.body;
   // Longer abbreviations first, so §10 is replaced before §1.
   const entries = Object.entries(parsed.legend).sort((a, b) => b[0].length - a[0].length);

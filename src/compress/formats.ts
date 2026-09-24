@@ -9,6 +9,7 @@ import {
   applySubstringCompression,
   findRepeatedSubstrings,
   generateAbbreviation,
+  renameKeys,
 } from "./legend.ts";
 
 /** The formats that `--format` accepts, in help order. */
@@ -99,18 +100,6 @@ function collectKeys(value: unknown, freq: Map<string, number>): void {
   }
 }
 
-function transformKeys(value: unknown, keyMap: Map<string, string>): unknown {
-  if (Array.isArray(value)) return value.map((item) => transformKeys(item, keyMap));
-  if (value !== null && typeof value === "object") {
-    const out: Record<string, unknown> = {};
-    for (const [key, v] of Object.entries(value)) {
-      out[keyMap.get(key) || key] = transformKeys(v, keyMap);
-    }
-    return out;
-  }
-  return value;
-}
-
 const compressJson: Compressor = (content, level) => {
   const data: unknown = JSON.parse(content);
   const legend: Record<string, string> = {};
@@ -131,7 +120,7 @@ const compressJson: Compressor = (content, level) => {
     existing.add(abbrev);
   }
 
-  const transformed = transformKeys(data, keyMap);
+  const transformed = renameKeys(data, keyMap);
   const output =
     typeof transformed === "object" && transformed !== null
       ? { _legend: legend, ...(transformed as Record<string, unknown>) }
