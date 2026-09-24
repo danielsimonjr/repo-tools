@@ -51,7 +51,7 @@ import {
 import { generateSurfacesJson } from "./reporters/surfaces.ts";
 import { generateUnusedReport } from "./reporters/unused.ts";
 import { generateYaml } from "./reporters/yaml.ts";
-import { collectEntryPoints } from "./roots.ts";
+import { collectEntryPoints, isJsonObject } from "./roots.ts";
 import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, TEST_DIR_NAMES } from "./scanner.ts";
 import type { PackageJson, ParsedFile, Statistics, UnusedExport } from "./types.ts";
 import { detectWorkspaces } from "./workspaces.ts";
@@ -108,14 +108,23 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
   return options;
 }
 
-/** Reads the name and version of `<root>/package.json`, or the defaults with a warning. */
+/**
+ * Reads the name and version of `<root>/package.json`, or the defaults with a warning. Fix F35:
+ * a package.json that is not a JSON object (`null`, an array, a number) gives the defaults.
+ */
 function readPackageJson(root: string, io: Io): PackageJson {
+  let pkg: unknown;
   try {
-    return JSON.parse(readFileSync(join(root, "package.json"), "utf-8")) as PackageJson;
+    pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf-8"));
   } catch {
     io.stderr("Warning: Could not read package.json, using defaults\n");
     return { name: "unknown", version: "0.0.0" };
   }
+  if (!isJsonObject(pkg)) {
+    io.stderr("Warning: package.json is not a JSON object, using defaults\n");
+    return { name: "unknown", version: "0.0.0" };
+  }
+  return pkg as unknown as PackageJson;
 }
 
 /** Runs `repo-tools depgraph` and returns the exit code. */
@@ -160,7 +169,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   // Scan.
   log("Scanning codebase for dependencies...");
   if (options.includeTests) log("note: --include-tests is a no-op; test analysis is always on.");
-  const workspaces = detectWorkspaces(root);
+  const workspaces = detectWorkspaces(root, (message) => io.stderr(`Warning: ${message}\n`));
   const isMonorepo = workspaces.size > 0;
   if (isMonorepo) {
     log(`Monorepo detected: ${workspaces.size} workspace packages`);

@@ -20,6 +20,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F35: `package.json` type guards. A root `package.json` that is `null` or not a JSON
+  object gives the warning "package.json is not a JSON object, using defaults" (the port
+  crashed with a TypeError, exit 1). A workspace `package.json` that is not a JSON object is
+  skipped with a warning. A `scripts` value that is not a string, a `scripts` field that is not
+  an object, and a workspace pattern that is not a string are ignored with a warning; the
+  package stays a workspace package (the port dropped it without a message, and the census
+  then failed on its files).
 - depgraph F34: no walk follows a link (a symbolic link or a junction). A link can point to
   another repository, to a missing path or to its own parent: the port counted the files of a
   linked sibling tree as its own, crashed with ENOENT on a dangling link, and failed on a

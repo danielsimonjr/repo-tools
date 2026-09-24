@@ -13,11 +13,19 @@ import { relativePosix, toPosix } from "./paths.ts";
 import { getAllSourceTsFiles } from "./scanner.ts";
 import type { ParsedFile, WorkspacePackage } from "./types.ts";
 
-/** The `package.json` fields that name build roots. */
+/** The `package.json` fields that name build roots. The values are not checked yet. */
 export interface PackageRootFields {
-  exports?: Record<string, unknown>;
-  bin?: Record<string, string> | string;
-  scripts?: Record<string, string>;
+  exports?: unknown;
+  bin?: unknown;
+  scripts?: unknown;
+}
+
+/** Receives one warning line (without the trailing line feed). */
+export type Warn = (message: string) => void;
+
+/** True for a JSON object: not null, not an array. */
+export function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /** A tsup config file name: `tsup.config.ts`, `.mts`, `.cts`, `.js`, `.mjs`, `.cjs` or `.json`. */
@@ -96,26 +104,39 @@ export function exportsSubpathEntries(
   root: string,
   pkgDir: string,
   pkg: PackageRootFields,
+  warn: Warn = () => {},
 ): string[] {
   const entries: string[] = [];
   const addIfExists = (srcPath: string): void => {
     const norm = toPosix(srcPath);
     if (existsSync(join(root, srcPath)) && !entries.includes(norm)) entries.push(norm);
   };
-  if (pkg.exports && typeof pkg.exports === "object") {
+  if (isJsonObject(pkg.exports)) {
     for (const key of Object.keys(pkg.exports)) {
       if (key === "." || !key.startsWith("./")) continue;
       addIfExists(join(pkgDir, "src", `${key.slice(2)}.ts`));
     }
   }
-  const binValues = typeof pkg.bin === "string" ? [pkg.bin] : pkg.bin ? Object.values(pkg.bin) : [];
+  const binValues =
+    typeof pkg.bin === "string" ? [pkg.bin] : isJsonObject(pkg.bin) ? Object.values(pkg.bin) : [];
   for (const bin of binValues) {
+    if (typeof bin !== "string") continue;
     const m = /(?:\.\/)?dist\/(.+)\.[cm]?js$/.exec(bin);
     if (!m) continue;
     const rel = (m[1] ?? "").replace(/^src\//, "");
     addIfExists(join(pkgDir, "src", `${rel}.ts`));
   }
-  for (const script of Object.values(pkg.scripts ?? {})) {
+  // Fix F35: a script that is not a string is ignored with a warning, never a TypeError that
+  // drops the package.
+  const pkgJson = toPosix(join(pkgDir, "package.json"));
+  let scripts: Record<string, unknown> = {};
+  if (isJsonObject(pkg.scripts)) scripts = pkg.scripts;
+  else if (pkg.scripts !== undefined) warn(`${pkgJson}: scripts is not an object; it is ignored`);
+  for (const [name, script] of Object.entries(scripts)) {
+    if (typeof script !== "string") {
+      warn(`${pkgJson}: scripts.${name} is not a string; it is ignored`);
+      continue;
+    }
     if (!script) continue;
     for (const m of script.matchAll(/(?:^|\s)(src\/[\w./-]+\.ts)\b/g)) {
       addIfExists(join(pkgDir, m[1] ?? ""));

@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { load } from "js-yaml";
 import { isLink, isLinkEntry, listEntries, listNames } from "./dirlist.ts";
 import { toPosix } from "./paths.ts";
-import { exportsSubpathEntries } from "./roots.ts";
+import { exportsSubpathEntries, isJsonObject, type Warn } from "./roots.ts";
 import type { WorkspacePackage } from "./types.ts";
 
 /**
@@ -18,13 +18,21 @@ import type { WorkspacePackage } from "./types.ts";
  * 3. Structure: each top-level directory (not a dot-directory, not `node_modules` or `tools`)
  *    that holds a `package.json` and a `src/`, when there are two or more.
  *
- * Negated patterns (`!x`) are removed.
+ * Negated patterns (`!x`) are removed. A pattern that is not a string is ignored with a warning
+ * (fix F35).
  */
-export function readWorkspacePatterns(root: string): string[] {
+export function readWorkspacePatterns(root: string, warn: Warn = () => {}): string[] {
+  const strings = (list: unknown[], file: string): string[] =>
+    list.filter((p): p is string => {
+      if (typeof p === "string") return true;
+      warn(`${file}: workspace pattern ${JSON.stringify(p)} is not a string; it is ignored`);
+      return false;
+    });
   try {
-    const rootPkg = JSON.parse(readFileSync(join(root, "package.json"), "utf-8"));
-    const ws = rootPkg.workspaces;
-    const patterns: string[] | undefined = Array.isArray(ws) ? ws : ws?.packages;
+    const rootPkg: unknown = JSON.parse(readFileSync(join(root, "package.json"), "utf-8"));
+    const ws = isJsonObject(rootPkg) ? rootPkg.workspaces : undefined;
+    const list = Array.isArray(ws) ? ws : isJsonObject(ws) ? ws.packages : undefined;
+    const patterns = Array.isArray(list) ? strings(list, "package.json") : undefined;
     if (patterns?.length) return patterns.filter((p) => !p.startsWith("!"));
   } catch {
     // No package.json, or not valid JSON: try pnpm.
@@ -32,9 +40,11 @@ export function readWorkspacePatterns(root: string): string[] {
 
   try {
     const cfg = load(readFileSync(join(root, "pnpm-workspace.yaml"), "utf-8")) as
-      | { packages?: string[] }
+      | { packages?: unknown[] }
       | undefined;
-    if (Array.isArray(cfg?.packages)) return cfg.packages.filter((p) => !p.startsWith("!"));
+    if (Array.isArray(cfg?.packages)) {
+      return strings(cfg.packages, "pnpm-workspace.yaml").filter((p) => !p.startsWith("!"));
+    }
   } catch {
     // No pnpm-workspace.yaml: try the structural fallback.
   }
@@ -55,25 +65,36 @@ export function readWorkspacePatterns(root: string): string[] {
 
 /**
  * Reads `<root>/<pkgDir>/package.json` into `workspaces` when it has a name. A package folder
- * that is a link is not read (fix F34): it can hold the files of another repository.
+ * that is a link is not read (fix F34): it can hold the files of another repository. A
+ * package.json that is not a JSON object is skipped with a warning (fix F35).
  */
-function addPackage(root: string, pkgDir: string, workspaces: Map<string, WorkspacePackage>): void {
+function addPackage(
+  root: string,
+  pkgDir: string,
+  workspaces: Map<string, WorkspacePackage>,
+  warn: Warn,
+): void {
   if (isLink(join(root, pkgDir))) return;
   const pkgJsonPath = join(root, pkgDir, "package.json");
   if (!existsSync(pkgJsonPath)) return;
+  let pkg: unknown;
   try {
-    const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
-    if (pkg.name) {
-      workspaces.set(pkg.name, {
-        name: pkg.name,
-        directory: toPosix(pkgDir),
-        srcDir: toPosix(join(pkgDir, "src")),
-        extraEntries: exportsSubpathEntries(root, pkgDir, pkg),
-      });
-    }
+    pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
   } catch {
     // Skip a package.json that is not valid JSON.
+    return;
   }
+  if (!isJsonObject(pkg)) {
+    warn(`${toPosix(join(pkgDir, "package.json"))} is not a JSON object; the package is skipped`);
+    return;
+  }
+  if (typeof pkg.name !== "string" || !pkg.name) return;
+  workspaces.set(pkg.name, {
+    name: pkg.name,
+    directory: toPosix(pkgDir),
+    srcDir: toPosix(join(pkgDir, "src")),
+    extraEntries: exportsSubpathEntries(root, pkgDir, pkg, warn),
+  });
 }
 
 /**
@@ -81,19 +102,22 @@ function addPackage(root: string, pkgDir: string, workspaces: Map<string, Worksp
  * lists its parent directory. Any other pattern is one package directory. Returns an empty map
  * in single-package mode.
  */
-export function detectWorkspaces(root: string): Map<string, WorkspacePackage> {
+export function detectWorkspaces(
+  root: string,
+  warn: Warn = () => {},
+): Map<string, WorkspacePackage> {
   const workspaces = new Map<string, WorkspacePackage>();
   try {
-    const patterns = readWorkspacePatterns(root);
+    const patterns = readWorkspacePatterns(root, warn);
     for (const pattern of patterns) {
       if (pattern.endsWith("/*")) {
         const parentDir = pattern.slice(0, -2);
         if (!existsSync(join(root, parentDir))) continue;
         for (const entry of listNames(join(root, parentDir))) {
-          addPackage(root, join(parentDir, entry), workspaces);
+          addPackage(root, join(parentDir, entry), workspaces, warn);
         }
       } else {
-        addPackage(root, pattern, workspaces);
+        addPackage(root, pattern, workspaces, warn);
       }
     }
   } catch {
