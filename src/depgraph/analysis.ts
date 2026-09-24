@@ -64,7 +64,9 @@ export function categorizeFiles(
       }
       const parts = file.path.split("/");
       if (parts.length >= 2 && parts[0] === "src") {
-        add(parts.length === 2 ? "root" : (parts[1] ?? "").replace(".ts", ""), file);
+        // Fix F32: `parts[1]` is a directory here, and a directory name is a module name as it
+        // is (`src/lib.ts/x.ts` is in module `lib.ts`).
+        add(parts.length === 2 ? "root" : (parts[1] ?? ""), file);
       } else if (parts.length >= 2) {
         // Fix F12: a repo without `src/` has top-level source folders. `<dir>/x.ts` goes to
         // module `<dir>`, and `<dir>/<sub>/x.ts` goes to module `<dir>/<sub>`.
@@ -93,7 +95,7 @@ export function buildDependencyMatrix(files: ParsedFile[]): DependencyMatrix {
       if (other.path === file.path) continue;
       for (const dep of other.internalDependencies) {
         const resolved = resolvePath(other.path, dep.file, known);
-        if (resolved === file.path || resolved === file.path.replace(".ts", "")) {
+        if (resolved === file.path || resolved === file.path.replace(/\.ts$/, "")) {
           exportsTo.add(other.path);
         }
       }

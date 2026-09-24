@@ -20,6 +20,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F32: removing the `.ts` extension removes the suffix only. The port removed the
+  first `.ts` text in a path: the runtime cycle label (`c.rtp` of
+  `dependency-summary.compact.json`) of `src/a.tsx.ts` was `ax.ts`, and a single-package module
+  took its name from its directory less the first `.ts` (`src/lib.ts/x.ts` was in module `lib`,
+  `src/a.ts.d/y.ts` in module `a.d`). The label is now `a.tsx`, and a module name is its
+  directory name as it is (`lib.ts`, `a.ts.d`).
 - depgraph F31: the `entryPoints` list of `dependency-graph.json` matches the path segments
   `src/index.ts`, not the text suffix. `src/mysrc/index.ts` ends with the text `src/index.ts`
   and was listed as a main entry point. One helper (`isSrcIndex`) now makes this check for the

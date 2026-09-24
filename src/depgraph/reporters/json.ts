@@ -119,7 +119,7 @@ export function generateCompactSummary(
       tof: stats.typeOnlyFilesInCycles,
       rtp: cycles.runtime
         .slice(0, 5)
-        .map((c) => c.cycle.map((p) => p.split("/").pop()?.replace(".ts", "")).join("→")),
+        .map((c) => c.cycle.map((p) => p.split("/").pop()?.replace(/\.ts$/, "")).join("→")),
     },
     mod: {} as Record<string, { f: number; exp: string[]; cls?: string[]; int?: string[] }>,
     hp: [] as { p: string; i: number; o: number }[],
