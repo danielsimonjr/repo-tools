@@ -39,7 +39,7 @@ The codebase is organized into the following modules:
 | Package | Depends On | Files (Active) | Files (Dormant) |
 |---------|------------|----------------|-----------------|
 | `@scope/cli` (`packages/cli/`) | `@scope/core` | 2 | 0 |
-| `@scope/core` (`packages/core/`) | (none) | 4 | 1 |
+| `@scope/core` (`packages/core/`) | (none) | 5 | 0 |
 
 ### Package Dependency Diagram
 

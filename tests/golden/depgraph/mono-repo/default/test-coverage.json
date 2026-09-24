@@ -1,19 +1,19 @@
 {
   "metadata": {
-    "totalSourceFiles": 6,
+    "totalSourceFiles": 7,
     "totalTestFiles": 1,
     "testedCount": 1,
-    "untestedCount": 5,
-    "coveragePercent": "16.7",
+    "untestedCount": 6,
+    "coveragePercent": "14.3",
     "effectiveCoverage": {
       "policyLoaded": false,
-      "activeFiles": 6,
+      "activeFiles": 7,
       "testedActive": 1,
-      "activeUntested": 5,
+      "activeUntested": 6,
       "excludedTotal": 0,
-      "percent": "16.7",
+      "percent": "14.3",
       "breakdown": {
-        "active_untested": 5
+        "active_untested": 6
       }
     }
   },
@@ -22,7 +22,8 @@
     "packages/cli/src/main.ts",
     "packages/core/src/index.ts",
     "packages/core/src/internal.ts",
-    "packages/core/src/types.ts"
+    "packages/core/src/types.ts",
+    "packages/core/src/worker.ts"
   ],
   "testedFiles": [
     "packages/core/src/math.ts"
@@ -35,7 +36,8 @@
     "packages/core/src/math.ts": [
       "packages/core/tests/math.test.ts"
     ],
-    "packages/core/src/types.ts": []
+    "packages/core/src/types.ts": [],
+    "packages/core/src/worker.ts": []
   },
   "testToSourceMap": {
     "packages/core/tests/math.test.ts": [
@@ -61,6 +63,10 @@
     },
     {
       "file": "packages/core/src/types.ts",
+      "category": null
+    },
+    {
+      "file": "packages/core/src/worker.ts",
       "category": null
     }
   ]

@@ -8,16 +8,16 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 6 |
+| Total Source Files | 7 |
 | Total Test Files | 1 |
 | Source Files with Tests | 1 |
-| Source Files without Tests | 5 |
-| Coverage (raw, direct-import) | **16.7%** |
+| Source Files without Tests | 6 |
+| Coverage (raw, direct-import) | **14.3%** |
 ---
 
 ## Source Files Without Test Coverage
 
-The following 5 source files are not directly imported by any test file:
+The following 6 source files are not directly imported by any test file:
 
 ### cli/
 
@@ -29,6 +29,7 @@ The following 5 source files are not directly imported by any test file:
 - `packages/core/src/index.ts` → Expected test: `tests/unit/core/index.test.ts`
 - `packages/core/src/internal.ts` → Expected test: `tests/unit/core/internal.test.ts`
 - `packages/core/src/types.ts` → Expected test: `tests/unit/core/types.test.ts`
+- `packages/core/src/worker.ts` → Expected test: `tests/unit/core/worker.test.ts`
 
 ---
 

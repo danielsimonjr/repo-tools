@@ -132,8 +132,8 @@ describe("roots", () => {
     "pkg/src/host.ts": "new Worker(new URL('./run.js', import.meta.url));",
   });
 
-  test("tsupConfigEntries reads the first entry array only", () => {
-    expect(tsupConfigEntries(root, "pkg")).toEqual(["pkg/src/one.ts"]);
+  test("tsupConfigEntries reads every entry array (F14)", () => {
+    expect(tsupConfigEntries(root, "pkg")).toEqual(["pkg/src/one.ts", "pkg/src/two.ts"]);
     expect(tsupConfigEntries(root, "absent")).toEqual([]);
   });
 
@@ -163,6 +163,7 @@ describe("roots", () => {
       "pkg/src/run.ts",
       "pkg/src/bind/b.ts",
       "pkg/src/one.ts",
+      "pkg/src/two.ts",
     ]);
   });
 

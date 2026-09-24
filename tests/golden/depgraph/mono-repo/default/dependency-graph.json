@@ -1,9 +1,9 @@
 {
   "metadata": {
     "name": "mono-repo",
-    "totalFiles": 6,
+    "totalFiles": 7,
     "totalModules": 2,
-    "totalExports": 6
+    "totalExports": 7
   },
   "entryPoints": [
     {
@@ -136,6 +136,26 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": []
+      },
+      "packages/core/src/worker.ts": {
+        "description": "worker module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./math.js",
+            "imports": [
+              "double"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "workerResult"
+        ],
+        "constants": [
+          "workerResult"
+        ]
       }
     }
   },
@@ -161,27 +181,28 @@
           "packages/core/src/index.ts",
           "packages/core/src/internal.ts",
           "packages/core/src/math.ts",
-          "packages/core/src/types.ts"
+          "packages/core/src/types.ts",
+          "packages/core/src/worker.ts"
         ]
       }
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 6,
+    "totalTypeScriptFiles": 7,
     "totalModules": 2,
-    "totalLinesOfCode": 33,
-    "totalExports": 6,
+    "totalLinesOfCode": 38,
+    "totalExports": 7,
     "totalClasses": 0,
     "totalInterfaces": 0,
     "totalFunctions": 3,
     "totalTypeGuards": 0,
     "totalEnums": 0,
-    "totalConstants": 1,
+    "totalConstants": 2,
     "totalReExports": 2,
     "totalTypeOnlyImports": 2,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 1
+    "unusedExportsCount": 0
   }
 }

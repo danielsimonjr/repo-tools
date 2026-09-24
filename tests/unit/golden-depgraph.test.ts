@@ -43,7 +43,8 @@ describe("depgraph characterization goldens (D0)", () => {
     expect(sortCodeUnits(names)).not.toEqual(caseless);
   });
 
-  test("the census gate fails on the tsup second-entry orphan before fix F14", () => {
-    expect(readFileSync(join(golden, "mono-repo/default/_exit-code.txt"), "utf8")).toBe("1\n");
+  test("the census gate passes: fix F14 seeds the tsup second-entry file", () => {
+    expect(readFileSync(join(golden, "mono-repo/default/_exit-code.txt"), "utf8")).toBe("0\n");
+    expect(readFileSync(join(golden, "mono-repo/all/_exit-code.txt"), "utf8")).toBe("0\n");
   });
 });

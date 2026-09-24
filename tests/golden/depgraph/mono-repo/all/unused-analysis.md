@@ -6,9 +6,9 @@
 
 ## Summary
 
-- **Potentially unused files**: 1
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 1
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
+- **Potentially unused files**: 0
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 0
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 0
 - **Potentially unused exports**: 0
   - **Unreferenced anywhere (deletion candidates)**: 0
@@ -21,9 +21,7 @@ to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
 
-### `packages/core` (1)
-
-- `packages/core/src/worker.ts`
+_None._
 
 ## Dormant Files — Test-only (ships nothing, but exercised)
 
@@ -37,7 +35,6 @@ _None._
 
 These files are not imported by any other file in the codebase:
 
-- `packages/core/src/worker.ts`
 
 ## Unreferenced Anywhere (deletion candidates)
 

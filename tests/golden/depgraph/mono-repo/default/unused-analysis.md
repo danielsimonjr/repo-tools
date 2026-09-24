@@ -7,11 +7,11 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 1
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 0
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
   - **Test-only (exercised by a test, ships nothing)**: 0
-- **Potentially unused exports**: 1
-  - **Unreferenced anywhere (deletion candidates)**: 1
+- **Potentially unused exports**: 0
+  - **Unreferenced anywhere (deletion candidates)**: 0
   - **Referenced in-module (type contracts / helpers backing live exports)**: 0
 
 ## Dormant Files — Orphaned (delete/wire candidates)
@@ -21,9 +21,7 @@ to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
 
-### `packages/core` (1)
-
-- `packages/core/src/worker.ts`
+_None._
 
 ## Dormant Files — Test-only (ships nothing, but exercised)
 
@@ -42,10 +40,6 @@ These files are not imported by any other file in the codebase:
 
 Not imported by any other file AND not referenced within their own module — the true dead-code candidates. Verify each isn't consumed by a mechanism the
 parser can't see (dynamic access, docs examples, published-API contract) before deleting.
-
-### `packages/core/src/math.ts`
-
-- `double` (function)
 
 
 ## Referenced In-Module (type contracts / helpers backing live exports)

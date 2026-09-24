@@ -8,9 +8,9 @@ Created output directory: docs/architecture
   packages/core/src: 5 files
 Found 7 TypeScript files total
 Parsed all files
-Entry points: 3
-Reachable files: 6
-Dormant files: 1
+Entry points: 4
+Reachable files: 7
+Dormant files: 0
 Analyzing all 7 files (including dormant)
 Categorized into 2 modules
 Found 0 circular dependencies (0 runtime, 0 type-only)
@@ -30,18 +30,29 @@ Written: docs/architecture/test-coverage.json
 
 Dependency graph generation complete!
   - 2 workspace packages scanned
-  - 6 reachable files, 1 dormant files
+  - 7 reachable files, 0 dormant files
   - 7 files analyzed
   - 7 exports found (2 re-exports)
   - 2 type-only imports detected
   - 0 circular dependencies:
       0 runtime (require attention)
       0 type-only (safe)
-  - 1 potentially unused files
+  - 0 potentially unused files
   - 0 potentially unused exports
 
-Potentially unused files:
-  - packages/core/src/worker.ts
-
 Written: docs/architecture/unused-analysis.md
-Written: docs/architecture/FILE_INVENTORY.md (9 files: 3 reachable, 3 build-entry, 0 test-only, 1 orphan, 1 test, 0 tool, 1 config, 0 example)
+Written: docs/architecture/FILE_INVENTORY.md (9 files: 3 reachable, 4 build-entry, 0 test-only, 0 orphan, 1 test, 0 tool, 1 config, 0 example)
+File census self-check passed: 9 files == maximal repo walk (independent), 0 orphans.
+
+=== Test Coverage Analysis ===
+  - 1 test files analyzed
+  - 1/7 source files have tests (14.3%)
+  - 6 source files without tests
+
+Source files without test coverage:
+  - packages/cli/src/format.ts
+  - packages/cli/src/main.ts
+  - packages/core/src/index.ts
+  - packages/core/src/internal.ts
+  - packages/core/src/types.ts
+  - packages/core/src/worker.ts

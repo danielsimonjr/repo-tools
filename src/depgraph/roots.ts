@@ -3,8 +3,8 @@
  * `package.json` `exports` subpaths, `bin` targets and scripts, secondary tsconfig files, the
  * tsup config, root-level build configs and `new URL(..., import.meta.url)` launches.
  *
- * Port note: `tsupConfigEntries` reads the first `entry: [...]` array only (fix F14), and it runs
- * only when a `build` or `dev` script calls a bare `tsup`.
+ * Fix F14: `tsupConfigEntries` reads every `entry: [...]` array of each `tsup.config.*` file,
+ * whenever the file exists.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -20,24 +20,34 @@ export interface PackageRootFields {
   scripts?: Record<string, string>;
 }
 
+/** A tsup config file name: `tsup.config.ts`, `.mts`, `.cts`, `.js`, `.mjs`, `.cjs` or `.json`. */
+const TSUP_CONFIG = /^tsup\.config\.(?:[mc]?[jt]s|json)$/;
+
 /**
- * The `.ts` entries of the first `entry: [...]` array in `<pkgDir>/tsup.config.ts`, as
- * root-relative POSIX paths. Returns an empty list when the file is absent or unreadable.
+ * The `.ts` entries of every `entry: [...]` array in each tsup config of `<pkgDir>` (fix F14),
+ * as root-relative POSIX paths. Returns an empty list when no config exists or none is readable.
  */
 export function tsupConfigEntries(root: string, pkgDir: string): string[] {
-  const cfgPath = join(root, pkgDir, "tsup.config.ts");
-  if (!existsSync(cfgPath)) return [];
-  let code: string;
+  let names: string[];
   try {
-    code = readFileSync(cfgPath, "utf-8");
+    names = listNames(join(root, pkgDir)).filter((n) => TSUP_CONFIG.test(n));
   } catch {
     return [];
   }
-  const arr = /entry\s*:\s*\[([^\]]*)\]/.exec(code);
-  if (!arr) return [];
   const out: string[] = [];
-  for (const m of (arr[1] ?? "").matchAll(/['"`]([^'"`]+\.ts)['"`]/g)) {
-    out.push(toPosix(join(pkgDir, m[1] ?? "")));
+  for (const name of names) {
+    let code: string;
+    try {
+      code = readFileSync(join(root, pkgDir, name), "utf-8");
+    } catch {
+      continue;
+    }
+    for (const arr of code.matchAll(/["']?\bentry["']?\s*:\s*\[([^\]]*)\]/g)) {
+      for (const m of (arr[1] ?? "").matchAll(/['"`]([^'"`]+\.ts)['"`]/g)) {
+        const entry = toPosix(join(pkgDir, m[1] ?? ""));
+        if (!out.includes(entry)) out.push(entry);
+      }
+    }
   }
   return out;
 }
@@ -80,7 +90,7 @@ export function seedTsconfigEntries(
  * The extra build roots of one package, as root-relative POSIX paths that exist on disk:
  * `exports` subpaths other than ".", `bin` targets (`dist/x.js` and `dist/src/x.js` both map to
  * `src/x.ts`), `src/*.ts` arguments and `node dist/...` runs in scripts, `tsc -p` tsconfig
- * entries, and the tsup config entries when a `build` or `dev` script calls a bare `tsup`.
+ * entries, and the entries of each tsup config.
  */
 export function exportsSubpathEntries(
   root: string,
@@ -123,15 +133,9 @@ export function exportsSubpathEntries(
       seedTsconfigEntries(root, pkgDir, m[1] ?? "", addIfExists);
     }
   }
-  const buildDevScripts = [pkg.scripts?.build, pkg.scripts?.dev].filter((s): s is string =>
-    Boolean(s),
-  );
-  const hasConfigDrivenTsup = buildDevScripts.some(
-    (s) => /(?:^|\s|&|\|)tsup(?:\s|$|&|\|)/.test(s) && !/(?:^|\s)src\/[\w./-]+\.ts\b/.test(s),
-  );
-  if (hasConfigDrivenTsup) {
-    for (const entry of tsupConfigEntries(root, pkgDir)) addIfExists(entry);
-  }
+  // Fix F14: a tsup config names build roots whenever it exists. The pre-port generator read it
+  // only when a `build` or `dev` script called a bare `tsup`.
+  for (const entry of tsupConfigEntries(root, pkgDir)) addIfExists(entry);
   return entries;
 }
 

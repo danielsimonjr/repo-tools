@@ -29,7 +29,7 @@ This document provides a comprehensive dependency graph of all files, components
 The codebase is organized into the following modules:
 
 - **packages/cli**: 2 files
-- **packages/core**: 4 files
+- **packages/core**: 5 files
 
 ---
 
@@ -39,7 +39,7 @@ The codebase is organized into the following modules:
 | Package | Depends On | Files (Active) | Files (Dormant) |
 |---------|------------|----------------|-----------------|
 | `@scope/cli` (`packages/cli/`) | `@scope/core` | 2 | 0 |
-| `@scope/core` (`packages/core/`) | (none) | 4 | 1 |
+| `@scope/core` (`packages/core/`) | (none) | 5 | 0 |
 
 ### Package Dependency Diagram
 
@@ -122,6 +122,18 @@ graph LR
 
 ---
 
+### `packages/core/src/worker.ts` - worker module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./math.js` | `double` | Import |
+
+**Exports:**
+- Constants: `workerResult`
+
+---
+
 <a id="dependency-matrix"></a>
 ## Dependency Matrix
 
@@ -129,11 +141,12 @@ graph LR
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
+| `packages/core/src/math` | 1 file | 2 files |
 | `packages/core/src/index` | 2 files | 0 files |
-| `packages/core/src/math` | 1 file | 1 file |
 | `packages/core/src/types` | 0 files | 2 files |
 | `packages/cli/src/format` | 0 files | 1 file |
 | `packages/cli/src/main` | 1 file | 0 files |
+| `packages/core/src/worker` | 1 file | 0 files |
 | `packages/core/src/internal` | 0 files | 0 files |
 
 ---
@@ -159,12 +172,14 @@ graph TD
         N3[internal]
         N4[math]
         N5[types]
+        N6[worker]
     end
 
     N1 --> N0
     N2 --> N4
     N2 --> N5
     N4 --> N5
+    N6 --> N4
 ```
 
 ---
@@ -174,10 +189,10 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 6 |
+| Total TypeScript Files | 7 |
 | Total Modules | 2 |
-| Total Lines of Code | 33 |
-| Total Exports | 6 |
+| Total Lines of Code | 38 |
+| Total Exports | 7 |
 | Total Re-exports | 2 |
 | Total Classes | 0 |
 | Total Interfaces | 0 |

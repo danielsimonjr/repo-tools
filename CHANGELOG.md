@@ -20,6 +20,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F14: every `entry: [...]` array of a tsup config names build roots (the port read
+  only the first), and each `tsup.config.*` file (`.ts`, `.mts`, `.cts`, `.js`, `.mjs`, `.cjs`,
+  `.json`) is read whenever it exists, also when no `build` or `dev` script calls `tsup`. In
+  the `mono-repo` fixture, `packages/core/src/worker.ts` (the second entry array) is now a build
+  entry, not an orphan, so the census passes and the run exits 0 (it exited 1).
 - depgraph F13 (already in the port; a regression test pins it): the packages of a pnpm
   workspace come from `pnpm-workspace.yaml`. The new fixture `tests/fixtures/depgraph/pnpm-repo`
   has a `packages/*` glob and a plain folder pattern, and every package is found.

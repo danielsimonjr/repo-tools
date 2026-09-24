@@ -2,9 +2,9 @@
   "totalFiles": 9,
   "byDisposition": {
     "reachable": 3,
-    "build-entry": 3,
+    "build-entry": 4,
     "test-only": 0,
-    "orphan": 1,
+    "orphan": 0,
     "test": 1,
     "tool": 0,
     "config": 1,
@@ -66,7 +66,7 @@
       "file": "packages/core/src/worker.ts",
       "package": "@scope/core",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "build-entry",
       "loc": 5
     },
     {
