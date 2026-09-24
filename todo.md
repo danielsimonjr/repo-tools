@@ -22,10 +22,10 @@
 - [x] D1-D8 `depgraph` port to byte parity with the goldens (reviewed; one fidelity fix).
 - [x] D9 API-surface module. Landed in 486d8f3; the CLI flag comes with D10.
 - [x] D10a `depgraph` config file, strict flags, path and exclude flags, `--api-surface` (8b974ea).
-- [ ] D10b the duplicate gate (`--check-duplicates`, `--no-regen`, `--write-duplicate-baseline`), the
+- [x] D10b the duplicate gate (`--check-duplicates`, `--no-regen`, `--write-duplicate-baseline`), the
   extension loader with `--no-extensions`, and `.tsx` input. Also: `--src` in a monorepo exits 1
   with a clear message, and the absolute-path error says to pass a root-relative path.
-- [ ] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
+- [x] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
   the extension loader.
 - [ ] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
   symbol-users, is-public, node-safety, cycles, the browser-safety gate, and the derived files
@@ -34,6 +34,8 @@
   Also: `bun run compile` refuses to build when `node_modules` does not match `bun.lock`
   (a frozen install does not prune a stale nested package), proven with a planted stale nested
   package, RED then GREEN; the README build step matches.
+  Also: the golden sets run with `--no-extensions`, and `tests/fixtures/extension/probe.mjs` moves
+  to the section 5.2 extension shape when smoke step 7 runs the product.
 - [ ] D12 Public design document and the release-candidate report.
 - [x] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
@@ -51,6 +53,11 @@
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
 data. Other findings are filed here.
 
+- [ ] A named re-export writes an extra empty-imports edge (`./view.js` twice for `src/index.ts`).
+- [ ] The extension `write` does not guard against a link inside the output folder that points
+  outside it.
+- [ ] Mathts migration note: set `depgraph.duplicateAllowlist` to its own allowlist path, or the
+  duplicate gate fails on 283 names.
 - [ ] The skip list (`node_modules, dist, build, coverage, .git`) also skips a real source folder
   such as `src/build/`, with no warning.
 - [ ] The census messages and the TEST_COVERAGE note name fixed values instead of the configured
