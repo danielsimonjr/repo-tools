@@ -197,3 +197,17 @@ describe("chunk K7: no data loss on merge", () => {
     });
   }
 });
+
+describe("chunk JSON merge keeps a __proto__ key (finding 7)", () => {
+  test('{"__proto__":{"k":1},"b":2} round-trips with its __proto__ key', async () => {
+    const dir = join(work, "proto");
+    const src = put(join(dir, "proto.json"), '{"__proto__":{"k":1},"b":2}\n');
+    expect((await chunk(["split", src])).code).toBe(0);
+    const m = await chunk(["merge", join(dir, "proto_chunks", "manifest.json")]);
+    expect(m.err).toBe("");
+    expect(m.code).toBe(0);
+    const merged = JSON.parse(readFileSync(src, "utf8"));
+    expect(Object.keys(merged)).toEqual(["__proto__", "b"]);
+    expect(JSON.stringify(merged)).toBe('{"__proto__":{"k":1},"b":2}');
+  });
+});

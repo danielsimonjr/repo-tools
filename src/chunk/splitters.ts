@@ -172,15 +172,23 @@ export function splitJson(content: string): Section[] {
 
 /**
  * Merges JSON chunks into one object. A chunk that is not a JSON object is skipped; `warn`
- * receives one message for each chunk that does not parse.
+ * receives one message for each chunk that does not parse. Each key is defined as an own
+ * property, so a `__proto__` key stays a key and does not set the prototype.
  */
 export function mergeJson(chunks: string[], warn: (message: string) => void): string {
-  const merged: Record<string, unknown> = {};
+  const merged: Record<string, unknown> = Object.create(null);
   for (const chunk of chunks) {
     try {
       const parsed: unknown = JSON.parse(chunk);
       if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-        Object.assign(merged, parsed);
+        for (const [key, value] of Object.entries(parsed)) {
+          Object.defineProperty(merged, key, {
+            value,
+            enumerable: true,
+            writable: true,
+            configurable: true,
+          });
+        }
       }
     } catch {
       warn("Warning: Skipping invalid JSON chunk\n");

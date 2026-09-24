@@ -112,6 +112,8 @@ All notable changes to this project are recorded in this file. The format follow
 - `chunk merge` (K7): a JSON array or an invalid JSON file merges back to its original text.
   `split` writes such a file as one whole-file chunk (`_array` or `_invalid_json`), but `merge`
   read every JSON chunk as an object, skipped the chunk and wrote `{}` over the source file.
+- `chunk merge` keeps a `__proto__` key of a JSON object. The merge used `Object.assign`, so a
+  `__proto__` key set the prototype of the result and the key was lost from the file.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`
   separators. You can move the source file and the chunk folder together, and `merge` still
   finds the source. The manifest holds no absolute path. `merge` and `status` print the
