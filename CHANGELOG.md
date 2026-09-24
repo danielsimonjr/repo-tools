@@ -20,6 +20,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F27: comment removal does not cut a `//` or a `/*` inside a string literal. The port
+  removed comments with regular expressions, so `const u = 'http://x'; import('./b.js');` lost
+  its import, and a `'src/*'` string removed every line up to the next `*/`. The parser and the
+  duplicate classifier now remove comments with the string-aware scanner of `src/mask.ts`. The
+  regex functions of `src/mask.ts` are removed.
 - depgraph F26: cycles are reported by strongly connected component (Tarjan's algorithm, linear
   time), not by the cycles that a depth-first search meets. The search missed cycles, and the
   cycles that it listed depended on the file order. A runtime component is a component of the

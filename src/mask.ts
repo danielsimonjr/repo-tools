@@ -1,15 +1,12 @@
 /**
  * The one comment and string masking module of repo-tools.
  *
- * Two families:
+ * The functions read the source as tokens. They know line comments, block comments, quoted
+ * strings and template literals with nested `${...}` code. They do not detect
+ * regular-expression literals: a `/` in code is code.
  *
- * - The scanner functions (`blankCommentsAndStrings`, `stripComments`) read the source as
- *   tokens. They know line comments, block comments, quoted strings and template literals with
- *   nested `${...}` code. They do not detect regular-expression literals: a `/` in code is code.
- * - The regex functions (`removeBlockCommentsRegex`, `removeLineCommentsRegex`,
- *   `stripCommentsRegex`) are the comment removal of the pre-port generator, kept byte for byte.
- *   They do not know strings, so they also remove `//` and `/* ... *\/` text inside a string.
- *   The port uses them until the fixes replace them with the scanner functions.
+ * Fix F27: the regex comment removal of the pre-port generator is gone. It did not know
+ * strings, so it also removed `//` and `/* ... *\/` text inside a string.
  */
 
 /** The kind of one source segment. */
@@ -150,19 +147,4 @@ export function stripComments(src: string): string {
     .filter((s) => s.kind !== "comment")
     .map((s) => src.slice(s.start, s.end))
     .join("");
-}
-
-/** Removes each `/* ... *\/` block with a regular expression (pre-port behavior). */
-export function removeBlockCommentsRegex(text: string): string {
-  return text.replace(/\/\*[\s\S]*?\*\//g, "");
-}
-
-/** Removes each `//` to the end of its line with a regular expression (pre-port behavior). */
-export function removeLineCommentsRegex(text: string): string {
-  return text.replace(/\/\/.*$/gm, "");
-}
-
-/** Removes block comments, then line comments, with regular expressions (pre-port behavior). */
-export function stripCommentsRegex(text: string): string {
-  return removeLineCommentsRegex(removeBlockCommentsRegex(text));
 }

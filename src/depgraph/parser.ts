@@ -2,16 +2,14 @@
  * The regex parser: imports, side-effect imports, `import()` expressions, re-exports and export
  * declarations of one TypeScript file, over its comment-stripped source.
  *
- * Port notes, kept on purpose until the fixes land:
- * - Comments are removed with the regex functions of `src/mask.ts`, which also cut `//` text
- *   inside strings (fix F6 covers comments in brace blocks).
- *
+ * Fix F27: comments are removed with the string-aware scanner of `src/mask.ts`, so a `//` or a
+ * `/*` inside a string literal does not remove code.
  * Fix F23: `import()` reads a backtick specifier that holds no `${` substitution.
  * Fix F25: an `import()` is a runtime edge unless it is in a type position.
  */
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
-import { removeBlockCommentsRegex, removeLineCommentsRegex, stripCommentsRegex } from "../mask.ts";
+import { stripComments } from "../mask.ts";
 import { relativePosix } from "./paths.ts";
 import { resolveWorkspaceSource } from "./resolver.ts";
 import type { ParsedFile, WorkspacePackage } from "./types.ts";
@@ -95,12 +93,11 @@ export function extractDescription(content: string): string | null {
 }
 
 /**
- * Cleans one export name: removes line comments, then block comments, collapses white space,
- * and removes a leading `type ` keyword when the text holds no `{`.
+ * Cleans one export name: removes comments, collapses white space, and removes a leading
+ * `type ` keyword when the text holds no `{`.
  */
 export function cleanExportName(name: string): string {
-  let cleaned = removeLineCommentsRegex(name);
-  cleaned = removeBlockCommentsRegex(cleaned);
+  let cleaned = stripComments(name);
   cleaned = cleaned.replace(/\s+/g, " ").trim();
   if (cleaned.startsWith("type ") && !cleaned.includes("{")) cleaned = cleaned.slice(5).trim();
   return cleaned;
@@ -165,7 +162,8 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     }
   }
 
-  const code = stripCommentsRegex(content);
+  // Fix F27: the scanner keeps string literals, so `'http://x'` does not cut its line.
+  const code = stripComments(content);
   const wsSource = (source: string) => resolveWorkspaceSource(ctx.workspaces, source);
 
   const result: ParsedFile = {

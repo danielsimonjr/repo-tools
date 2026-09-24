@@ -12,7 +12,7 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { stripCommentsRegex } from "../mask.ts";
+import { stripComments } from "../mask.ts";
 import { compareCodeUnits } from "../sort.ts";
 import type { ParsedFile, PublicSurface } from "./types.ts";
 
@@ -216,7 +216,8 @@ export function classifyDefiner(
   if (category === "constant") {
     const raw = readRaw(file.path);
     if (raw) {
-      const code = stripCommentsRegex(raw);
+      // Fix F27: string-aware comment removal keeps a `//` inside a string.
+      const code = stripComments(raw);
       if (isDispatchVariantBody(code, name)) return { tag: "DISPATCH_VARIANT" };
       if (isAliasDelegationBody(code, name, collectImportedLocalNames(code))) {
         return { tag: "ALIAS_DELEGATION" };

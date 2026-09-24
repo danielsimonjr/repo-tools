@@ -1,11 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  blankCommentsAndStrings,
-  removeBlockCommentsRegex,
-  removeLineCommentsRegex,
-  stripComments,
-  stripCommentsRegex,
-} from "../../src/mask.ts";
+import { blankCommentsAndStrings, stripComments } from "../../src/mask.ts";
 
 /** The template interpolation opener, built so no string literal holds it. */
 const O = "$" + "{";
@@ -35,19 +29,5 @@ describe("stripComments", () => {
   test("removes comments and keeps string text", () => {
     const src = "a('//not'); // gone\nb(); /* gone */ c();";
     expect(stripComments(src)).toBe("a('//not'); \nb();  c();");
-  });
-});
-
-describe("regex comment removal (pre-port behavior)", () => {
-  test("removeBlockCommentsRegex removes block comments", () => {
-    expect(removeBlockCommentsRegex("a /* b\n c */ d")).toBe("a  d");
-  });
-
-  test("removeLineCommentsRegex removes to the end of each line", () => {
-    expect(removeLineCommentsRegex("a // b\nc // d")).toBe("a \nc ");
-  });
-
-  test("stripCommentsRegex also removes comment markers inside strings", () => {
-    expect(stripCommentsRegex("const u = 'http://x';\n/* c */y")).toBe("const u = 'http:\ny");
   });
 });
