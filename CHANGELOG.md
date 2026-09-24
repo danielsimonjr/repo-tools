@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F23: a dynamic `import()` with a backtick-quoted relative specifier, such as
+  ``import(`./x.js`)``, is a dependency edge. A template with a `${` substitution names no fixed
+  file and gives no edge. The port read single and double quotes only.
 - depgraph F21: in `DEPENDENCY_GRAPH.md`, an export list of more than 8 names
   (`LONG_EXPORT_LIST_THRESHOLD`) renders as a fenced `text` block under its label, with the names
   separated by ", " and wrapped at 100 characters. A list of names is data, not prose; the long

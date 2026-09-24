@@ -6,7 +6,8 @@
  * - Comments are removed with the regex functions of `src/mask.ts`, which also cut `//` text
  *   inside strings (fix F6 covers comments in brace blocks).
  * - Every relative `import('...')` is a type-only edge, `await import()` included (fix F25).
- *   Backtick specifiers are not read (fix F23).
+ *
+ * Fix F23: `import()` reads a backtick specifier that holds no `${` substitution.
  */
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
@@ -234,8 +235,9 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     typeOnly: false,
     sideEffect: true,
   });
-  // `import('./x.js')` in any position, recorded as type-only (fix F25).
-  addInternal(/\bimport\s*\(\s*['"](\.[^'"]+)['"]\s*\)/g, { typeOnly: true });
+  // `import('./x.js')` in any position, recorded as type-only (fix F25). Fix F23: a backtick
+  // specifier counts too, unless it holds a `${` substitution.
+  addInternal(/\bimport\s*\(\s*['"`](\.[^'"`${]+)['"`]\s*\)/g, { typeOnly: true });
   // Re-export edges: `export * from`, `export * as ns from`, `export { a } from`,
   // `export type { T } from`.
   addInternal(
