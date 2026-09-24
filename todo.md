@@ -23,6 +23,9 @@
 - [ ] D9 API-surface module. Landed in 486d8f3; the CLI flag comes with D10.
 - [ ] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
   the extension loader.
+- [ ] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
+  symbol-users, is-public, node-safety, cycles, the browser-safety gate, and the derived files
+  `dependency-reverse.json` and `node-safety.json`. After D10b, before D11.
 - [ ] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.
 - [ ] D12 Public design document and the release-candidate report.
 - [x] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
