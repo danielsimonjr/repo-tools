@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { extname, join, relative } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
 import { type CompressDeps, findFiles, run } from "../../src/compress/index.ts";
-import { decompress, renameKeys } from "../../src/compress/legend.ts";
+import { assertNumbersKept, decompress, renameKeys } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
@@ -508,48 +508,86 @@ describe("the batch pattern escapes every RegExp metacharacter", () => {
   });
 });
 
-describe("JSON: an unsafe integer is refused", () => {
-  const UNSAFE = '{"id":12345678901234567890,"ok":1}';
+describe("JSON: every number keeps its text (lossless passthrough)", () => {
+  // Each token changes its value in JSON.parse. Compress and -d must carry the text unchanged.
+  const TOKENS = [
+    "12345678901234567890",
+    "-9007199254740993",
+    "1e400",
+    "-1e400",
+    "1e-400",
+    "12345678901234567890.5",
+    "0.12345678901234567890123",
+    "0.30000000000000004",
+    "1.0E+2",
+    "-0",
+  ];
 
-  test("compress exits 1 with a message that names the integer, and writes no file", async () => {
+  for (const level of LEVELS) {
+    for (const token of TOKENS) {
+      for (const [where, text] of [
+        ["a value", `{\n  "measurement": ${token},\n  "ok": 1\n}`],
+        ["an array", `[\n  ${token},\n  [\n    ${token}\n  ]\n]`],
+      ] as const) {
+        test(`${token} in ${where} at ${level}: compress then -d is byte-identical`, async () => {
+          const dir = folder();
+          writeFileSync(join(dir, "n.json"), text);
+          const c = await compressIn(dir, ["n.json", "-l", level, "--no-stats"]);
+          expect(c.err).toBe("");
+          expect(c.code).toBe(0);
+          const compact = readFileSync(join(dir, "n.compact.json"), "utf8");
+          expect(compact).toContain(token);
+          const d = await compressIn(dir, ["-d", "n.compact.json", "-o", "r.json", "--no-stats"]);
+          expect(d.err).toBe("");
+          expect(d.code).toBe(0);
+          expect(readFileSync(join(dir, "r.json")).equals(Buffer.from(text))).toBe(true);
+        });
+      }
+    }
+  }
+
+  test("batch compress and batch -d keep the number text", async () => {
     const dir = folder();
-    writeFileSync(join(dir, "big.json"), UNSAFE);
-    const r = await compressIn(dir, ["big.json", "--no-stats"]);
-    expect(r.code).toBe(1);
-    expect(r.err).toContain("12345678901234567890");
-    expect(r.err).toContain("safe integer range");
-    expect(readdirSync(dir)).toEqual(["big.json"]);
+    const text = '{\n  "id": 12345678901234567890\n}';
+    writeFileSync(join(dir, "big.json"), text);
+    expect((await compressIn(dir, ["-b", "big.json", "--no-stats"])).code).toBe(0);
+    const r = await compressIn(dir, ["-b", "-d", "big.compact.json", "--no-stats", "--yes"]);
+    expect(r.code).toBe(0);
+    expect(readFileSync(join(dir, "big.json"), "utf8")).toBe(text);
   });
 
-  test("batch compress fails the file and exits 1", async () => {
-    const dir = folder();
-    writeFileSync(join(dir, "big.json"), UNSAFE);
-    const r = await compressIn(dir, ["-b", "big.json", "--no-stats"]);
-    expect(r.code).toBe(1);
-    expect(r.out).toContain("safe integer range");
-    expect(readdirSync(dir)).toEqual(["big.json"]);
-  });
-
-  test("-d exits 1 on a compact file with an unsafe integer, and writes no file", async () => {
-    const dir = folder();
-    writeFileSync(join(dir, "big.compact.json"), '{"_legend":{},"n":-9007199254740993}');
-    const r = await compressIn(dir, ["-d", "big.compact.json", "--no-stats"]);
-    expect(r.code).toBe(1);
-    expect(r.err).toContain("-9007199254740993");
-    expect(readdirSync(dir)).toEqual(["big.compact.json"]);
-  });
-
-  test("the edge of the safe range, a string, a float, an exponent and 17 digits are accepted", () => {
+  test("a number in a string and an integer-like key do not change", () => {
     const input = JSON.stringify({
       max: 9007199254740991,
-      min: -9007199254740991,
-      text: "12345678901234567890",
+      text: "12345678901234567890 and 1e400",
       float: 0.5,
-      exp: 1.5e-7,
-      shortest: 0.30000000000000004,
       "12345678901234567890": [1, -2],
     });
     expect(jsonRoundTrip(JSON.parse(input), "medium").restored).toEqual(JSON.parse(input));
+  });
+
+  test("a top-level number keeps its text", () => {
+    const compact = getCompressor("json")("12345678901234567890", "medium").compressed;
+    expect(compact).toBe('{"_legend":{},"data":12345678901234567890}');
+    expect(decompress(compact, "json")).toBe("12345678901234567890");
+  });
+
+  // The fallback for a runtime without source-text access: refuse, and name the JSON path.
+  for (const [text, needle] of [
+    ['{"items":[1,2,3,{"v":1e400}]}', "1e400 at $.items[3].v"],
+    ['{"a b":[0,12345678901234567890]}', '12345678901234567890 at $["a b"][1]'],
+    ["[[1],-1e-400]", "-1e-400 at $[1]"],
+    ["0.12345678901234567890123", "0.12345678901234567890123 at $"],
+  ] as const) {
+    test(`the fallback check refuses ${text} and names "${needle}"`, () => {
+      expect(() => assertNumbersKept(text)).toThrow(needle);
+    });
+  }
+
+  test("the fallback check accepts numbers that keep their value, and numbers in strings", () => {
+    expect(() =>
+      assertNumbersKept('{"x":"1e400","y":[1.0,-0,0.30000000000000004,9007199254740991]}'),
+    ).not.toThrow();
   });
 
   test("the help tells that an integer-like key comes first", async () => {
@@ -604,40 +642,6 @@ describe("the command line: an error exits 1 with a message and writes no file",
     expect(r.code).toBe(1);
     expect(r.err).toContain("option '-o' needs a value");
     expect(readdirSync(dir)).toEqual(["sample.md"]);
-  });
-});
-
-describe("JSON: a number that JSON.parse would change is refused (second review, finding 5)", () => {
-  for (const [token, reason] of [
-    ["1e400", "finite"],
-    ["-1e400", "finite"],
-    ["12345678901234567890.5", "safe integer range"],
-    ["1e300", "safe integer range"],
-    ["1.5e20", "safe integer range"],
-    ["0.1234567890123456789", "digits"],
-    ["1e-400", "digits"],
-  ] as const) {
-    test(`compress and -d exit 1 on ${token}, and write no file`, async () => {
-      const dir = folder();
-      writeFileSync(join(dir, "n.json"), `{"v":${token}}`);
-      const r = await compressIn(dir, ["n.json", "--no-stats"]);
-      expect(r.code).toBe(1);
-      expect(r.err).toContain(token);
-      expect(r.err).toContain(reason);
-      writeFileSync(join(dir, "m.compact.json"), `{"_legend":{},"v":${token}}`);
-      const d = await compressIn(dir, ["-d", "m.compact.json", "--no-stats"]);
-      expect(d.code).toBe(1);
-      expect(d.err).toContain(token);
-      expect(readdirSync(dir).sort(compareCodeUnits)).toEqual(["m.compact.json", "n.json"]);
-    });
-  }
-
-  test("a number in the text of a string is not checked", async () => {
-    const dir = folder();
-    writeFileSync(join(dir, "s.json"), '{"v":"1e400 and 0.1234567890123456789"}');
-    const r = await compressIn(dir, ["s.json", "--no-stats"]);
-    expect(r.err).toBe("");
-    expect(r.code).toBe(0);
   });
 });
 

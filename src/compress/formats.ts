@@ -7,9 +7,10 @@
 import { extname } from "node:path";
 import {
   applySubstringCompression,
-  assertSafeNumbers,
   findRepeatedSubstrings,
   generateAbbreviation,
+  isRawNumber,
+  parseLossless,
   renameKeys,
 } from "./legend.ts";
 
@@ -93,7 +94,7 @@ function result(content: string, compressed: string, legend: Record<string, stri
 function collectKeys(value: unknown, freq: Map<string, number>): void {
   if (Array.isArray(value)) {
     for (const item of value) collectKeys(item, freq);
-  } else if (value !== null && typeof value === "object") {
+  } else if (value !== null && typeof value === "object" && !isRawNumber(value)) {
     for (const key of Object.keys(value)) {
       freq.set(key, (freq.get(key) || 0) + 1);
       collectKeys((value as Record<string, unknown>)[key], freq);
@@ -102,8 +103,8 @@ function collectKeys(value: unknown, freq: Map<string, number>): void {
 }
 
 const compressJson: Compressor = (content, level) => {
-  const data: unknown = JSON.parse(content);
-  assertSafeNumbers(content);
+  // Each number keeps its text (lossless passthrough), so no value changes in the compact file.
+  const data: unknown = parseLossless(content);
   const legend: Record<string, string> = {};
   const freq = new Map<string, number>();
   collectKeys(data, freq);
@@ -128,7 +129,10 @@ const compressJson: Compressor = (content, level) => {
   // An array, a single value and an object with the one key `data` are wrapped as the value of
   // `data`. `-d` unwraps a compact file whose only keys are `_legend` and `data`.
   const isObject =
-    typeof transformed === "object" && transformed !== null && !Array.isArray(transformed);
+    typeof transformed === "object" &&
+    transformed !== null &&
+    !Array.isArray(transformed) &&
+    !isRawNumber(transformed);
   const onlyData = isObject && Object.keys(transformed).join("\n") === "data";
   const output =
     isObject && !onlyData

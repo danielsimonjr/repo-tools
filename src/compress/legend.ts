@@ -142,16 +142,71 @@ export function applySubstringCompression(
 }
 
 const NUMBER_TOKEN = /-?\d+(\.\d+)?([eE][+-]?\d+)?/y;
-const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
 const DECIMAL = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/;
+
+/** The source-text functions of ES2025 JSON: `JSON.rawJSON` and `JSON.isRawJSON`. */
+interface SourceTextJson {
+  rawJSON(text: string): object;
+  isRawJSON(value: unknown): boolean;
+}
+const RAW = JSON as unknown as Partial<SourceTextJson>;
+
+/** The third argument of a `JSON.parse` reviver in ES2025: the source text of a primitive. */
+type ReviverContext = { source?: string } | undefined;
+
+/**
+ * True when this runtime gives a `JSON.parse` reviver the source text of each number and has
+ * `JSON.rawJSON`. Probed once. Bun 1.4.2 has both.
+ */
+const HAS_SOURCE_TEXT = ((): boolean => {
+  try {
+    const source = JSON.parse("1.0", (_key, value, context?: ReviverContext) =>
+      context?.source === undefined ? value : context.source,
+    );
+    return source === "1.0" && typeof RAW.rawJSON === "function";
+  } catch {
+    return false;
+  }
+})();
+
+/**
+ * Returns true when `value` is a number that `parseLossless` keeps as its source text. Code that
+ * walks a parsed value must treat it as a number, not as an object.
+ */
+export function isRawNumber(value: unknown): boolean {
+  return RAW.isRawJSON?.(value) === true;
+}
+
+/**
+ * Parses JSON and keeps each number as its source text (lossless passthrough). `JSON.stringify`
+ * writes such a number with the same text: `12345678901234567890`, `1e400` and
+ * `0.12345678901234567890123` do not change. A plain `JSON.parse` changes all three.
+ *
+ * On a runtime without source-text access, the numbers are plain numbers, and the function
+ * throws when a number would change (see `assertNumbersKept`).
+ *
+ * @throws Error when the text is not valid JSON, or when a number cannot be kept.
+ */
+export function parseLossless(text: string): unknown {
+  const rawJSON = RAW.rawJSON;
+  if (!HAS_SOURCE_TEXT || rawJSON === undefined) {
+    assertNumbersKept(text);
+    return JSON.parse(text);
+  }
+  return JSON.parse(text, (_key, value, context?: ReviverContext) =>
+    typeof value === "number" && context?.source !== undefined ? rawJSON(context.source) : value,
+  );
+}
 
 /**
  * Returns the decimal value of the number text `token` in one form: the sign, the significant
  * digits and the exponent ("-15e-1" for "-1.50"). Zero gives "0". Two texts with one value give
- * one result.
+ * one result. A text that is not a JSON number gives "NaN".
  */
 function decimalValue(token: string): string {
-  const [, sign = "", int = "", frac = "", exp = "0"] = DECIMAL.exec(token) ?? [];
+  const match = DECIMAL.exec(token);
+  if (!match) return "NaN";
+  const [, sign = "", int = "", frac = "", exp = "0"] = match;
   const all = `${int}${frac}`.replace(/^0+/, "");
   const digits = all.replace(/0+$/, "");
   if (digits === "") return "0";
@@ -159,62 +214,63 @@ function decimalValue(token: string): string {
   return `${sign}${digits}e${exponent}`;
 }
 
-/**
- * Returns why `JSON.parse` would change the value of the number text `token`, or undefined when
- * the value stays the same.
- */
-function numberChange(token: string, integer: boolean): string | undefined {
-  const range = `the safe integer range (-${MAX_SAFE} to ${MAX_SAFE})`;
-  if (integer) {
-    const value = BigInt(token);
-    return value > MAX_SAFE || value < -MAX_SAFE ? `is outside ${range}` : undefined;
-  }
-  const value = Number(token);
-  if (!Number.isFinite(value)) return "is not a finite JavaScript number";
-  // JSON.stringify writes such a value as an integer, which is outside the range above.
-  if (Math.abs(value) > Number.MAX_SAFE_INTEGER) return `is outside ${range}`;
-  if (decimalValue(String(value)) !== decimalValue(token)) {
-    return `has more digits than a JavaScript number keeps (it becomes ${value})`;
-  }
-  return undefined;
+/** Returns a JSON path such as `$.items[3].v` for the keys and indexes of `path`. */
+function formatPath(path: readonly (string | number)[]): string {
+  return `$${path
+    .map((part) =>
+      typeof part === "number"
+        ? `[${part}]`
+        : /^[A-Za-z_$][\w$]*$/.test(part)
+          ? `.${part}`
+          : `[${JSON.stringify(part)}]`,
+    )
+    .join("")}`;
 }
 
 /**
- * Throws when the JSON source text holds a number whose value `JSON.parse` changes:
+ * The fallback of `parseLossless` for a runtime without source-text access. Throws when the JSON
+ * text holds a number whose value a plain `JSON.parse` changes (for example
+ * 12345678901234567890, 1e400 or 0.12345678901234567890123). The error names the number and its
+ * JSON path. The check reads the source text; numbers in the text of a string are not checked.
  *
- * - an integer outside the safe integer range of a JavaScript number (plus or minus 2^53 - 1):
- *   12345678901234567890 becomes 12345678901234567000;
- * - a number that is not finite as a JavaScript number: 1e400 becomes Infinity, and
- *   JSON.stringify writes null;
- * - a number with a fraction or an exponent whose magnitude is more than 2^53 - 1: 1e300 and
- *   12345678901234567890.5;
- * - a number with more digits than a JavaScript number keeps: 0.1234567890123456789, and 1e-400,
- *   which becomes 0.
- *
- * The data would change without a message. The check reads the source text, because the parsed
- * value has already lost the digits. Numbers in the text of a string are not checked.
- *
- * @throws Error that names the first number that would change.
+ * @throws Error that names the first number that cannot be kept, and its JSON path.
  */
-export function assertSafeNumbers(text: string): void {
+export function assertNumbersKept(text: string): void {
+  const path: (string | number)[] = [];
+  const open: string[] = [];
+  let expectKey = false;
   let i = 0;
   while (i < text.length) {
     const ch = text[i] ?? "";
     if (ch === '"') {
       // Skip the string, and each escaped character in it.
+      const start = i;
       i++;
       while (i < text.length && text[i] !== '"') i += text[i] === "\\" ? 2 : 1;
       i++;
+      if (expectKey) path[path.length - 1] = JSON.parse(text.slice(start, i)) as string;
+      expectKey = false;
+    } else if (ch === "{" || ch === "[") {
+      open.push(ch);
+      path.push(ch === "{" ? "" : 0);
+      expectKey = ch === "{";
+      i++;
+    } else if (ch === "}" || ch === "]") {
+      open.pop();
+      path.pop();
+      i++;
+    } else if (ch === ",") {
+      const last = path[path.length - 1];
+      if (open[open.length - 1] === "[" && typeof last === "number")
+        path[path.length - 1] = last + 1;
+      else expectKey = true;
+      i++;
     } else if (ch === "-" || (ch >= "0" && ch <= "9")) {
       NUMBER_TOKEN.lastIndex = i;
-      const match = NUMBER_TOKEN.exec(text);
-      const token = match?.[0] ?? ch;
-      const change = match
-        ? numberChange(token, match[1] === undefined && match[2] === undefined)
-        : undefined;
-      if (change !== undefined) {
+      const token = NUMBER_TOKEN.exec(text)?.[0] ?? ch;
+      if (decimalValue(String(Number(token))) !== decimalValue(token)) {
         throw new Error(
-          `the JSON holds the number ${token}, which ${change}. JSON.parse would change it, so the file is not processed.`,
+          `the JSON number ${token} at ${formatPath(path)} would change, and this runtime cannot keep its text. The file is not processed.`,
         );
       }
       i += token.length;
@@ -232,6 +288,7 @@ export function assertSafeNumbers(text: string): void {
  */
 export function renameKeys(value: unknown, keyMap: ReadonlyMap<string, string>): unknown {
   if (Array.isArray(value)) return value.map((item) => renameKeys(item, keyMap));
+  if (isRawNumber(value)) return value;
   if (value !== null && typeof value === "object") {
     const out: Record<string, unknown> = {};
     for (const [key, v] of Object.entries(value)) {
@@ -253,14 +310,16 @@ export function renameKeys(value: unknown, keyMap: ReadonlyMap<string, string>):
  * as `n` also changed every `n` in the keys and the values.
  */
 function decompressJson(content: string): string {
-  let data: unknown;
   try {
-    data = JSON.parse(content);
+    JSON.parse(content);
   } catch {
     return content;
   }
-  assertSafeNumbers(content);
-  if (data === null || typeof data !== "object" || Array.isArray(data)) return content;
+  // Each number keeps its text (lossless passthrough).
+  const data = parseLossless(content);
+  if (data === null || typeof data !== "object" || Array.isArray(data) || isRawNumber(data)) {
+    return content;
+  }
   const { _legend: legend, ...rest } = data as Record<string, unknown>;
   if (!legend || typeof legend !== "object") return content;
   const keyMap = new Map<string, string>();

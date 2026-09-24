@@ -58,11 +58,10 @@ Levels:
   aggressive  The smallest output. The output can be difficult to read.
 
 JSON:
-  A number that JSON.parse would change is refused (exit 1): an integer outside the safe
-  range (-9007199254740991 to 9007199254740991), a number that is not finite (1e400), a
-  fraction or exponent above that range (1e300), and a number with more digits than a
-  JavaScript number keeps (0.1234567890123456789). An integer-like key ("2", "10")
-  moves to the start of its object, in numeric order, as JSON.parse orders it.
+  Each number keeps its text in the compact file and after -d, also a number that a
+  JavaScript number cannot hold (12345678901234567890, 1e400, 0.12345678901234567890123).
+  An integer-like key ("2", "10") moves to the start of its object, in numeric order, as
+  JSON.parse orders it.
 
 Exit codes: 0 when all files are done, 1 on an error. An unknown option, an option without
 a value, a missing input file and two inputs without --batch are errors. No file is written.

@@ -20,6 +20,19 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `compress` JSON keeps the text of every number, in the compact file and after `-d`
+  (lossless passthrough). The parser keeps the source text of each number (`JSON.parse` with
+  the source text of the reviver, and `JSON.rawJSON`), so a number that a JavaScript number
+  cannot hold does not change: `12345678901234567890`, `1e400`, `-1e400`, `1e-400`,
+  `12345678901234567890.5` and `0.12345678901234567890123` come back byte for byte. Before, a
+  plain `JSON.parse` changed them (`1e400` became `null`, `1e-400` became `0`, and
+  `12345678901234567890.5` became `12345678901234567000`), and the unreleased fixes refused
+  the file instead (exit 1). Those refusals are removed. On a runtime without source-text
+  access, `compress` refuses a number that would change, with its JSON path (for example
+  `$.items[3].v`). The help text tells the rule. The library function `assertSafeNumbers` is
+  removed; `parseLossless` and `assertNumbersKept` replace it. A known limit, in the help
+  text: an integer-like object key (`"2"`, `"10"`) moves to the start of its object, in numeric
+  order, because `JSON.parse` orders the keys so. The values do not change.
 - `compress --batch` finds a compact file by its name in any case: `X.COMPACT.md` is skipped
   in compression and selected by `-d`. `-d` removes `.compact` in any case from the base name
   (`B.COMPACT.json` gives `B.json`). Before, batch compression wrote `X.COMPACT.compact.md`.
@@ -28,15 +41,6 @@ All notable changes to this project are recorded in this file. The format follow
   `--dry-run` needs no `--yes`. Before, `-d` wrote over the file with no backup, so edits made
   after the compression were lost. The unit golden test removes the original file before the
   `-d` run, because the goldens hold runs without `--yes`; the golden files do not change.
-- `compress` JSON refuses every number whose value `JSON.parse` changes, not only an unsafe
-  integer. Compression and `-d` exit 1 with a message that names the number, and write no file,
-  for a number that is not finite (`1e400`, which became `null`), a number with a fraction or
-  an exponent above 9007199254740991 (`1e300`, `12345678901234567890.5`, which became
-  `12345678901234567000`, and `-d` on that compact file then exited 1), and a number with more
-  digits than a JavaScript number keeps (`0.1234567890123456789`; `1e-400`, which became `0`).
-  A number whose shortest JavaScript form has the same value is accepted, also with 16 or 17
-  digits (`0.30000000000000004`). The library function `assertSafeIntegers` is now
-  `assertSafeNumbers`. The help text tells the rule.
 - `chunk merge` names the chunk number and the chunk file name when a JSON chunk is not valid
   JSON or is not a JSON object, for example `JSON chunk 2 (002-b.json) is not valid JSON: ...`.
   Before, the message was only the parser error, for example `JSON Parse error: Unexpected EOF`.
@@ -97,12 +101,6 @@ All notable changes to this project are recorded in this file. The format follow
 - `compress --pattern` escapes every RegExp metacharacter. Only `*` and `?` are wildcards.
   Before, only `.` was escaped: `a+b.md` also matched `aab.md`, `[x].md` matched `x.md`, and
   `a[.md` stopped the run with a `SyntaxError`.
-- `compress` JSON refuses an integer outside the safe integer range (-9007199254740991 to
-  9007199254740991). Compression and `-d` exit 1 with a message that names the integer, and
-  write no file. The check reads the source text. Before, `JSON.parse` changed the value
-  without a message: `12345678901234567890` became `12345678901234567000`. A known limit, now
-  in the help text: an integer-like object key (`"2"`, `"10"`) moves to the start of its
-  object, in numeric order, because `JSON.parse` orders the keys so. The values do not change.
 - `compress` command-line errors exit 1 with a message and write no file: an unknown option
   (for example `--nope`, or `--level=aggressive`, which is not a supported form), an option
   without a value (a trailing `-o`, or `-o` followed by another option), a missing file in
