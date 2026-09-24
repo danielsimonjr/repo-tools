@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 import {
   buildDependencyMatrix,
   categorizeFiles,
@@ -155,7 +155,7 @@ describe("json and yaml reporters", () => {
   });
 
   test("generateYaml round-trips to the same object", () => {
-    expect(yaml.load(generateYaml(json))).toEqual(JSON.parse(JSON.stringify(json)));
+    expect(load(generateYaml(json))).toEqual(JSON.parse(JSON.stringify(json)));
   });
 });
 

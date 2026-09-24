@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F4: dependency-graph.yaml is built with js-yaml 5.4.2 (pinned exactly; it was
+  4.3.2). js-yaml 5 has no default export and no `quotingType` option, and ships its own types,
+  so `@types/js-yaml` is removed. The YAML of every golden set is byte-identical.
 - depgraph R1: every report ends with exactly one LF. The JSON reports had no trailing newline,
   and `duplicate-symbols.md` and `unused-analysis.md` had two. The goldens change in the last
   byte only.

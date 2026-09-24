@@ -4,7 +4,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import yaml from "js-yaml";
+import { load } from "js-yaml";
 import { listEntries, listNames } from "./dirlist.ts";
 import { toPosix } from "./paths.ts";
 import { exportsSubpathEntries } from "./roots.ts";
@@ -31,7 +31,7 @@ export function readWorkspacePatterns(root: string): string[] {
   }
 
   try {
-    const cfg = yaml.load(readFileSync(join(root, "pnpm-workspace.yaml"), "utf-8")) as
+    const cfg = load(readFileSync(join(root, "pnpm-workspace.yaml"), "utf-8")) as
       | { packages?: string[] }
       | undefined;
     if (Array.isArray(cfg?.packages)) return cfg.packages.filter((p) => !p.startsWith("!"));
