@@ -31,6 +31,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `compress` round-trip tests (design 13.3 step 5): for JSON, `compress` then `compress -d`
+  gives a deep-equal value at each level. For the other 10 formats, the chain from the fixture
+  gives the golden restored file. The smoke test `scripts/smoke.ts` has a fourth step: a JSON
+  round trip through the command under test, in a temp folder.
 - Subcommand `compress` (design 3.4 and 4): a port of the CTON context compressor. It writes a
   compact copy of a file for a model context, or restores a compact file with `-d`. Single-file
   mode and batch mode (`-b`, `-p`, `-r`) are available. The code is in `src/compress/`:

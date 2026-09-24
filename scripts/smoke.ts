@@ -4,9 +4,18 @@
  *   bun scripts/smoke.ts -- <command...>
  *
  * Examples: `-- bin/repo-tools-linux-x64`, `-- node dist/cli.js`, `-- bun dist/cli.js`.
- * The script runs each step, then the chunk round trip (13.3 step 4), and exits 1 on any failure.
+ * The script runs every step and exits 1 when a step fails. The steps: `--version`, `--help`,
+ * an unknown subcommand, the `chunk split` and `chunk merge` round trip (13.3 step 4), and a JSON
+ * round trip through `compress` and `compress -d` (13.3 step 5), each in a temp folder.
  */
-import { copyFileSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pkg from "../package.json" with { type: "json" };
@@ -70,12 +79,60 @@ function chunkRoundTrip(command: string[]): string | undefined {
   }
 }
 
+/** A JSON document whose values hold the letters of the key abbreviations. */
+const ROUND_TRIP_INPUT = {
+  projectName: "name items description",
+  items: [
+    { itemName: "n", itemCount: 3, description: "i d n" },
+    { itemName: "nd", itemCount: 0, description: null },
+  ],
+  description: "a name",
+};
+
+/**
+ * Design 13.3 step 5: `compress` then `compress -d` in a temp folder must give a JSON value that
+ * is deep-equal to the input. Returns an error text or undefined.
+ */
+function jsonRoundTrip(command: string[]): string | undefined {
+  const dir = mkdtempSync(join(tmpdir(), "repo-tools-smoke-"));
+  try {
+    const input = join(dir, "data.json");
+    writeFileSync(input, `${JSON.stringify(ROUND_TRIP_INPUT, null, 2)}\n`);
+    const compact = join(dir, "data.compact.json");
+    const restored = join(dir, "restored.json");
+    for (const args of [
+      ["compress", input, "--no-stats"],
+      ["compress", "-d", compact, "-o", restored, "--no-stats"],
+    ]) {
+      const r = Bun.spawnSync([...command, ...args]);
+      if (r.exitCode !== 0) return `'${args.slice(0, 2).join(" ")}' exit ${r.exitCode}`;
+    }
+    if (!existsSync(restored)) return "no restored file";
+    const value: unknown = JSON.parse(readFileSync(restored, "utf8"));
+    return Bun.deepEquals(value, ROUND_TRIP_INPUT) ? undefined : "the restored value differs";
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/** Checks that run a command more than once and check files. */
+const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined }[] = [
+  { name: "chunk round trip", run: chunkRoundTrip },
+  { name: "compress JSON round trip", run: jsonRoundTrip },
+];
+
 /** The number of checks that `smoke` runs. */
-export const STEP_COUNT = STEPS.length + 1;
+export const STEP_COUNT = STEPS.length + FILE_STEPS.length;
 
 /** Runs every step against `command`. Returns the failure texts. */
 export function smoke(command: string[]): string[] {
   const failures: string[] = [];
+  for (const step of FILE_STEPS) {
+    const problem = step.run(command);
+    if (problem) failures.push(`${step.name}: ${problem}`);
+  }
   for (const step of STEPS) {
     const r = Bun.spawnSync([...command, ...step.args]);
     const out = r.stdout.toString();
@@ -86,8 +143,6 @@ export function smoke(command: string[]): string[] {
     const problem = step.check?.(out);
     if (problem) failures.push(`${step.name}: ${problem}`);
   }
-  const roundTrip = chunkRoundTrip(command);
-  if (roundTrip) failures.push(`chunk round trip: ${roundTrip}`);
   return failures;
 }
 

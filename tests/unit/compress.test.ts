@@ -2,13 +2,14 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative } from "node:path";
-import { getCompressor } from "../../src/compress/formats.ts";
+import { extname, join, relative } from "node:path";
+import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
 import { type CompressDeps, run } from "../../src/compress/index.ts";
 import { decompress } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
+const goldens = join(import.meta.dir, "../golden/compress");
 const work = mkdtempSync(join(tmpdir(), "repo-tools-compress-"));
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
@@ -194,6 +195,20 @@ describe("round trip (design 13.3 step 5)", () => {
       expect((await compressIn(dir, args)).code).toBe(0);
       expect(JSON.parse(readFileSync(join(dir, "restored.json"), "utf8"))).toEqual(original);
     });
+  }
+
+  // The other formats do not restore the input exactly (see the goldens): they are compared with
+  // the golden restored file, through the full chain from the fixture.
+  for (const file of readdirSync(fixtures).filter((f) => extname(f) !== ".json")) {
+    for (const level of LEVELS) {
+      test(`${file} at ${level}: compress then decompress gives the golden restored file`, () => {
+        const format = detectFormat(file);
+        const compact = getCompressor(format)(readFileSync(join(fixtures, file), "utf8"), level);
+        const name = extname(file).slice(1);
+        const expected = readFileSync(join(goldens, `${name}.${level}.restored${extname(file)}`));
+        expect(decompress(compact.compressed, format)).toBe(expected.toString("utf8"));
+      });
+    }
   }
 
   test("JSON: a value that equals an abbreviation is not changed", () => {

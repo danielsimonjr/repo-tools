@@ -76,6 +76,23 @@ describe("smoke test script (design 13.3)", () => {
     expect(r.stderr.toString()).toContain("chunk round trip");
   });
 
+  test("the smoke test fails when compress does not round-trip a JSON file", () => {
+    const fake = join(work, "fake-compress.js");
+    writeFileSync(
+      fake,
+      [
+        "const a = process.argv.slice(2);",
+        `if (a[0] === "--version") console.log(${JSON.stringify(pkg.version)});`,
+        'else if (a[0] === "--help") console.log("depgraph chunk compress");',
+        'else if (a[0] !== "compress") process.exitCode = 1;',
+        "",
+      ].join("\n"),
+    );
+    const r = smoke(["node", fake]);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr.toString()).toContain("compress JSON round trip");
+  });
+
   test("the smoke test fails without a command", () => {
     expect(smoke([]).exitCode).toBe(1);
   });
