@@ -29,8 +29,7 @@
           },
           {
             "file": "./dyn.js",
-            "imports": [],
-            "typeOnly": true
+            "imports": []
           }
         ],
         "workspaceDependencies": [],
@@ -421,7 +420,7 @@
     "totalEnums": 0,
     "totalConstants": 2,
     "totalReExports": 7,
-    "totalTypeOnlyImports": 4,
+    "totalTypeOnlyImports": 3,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 1,
     "unusedFilesCount": 4,

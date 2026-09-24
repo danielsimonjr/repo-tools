@@ -22,7 +22,7 @@ Written: docs/architecture/test-coverage.json
 Dependency graph generation complete!
   - 15 files analyzed
   - 16 exports found (7 re-exports)
-  - 4 type-only imports detected
+  - 3 type-only imports detected
   - 2 circular dependencies:
       1 runtime (require attention)
       1 type-only (safe)

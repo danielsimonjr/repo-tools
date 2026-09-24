@@ -5,9 +5,9 @@
  * Port notes, kept on purpose until the fixes land:
  * - Comments are removed with the regex functions of `src/mask.ts`, which also cut `//` text
  *   inside strings (fix F6 covers comments in brace blocks).
- * - Every relative `import('...')` is a type-only edge, `await import()` included (fix F25).
  *
  * Fix F23: `import()` reads a backtick specifier that holds no `${` substitution.
+ * Fix F25: an `import()` is a runtime edge unless it is in a type position.
  */
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
@@ -138,6 +138,20 @@ function splitNames(list: string, pick: (parts: string[]) => string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * True when the `import(...)` at `code[start, end)` is in a type position (fix F25). The rule is
+ * by exclusion. A type position is `typeof import(...)`, or `import(...).Name` (a chain of
+ * member names, then no call), as in a type alias, an annotation or an interface member. Every
+ * other `import()` is a runtime expression: `await import()`, `import().then(...)`, a bare
+ * statement, an assignment, an array element, a return value.
+ */
+export function isTypePositionImport(code: string, start: number, end: number): boolean {
+  if (/\btypeof\s*$/.test(code.slice(Math.max(0, start - 32), start))) return true;
+  const member = /^\s*(?:\.\s*[A-Za-z_$][\w$]*\s*)+/.exec(code.slice(end));
+  if (!member) return false;
+  return code.charAt(end + member[0].length) !== "(";
+}
+
 /** Parses the imports and exports of the file at the absolute path `filePath`. */
 export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
   const content = readFileSync(filePath, "utf-8");
@@ -235,9 +249,21 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     typeOnly: false,
     sideEffect: true,
   });
-  // `import('./x.js')` in any position, recorded as type-only (fix F25). Fix F23: a backtick
-  // specifier counts too, unless it holds a `${` substitution.
-  addInternal(/\bimport\s*\(\s*['"`](\.[^'"`${]+)['"`]\s*\)/g, { typeOnly: true });
+  // `import('./x.js')` expressions. Fix F23: a backtick specifier counts too, unless it holds a
+  // `${` substitution. Fix F25: the edge is runtime unless every `import()` of the specifier is
+  // in a type position. A runtime `import()` of a file that only type-only edges name adds a
+  // runtime edge, so a runtime cycle through it is found.
+  const dynamicKinds = new Map<string, boolean>();
+  for (const match of code.matchAll(/\bimport\s*\(\s*['"`](\.[^'"`${]+)['"`]\s*\)/g)) {
+    const source = match[1] ?? "";
+    const typeOnly = isTypePositionImport(code, match.index, match.index + match[0].length);
+    dynamicKinds.set(source, (dynamicKinds.get(source) ?? true) && typeOnly);
+  }
+  for (const [source, typeOnly] of dynamicKinds) {
+    const existing = result.internalDependencies.filter((d) => d.file === source);
+    if (existing.length > 0 && (typeOnly || existing.some((d) => !d.typeOnly))) continue;
+    result.internalDependencies.push({ file: source, imports: [], typeOnly });
+  }
   // Re-export edges: `export * from`, `export * as ns from`, `export { a } from`,
   // `export type { T } from`.
   addInternal(

@@ -47,7 +47,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./a.js` | `AlphaOptions` | Import (type-only) |
-| `./dyn.js` | `` | Import (type-only) |
+| `./dyn.js` | `` | Import |
 
 **Exports:**
 - Classes: `Bravo`
@@ -320,7 +320,7 @@ graph TD
 | Total Functions | 7 |
 | Total Type Guards | 0 |
 | Total Enums | 0 |
-| Type-only Imports | 4 |
+| Type-only Imports | 3 |
 | Runtime Circular Deps | 1 |
 | Type-only Circular Deps | 1 |
 

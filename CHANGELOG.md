@@ -20,6 +20,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F25: a dynamic `import()` is a runtime edge unless it is in a type position. A type
+  position is `typeof import(...)`, or `import(...).Name` with no call after it (a type alias,
+  an annotation, an interface member). `await import()`, `import().then(...)`, a bare
+  `import();`, `const p = import()`, `Promise.all([import()])` and `return import()` are
+  runtime. The port recorded every `import()` as type-only, so a runtime cycle through a
+  dynamic import was classed as type-only. A runtime `import()` of a file that a type-only
+  import also names adds a runtime edge. In the `mini-repo` fixture, the `./dyn.js` edge of
+  `src/B.ts` is now `Import`, not `Import (type-only)`, and the type-only import count is 3.
 - depgraph F24: the in-file reference count of an unused export reads the source without
   comments. An export named only in its own JSDoc or in a `//` comment stays in "Unreferenced
   anywhere (deletion candidates)"; the port counted the comment text as a use. A use in code
