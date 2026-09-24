@@ -4,7 +4,7 @@
  * tsup config, root-level build configs and `new URL(..., import.meta.url)` launches.
  *
  * Fix F14: `tsupConfigEntries` reads every `entry: [...]` array of each `tsup.config.*` file,
- * whenever the file exists.
+ * whenever the file exists. Fix F37: it also reads the object form, `entry: { a: 'src/a.ts' }`.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -32,8 +32,10 @@ export function isJsonObject(value: unknown): value is Record<string, unknown> {
 const TSUP_CONFIG = /^tsup\.config\.(?:[mc]?[jt]s|json)$/;
 
 /**
- * The `.ts` entries of every `entry: [...]` array in each tsup config of `<pkgDir>` (fix F14),
- * as root-relative POSIX paths. Returns an empty list when no config exists or none is readable.
+ * The `.ts` entries of every `entry` option in each tsup config of `<pkgDir>`, as root-relative
+ * POSIX paths in file order: each string of an `entry: [...]` array (fix F14), and each string
+ * value of an `entry: { name: '...' }` object (fix F37). Returns an empty list when no config
+ * exists or none is readable.
  */
 export function tsupConfigEntries(root: string, pkgDir: string): string[] {
   let names: string[];
@@ -50,8 +52,13 @@ export function tsupConfigEntries(root: string, pkgDir: string): string[] {
     } catch {
       continue;
     }
-    for (const arr of code.matchAll(/["']?\bentry["']?\s*:\s*\[([^\]]*)\]/g)) {
-      for (const m of (arr[1] ?? "").matchAll(/['"`]([^'"`]+\.ts)['"`]/g)) {
+    for (const opt of code.matchAll(/["']?\bentry["']?\s*:\s*(?:\[([^\]]*)\]|\{([^}]*)\})/g)) {
+      // An array lists the entries; an object maps each output name to an entry after a `:`.
+      const values =
+        opt[1] !== undefined
+          ? (opt[1] ?? "").matchAll(/['"`]([^'"`]+\.ts)['"`]/g)
+          : (opt[2] ?? "").matchAll(/:\s*['"`]([^'"`]+\.ts)['"`]/g);
+      for (const m of values) {
         const entry = toPosix(join(pkgDir, m[1] ?? ""));
         if (!out.includes(entry)) out.push(entry);
       }

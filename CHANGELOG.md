@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F37: the object form of the tsup `entry` option (`entry: { worker: 'src/worker.ts' }`)
+  names build roots, as the array form does (F14). Each string value after a `:` is an entry,
+  in file order. The port read the array form only, so an object-form entry was an orphan and
+  failed the census self-check.
 - depgraph F36: a negated workspace pattern excludes the package folders that it matches, in
   `package.json` `workspaces` (npm and Yarn) and in `pnpm-workspace.yaml`. `!packages/skip` and
   a glob such as `!packages/old-*` work, with or without a leading `./` or a trailing `/`. The
