@@ -40,7 +40,16 @@ import { type DepgraphOptions, parseDepgraphArgs, wantsHelp } from "./args.ts";
 import { analyzeTestCoverage, type TestCoverageAnalysis } from "./coverage.ts";
 import { detectCyclicComponents } from "./cycles.ts";
 import { linkLog } from "./dirlist.ts";
-import { buildDuplicateReport, detectDuplicateSymbols } from "./duplicates.ts";
+import {
+  asBaselineNames,
+  asDuplicateEntries,
+  buildDuplicateBaseline,
+  buildDuplicateReport,
+  type DuplicateEntries,
+  detectDuplicateSymbols,
+  findNewDuplicates,
+  trueDuplicateNames,
+} from "./duplicates.ts";
 import {
   buildFileInventory,
   censusFailure,
@@ -116,14 +125,30 @@ Options:
                        reports are always written.
   --check-census       Check the committed file-inventory.json against a fresh
                        walk of the root. Write nothing. Exit 1 on a difference.
+  --check-duplicates   Write the reports, then exit 1 when duplicate-symbols.json
+                       holds a TRUE_DUPLICATE name that the duplicate baseline
+                       does not hold. Config: depgraph.duplicateBaseline
+                       (default: <out>/duplicate-baseline.json). A missing
+                       baseline exits 1 before the run writes.
+  --no-regen           With --check-duplicates: read the committed
+                       duplicate-symbols.json. Write nothing.
+  --write-duplicate-baseline
+                       Write the duplicate baseline from the current
+                       duplicate-symbols.json (run depgraph first). Write
+                       nothing else.
   --help, -h           Show this help.
+
+Use one mode in a run: --check-census, --check-duplicates or
+--write-duplicate-baseline.
 
 Exit codes: 0 on success. 1 on an unknown flag, a flag without its value or an
 invalid value (the run then writes nothing), when the root is not an existing
 directory (no folder is made), when no TypeScript file is found (no output folder
 is made), when the --api-entry file of --api-surface does not exist,
 when the census self-check fails with --strict-census, when an orphan exists
-with --strict-orphans, or when --check-census fails.
+with --strict-orphans, when --check-census fails, when --check-duplicates finds
+a new TRUE_DUPLICATE name or no baseline, or when a report that a mode reads
+does not exist.
 `;
 
 /**
@@ -163,13 +188,123 @@ export async function run(argv: string[], io: Io): Promise<number> {
     if (!isDirectory(root)) throw new Error("the root <root> is not an existing directory");
     const config = mergeDepgraphConfig(options.settings, loadConfigFile(root, options.config));
     setWalkSkip([...config.exclude, ...config.alsoExclude]);
-    return runPipeline(options, config, { stdout: io.stdout, stderr });
+    const sinks: Io = { stdout: io.stdout, stderr };
+    if (options.writeDuplicateBaseline) return writeDuplicateBaseline(root, config, sinks);
+    if (options.checkDuplicates) return checkDuplicates(options, config, sinks);
+    return runPipeline(options, config, sinks);
   } catch (err) {
     stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;
   } finally {
     setWalkSkip();
   }
+}
+
+/** `<root>/<rel>` with forward slashes: the form of a path in a message. */
+function shown(rel: string): string {
+  return `<root>/${rel.replace(/\\/g, "/")}`;
+}
+
+/**
+ * Reads and parses the JSON file `rel` (relative to the root). Throws when the file does not
+ * exist (the text then ends with `missingHint`), cannot be read or is not valid JSON.
+ */
+function readJsonFile(root: string, rel: string, what: string, missingHint: string): unknown {
+  const path = resolveUnderRoot(root, rel);
+  if (!isFile(path)) throw new Error(`the ${what} ${shown(rel)} does not exist; ${missingHint}`);
+  let text: string;
+  try {
+    text = readFileSync(path, "utf8");
+  } catch {
+    throw new Error(`the ${what} ${shown(rel)} cannot be read`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`the ${what} ${shown(rel)} is not valid JSON`);
+  }
+}
+
+/** The root-relative path of duplicate-symbols.json in the output folder of `config`. */
+function duplicateReportPath(config: DepgraphConfig): string {
+  return `${config.out.replace(/[\\/]+$/, "")}/duplicate-symbols.json`;
+}
+
+/** Reads the duplicate-symbols.json of the output folder. Throws when it is missing or bad. */
+function readDuplicateReport(root: string, config: DepgraphConfig): DuplicateEntries {
+  const rel = duplicateReportPath(config);
+  const parsed = readJsonFile(root, rel, "duplicate report", "run repo-tools depgraph first");
+  const entries = asDuplicateEntries(parsed);
+  if (!entries) throw new Error(`the duplicate report ${shown(rel)} has an unknown shape`);
+  return entries;
+}
+
+/** `1 TRUE_DUPLICATE name` or `N TRUE_DUPLICATE names`. */
+function namesLabel(count: number): string {
+  return `${count} TRUE_DUPLICATE name${count === 1 ? "" : "s"}`;
+}
+
+/**
+ * `--check-duplicates`: exit 1 on a TRUE_DUPLICATE name that the baseline does not hold. The
+ * baseline is read first, so a missing baseline stops the run before it writes. Without
+ * `--no-regen` the pipeline then writes every report, and the gate reads the fresh
+ * duplicate-symbols.json. With `--no-regen` the gate reads the committed report and writes
+ * nothing. A missing baseline exits 1: the source gate also stops when it cannot read it.
+ */
+function checkDuplicates(options: DepgraphOptions, config: DepgraphConfig, io: Io): number {
+  const root = resolve(options.root);
+  const baselineRel = config.duplicateBaseline;
+  const baseline = asBaselineNames(
+    readJsonFile(
+      root,
+      baselineRel,
+      "duplicate baseline",
+      "write it with repo-tools depgraph --write-duplicate-baseline",
+    ),
+  );
+  if (!baseline) {
+    throw new Error(`the duplicate baseline ${shown(baselineRel)} has an unknown shape`);
+  }
+  if (!options.noRegen) {
+    const code = runPipeline(options, config, io);
+    if (code !== 0) return code;
+  }
+  const report = readDuplicateReport(root, config);
+  const found = findNewDuplicates(report, baseline);
+  const current =
+    Object.keys(trueDuplicateNames(report.runtime)).length +
+    Object.keys(trueDuplicateNames(report.types)).length;
+  const held = Object.keys(baseline.runtime).length + Object.keys(baseline.types).length;
+  if (found.length === 0) {
+    io.stdout(`duplicate check passed: ${namesLabel(current)}, ${held} in the baseline, 0 new.\n`);
+    return 0;
+  }
+  const noun = found.length === 1 ? "name" : "names";
+  const lines = [
+    `duplicate check FAILED: ${found.length} new TRUE_DUPLICATE ${noun} not in ${shown(baselineRel)}:`,
+  ];
+  for (const f of found) {
+    lines.push(`  [${f.kind}] ${f.name}`);
+    for (const file of f.files) lines.push(`    - ${file}`);
+  }
+  lines.push(
+    "Reuse one definition, or add the name to the duplicate allowlist. To accept the name " +
+      "after review, run repo-tools depgraph --write-duplicate-baseline.",
+  );
+  io.stderr(`${lines.join("\n")}\n`);
+  return 1;
+}
+
+/** `--write-duplicate-baseline`: writes the baseline from the current duplicate-symbols.json. */
+function writeDuplicateBaseline(root: string, config: DepgraphConfig, io: Io): number {
+  const baseline = buildDuplicateBaseline(readDuplicateReport(root, config));
+  const path = resolveUnderRoot(root, config.duplicateBaseline);
+  writeReport(path, JSON.stringify(baseline, null, 2));
+  io.stdout(
+    `Written: ${relativePosix(root, path)} (${Object.keys(baseline.runtime).length} runtime, ` +
+      `${Object.keys(baseline.types).length} type TRUE_DUPLICATE names)\n`,
+  );
+  return 0;
 }
 
 /** The pipeline. Returns the exit code. */

@@ -24,6 +24,12 @@ export interface DepgraphOptions {
   /** Fix F42: a census gap fails the census self-check. */
   strictCensus: boolean;
   checkCensus: boolean;
+  /** The duplicate gate: exit 1 on a TRUE_DUPLICATE name that the baseline does not hold. */
+  checkDuplicates: boolean;
+  /** With `checkDuplicates`: read the committed report, do not regenerate. */
+  noRegen: boolean;
+  /** Write the duplicate baseline from the current duplicate-symbols.json. */
+  writeDuplicateBaseline: boolean;
   help: boolean;
 }
 
@@ -42,6 +48,9 @@ const BOOLEAN_FLAGS: Readonly<Record<string, BooleanKey>> = {
   "--strict-orphans": "strictOrphans",
   "--strict-census": "strictCensus",
   "--check-census": "checkCensus",
+  "--check-duplicates": "checkDuplicates",
+  "--no-regen": "noRegen",
+  "--write-duplicate-baseline": "writeDuplicateBaseline",
   "--help": "help",
   "-h": "help",
 };
@@ -120,6 +129,9 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     strictOrphans: false,
     strictCensus: false,
     checkCensus: false,
+    checkDuplicates: false,
+    noRegen: false,
+    writeDuplicateBaseline: false,
     help: false,
   };
   let rootSet = false;
@@ -153,7 +165,26 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     }
     throw new Error(`unknown flag '${name}' (see repo-tools depgraph --help)`);
   }
+  checkModes(options);
   return options;
+}
+
+/**
+ * Throws when the flags ask for two modes in one run, or for `--no-regen` without
+ * `--check-duplicates`. A flag that the run ignores would hide a typing error.
+ */
+function checkModes(options: DepgraphOptions): void {
+  if (options.noRegen && !options.checkDuplicates) {
+    throw new Error("flag --no-regen applies with --check-duplicates only");
+  }
+  const modes = [
+    options.checkCensus && "--check-census",
+    options.checkDuplicates && "--check-duplicates",
+    options.writeDuplicateBaseline && "--write-duplicate-baseline",
+  ].filter((mode): mode is string => mode !== false);
+  if (modes.length > 1) {
+    throw new Error(`flags ${modes.join(" and ")} are two modes; use one of them in a run`);
+  }
 }
 
 /** True when `argv` asks for the help text. The help wins over any other argument. */

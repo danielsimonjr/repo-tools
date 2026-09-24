@@ -211,6 +211,9 @@ describe("pipeline entry", () => {
       strictOrphans: false,
       strictCensus: false,
       checkCensus: true,
+      checkDuplicates: false,
+      noRegen: false,
+      writeDuplicateBaseline: false,
       help: false,
     });
     // Fix M1: the two single-package model flags.

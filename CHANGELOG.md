@@ -461,6 +461,20 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph duplicate gate (D10b, design section 3.2). `--check-duplicates` writes the reports
+  in process, then exits 1 when duplicate-symbols.json holds a TRUE_DUPLICATE name that the
+  baseline does not hold; the error lists each new name with its kind and files. The baseline
+  is `depgraph.duplicateBaseline` (default `<out>/duplicate-baseline.json`). A name counts per
+  kind (runtime, types). A missing, unreadable or invalid baseline exits 1 before the run
+  writes; the source gate also stopped when it could not read the baseline. `--no-regen` reads
+  the committed duplicate-symbols.json and writes nothing. `--write-duplicate-baseline` writes
+  the baseline from the current duplicate-symbols.json and writes nothing else; the baseline
+  has no date (the source wrote a `generated` date), and its names and files are in code-unit
+  order, so two writes of one report give the same bytes. A mode that needs a report that does
+  not exist exits 1 and says to run depgraph first. `--no-regen` without `--check-duplicates`,
+  and two of `--check-census`, `--check-duplicates` and `--write-duplicate-baseline` in one
+  run, exit 1: the run would ignore a flag. The gate reads a baseline with a `generated` key.
+  No golden changes.
 - depgraph reads `.tsx` input (D10b, design section 3.2). The graph walk, the source walk, the
   census walks and the test walk (`.test.tsx`, `.spec.tsx`) read `.tsx` as well as `.ts`; the
   resolver already tried `<x>.tsx` (fix F30). The `.d.ts` rules do not change. A `.test.tsx`

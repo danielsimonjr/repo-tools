@@ -394,3 +394,104 @@ export function buildDuplicateReport(dup: {
     types: dup.types,
   };
 }
+
+/** The TRUE_DUPLICATE names of one kind, each with its defining files in code-unit order. */
+export type DuplicateNames = Record<string, string[]>;
+
+/** The content of duplicate-baseline.json: the accepted TRUE_DUPLICATE names of each kind. */
+export interface DuplicateBaseline {
+  note: string;
+  runtime: DuplicateNames;
+  types: DuplicateNames;
+}
+
+/** A TRUE_DUPLICATE name that the baseline does not hold. */
+export interface NewDuplicate {
+  kind: "runtime" | "types";
+  name: string;
+  files: string[];
+}
+
+/** The two parts of duplicate-symbols.json that the gate reads. */
+export type DuplicateEntries = Pick<DuplicateSymbolsReport, "runtime" | "types">;
+
+/** The runtime and type names of a baseline. */
+export type BaselineNames = Pick<DuplicateBaseline, "runtime" | "types">;
+
+/** The note at the top of duplicate-baseline.json. */
+export const DUPLICATE_BASELINE_NOTE =
+  "The accepted TRUE_DUPLICATE names of each kind, with their defining files. " +
+  "`repo-tools depgraph --check-duplicates` fails only on a TRUE_DUPLICATE name that this file " +
+  "does not hold. After a reviewed change, write it again with " +
+  "`repo-tools depgraph --write-duplicate-baseline`.";
+
+/** The TRUE_DUPLICATE names of `entries`, in code-unit order, each with its sorted files. */
+export function trueDuplicateNames(entries: readonly DuplicateSymbolEntry[]): DuplicateNames {
+  const names: DuplicateNames = {};
+  const found = entries
+    .filter((e) => e.tag === "TRUE_DUPLICATE")
+    .sort((a, b) => compareCodeUnits(a.name, b.name));
+  for (const e of found) names[e.name] = e.definers.map((d) => d.file).sort(compareCodeUnits);
+  return names;
+}
+
+/** The baseline of the report `report`: its TRUE_DUPLICATE names. No date, so reruns agree. */
+export function buildDuplicateBaseline(report: DuplicateEntries): DuplicateBaseline {
+  return {
+    note: DUPLICATE_BASELINE_NOTE,
+    runtime: trueDuplicateNames(report.runtime),
+    types: trueDuplicateNames(report.types),
+  };
+}
+
+/**
+ * The TRUE_DUPLICATE names of `report` that `baseline` does not hold, runtime names first, each
+ * kind in code-unit order. A name counts per kind: a runtime name in the baseline does not
+ * cover a type name.
+ */
+export function findNewDuplicates(
+  report: DuplicateEntries,
+  baseline: BaselineNames,
+): NewDuplicate[] {
+  const found: NewDuplicate[] = [];
+  for (const kind of ["runtime", "types"] as const) {
+    const held = baseline[kind];
+    for (const [name, files] of Object.entries(trueDuplicateNames(report[kind]))) {
+      if (!Object.hasOwn(held, name)) found.push({ kind, name, files });
+    }
+  }
+  return found;
+}
+
+/** True for a plain JSON object (not `null`, not an array). */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** The runtime and type entries of a parsed duplicate-symbols.json, or null on a bad shape. */
+export function asDuplicateEntries(parsed: unknown): DuplicateEntries | null {
+  if (!isRecord(parsed) || !Array.isArray(parsed.runtime) || !Array.isArray(parsed.types)) {
+    return null;
+  }
+  const valid = (e: unknown): boolean =>
+    isRecord(e) &&
+    typeof e.name === "string" &&
+    typeof e.tag === "string" &&
+    Array.isArray(e.definers) &&
+    e.definers.every((d: unknown) => isRecord(d) && typeof d.file === "string");
+  if (!parsed.runtime.every(valid) || !parsed.types.every(valid)) return null;
+  return parsed as unknown as DuplicateEntries;
+}
+
+/**
+ * The runtime and type names of a parsed baseline, or null on a bad shape. A missing kind is an
+ * empty kind, as in the source gate. The gate ignores other keys (for example a date).
+ */
+export function asBaselineNames(parsed: unknown): BaselineNames | null {
+  if (!isRecord(parsed)) return null;
+  const kind = (value: unknown): DuplicateNames | null =>
+    value === undefined ? {} : isRecord(value) ? (value as DuplicateNames) : null;
+  const runtime = kind(parsed.runtime);
+  const types = kind(parsed.types);
+  return runtime && types ? { runtime, types } : null;
+}
