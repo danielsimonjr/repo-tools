@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `chunk merge` names the chunk number and the chunk file name when a JSON chunk is not valid
+  JSON or is not a JSON object, for example `JSON chunk 2 (002-b.json) is not valid JSON: ...`.
+  Before, the message was only the parser error, for example `JSON Parse error: Unexpected EOF`.
 - The `chunk` round-trip tests merge into a new file (`-o`) and compare that file with the
   input. Before, they merged over the source and compared the source, so a merge that wrote
   nothing passed: with the final write removed, 19 of 20 of these tests passed; now 15 of 20

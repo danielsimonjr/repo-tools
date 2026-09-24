@@ -529,7 +529,11 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   if (!keyChunks) {
     mergedContent = chunkContents.join("\n");
   } else if (manifest.jsonLayout) {
-    mergedContent = mergeJsonLayout(chunkContents, manifest.jsonLayout);
+    mergedContent = mergeJsonLayout(
+      chunkContents,
+      manifest.jsonLayout,
+      manifest.chunks.map((c) => c.filename),
+    );
   } else {
     mergedContent = mergeJson(chunkContents, io.stderr);
   }

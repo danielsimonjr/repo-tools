@@ -347,15 +347,26 @@ export function splitJson(content: string): JsonSplit {
  * Merges JSON key chunks with the layout of the source file (fix K8). Each chunk must be a JSON
  * object; its members go into the place of the original member, as text. A chunk without
  * members is left out with its separator. Throws when a chunk or the result is not valid JSON.
+ * The error names the chunk number and, from `names`, the chunk file name.
  */
-export function mergeJsonLayout(chunks: string[], layout: JsonLayout): string {
+export function mergeJsonLayout(
+  chunks: string[],
+  layout: JsonLayout,
+  names: readonly string[] = [],
+): string {
   let body = "";
   let count = 0;
   chunks.forEach((chunk, i) => {
+    const label = `JSON chunk ${i + 1}${names[i] === undefined ? "" : ` (${names[i]})`}`;
     const trimmed = chunk.trim();
-    const parsed: unknown = JSON.parse(trimmed);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch (error) {
+      throw new Error(`${label} is not valid JSON: ${(error as Error).message}`);
+    }
     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-      throw new Error(`JSON chunk ${i + 1} is not a JSON object`);
+      throw new Error(`${label} is not a JSON object`);
     }
     const members = trimmed.slice(1, -1).trim();
     if (members === "") return;

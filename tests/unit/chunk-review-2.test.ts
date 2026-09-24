@@ -321,3 +321,24 @@ test("split -o refuses a chunk folder that holds the source file (finding 6)", a
   expect(r.err).toContain("chunk folder");
   expect(r.out).toBe("");
 });
+
+describe("chunk: an invalid JSON chunk is named in the error (finding 9)", () => {
+  for (const [what, edit, needle] of [
+    ["invalid JSON", '{"a": ', "not valid JSON"],
+    ["a JSON array", "[1, 2]", "not a JSON object"],
+  ] as const) {
+    test(`merge names the chunk that holds ${what}`, async () => {
+      const dir = join(work, `json-error-${what.replace(/\W+/g, "-")}`);
+      const src = put(join(dir, "data.json"), '{\n  "a": 1,\n  "b": 2\n}\n');
+      expect((await chunk(["split", src])).code).toBe(0);
+      const chunks = join(dir, "data_chunks");
+      const m = JSON.parse(readFileSync(join(chunks, "manifest.json"), "utf8"));
+      const name = m.chunks[1].filename;
+      writeFileSync(join(chunks, name), edit);
+      const r = await chunk(["merge", join(chunks, "manifest.json"), "-o", join(dir, "out.json")]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(`chunk 2 (${name})`);
+      expect(r.err).toContain(needle);
+    });
+  }
+});
