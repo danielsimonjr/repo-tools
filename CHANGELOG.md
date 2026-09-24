@@ -20,6 +20,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F11 (already in the port; a regression test pins it): a dynamic `import('./x.js')`
+  is a dependency edge, so its target is not an unused file. Fix F25 sets the kind of the edge.
 - depgraph F10: test coverage follows chains of bare side-effect imports. When a test imports
   `a`, and `a` holds `import './b.js';` and `b` holds `import './c.js';`, then `b` and `c` are
   covered (a command registry is this shape). A namespace import does not carry coverage, and a
