@@ -197,7 +197,7 @@ describe("unused, coverage, inventory and surface reporters", () => {
     expect(packageKeyOf("core/sub")).toBe("core");
     const surfaces = buildPackageExportSurfaces(modules);
     expect(surfaces.lib).toEqual([]);
-    expect(surfaces.root).toEqual(["A", "a", "b", "spare"].sort((x, y) => x.localeCompare(y)));
+    expect(surfaces.root).toEqual(["A", "a", "b", "spare"]);
     expect(JSON.parse(generateSurfacesJson(modules, "DAY")).generated).toBe("DAY");
   });
 });

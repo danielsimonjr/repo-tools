@@ -7,11 +7,13 @@
  *
  * Port notes: the allowlist path is fixed at
  * `tools/create-dependency-graph/duplicate-allowlist.json` under the root (the config path comes
- * with task D10), and the entries sort with `localeCompare` (fix F22).
+ * with task D10). The entries sort in code-unit order (fix F22).
  */
+
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stripCommentsRegex } from "../mask.ts";
+import { compareCodeUnits } from "../sort.ts";
 import type { ParsedFile, PublicSurface } from "./types.ts";
 
 /** The export-list keys of `FileExports` that hold own definitions. */
@@ -299,7 +301,7 @@ export function buildDuplicateEntries(
         ...(reason ? { reason } : {}),
       });
     }
-    definers.sort((a, b) => a.file.localeCompare(b.file));
+    definers.sort((a, b) => compareCodeUnits(a.file, b.file));
     const nonAlias = definers.filter((d) => d.tag !== "ALIAS_DELEGATION");
     if (nonAlias.length < 2) {
       entries.push(finalizeDuplicateEntry(name, categories, definers, "ALIAS_DELEGATION"));
@@ -319,7 +321,7 @@ export function buildDuplicateEntries(
     (a, b) =>
       DUP_ENTRY_TAG_SORT_ORDER[a.tag] - DUP_ENTRY_TAG_SORT_ORDER[b.tag] ||
       b.definers.length - a.definers.length ||
-      a.name.localeCompare(b.name),
+      compareCodeUnits(a.name, b.name),
   );
   return entries;
 }

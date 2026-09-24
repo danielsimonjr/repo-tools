@@ -2,18 +2,18 @@
   "generated": "<DATE>",
   "surfaces": {
     "Z": [
-      "zed",
-      "ZedShape"
+      "ZedShape",
+      "zed"
     ],
     "entry": [
-      "alpha",
       "AlphaOptions",
       "Bravo",
+      "alpha",
       "render"
     ],
     "root": [
-      "alpha",
       "Bravo",
+      "alpha",
       "dynamicValue",
       "forgotten",
       "helper",

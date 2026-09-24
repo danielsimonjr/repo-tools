@@ -79,6 +79,10 @@
   },
   "classifiedUntested": [
     {
+      "file": "src/Z/loop.ts",
+      "category": null
+    },
+    {
       "file": "src/_x.ts",
       "category": null
     },
@@ -112,10 +116,6 @@
     },
     {
       "file": "src/util/index.ts",
-      "category": null
-    },
-    {
-      "file": "src/Z/loop.ts",
       "category": null
     }
   ]

@@ -5,10 +5,10 @@
       "format"
     ],
     "packages/core": [
-      "add",
-      "double",
       "INTERNAL_FLAG",
-      "Pair"
+      "Pair",
+      "add",
+      "double"
     ]
   }
 }

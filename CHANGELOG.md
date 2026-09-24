@@ -8,6 +8,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F22: every depgraph sort uses UTF-16 code-unit order; no source file calls
+  `localeCompare`, so the order does not depend on the ICU data of the runtime. The export
+  surfaces and the coverage lists of both fixtures change in order only.
 - depgraph F2: every walk lists folders in code-unit order through one module
   (`src/depgraph/dirlist.ts`), so the reports do not depend on the order that the file system
   returns. A reversed listing now gives the same bytes. The `mini-repo` goldens change in order

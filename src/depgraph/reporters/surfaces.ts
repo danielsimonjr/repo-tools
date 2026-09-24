@@ -2,9 +2,10 @@
  * package-export-surfaces.json: per package, the union of the named exports of its module
  * files.
  *
- * Port notes: every named export counts, internal ones included (fix F15), names sort with
- * `localeCompare` (fix F22), and the file holds a date (fix F1).
+ * Names sort in code-unit order (fix F22). Port notes: every named export counts, internal ones
+ * included (fix F15), and the file holds a date (fix F1).
  */
+import { compareCodeUnits } from "../../sort.ts";
 import type { ModuleMap } from "../types.ts";
 
 /** The package key of a module key: `packages/<x>` for a `packages/` path, else the first part. */
@@ -25,7 +26,7 @@ export function buildPackageExportSurfaces(modules: ModuleMap): Record<string, s
   }
   const surfaces: Record<string, string[]> = {};
   for (const pkg of Object.keys(surfaceSets).sort()) {
-    surfaces[pkg] = [...(surfaceSets[pkg] ?? [])].sort((a, b) => a.localeCompare(b));
+    surfaces[pkg] = [...(surfaceSets[pkg] ?? [])].sort((a, b) => compareCodeUnits(a, b));
   }
   return surfaces;
 }

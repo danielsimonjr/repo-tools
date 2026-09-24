@@ -2,11 +2,13 @@
  * The file inventory (census): every `.ts` file of the census walk with its area and its
  * disposition, and the census self-check against the maximal repo walk.
  *
- * Port notes: the inventory exists in monorepo mode only (fix M1), and the rows sort with
- * `localeCompare` (fix F22).
+ * The rows sort in code-unit order (fix F22). Port note: the inventory exists in monorepo mode
+ * only (fix M1).
  */
+
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { compareCodeUnits } from "../sort.ts";
 import { collectCensusFiles, walkRepoTsFiles } from "./scanner.ts";
 import type { WorkspacePackage } from "./types.ts";
 
@@ -116,7 +118,7 @@ export function buildFileInventory(
       loc: countLoc(root, rel),
     });
   }
-  rows.sort((a, b) => a.file.localeCompare(b.file));
+  rows.sort((a, b) => compareCodeUnits(a.file, b.file));
 
   const byDisposition: Record<string, number> = {
     reachable: 0,

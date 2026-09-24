@@ -5,7 +5,9 @@
  * `coverage.testedFiles` in place, as the pre-port generator did. Call it after the Markdown
  * report, because the Markdown groups the untested files in their original order.
  */
+
 import { basename } from "node:path";
+import { compareCodeUnits } from "../../sort.ts";
 import type { TestCoverageAnalysis } from "../coverage.ts";
 
 /** Raw coverage in percent with one decimal place, or `0`. */
@@ -148,6 +150,8 @@ export function generateTestCoverageJson(coverage: TestCoverageAnalysis, nowIso:
     testedFiles: coverage.testedFiles.sort(),
     coverageMap: coverageMapObj,
     testToSourceMap: testToSourceObj,
-    classifiedUntested: b.classifiedUntested.slice().sort((a, c) => a.file.localeCompare(c.file)),
+    classifiedUntested: b.classifiedUntested
+      .slice()
+      .sort((a, c) => compareCodeUnits(a.file, c.file)),
   };
 }
