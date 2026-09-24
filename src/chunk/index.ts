@@ -272,6 +272,32 @@ function isOutside(folder: string, path: string): boolean {
   );
 }
 
+/**
+ * Returns true when `path` is in `folder` or below it, by path text or by real path. A merge
+ * must not write into its own chunk folder: it would replace a chunk file or the manifest.
+ */
+function isInside(folder: string, path: string): boolean {
+  if (!isOutsideText(folder, path)) return true;
+  const realFolder = realPath(folder);
+  const realTarget = realPath(path);
+  return (
+    realFolder !== undefined && realTarget !== undefined && !isOutsideText(realFolder, realTarget)
+  );
+}
+
+/**
+ * Returns the error text for a file in the chunk folder, or undefined when no path of `paths` is
+ * in the chunk folder.
+ */
+function chunkFolderError(chunksDir: string, paths: Record<string, string>): string | undefined {
+  for (const [what, path] of Object.entries(paths)) {
+    if (isInside(chunksDir, path)) {
+      return `Error: the ${what} ${path} is in the chunk folder ${chunksDir}. Nothing was written. Use a file outside the chunk folder.\n`;
+    }
+  }
+  return undefined;
+}
+
 /** Returns the error text for a source file outside the parent folder of the chunk folder. */
 function outsideError(sourcePath: string, chunksDir: string, remedy: string): string {
   return `Error: the source file ${sourcePath} is outside ${dirname(chunksDir)}, the parent folder of the chunk folder. ${remedy}\n`;
@@ -345,9 +371,14 @@ function split(inputFile: string, options: Options, io: Io): number {
   const sourceFile = relativeSource(outputDir, absoluteInput);
   if (isAbsoluteAnywhere(sourceFile)) {
     io.stderr(
-      `Error: the chunk folder ${outputDir} is on another volume than ${absoluteInput}. Nothing was written. Put the chunk folder on the same volume as the source file.
-`,
+      `Error: the chunk folder ${outputDir} is on another volume than ${absoluteInput}. Nothing was written. Put the chunk folder on the same volume as the source file.\n`,
     );
+    return 1;
+  }
+  // A source file in its own chunk folder cannot be merged (merge refuses it), so split refuses it.
+  const selfError = chunkFolderError(outputDir, { "source file": absoluteInput });
+  if (selfError) {
+    io.stderr(selfError);
     return 1;
   }
 
@@ -443,6 +474,14 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
+  const selfError = chunkFolderError(chunksDir, {
+    "source file": sourcePath,
+    ...(options.output ? { "output file": resolve(options.output) } : {}),
+  });
+  if (selfError) {
+    io.stderr(selfError);
+    return 1;
+  }
   const outside = isOutside(dirname(chunksDir), sourcePath);
   if (outside && !options.output && !options.yes) {
     io.stderr(
@@ -561,6 +600,11 @@ function status(manifestFile: string, options: Options, io: Io): number {
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
+  const selfError = chunkFolderError(chunksDir, { "source file": sourcePath });
+  if (selfError) {
+    io.stderr(selfError);
+    return 1;
+  }
   if (isOutside(dirname(chunksDir), sourcePath) && !options.yes) {
     io.stderr(outsideError(sourcePath, chunksDir, "Use --yes to read it."));
     return 1;

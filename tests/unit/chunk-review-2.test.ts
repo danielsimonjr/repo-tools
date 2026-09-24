@@ -263,3 +263,61 @@ test("a manifest with an invalid lineBreaks value exits 1 (finding 4)", async ()
   expect(r.code).toBe(1);
   expect(r.err).toContain("lineBreaks");
 });
+
+describe("chunk: a manifest cannot target its own chunk folder (finding 6)", () => {
+  for (const source of ["001-part.md", "manifest.json", "new.md"]) {
+    test(`merge refuses the sourceFile ${source} in the chunk folder`, async () => {
+      const p = plant(`self-${source}`, manifestOf(source));
+      const before = readFileSync(p.manifest, "utf8");
+      const r = await chunk(["merge", p.manifest, "--allow-shrink", "--yes"]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain("chunk folder");
+      expect(readFileSync(p.manifest, "utf8")).toBe(before);
+      expect(readFileSync(join(p.chunks, "001-part.md"), "utf8")).toBe("# Part\n\nNew text.\n");
+    });
+  }
+
+  test("status refuses a sourceFile in the chunk folder", async () => {
+    const p = plant("self-status", manifestOf("001-part.md"));
+    const r = await chunk(["status", p.manifest, "--yes"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("chunk folder");
+  });
+
+  test("merge refuses a sourceFile that reaches the chunk folder through a junction", async () => {
+    const p = plant("self-junction", manifestOf(["..", "link", "001-part.md"].join("/")));
+    await withJunction(p.chunks, join(p.b, "link"), async () => {
+      const r = await chunk(["merge", p.manifest, "--allow-shrink"]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain("chunk folder");
+    });
+    expect(readFileSync(join(p.chunks, "001-part.md"), "utf8")).toBe("# Part\n\nNew text.\n");
+  });
+
+  test("merge refuses -o in the chunk folder", async () => {
+    const p = plant("self-output", manifestOf("../doc.md"));
+    const r = await chunk(["merge", p.manifest, "-o", join(p.chunks, "out.md")]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("chunk folder");
+  });
+
+  for (const name of ["manifest.json", "MANIFEST.JSON", "Manifest.Json"]) {
+    test(`merge and status refuse the chunk name ${name}`, async () => {
+      const p = plant(`self-name-${name}`, manifestOf("../doc.md", name));
+      for (const action of ["merge", "status"]) {
+        const r = await chunk([action, p.manifest]);
+        expect(r.code).toBe(1);
+        expect(r.err).toContain("chunk file name");
+      }
+    });
+  }
+});
+
+test("split -o refuses a chunk folder that holds the source file (finding 6)", async () => {
+  const dir = join(work, "self-split");
+  const src = put(join(dir, "doc.md"), "# A\n\ntext\n");
+  const r = await chunk(["split", src, "-o", dir]);
+  expect(r.code).toBe(1);
+  expect(r.err).toContain("chunk folder");
+  expect(r.out).toBe("");
+});

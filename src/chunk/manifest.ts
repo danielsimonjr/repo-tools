@@ -168,7 +168,8 @@ export function validateManifest(value: unknown): Manifest {
     if (typeof chunk !== "object" || chunk === null) fail(`chunks[${i}] must be an object`);
     const c = chunk as Record<string, unknown>;
     if (typeof c.filename !== "string") fail(`chunks[${i}].filename must be a string`);
-    if (!isPlainFileName(c.filename)) {
+    // A chunk named manifest.json (in any case) would read the manifest itself as a chunk.
+    if (!isPlainFileName(c.filename) || c.filename.toLowerCase() === MANIFEST_NAME) {
       fail(`chunks[${i}] has an unsafe chunk file name ${JSON.stringify(c.filename)}`);
     }
     if (typeof c.hash !== "string") fail(`chunks[${i}].hash must be a string`);

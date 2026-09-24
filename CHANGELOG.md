@@ -20,6 +20,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `chunk` does not let a manifest target its own chunk folder. `merge` and `status` exit 1 when
+  the `sourceFile` is in the chunk folder (by path text or by real path), and `merge` exits 1
+  when `-o` names a file in the chunk folder. `split -o` exits 1 when the chunk folder holds the
+  source file. A chunk file named `manifest.json`, in any case, is an unsafe chunk file name.
+  Before, a `sourceFile` that named a chunk file overwrote that chunk, a `sourceFile` of
+  `manifest.json` overwrote the manifest (with `--allow-shrink` or a larger result), and a
+  chunk named `MANIFEST.JSON` read the manifest as a chunk.
 - `chunk` keeps mixed and CR line breaks. `split` records each line break of a file with mixed
   or CR-only line breaks in the manifest, as runs such as `"lineBreaks": "crlf*2,lf*1"`, and
   `merge` puts each one back. The shrink guard compares the restored bytes. A merge of the
