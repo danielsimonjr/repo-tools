@@ -2,7 +2,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { toJson, writeLf } from "../../src/io.ts";
+import { toJson, withOneLf, writeLf } from "../../src/io.ts";
 
 const work = mkdtempSync(join(tmpdir(), "repo-tools-io-"));
 afterAll(() => rmSync(work, { recursive: true, force: true }));
@@ -18,6 +18,12 @@ describe("deterministic writes", () => {
     const file = join(work, "exact.txt");
     writeLf(file, "no newline at end");
     expect(readFileSync(file, "utf8")).toBe("no newline at end");
+  });
+
+  test("withOneLf ends the text with exactly one LF (rule R1)", () => {
+    expect(withOneLf("{}")).toBe("{}\n");
+    expect(withOneLf("a\n\n\n")).toBe("a\n");
+    expect(withOneLf("a\r\nb\r\n")).toBe("a\nb\n");
   });
 
   test("toJson uses 2-space indentation and ends with one LF", () => {

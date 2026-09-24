@@ -53,4 +53,3 @@ parser can't see (dynamic access, docs examples, published-API contract) before 
 Not imported cross-file, but referenced within their own module — they type or
 support exports that ARE used, so they cannot be deleted in isolation. Mostly
 interfaces typing live guards and per-package API completeness, not rot.
-

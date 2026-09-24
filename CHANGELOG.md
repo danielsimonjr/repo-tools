@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph R1: every report ends with exactly one LF. The JSON reports had no trailing newline,
+  and `duplicate-symbols.md` and `unused-analysis.md` had two. The goldens change in the last
+  byte only.
 - The chunk link tests remove their links the right way on each system: `unlinkSync` for the
   ordinary symlink that Linux and macOS create, `rmdirSync` for a Windows junction. Their cleanup
   failed on Linux and macOS with ENOTDIR.

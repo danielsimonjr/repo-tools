@@ -9,8 +9,9 @@
  * They read fixed paths of one consumer repo and write nothing on other repos. They ran after the
  * census gate and before the coverage summary; they come back as an extension (task D10).
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { withOneLf, writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
 import {
   buildDependencyMatrix,
@@ -136,9 +137,8 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const root = resolve(options.root);
   const outputDir = outputDirOf(root);
   const out = (name: string): string => `${OUTPUT_SUBDIR}/${name}`;
-  const write = (name: string, text: string): void => {
-    writeFileSync(join(outputDir, name), text);
-  };
+  // Every report ends with exactly one LF (rule R1).
+  const write = (name: string, text: string): void => writeReport(join(outputDir, name), text);
 
   if (options.checkCensus) {
     const failure = checkCensusNoRegen(root, outputDir);
@@ -275,7 +275,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     packageJson,
   );
   write("dependency-summary.compact.json", compactSummary);
-  const compactKb = (Buffer.byteLength(compactSummary, "utf8") / 1024).toFixed(1);
+  const compactKb = (Buffer.byteLength(withOneLf(compactSummary), "utf8") / 1024).toFixed(1);
   log(`Written: ${out("dependency-summary.compact.json")} (${compactKb}KB)`);
   write("package-export-surfaces.json", generateSurfacesJson(modules));
   log(`Written: ${out("package-export-surfaces.json")}`);
