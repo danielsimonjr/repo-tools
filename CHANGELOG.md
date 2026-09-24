@@ -109,6 +109,9 @@ All notable changes to this project are recorded in this file. The format follow
   any file into it. The manifest reader also checks the shape (version, `sourceFile`, `chunks`
   with `filename` and `hash`). A bad shape exits 1 with a message that starts with
   "invalid manifest", not with an internal Node error.
+- `chunk merge` (K7): a JSON array or an invalid JSON file merges back to its original text.
+  `split` writes such a file as one whole-file chunk (`_array` or `_invalid_json`), but `merge`
+  read every JSON chunk as an object, skipped the chunk and wrote `{}` over the source file.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`
   separators. You can move the source file and the chunk folder together, and `merge` still
   finds the source. The manifest holds no absolute path. `merge` and `status` print the

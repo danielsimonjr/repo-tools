@@ -302,8 +302,10 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   }
   log(`\nModified chunks: ${modifiedCount} of ${manifest.chunks.length}`);
 
-  const mergedContent =
-    fileType === "json" ? mergeJson(chunkContents, io.stderr) : chunkContents.join("\n");
+  // A JSON array or invalid JSON is one whole-file chunk of level 0 (`_array`, `_invalid_json`).
+  // Its text is the file text, so merge keeps it as it is (fix K7).
+  const keyChunks = fileType === "json" && !manifest.chunks.every((c) => c.level === 0);
+  const mergedContent = keyChunks ? mergeJson(chunkContents, io.stderr) : chunkContents.join("\n");
   const outputPath = options.output ? resolve(options.output) : sourcePath;
 
   if (readSource && existsSync(sourcePath)) {

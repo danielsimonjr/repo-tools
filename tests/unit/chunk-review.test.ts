@@ -171,3 +171,29 @@ describe("chunk path safety (reviewer finding 1)", () => {
     });
   }
 });
+
+const FIXTURES = join(import.meta.dir, "../fixtures/chunk");
+
+/** Copies fixture `file` to `<work>/<name>/`, splits it, merges it, and returns both texts. */
+async function splitMerge(name: string, file: string, mergeFlags: string[] = []) {
+  const dir = join(work, name);
+  const src = put(join(dir, file), readFileSync(join(FIXTURES, file), "utf8"));
+  const before = readFileSync(src, "utf8");
+  const s = await chunk(["split", src]);
+  expect(s.code).toBe(0);
+  const base = file.slice(0, file.lastIndexOf("."));
+  const manifest = join(dir, `${base}_chunks`, "manifest.json");
+  const m = await chunk(["merge", manifest, ...mergeFlags]);
+  return { dir, src, manifest, before, after: readFileSync(src, "utf8"), merge: m };
+}
+
+describe("chunk K7: no data loss on merge", () => {
+  for (const file of ["list.json", "broken.json"]) {
+    test(`${file} (one whole-file chunk) merges back to its original text`, async () => {
+      const r = await splitMerge(`k7-${file}`, file);
+      expect(r.merge.err).toBe("");
+      expect(r.merge.code).toBe(0);
+      expect(r.after).toBe(r.before);
+    });
+  }
+});
