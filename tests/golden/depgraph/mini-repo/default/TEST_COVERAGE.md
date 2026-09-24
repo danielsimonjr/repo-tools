@@ -8,16 +8,16 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 15 |
+| Total Source Files | 14 |
 | Total Test Files | 2 |
 | Source Files with Tests | 5 |
-| Source Files without Tests | 10 |
-| Coverage (raw, direct-import) | **33.3%** |
+| Source Files without Tests | 9 |
+| Coverage (raw, direct-import) | **35.7%** |
 ---
 
 ## Source Files Without Test Coverage
 
-The following 10 source files are not directly imported by any test file:
+The following 9 source files are not directly imported by any test file:
 
 ### Z/
 
@@ -26,7 +26,6 @@ The following 10 source files are not directly imported by any test file:
 ### root/
 
 - `src/_x.ts` → Expected test: `tests/unit/root/_x.test.ts`
-- `src/ambient.d.ts` → Expected test: `tests/unit/root/ambient.d.test.ts`
 - `src/cli.ts` → Expected test: `tests/unit/root/cli.test.ts`
 - `src/dyn.ts` → Expected test: `tests/unit/root/dyn.test.ts`
 - `src/orphan.ts` → Expected test: `tests/unit/root/orphan.test.ts`

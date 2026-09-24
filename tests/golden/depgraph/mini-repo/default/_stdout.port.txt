@@ -45,13 +45,12 @@ Written: docs/architecture/unused-analysis.md
 
 === Test Coverage Analysis ===
   - 2 test files analyzed
-  - 5/15 source files have tests (33.3%)
-  - 10 source files without tests
+  - 5/14 source files have tests (35.7%)
+  - 9 source files without tests
 
 Source files without test coverage:
   - src/Z/loop.ts
   - src/_x.ts
-  - src/ambient.d.ts
   - src/cli.ts
   - src/dyn.ts
   - src/orphan.ts

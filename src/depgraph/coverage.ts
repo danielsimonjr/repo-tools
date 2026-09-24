@@ -2,7 +2,8 @@
  * Test coverage by direct import: which source files the test files import, directly or through
  * barrel re-exports, and the optional coverage policy that marks files as intentionally untested.
  *
- * Fix F10: coverage follows chains of bare side-effect imports.
+ * Fix F10: coverage follows chains of bare side-effect imports. Fix F18: a `.d.ts` file is not
+ * in the denominator.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -177,13 +178,15 @@ export function traceReExports(importedPath: string, reExportMap: ReExportMap): 
 
 /**
  * Maps the source files to the test files that import them, directly or through barrel
- * re-exports, and applies the coverage policy of `root`.
+ * re-exports, and applies the coverage policy of `root`. A `.d.ts` file is not measured (fix
+ * F18): it declares types and holds no code that a test can run.
  */
 export function analyzeTestCoverage(
-  sourceFiles: ParsedFile[],
+  graphFiles: ParsedFile[],
   testFiles: ParsedFile[],
   root: string,
 ): TestCoverageAnalysis {
+  const sourceFiles = graphFiles.filter((f) => !f.path.endsWith(".d.ts"));
   const sourceFilePaths = new Set(sourceFiles.map((f) => f.path));
   const coverageMap = new Map<string, string[]>();
   const testToSourceMap = new Map<string, string[]>();

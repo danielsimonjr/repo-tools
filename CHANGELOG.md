@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F18: a `.d.ts` file is not in the test coverage denominator. It declares types and
+  holds no code that a test can run; the port listed it as an untested source file. The graph
+  keeps the file. In the `mini-repo` fixture, `src/ambient.d.ts` leaves the coverage reports:
+  5/14 source files have tests (35.7%), not 5/15 (33.3%).
 - depgraph F17: a package `src/index.ts` that re-exports nothing is an entry root, not a
   "potentially unused file" (the port exempted only the root `src/index.ts`). Regression tests
   now pin the other classifier roots, which were already in the port: a `bin` target, an
