@@ -100,6 +100,15 @@ All notable changes to this project are recorded in this file. The format follow
   other keys and in values (`"items"` became `"itemetadatas"`). Now a JSON object with a
   top-level object round-trips to a deep-equal value. The compact format does not change. The
   three JSON restore goldens now hold the correct output.
+- `chunk merge` and `chunk status` check the manifest before they read or write a file. A chunk
+  file name must be a plain file name: a name with `/`, `\`, `:`, or the name `.` or `..`, exits
+  1. A 2.x manifest with an absolute `sourceFile` exits 1; a 1.x manifest can still hold one.
+  When the source file is outside the parent folder of the chunk folder, `merge` exits 1 unless
+  `-o <file>` names the target or `--yes` is given, and `status` exits 1 unless `--yes` is given.
+  Before this fix, a manifest from another person could make `merge` overwrite any file and read
+  any file into it. The manifest reader also checks the shape (version, `sourceFile`, `chunks`
+  with `filename` and `hash`). A bad shape exits 1 with a message that starts with
+  "invalid manifest", not with an internal Node error.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`
   separators. You can move the source file and the chunk folder together, and `merge` still
   finds the source. The manifest holds no absolute path. `merge` and `status` print the

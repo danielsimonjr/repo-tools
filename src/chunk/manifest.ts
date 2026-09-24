@@ -6,7 +6,7 @@
  */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { relative, resolve, sep } from "node:path";
+import { posix, relative, resolve, sep, win32 } from "node:path";
 import { toJson, writeLf } from "../io.ts";
 
 export type FileType = "markdown" | "json" | "typescript";
@@ -92,12 +92,69 @@ export function resolveSource(manifestDir: string, sourceFile: string): string {
  * invalid JSON and on another version.
  */
 export function readManifest(path: string): Manifest {
-  const manifest = JSON.parse(readFileSync(path, "utf8")) as Manifest;
-  const version = String(manifest.version);
+  return validateManifest(JSON.parse(readFileSync(path, "utf8")));
+}
+
+/**
+ * Returns true when `name` is a plain file name: not empty, not `.` or `..`, and without a path
+ * separator, a drive colon or a NUL. A chunk file name must be plain, so that a manifest cannot
+ * make `merge` or `status` read a file outside the chunk folder.
+ */
+export function isPlainFileName(name: string): boolean {
+  if (name === "" || name === "." || name === ".." || name.includes("\u0000")) return false;
+  return !/[/\\:]/.test(name);
+}
+
+/**
+ * Returns true when `path` is absolute or drive-relative on POSIX or on Windows. The check does
+ * not depend on the OS of the run, so one manifest gives one result on each machine.
+ */
+export function isAbsoluteAnywhere(path: string): boolean {
+  return posix.isAbsolute(path) || win32.isAbsolute(path) || /^[A-Za-z]:/.test(path);
+}
+
+function fail(message: string): never {
+  throw new Error(`invalid manifest: ${message}`);
+}
+
+/**
+ * Checks the shape of a parsed manifest and returns it as a `Manifest`. Throws an error that
+ * starts with "invalid manifest" on a bad shape, an unsafe chunk file name or an absolute
+ * `sourceFile` in a 2.x manifest. A 1.x manifest can hold an absolute `sourceFile`.
+ */
+export function validateManifest(value: unknown): Manifest {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    fail("the manifest must be a JSON object");
+  }
+  const m = value as Record<string, unknown>;
+  if (typeof m.version !== "string") fail("version must be a string");
+  const version = m.version;
   if (!version.startsWith("1.") && !version.startsWith("2.")) {
     throw new Error(`unsupported manifest version ${version} (this build reads 1.x and 2.x)`);
   }
-  return manifest;
+  if (typeof m.sourceFile !== "string" || m.sourceFile === "") {
+    fail("sourceFile must be a non-empty string");
+  }
+  if (version.startsWith("2.") && isAbsoluteAnywhere(m.sourceFile)) {
+    fail("a 2.x manifest cannot hold an absolute sourceFile");
+  }
+  if (
+    m.fileType !== undefined &&
+    !["markdown", "json", "typescript"].includes(String(m.fileType))
+  ) {
+    fail("fileType must be markdown, json or typescript");
+  }
+  if (!Array.isArray(m.chunks)) fail("chunks must be an array");
+  m.chunks.forEach((chunk: unknown, i: number) => {
+    if (typeof chunk !== "object" || chunk === null) fail(`chunks[${i}] must be an object`);
+    const c = chunk as Record<string, unknown>;
+    if (typeof c.filename !== "string") fail(`chunks[${i}].filename must be a string`);
+    if (!isPlainFileName(c.filename)) {
+      fail(`chunks[${i}] has an unsafe chunk file name ${JSON.stringify(c.filename)}`);
+    }
+    if (typeof c.hash !== "string") fail(`chunks[${i}].hash must be a string`);
+  });
+  return m as unknown as Manifest;
 }
 
 /** Writes `manifest` to `path` as JSON with 2-space indentation and one trailing LF. */

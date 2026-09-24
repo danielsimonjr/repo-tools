@@ -5,7 +5,7 @@
  * Output goes to `io`. Errors return exit code 1; this module never ends the process.
  */
 import { copyFileSync, existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, extname, join, resolve } from "node:path";
+import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { writeLf } from "../io.ts";
 import type { Io } from "../io-types.ts";
 import {
@@ -46,7 +46,11 @@ Split options:
 
 Merge options:
   -o, --output <file>    Output file (default: the source file of the manifest)
+  --yes                  Write a source file outside the parent folder of the chunk folder
   --dry-run              Show the result and write no files
+
+Status options:
+  --yes                  Read a source file outside the parent folder of the chunk folder
 
 File types:
   Markdown (.md, .markdown)          Splits at headings of level 1 to <n>.
@@ -67,6 +71,7 @@ interface Options {
   maxLines?: number;
   type?: string;
   dryRun?: boolean;
+  yes?: boolean;
 }
 
 /** Parses the flags after the action and the target, as the original chunker does. */
@@ -84,6 +89,8 @@ function parseOptions(args: string[]): Options {
       options.type = args[++i];
     } else if (arg === "--dry-run") {
       options.dryRun = true;
+    } else if (arg === "--yes") {
+      options.yes = true;
     }
   }
   return options;
@@ -108,6 +115,20 @@ function invalidOption(options: Options): string | undefined {
 /** Returns an error message when `path` is a directory, or undefined. */
 function directoryError(path: string): string | undefined {
   return statSync(path).isDirectory() ? `${path} is a directory, not a file` : undefined;
+}
+
+/**
+ * Returns true when `path` is outside `folder`. The source file of a manifest must be in the
+ * parent folder of the chunk folder, or below it, unless the user confirms another place.
+ */
+function isOutside(folder: string, path: string): boolean {
+  const rel = relative(folder, path);
+  return rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel);
+}
+
+/** Returns the error text for a source file outside the parent folder of the chunk folder. */
+function outsideError(sourcePath: string, chunksDir: string, remedy: string): string {
+  return `Error: the source file ${sourcePath} is outside ${dirname(chunksDir)}, the parent folder of the chunk folder. ${remedy}\n`;
 }
 
 /** A line writer on top of `io.stdout`, in the style of `console.log`. */
@@ -242,6 +263,15 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
+  const outside = isOutside(dirname(chunksDir), sourcePath);
+  if (outside && !options.output && !options.yes) {
+    io.stderr(
+      outsideError(sourcePath, chunksDir, "Use -o <file> to name the target, or --yes to confirm."),
+    );
+    return 1;
+  }
+  // Without --yes, merge does not read a source file outside the parent folder.
+  const readSource = !outside || options.yes === true;
   const hash = hashFor(manifest);
   const fileType = manifest.fileType || "markdown";
 
@@ -276,7 +306,7 @@ function merge(manifestFile: string, options: Options, io: Io): number {
     fileType === "json" ? mergeJson(chunkContents, io.stderr) : chunkContents.join("\n");
   const outputPath = options.output ? resolve(options.output) : sourcePath;
 
-  if (existsSync(sourcePath)) {
+  if (readSource && existsSync(sourcePath)) {
     const currentSourceHash = hash(readFileSync(sourcePath, "utf8"));
     if (currentSourceHash !== manifest.sourceHash) {
       log("\nWARNING: Source file has changed since split!");
@@ -304,7 +334,7 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   return 0;
 }
 
-function status(manifestFile: string, io: Io): number {
+function status(manifestFile: string, options: Options, io: Io): number {
   const log = lineWriter(io);
   const absoluteManifest = resolve(manifestFile);
   if (!existsSync(absoluteManifest)) {
@@ -319,6 +349,10 @@ function status(manifestFile: string, io: Io): number {
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
+  if (isOutside(dirname(chunksDir), sourcePath) && !options.yes) {
+    io.stderr(outsideError(sourcePath, chunksDir, "Use --yes to read it."));
+    return 1;
+  }
   const hash = hashFor(manifest);
   const fileType = manifest.fileType || "markdown";
 
@@ -415,7 +449,7 @@ export async function run(argv: string[], io: Io): Promise<number> {
           io.stderr("Usage: repo-tools chunk status <manifest.json>\n");
           return 1;
         }
-        return status(target, io);
+        return status(target, options, io);
       default:
         io.stderr(`Unknown command: ${action}\n\n${CHUNK_HELP}`);
         return 1;
