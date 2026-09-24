@@ -40,7 +40,7 @@ Dependency graph generation complete!
   - 0 potentially unused exports
 
 Written: docs/architecture/unused-analysis.md
-Written: docs/architecture/FILE_INVENTORY.md (9 files: 3 reachable, 4 build-entry, 0 test-only, 0 orphan, 1 test, 0 tool, 1 config, 0 example)
+Written: docs/architecture/FILE_INVENTORY.md (9 files: 3 reachable, 4 build-entry, 0 test-only, 0 orphan, 1 test, 0 tool, 1 config, 0 example, 0 bench)
 File census self-check passed: 9 files == maximal repo walk (independent), 0 orphans.
 
 === Test Coverage Analysis ===

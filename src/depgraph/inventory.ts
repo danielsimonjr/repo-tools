@@ -21,7 +21,8 @@ export type FileDisposition =
   | "test"
   | "tool"
   | "config"
-  | "example";
+  | "example"
+  | "bench";
 
 /** Where a census file is, by its path only. */
 export type FileArea = "src" | "tests" | "bench" | "tools" | "config" | "examples" | "docs";
@@ -54,7 +55,7 @@ export function classifyArea(rel: string): FileArea {
   if (/(^|\/)(tools|scripts)\//.test(rel)) return "tools";
   if (/\.config(\.[\w-]+)?\.[cm]?ts$/.test(rel)) return "config";
   if (/\.(test|spec)\.ts$/.test(rel) || /(^|\/)tests?\//.test(rel)) return "tests";
-  if (/(^|\/)bench\//.test(rel)) return "bench";
+  if (/(^|\/)bench(marks)?\//.test(rel)) return "bench";
   if (/^examples\//.test(rel)) return "examples";
   if (/^docs\//.test(rel)) return "docs";
   return "src";
@@ -107,6 +108,8 @@ export function buildFileInventory(
       disposition = "tool";
     } else if (area === "config") {
       disposition = "config";
+    } else if (area === "bench") {
+      disposition = "bench";
     } else {
       disposition = "example";
     }
@@ -129,6 +132,7 @@ export function buildFileInventory(
     tool: 0,
     config: 0,
     example: 0,
+    bench: 0,
   };
   const byArea: Record<string, number> = {};
   const byPackage: Record<string, number> = {};

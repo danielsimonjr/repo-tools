@@ -22,6 +22,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tool` | 0 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks). |
 | `config` | 0 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root). |
 | `example` | 0 | An `examples/` or `docs/` reference/illustration source. |
+| `bench` | 0 | A `bench/` or `benchmarks/` source file (run directly, not imported). |
 | **Total** | **16** | |
 
 ## Per-area counts

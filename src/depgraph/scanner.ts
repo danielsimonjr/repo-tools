@@ -134,7 +134,16 @@ export function walkRepoTsFiles(root: string): string[] {
 }
 
 /** The root directories that the census walks after the workspace packages. */
-const CENSUS_DIRS = ["tests", "test", "bench", "tools", "examples", "docs", "scripts"];
+const CENSUS_DIRS = [
+  "tests",
+  "test",
+  "bench",
+  "benchmarks",
+  "tools",
+  "examples",
+  "docs",
+  "scripts",
+];
 
 /**
  * The census file discovery: each workspace package directory (in single-package mode, each

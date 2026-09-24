@@ -45,7 +45,7 @@ Potentially unused exports:
     - dynamicValue (constant)
 
 Written: docs/architecture/unused-analysis.md
-Written: docs/architecture/FILE_INVENTORY.md (16 files: 10 reachable, 3 build-entry, 0 test-only, 1 orphan, 2 test, 0 tool, 0 config, 0 example)
+Written: docs/architecture/FILE_INVENTORY.md (16 files: 10 reachable, 3 build-entry, 0 test-only, 1 orphan, 2 test, 0 tool, 0 config, 0 example, 0 bench)
 File census self-check passed: 16 files == maximal repo walk (independent), 1 orphan.
 
 === Test Coverage Analysis ===

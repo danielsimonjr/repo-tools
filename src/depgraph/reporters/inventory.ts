@@ -17,6 +17,7 @@ export const FILE_DISPOSITION_LEGEND: Array<[FileDisposition, string]> = [
   ["tool", "A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks)."],
   ["config", "A build/test config source (`*.config.ts`: vitest/tsup, per-package or root)."],
   ["example", "An `examples/` or `docs/` reference/illustration source."],
+  ["bench", "A `bench/` or `benchmarks/` source file (run directly, not imported)."],
 ];
 
 /** The file-inventory.json text (2-space JSON, no trailing newline). */

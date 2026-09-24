@@ -20,6 +20,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph M1 follow-up: the census walks `benchmarks/` and classes its files as `bench` (a new
+  disposition). A single package with benchmark scripts failed the census as "absent" and exited 1.
 - depgraph M1: the single-package model. The inventory (`FILE_INVENTORY.md`,
   `file-inventory.json`), the census self-check and the dormancy split run in both modes; the
   port ran them in monorepo mode only, so single-package dormancy was always 0. In

@@ -113,3 +113,18 @@ describe("M1: single-package inventory, census and dormancy", () => {
     expect((await runDepgraph(root, ["--check-census"])).code).toBe(0);
   });
 });
+
+describe("M1: a benchmarks folder is part of the census", () => {
+  test("a single package with benchmarks/*.ts passes the census, and the files are bench", async () => {
+    const root = makeTree({
+      "package.json": JSON.stringify({ name: "m1b", version: "1.0.0" }),
+      "src/index.ts": "/** Entry. */\nexport const main = 1;\n",
+      "benchmarks/speed.ts": "import { main } from '../src/index.js';\nmain;\n",
+    });
+    const result = await runDepgraph(root);
+    expect(result.code).toBe(0);
+    expect(result.stderr).not.toContain("ABSENT");
+    const inventory = result.report("file-inventory.json");
+    expect(dispositions(inventory)["benchmarks/speed.ts"]).toBe("bench");
+  });
+});
