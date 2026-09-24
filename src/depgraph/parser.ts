@@ -11,7 +11,7 @@
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { stripComments } from "../mask.ts";
-import { relativePosix } from "./paths.ts";
+import { relativePosix, withoutTsExtension } from "./paths.ts";
 import { resolveWorkspaceSource } from "./resolver.ts";
 import type { ParsedFile, WorkspacePackage } from "./types.ts";
 
@@ -106,7 +106,7 @@ export function cleanExportName(name: string): string {
 
 /** A description made from the file name and the export counts, for a file with none. */
 export function generateFallbackDescription(file: ParsedFile): string {
-  const fileName = basename(file.path, ".ts");
+  const fileName = withoutTsExtension(basename(file.path));
   if (fileName === "index") {
     if (file.exports.reExported.length > 0) {
       const pkgName = file.packageName || dirname(file.path).split("/").pop() || "";
@@ -201,7 +201,7 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
 
   const result: ParsedFile = {
     path: relativePath,
-    name: basename(filePath, ".ts"),
+    name: withoutTsExtension(basename(filePath)),
     externalDependencies: [],
     nodeDependencies: [],
     internalDependencies: [],

@@ -1,9 +1,9 @@
 metadata:
   name: mini-repo
   version: 1.0.0
-  totalFiles: 15
+  totalFiles: 16
   totalModules: 4
-  totalExports: 16
+  totalExports: 17
 entryPoints:
   - file: src/index.ts
     type: main
@@ -130,6 +130,16 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports: []
+    src/view.tsx:
+      description: view module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - render
+      functions:
+        - render
   Z:
     src/Z/index.ts:
       description: Package entry point for Z (re-exports 2 symbols)
@@ -269,6 +279,7 @@ dependencyGraph:
         - src/ping.ts
         - src/pong.ts
         - src/register.ts
+        - src/view.tsx
     - name: Z
       files:
         - src/Z/index.ts
@@ -281,13 +292,13 @@ dependencyGraph:
       files:
         - src/util/index.ts
 statistics:
-  totalTypeScriptFiles: 15
+  totalTypeScriptFiles: 16
   totalModules: 4
-  totalLinesOfCode: 101
-  totalExports: 16
+  totalLinesOfCode: 106
+  totalExports: 17
   totalClasses: 1
   totalInterfaces: 3
-  totalFunctions: 7
+  totalFunctions: 8
   totalTypeGuards: 0
   totalEnums: 0
   totalConstants: 2

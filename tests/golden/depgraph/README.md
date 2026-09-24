@@ -21,7 +21,8 @@ Known facts in these goldens:
 - `mono-repo` exits 0. Before fix F14 it exited 1: the pre-port generator read only the first
   tsup `entry` array, so the census gate reported `packages/core/src/worker.ts` as an orphan.
   `_stdout.txt` (the pre-port reference) still shows that run.
-- `mini-repo` omits `src/view.tsx`, because the pre-port generator reads `.ts` files only.
+- `mini-repo` holds `src/view.tsx` since D10b: the port reads `.ts` and `.tsx` files. The
+  pre-port generator read `.ts` files only, so `_stdout.txt` (the pre-port reference) omits it.
 - `_stdout.txt` holds the fixture root (masked). The port writes no absolute path to standard
   output (design criterion 4). `_stdout.port.txt` is the port's own standard output, and the
   characterization test compares it byte for byte.

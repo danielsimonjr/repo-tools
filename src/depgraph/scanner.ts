@@ -30,6 +30,21 @@ export function setWalkSkip(names: readonly string[] = DEFAULT_EXCLUDE): void {
   walkScope.skip = new Set(names);
 }
 
+/** True for a TypeScript input file name: `.ts` or `.tsx` (design section 3.2). */
+export function isTsInput(name: string): boolean {
+  return name.endsWith(".ts") || name.endsWith(".tsx");
+}
+
+/** True for a test file name: `.test.ts`, `.spec.ts`, `.test.tsx` or `.spec.tsx`. */
+export function isTestInput(name: string): boolean {
+  return /\.(test|spec)\.tsx?$/.test(name);
+}
+
+/** True for a census file name: a TypeScript input that is not a `.d.ts` file. */
+function isCensusInput(name: string): boolean {
+  return isTsInput(name) && !name.endsWith(".d.ts");
+}
+
 /** Directory names that hold tests. Both spellings occur. */
 export const TEST_DIR_NAMES = ["test", "tests"] as const;
 
@@ -52,8 +67,8 @@ const NOT_SOURCE = new Set([
 ]);
 
 /**
- * Collects every `.ts` file under `dir` that is not a `.test.ts` or `.spec.ts` file. Keeps
- * `.d.ts` files. Skips the folders of the skip list. Returns absolute paths in listing order.
+ * Collects every `.ts` and `.tsx` file under `dir` that is not a test file. Keeps `.d.ts`
+ * files. Skips the folders of the skip list. Returns absolute paths in listing order.
  */
 export function getAllTsFiles(dir: string, files: string[] = []): string[] {
   if (!isWalkable(dir)) return files;
@@ -63,18 +78,14 @@ export function getAllTsFiles(dir: string, files: string[] = []): string[] {
     if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
       getAllTsFiles(fullPath, files);
-    } else if (
-      entry.endsWith(".ts") &&
-      !entry.endsWith(".test.ts") &&
-      !entry.endsWith(".spec.ts")
-    ) {
+    } else if (isTsInput(entry) && !isTestInput(entry)) {
       files.push(fullPath);
     }
   }
   return files;
 }
 
-/** Collects the `.ts` source files under `dir`: no test file and no `.d.ts` file. */
+/** Collects the `.ts` and `.tsx` source files under `dir`: no test file and no `.d.ts` file. */
 export function getAllSourceTsFiles(dir: string, files: string[] = []): string[] {
   if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
@@ -83,19 +94,14 @@ export function getAllSourceTsFiles(dir: string, files: string[] = []): string[]
     if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
       getAllSourceTsFiles(fullPath, files);
-    } else if (
-      entry.endsWith(".ts") &&
-      !entry.endsWith(".test.ts") &&
-      !entry.endsWith(".spec.ts") &&
-      !entry.endsWith(".d.ts")
-    ) {
+    } else if (isCensusInput(entry) && !isTestInput(entry)) {
       files.push(fullPath);
     }
   }
   return files;
 }
 
-/** Collects the `.test.ts` and `.spec.ts` files under `dir`. Skips the skip list. */
+/** Collects the test files (`.test.ts(x)`, `.spec.ts(x)`) under `dir`. Skips the skip list. */
 export function getAllTestFiles(dir: string, files: string[] = []): string[] {
   if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
@@ -104,7 +110,7 @@ export function getAllTestFiles(dir: string, files: string[] = []): string[] {
     if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
       getAllTestFiles(fullPath, files);
-    } else if (entry.endsWith(".test.ts") || entry.endsWith(".spec.ts")) {
+    } else if (isTestInput(entry)) {
       files.push(fullPath);
     }
   }
@@ -142,7 +148,7 @@ function censusSkips(name: string): boolean {
 }
 
 /**
- * The maximal repo walk: every `.ts` file except `.d.ts` under `root`. Skips the skip list and
+ * The maximal repo walk: every `.ts` and `.tsx` file except `.d.ts` under `root`. Skips the skip list and
  * dot-directories. Returns root-relative POSIX paths, sorted by `Array#sort`.
  */
 export function walkRepoTsFiles(root: string, excluded: Excluded = () => false): string[] {
@@ -153,8 +159,7 @@ export function walkRepoTsFiles(root: string, excluded: Excluded = () => false):
       const p = join(dir, e.name);
       if (e.isDirectory() && excluded(relativePosix(root, p))) continue;
       if (e.isDirectory()) walk(p);
-      else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts"))
-        out.push(relativePosix(root, p));
+      else if (isCensusInput(e.name)) out.push(relativePosix(root, p));
     }
   };
   walk(root);
@@ -176,7 +181,7 @@ const CENSUS_DIRS = [
 /**
  * The census file discovery: each workspace package directory (in single-package mode, each
  * source root in `sourceDirs`, by default those of `resolveSourceDirs`, fix M1), the directories in `CENSUS_DIRS`, and the `.ts`
- * files at the root. Narrower than `walkRepoTsFiles` on purpose, so that the census self-check
+ * and `.tsx` files at the root. Narrower than `walkRepoTsFiles` on purpose, so that the census self-check
  * finds a location that the census does not list.
  */
 export function collectCensusFiles(
@@ -193,7 +198,7 @@ export function collectCensusFiles(
       const p = join(dir, e.name);
       if (e.isDirectory() && excluded(relativePosix(root, p))) continue;
       if (e.isDirectory()) walk(p);
-      else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) set.add(relativePosix(root, p));
+      else if (isCensusInput(e.name)) set.add(relativePosix(root, p));
     }
   };
   for (const [, ws] of workspaces) walk(join(root, ws.directory));
@@ -201,7 +206,7 @@ export function collectCensusFiles(
   for (const d of CENSUS_DIRS) walk(join(root, d));
   for (const e of listEntries(root)) {
     if (isLinkEntry(root, e)) continue;
-    if (e.isFile() && e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) set.add(e.name);
+    if (e.isFile() && isCensusInput(e.name)) set.add(e.name);
   }
   return [...set];
 }

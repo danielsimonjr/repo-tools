@@ -1,12 +1,12 @@
 Scanning codebase for dependencies...
 Created output directory: docs/architecture
-  src: 15 files
-Found 15 TypeScript files total
+  src: 16 files
+Found 16 TypeScript files total
 Parsed all files
 Entry points: 3
-Reachable files: 13
+Reachable files: 14
 Dormant files: 2
-Analyzing all 15 files (dormancy reported; use --reachable-only to restrict)
+Analyzing all 16 files (dormancy reported; use --reachable-only to restrict)
 Categorized into 4 modules
 Found 2 cyclic components (1 runtime, 1 type-only)
 Generated statistics
@@ -24,9 +24,9 @@ Written: docs/architecture/TEST_COVERAGE.md
 Written: docs/architecture/test-coverage.json
 
 Dependency graph generation complete!
-  - 13 reachable files, 2 dormant files
-  - 15 files analyzed
-  - 16 exports found (7 re-exports)
+  - 14 reachable files, 2 dormant files
+  - 16 files analyzed
+  - 17 exports found (7 re-exports)
   - 3 type-only imports detected
   - 2 cyclic components:
       1 runtime, 2 files (require attention)
@@ -42,12 +42,12 @@ Potentially unused exports:
     - unusedConstant (constant)
 
 Written: docs/architecture/unused-analysis.md
-Written: docs/architecture/FILE_INVENTORY.md (16 files: 10 reachable, 3 build-entry, 0 test-only, 1 orphan, 2 test, 0 tool, 0 config, 0 example, 0 bench)
-File census self-check passed: 16 files == maximal repo walk (independent), 1 orphan.
+Written: docs/architecture/FILE_INVENTORY.md (17 files: 11 reachable, 3 build-entry, 0 test-only, 1 orphan, 2 test, 0 tool, 0 config, 0 example, 0 bench)
+File census self-check passed: 17 files == maximal repo walk (independent), 1 orphan.
 
 === Test Coverage Analysis ===
   - 2 test files analyzed
-  - 5/14 source files have tests (35.7%)
+  - 6/15 source files have tests (40.0%)
   - 9 source files without tests
 
 Source files without test coverage:

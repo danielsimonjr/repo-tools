@@ -7,6 +7,11 @@ import { join, relative } from "node:path";
 /** The output directory, relative to the root. Lowercase, as git tracks it. */
 export const OUTPUT_SUBDIR = "docs/architecture";
 
+/** Returns `path` without its `.ts` or `.tsx` extension. `a.d.ts` gives `a.d`. */
+export function withoutTsExtension(path: string): string {
+  return path.replace(/\.tsx?$/, "");
+}
+
 /** Replaces each backslash with a forward slash. */
 export function toPosix(path: string): string {
   return path.replace(/\\/g, "/");

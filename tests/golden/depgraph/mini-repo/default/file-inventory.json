@@ -1,7 +1,7 @@
 {
-  "totalFiles": 16,
+  "totalFiles": 17,
   "byDisposition": {
-    "reachable": 10,
+    "reachable": 11,
     "build-entry": 3,
     "test-only": 0,
     "orphan": 1,
@@ -12,11 +12,11 @@
     "bench": 0
   },
   "byArea": {
-    "src": 14,
+    "src": 15,
     "tests": 2
   },
   "byPackage": {
-    "(root)": 16
+    "(root)": 17
   },
   "files": [
     {
@@ -115,6 +115,13 @@
       "package": "(root)",
       "area": "src",
       "disposition": "build-entry",
+      "loc": 5
+    },
+    {
+      "file": "src/view.tsx",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
       "loc": 5
     },
     {

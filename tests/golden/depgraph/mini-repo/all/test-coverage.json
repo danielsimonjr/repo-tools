@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "totalSourceFiles": 14,
+    "totalSourceFiles": 15,
     "totalTestFiles": 2,
-    "testedCount": 5,
+    "testedCount": 6,
     "untestedCount": 9,
-    "coveragePercent": "35.7",
+    "coveragePercent": "40.0",
     "effectiveCoverage": {
       "policyLoaded": false,
-      "activeFiles": 14,
-      "testedActive": 5,
+      "activeFiles": 15,
+      "testedActive": 6,
       "activeUntested": 9,
       "excludedTotal": 0,
-      "percent": "35.7",
+      "percent": "40.0",
       "breakdown": {
         "active_untested": 9
       }
@@ -33,7 +33,8 @@
     "src/Z/index.ts",
     "src/Z/zed.ts",
     "src/a.ts",
-    "src/index.ts"
+    "src/index.ts",
+    "src/view.tsx"
   ],
   "coverageMap": {
     "src/B.ts": [
@@ -60,7 +61,10 @@
     "src/ping.ts": [],
     "src/pong.ts": [],
     "src/register.ts": [],
-    "src/util/index.ts": []
+    "src/util/index.ts": [],
+    "src/view.tsx": [
+      "tests/barrel.test.ts"
+    ]
   },
   "testToSourceMap": {
     "tests/a.test.ts": [
@@ -71,6 +75,7 @@
       "src/a.ts",
       "src/B.ts",
       "src/Z/index.ts",
+      "src/view.tsx",
       "src/Z/zed.ts"
     ]
   },

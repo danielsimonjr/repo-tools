@@ -8,13 +8,13 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 16
+**Total files**: 17
 
 ## Disposition counts
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 10 | A `src/` file in the module graph, reachable from a root. |
+| `reachable` | 11 | A `src/` file in the module graph, reachable from a root. |
 | `build-entry` | 3 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only` | 0 | A `src/` file not reachable from src roots but imported by a test. |
 | `orphan` | 1 | A `src/` file reachable from nothing — a delete/wire candidate (fails the gate with `--strict-orphans`). |
@@ -23,20 +23,20 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config` | 0 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root). |
 | `example` | 0 | An `examples/` or `docs/` reference/illustration source. |
 | `bench` | 0 | A `bench/` or `benchmarks/` source file (run directly, not imported). |
-| **Total** | **16** | |
+| **Total** | **17** | |
 
 ## Per-area counts
 
 | Area | Files |
 | --- | --: |
-| `src` | 14 |
+| `src` | 15 |
 | `tests` | 2 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 16 |
+| `(root)` | 17 |
 
 ## All files
 
@@ -56,6 +56,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `src/pong.ts` | (root) | src | reachable |
 | `src/register.ts` | (root) | src | reachable |
 | `src/util/index.ts` | (root) | src | build-entry |
+| `src/view.tsx` | (root) | src | reachable |
 | `tests/a.test.ts` | (root) | tests | test |
 | `tests/barrel.test.ts` | (root) | tests | test |
 

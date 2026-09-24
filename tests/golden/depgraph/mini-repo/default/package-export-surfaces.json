@@ -12,7 +12,8 @@
     ],
     "root": [
       "Bravo",
-      "alpha"
+      "alpha",
+      "render"
     ],
     "util": [
       "clamp"

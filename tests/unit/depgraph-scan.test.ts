@@ -68,13 +68,18 @@ describe("scanner", () => {
     "new/n.ts": "",
   });
 
-  test("getAllTsFiles keeps .d.ts and skips tests, .tsx and node_modules", () => {
-    expect(rel(root, getAllTsFiles(join(root, "src")))).toEqual(["src/a.ts", "src/g.d.ts"]);
+  // D10b: `.tsx` is an input (design section 3.2); the pre-port walks skipped it.
+  test("getAllTsFiles keeps .d.ts and .tsx and skips tests and node_modules", () => {
+    expect(rel(root, getAllTsFiles(join(root, "src")))).toEqual([
+      "src/a.ts",
+      "src/g.d.ts",
+      "src/x.tsx",
+    ]);
     expect(getAllTsFiles(join(root, "absent"))).toEqual([]);
   });
 
   test("getAllSourceTsFiles also skips .d.ts", () => {
-    expect(rel(root, getAllSourceTsFiles(join(root, "src")))).toEqual(["src/a.ts"]);
+    expect(rel(root, getAllSourceTsFiles(join(root, "src")))).toEqual(["src/a.ts", "src/x.tsx"]);
   });
 
   test("getAllTestFiles finds .test.ts and .spec.ts", () => {
@@ -97,6 +102,7 @@ describe("scanner", () => {
       "src/a.test.ts",
       "src/a.ts",
       "src/b.spec.ts",
+      "src/x.tsx",
       "tests/t.test.ts",
       "vitest.config.ts",
     ]);
@@ -110,6 +116,7 @@ describe("scanner", () => {
       "src/a.test.ts",
       "src/a.ts",
       "src/b.spec.ts",
+      "src/x.tsx",
       "tests/t.test.ts",
       "vitest.config.ts",
     ]);

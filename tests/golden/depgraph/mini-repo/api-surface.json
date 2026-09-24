@@ -375,6 +375,24 @@
           "summary": "Reachable only through the `./util` exports subpath."
         }
       ]
+    },
+    {
+      "path": "src/view.tsx",
+      "exports": [
+        {
+          "name": "render",
+          "localName": "render",
+          "kind": "function",
+          "line": 2,
+          "async": false,
+          "typeParams": null,
+          "params": "label: string",
+          "returnType": "string",
+          "stability": null,
+          "documented": true,
+          "summary": "A TSX file."
+        }
+      ]
     }
   ]
 }

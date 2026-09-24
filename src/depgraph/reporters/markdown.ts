@@ -7,6 +7,7 @@
  */
 import { basename } from "node:path";
 import { generateFallbackDescription } from "../parser.ts";
+import { withoutTsExtension } from "../paths.ts";
 import { resolvePath } from "../resolver.ts";
 import type {
   CyclicComponent,
@@ -51,7 +52,7 @@ export function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]):
     for (const filePath of moduleFiles.slice(0, 10)) {
       const nodeId = `N${nodeCounter++}`;
       nodeIds.set(filePath, nodeId);
-      lines.push(`        ${nodeId}[${basename(filePath, ".ts")}]`);
+      lines.push(`        ${nodeId}[${withoutTsExtension(basename(filePath))}]`);
     }
     if (moduleFiles.length > 10) {
       lines.push(`        N${nodeCounter++}[...${moduleFiles.length - 10} more]`);
@@ -252,7 +253,7 @@ export function generateMarkdown(
     )
     .slice(0, 40);
   for (const [filePath, deps] of matrixEntries) {
-    const shortPath = filePath.replace(/\.ts$/, "");
+    const shortPath = withoutTsExtension(filePath);
     lines.push(
       `| \`${shortPath}\` | ${filesLabel(deps.importsFrom.length)} | ${filesLabel(deps.exportsTo.length)} |`,
     );

@@ -461,6 +461,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph reads `.tsx` input (D10b, design section 3.2). The graph walk, the source walk, the
+  census walks and the test walk (`.test.tsx`, `.spec.tsx`) read `.tsx` as well as `.ts`; the
+  resolver already tried `<x>.tsx` (fix F30). The `.d.ts` rules do not change. A `.test.tsx`
+  file is in the `tests` census area. The reports name a `.tsx` file without its extension, as
+  they name a `.ts` file (`view module`, `` `src/view` ``). Golden changes (mini-repo, both
+  sets, the same hunks): `src/view.tsx` joins the graph, the census (reachable), the export
+  surface of `src/index.ts` and the test coverage (through `tests/barrel.test.ts`); the file,
+  export, function and line counts go up by the new file; the Mermaid `root` group gains a
+  `...1 more` node, so the later node numbers move by one; the compact summary lists
+  `src/view.tsx` in the 15 hot spots, and `src/util/index.ts` (0 in, 0 out) leaves the list;
+  the API-surface report lists the file.
+
 - depgraph per-export facts report (D10a, design section 6.2). `--api-surface=<file>` (config
   `depgraph.apiSurface.out`) writes the `buildApiSurfaceReport` output: `schemaVersion` 1, the
   entry, the stability tags, the counts, each surface symbol with its signature, `async`,

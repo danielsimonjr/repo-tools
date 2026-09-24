@@ -8,11 +8,11 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 14 |
+| Total Source Files | 15 |
 | Total Test Files | 2 |
-| Source Files with Tests | 5 |
+| Source Files with Tests | 6 |
 | Source Files without Tests | 9 |
-| Coverage (raw, direct-import) | **35.7%** |
+| Coverage (raw, direct-import) | **40.0%** |
 ---
 
 ## Source Files Without Test Coverage
@@ -48,6 +48,7 @@ The following 9 source files are not directly imported by any test file:
 | `Z/zed.ts` | `barrel.test.ts` |
 | `src/a.ts` | `a.test.ts`, `barrel.test.ts` |
 | `src/index.ts` | `barrel.test.ts` |
+| `src/view.tsx` | `barrel.test.ts` |
 
 ---
 
@@ -56,4 +57,4 @@ The following 9 source files are not directly imported by any test file:
 | Test File | Imports from Source |
 |-----------|---------------------|
 | `tests/a.test.ts` | 1 files |
-| `tests/barrel.test.ts` | 5 files |
+| `tests/barrel.test.ts` | 6 files |

@@ -80,7 +80,7 @@ export const DEPGRAPH_HELP = `Usage: repo-tools depgraph [options] [project-root
 Write the dependency graph and the architecture reports of a TypeScript tree into
 the output folder (default: <root>/${OUTPUT_SUBDIR}). A flag wins over the
 config file, and the config file wins over the default. Every path is relative
-to the root.
+to the root. The input files are .ts and .tsx files.
 
 Options:
   --root=<path>        Project root (default: the current directory). An

@@ -55,7 +55,7 @@ export interface FileInventory {
 export function classifyArea(rel: string): FileArea {
   if (/(^|\/)(tools|scripts)\//.test(rel)) return "tools";
   if (/\.config(\.[\w-]+)?\.[cm]?ts$/.test(rel)) return "config";
-  if (/\.(test|spec)\.ts$/.test(rel) || /(^|\/)tests?\//.test(rel)) return "tests";
+  if (/\.(test|spec)\.tsx?$/.test(rel) || /(^|\/)tests?\//.test(rel)) return "tests";
   if (/(^|\/)bench(marks)?\//.test(rel)) return "bench";
   if (/^examples\//.test(rel)) return "examples";
   if (/^docs\//.test(rel)) return "docs";

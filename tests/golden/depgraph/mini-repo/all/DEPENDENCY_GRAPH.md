@@ -30,7 +30,7 @@ This document provides a comprehensive dependency graph of all files, components
 
 The codebase is organized into the following modules:
 
-- **root**: 10 files
+- **root**: 11 files
 - **Z**: 3 files
 - **entry**: 1 file
 - **util**: 1 file
@@ -132,6 +132,13 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/view.tsx` - view module
+
+**Exports:**
+- Functions: `render`
+
+---
+
 <a id="z-dependencies"></a>
 
 ## Z Dependencies
@@ -227,6 +234,7 @@ The codebase is organized into the following modules:
 | `src/_x` | 0 files | 1 file |
 | `src/dyn` | 0 files | 1 file |
 | `src/register` | 0 files | 1 file |
+| `src/view` | 0 files | 1 file |
 | `src/ambient.d` | 0 files | 0 files |
 | `src/orphan` | 0 files | 0 files |
 | `src/util/index` | 0 files | 0 files |
@@ -273,34 +281,35 @@ graph TD
         N7[ping]
         N8[pong]
         N9[register]
+        N10[...1 more]
     end
 
     subgraph Z
-        N10[index]
-        N11[loop]
-        N12[zed]
+        N11[index]
+        N12[loop]
+        N13[zed]
     end
 
     subgraph Entry
-        N13[index]
+        N14[index]
     end
 
     subgraph Util
-        N14[index]
+        N15[index]
     end
 
     N0 --> N2
     N0 --> N5
-    N10 --> N12
-    N11 --> N12
-    N12 --> N11
+    N11 --> N13
+    N12 --> N13
+    N13 --> N12
     N2 --> N1
     N4 --> N2
     N4 --> N7
     N4 --> N9
-    N13 --> N2
-    N13 --> N0
-    N13 --> N10
+    N14 --> N2
+    N14 --> N0
+    N14 --> N11
     N7 --> N8
     N8 --> N7
 ```
@@ -312,14 +321,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 15 |
+| Total TypeScript Files | 16 |
 | Total Modules | 4 |
-| Total Lines of Code | 101 |
-| Total Exports | 16 |
+| Total Lines of Code | 106 |
+| Total Exports | 17 |
 | Total Re-exports | 7 |
 | Total Classes | 1 |
 | Total Interfaces | 3 |
-| Total Functions | 7 |
+| Total Functions | 8 |
 | Total Type Guards | 0 |
 | Total Enums | 0 |
 | Type-only Imports | 3 |
