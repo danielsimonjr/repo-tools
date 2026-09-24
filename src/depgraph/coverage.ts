@@ -7,6 +7,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { outputDirOf } from "./paths.ts";
 import { resolvePath } from "./resolver.ts";
 import type { ParsedFile } from "./types.ts";
 
@@ -61,11 +62,10 @@ export interface TestCoverageAnalysis {
 export type ReExportMap = Map<string, Set<string>>;
 
 /**
- * Reads `<root>/docs/architecture/coverage-policy.json`. Returns null when the file is absent,
- * not valid JSON, or has no `categories` object.
+ * Reads the coverage policy file `policyPath`. Returns null when the file is absent, not valid
+ * JSON, or has no `categories` object.
  */
-export function loadCoveragePolicy(root: string): CoveragePolicy | null {
-  const policyPath = join(root, "docs", "architecture", "coverage-policy.json");
+export function loadCoveragePolicy(policyPath: string): CoveragePolicy | null {
   if (!existsSync(policyPath)) return null;
   try {
     const parsed = JSON.parse(readFileSync(policyPath, "utf8")) as CoveragePolicy;
@@ -178,13 +178,15 @@ export function traceReExports(importedPath: string, reExportMap: ReExportMap): 
 
 /**
  * Maps the source files to the test files that import them, directly or through barrel
- * re-exports, and applies the coverage policy of `root`. A `.d.ts` file is not measured (fix
+ * re-exports, and applies the coverage policy `policyPath` (default: `coverage-policy.json` in
+ * the default output folder of `root`). A `.d.ts` file is not measured (fix
  * F18): it declares types and holds no code that a test can run.
  */
 export function analyzeTestCoverage(
   graphFiles: ParsedFile[],
   testFiles: ParsedFile[],
   root: string,
+  policyPath: string = join(outputDirOf(root), "coverage-policy.json"),
 ): TestCoverageAnalysis {
   const sourceFiles = graphFiles.filter((f) => !f.path.endsWith(".d.ts"));
   const sourceFilePaths = new Set(sourceFiles.map((f) => f.path));
@@ -250,7 +252,7 @@ export function analyzeTestCoverage(
     if (tests.length > 0) testedFiles.push(sourcePath);
     else untestedFiles.push(sourcePath);
   }
-  const policy = loadCoveragePolicy(root);
+  const policy = loadCoveragePolicy(policyPath);
   const sourcePaths = sourceFiles.map((f) => f.path);
   return {
     sourceFiles: sourcePaths,

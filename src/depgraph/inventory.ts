@@ -82,7 +82,8 @@ export function countLoc(root: string, relPath: string): number {
 /**
  * Builds the census. A `src` file is `build-entry` (in `roots`), else `reachable`, else
  * `test-only` (in `testReachable`), else `orphan`. Other areas map to `test`, `tool`, `config`
- * or `example`.
+ * or `example`. In single-package mode the census walks `sourceDirs` (default: the automatic
+ * source roots).
  */
 export function buildFileInventory(
   root: string,
@@ -90,9 +91,11 @@ export function buildFileInventory(
   roots: Set<string>,
   reachable: Set<string>,
   testReachable: Set<string>,
+  sourceDirs?: readonly string[],
 ): FileInventory {
   const rows: FileInventoryRow[] = [];
-  for (const rel of collectCensusFiles(root, workspaces, negatedWorkspaceFolders(root))) {
+  const excluded = negatedWorkspaceFolders(root);
+  for (const rel of collectCensusFiles(root, workspaces, excluded, sourceDirs)) {
     const area = classifyArea(rel);
     let disposition: FileDisposition;
     if (area === "src") {

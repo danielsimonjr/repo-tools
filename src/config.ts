@@ -13,7 +13,7 @@ import { posix, resolve, win32 } from "node:path";
 import { DEFAULT_STABILITY_TAGS } from "./depgraph/api-surface.ts";
 import { OUTPUT_SUBDIR } from "./depgraph/paths.ts";
 import { DEFAULT_REGENERATE_COMMAND, VERIFICATION_MARKER } from "./depgraph/reporters/banner.ts";
-import { TEST_DIR_NAMES } from "./depgraph/scanner.ts";
+import { DEFAULT_EXCLUDE, TEST_DIR_NAMES } from "./depgraph/scanner.ts";
 
 /** The name of the config file at the root. */
 export const CONFIG_FILE = "repo-tools.config.json";
@@ -62,15 +62,6 @@ export interface DepgraphConfig {
 export type DepgraphSettings = Partial<Omit<DepgraphConfig, "apiSurface">> & {
   apiSurface?: Partial<ApiSurfaceConfig>;
 };
-
-/** The default skip list of folder names. */
-export const DEFAULT_EXCLUDE: readonly string[] = [
-  "node_modules",
-  "dist",
-  "build",
-  "coverage",
-  ".git",
-];
 
 /** The default entry file of the per-export facts report. */
 export const DEFAULT_API_ENTRY = "src/index.ts";

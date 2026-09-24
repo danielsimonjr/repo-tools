@@ -198,7 +198,7 @@ describe("coverage", () => {
   });
 
   test("loadCoveragePolicy returns null without a policy file", () => {
-    expect(loadCoveragePolicy(root)).toBeNull();
+    expect(loadCoveragePolicy(join(root, "docs/architecture/coverage-policy.json"))).toBeNull();
   });
 
   test("analyzeTestCoverage covers files through a barrel", () => {

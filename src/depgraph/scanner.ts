@@ -10,6 +10,26 @@ import { isLink, isLinkEntry, isWalkable, listEntries, listNames } from "./dirli
 import { relativePosix, srcDirOf } from "./paths.ts";
 import type { WorkspacePackage } from "./types.ts";
 
+/** The default skip list of folder names (design section 3.2, `--exclude`). */
+export const DEFAULT_EXCLUDE: readonly string[] = [
+  "node_modules",
+  "dist",
+  "build",
+  "coverage",
+  ".git",
+];
+
+/**
+ * The folder names that every walk of the current run skips. The pipeline sets them from
+ * `--exclude` and `--also-exclude` (D10a) and restores the default after the run.
+ */
+export const walkScope = { skip: new Set<string>(DEFAULT_EXCLUDE) };
+
+/** Sets the skip list of the walks. With no argument, restores the default list. */
+export function setWalkSkip(names: readonly string[] = DEFAULT_EXCLUDE): void {
+  walkScope.skip = new Set(names);
+}
+
 /** Directory names that hold tests. Both spellings occur. */
 export const TEST_DIR_NAMES = ["test", "tests"] as const;
 
@@ -33,12 +53,12 @@ const NOT_SOURCE = new Set([
 
 /**
  * Collects every `.ts` file under `dir` that is not a `.test.ts` or `.spec.ts` file. Keeps
- * `.d.ts` files. Skips `node_modules`. Returns absolute paths in listing order.
+ * `.d.ts` files. Skips the folders of the skip list. Returns absolute paths in listing order.
  */
 export function getAllTsFiles(dir: string, files: string[] = []): string[] {
   if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
-    if (entry === "node_modules") continue;
+    if (walkScope.skip.has(entry)) continue;
     const fullPath = join(dir, entry);
     if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
@@ -58,7 +78,7 @@ export function getAllTsFiles(dir: string, files: string[] = []): string[] {
 export function getAllSourceTsFiles(dir: string, files: string[] = []): string[] {
   if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
-    if (entry === "node_modules") continue;
+    if (walkScope.skip.has(entry)) continue;
     const fullPath = join(dir, entry);
     if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
@@ -75,11 +95,11 @@ export function getAllSourceTsFiles(dir: string, files: string[] = []): string[]
   return files;
 }
 
-/** Collects the `.test.ts` and `.spec.ts` files under `dir`. Skips `node_modules`. */
+/** Collects the `.test.ts` and `.spec.ts` files under `dir`. Skips the skip list. */
 export function getAllTestFiles(dir: string, files: string[] = []): string[] {
   if (!isWalkable(dir)) return files;
   for (const entry of listNames(dir)) {
-    if (entry === "node_modules") continue;
+    if (walkScope.skip.has(entry)) continue;
     const fullPath = join(dir, entry);
     if (isLink(fullPath)) continue;
     if (statSync(fullPath).isDirectory()) {
@@ -102,6 +122,7 @@ export function resolveSourceDirs(root: string): string[] {
   const roots: string[] = [];
   for (const entry of listEntries(root)) {
     if (entry.name.startsWith(".") || NOT_SOURCE.has(entry.name)) continue;
+    if (walkScope.skip.has(entry.name)) continue;
     if (isLinkEntry(root, entry) || !entry.isDirectory()) continue;
     const dir = join(root, entry.name);
     if (getAllTsFiles(dir).length > 0) roots.push(dir);
@@ -115,14 +136,14 @@ export function resolveSourceDirs(root: string): string[] {
  */
 export type Excluded = (relDir: string) => boolean;
 
-/** True when a census walk skips the directory entry `name`. */
+/** True when a census walk skips the directory entry `name`: the skip list and dot-folders. */
 function censusSkips(name: string): boolean {
-  return name === "node_modules" || name === "dist" || name.startsWith(".");
+  return walkScope.skip.has(name) || name.startsWith(".");
 }
 
 /**
- * The maximal repo walk: every `.ts` file except `.d.ts` under `root`. Skips `node_modules`,
- * `dist` and dot-directories. Returns root-relative POSIX paths, sorted by `Array#sort`.
+ * The maximal repo walk: every `.ts` file except `.d.ts` under `root`. Skips the skip list and
+ * dot-directories. Returns root-relative POSIX paths, sorted by `Array#sort`.
  */
 export function walkRepoTsFiles(root: string, excluded: Excluded = () => false): string[] {
   const out: string[] = [];
@@ -154,7 +175,7 @@ const CENSUS_DIRS = [
 
 /**
  * The census file discovery: each workspace package directory (in single-package mode, each
- * source root of `resolveSourceDirs`, fix M1), the directories in `CENSUS_DIRS`, and the `.ts`
+ * source root in `sourceDirs`, by default those of `resolveSourceDirs`, fix M1), the directories in `CENSUS_DIRS`, and the `.ts`
  * files at the root. Narrower than `walkRepoTsFiles` on purpose, so that the census self-check
  * finds a location that the census does not list.
  */
@@ -162,6 +183,7 @@ export function collectCensusFiles(
   root: string,
   workspaces: Map<string, WorkspacePackage>,
   excluded: Excluded = () => false,
+  sourceDirs: readonly string[] = resolveSourceDirs(root),
 ): string[] {
   const set = new Set<string>();
   const walk = (dir: string): void => {
@@ -175,7 +197,7 @@ export function collectCensusFiles(
     }
   };
   for (const [, ws] of workspaces) walk(join(root, ws.directory));
-  if (workspaces.size === 0) for (const dir of resolveSourceDirs(root)) walk(dir);
+  if (workspaces.size === 0) for (const dir of sourceDirs) walk(dir);
   for (const d of CENSUS_DIRS) walk(join(root, d));
   for (const e of listEntries(root)) {
     if (isLinkEntry(root, e)) continue;

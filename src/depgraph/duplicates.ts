@@ -5,15 +5,15 @@
  * The classifier does not see typed-dispatch overloads inside one registration; a person
  * triages each TRUE_DUPLICATE entry.
  *
- * Port notes: the allowlist path is fixed at
- * `tools/create-dependency-graph/duplicate-allowlist.json` under the root (the config path comes
- * with task D10). The entries sort in code-unit order (fix F22).
+ * The allowlist file is `depgraph.duplicateAllowlist` of the config (D10a); the default is
+ * `duplicate-allowlist.json` in the output folder. The entries sort in code-unit order (fix F22).
  */
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "../mask.ts";
 import { compareCodeUnits } from "../sort.ts";
+import { outputDirOf } from "./paths.ts";
 import type { ParsedFile, PublicSurface } from "./types.ts";
 
 /** The export-list keys of `FileExports` that hold own definitions. */
@@ -113,12 +113,8 @@ const DUP_ENTRY_TAG_SORT_ORDER: Record<DupEntryTag, number> = {
   ALLOWLISTED: 3,
 };
 
-/**
- * Reads `<root>/tools/create-dependency-graph/duplicate-allowlist.json`. A missing or invalid
- * file gives an empty allowlist.
- */
-export function loadDuplicateAllowlist(root: string): DuplicateAllowlistEntry[] {
-  const path = join(root, "tools", "create-dependency-graph", "duplicate-allowlist.json");
+/** Reads the allowlist file `path`. A missing or invalid file gives an empty allowlist. */
+export function loadDuplicateAllowlist(path: string): DuplicateAllowlistEntry[] {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf-8")) as {
       entries?: DuplicateAllowlistEntry[];
@@ -338,13 +334,18 @@ export function tallyByTag(entries: DuplicateSymbolEntry[]): Record<DupEntryTag,
   return tally;
 }
 
-/** The runtime and type duplicate entries of `files`. Reads raw sources from `root`. */
+/**
+ * The runtime and type duplicate entries of `files`. Reads raw sources from `root`, and the
+ * allowlist from `allowlistPath` (default: `duplicate-allowlist.json` in the default output
+ * folder).
+ */
 export function detectDuplicateSymbols(
   files: ParsedFile[],
   publicSurface: PublicSurface,
   root: string,
+  allowlistPath: string = join(outputDirOf(root), "duplicate-allowlist.json"),
 ): { runtime: DuplicateSymbolEntry[]; types: DuplicateSymbolEntry[] } {
-  const allowlist = loadDuplicateAllowlist(root);
+  const allowlist = loadDuplicateAllowlist(allowlistPath);
   const cache = new Map<string, string>();
   const readRaw = (relPath: string): string => {
     let content = cache.get(relPath);

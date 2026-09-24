@@ -8,6 +8,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- depgraph: the duplicate allowlist is read from `duplicate-allowlist.json` in the output folder
+  by default (design section 5.1), not from `tools/create-dependency-graph/`. A repo that keeps
+  the allowlist at the old path sets `depgraph.duplicateAllowlist` to that path.
+- depgraph: the default skip list of every walk is `node_modules`, `dist`, `build`, `coverage`
+  and `.git` (design section 3.2). The graph walks skipped `node_modules` only, and the census
+  walks skipped `node_modules` and `dist`; the census walks still skip dot-folders. A folder
+  with one of these names inside a source folder is now left out; `--exclude` sets another list.
 - `compress -d` (K9) restores JSON only in this version. `-d` on any other format (yaml, csv,
   tsv, text, log, typescript, javascript, xml, html, markdown) exits 1 with the message
   "decompress supports JSON only in this version" and writes no file. In batch mode, each such
@@ -437,6 +444,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph config and flags in the pipeline (D10a). `--src=<a,b>` / `depgraph.src` names the
+  source folders of a single package (`auto`: `src/` if present, else each top-level folder with
+  TypeScript); the census and the test search follow them. `--tests=<a,b>` / `depgraph.tests`
+  names the test folders under the root and each package folder. `--out=<dir>` /
+  `depgraph.out` sets the output folder; standard output names it relative to the root, and
+  `--check-census` reads the inventory there. `--exclude=<a,b>` / `depgraph.exclude` replaces
+  the folder names that every walk skips, and `--also-exclude=<a,b>` / `depgraph.alsoExclude`
+  adds to them. `depgraph.strictOrphans` is the config form of `--strict-orphans`.
+  `depgraph.regenerateCommand` and `depgraph.verificationMarker` set the banner of every
+  Markdown report (`null` omits the marker line). `depgraph.duplicateAllowlist` and
+  `depgraph.coveragePolicy` name the allowlist and the coverage policy files. A list flag with an
+  empty item and a path flag with an absolute path exit 1. No golden changes.
 - depgraph config file (D10a, `src/config.ts`). `repo-tools.config.json` at the root, or the
   file that `--config=<path>` names, holds a `depgraph` object with the keys of design section
   5.1: `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `duplicateAllowlist`,

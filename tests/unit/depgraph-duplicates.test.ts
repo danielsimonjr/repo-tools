@@ -37,10 +37,11 @@ const root = makeTree({
   "src/d.ts": "export const alias = 2;\n",
   "src/v.ts": "export const VERSION = '1';\nexport const op = mathTyped('op', {});\n",
   "src/w.ts": "export const VERSION = '2';\nexport const op = mathTyped('op', {});\n",
-  "tools/create-dependency-graph/duplicate-allowlist.json": JSON.stringify({
+  "docs/architecture/duplicate-allowlist.json": JSON.stringify({
     entries: [{ names: ["VERSION"], filesGlob: ["src/**"], reason: "per-package version" }],
   }),
 });
+const allowPath = join(root, "docs/architecture/duplicate-allowlist.json");
 const files = ["index", "a", "b", "c", "d", "v", "w"].map((n) =>
   parseFile({ root, workspaces: new Map() }, join(root, `src/${n}.ts`)),
 );
@@ -54,7 +55,7 @@ describe("duplicate helpers", () => {
   });
 
   test("findAllowlistMatch needs a name match and a file match", () => {
-    const list = loadDuplicateAllowlist(root);
+    const list = loadDuplicateAllowlist(allowPath);
     expect(findAllowlistMatch(list, "VERSION", "src/v.ts")?.reason).toBe("per-package version");
     expect(findAllowlistMatch(list, "VERSION", "lib/v.ts")).toBeUndefined();
     expect(loadDuplicateAllowlist(join(root, "absent"))).toEqual([]);
@@ -74,7 +75,7 @@ describe("duplicate helpers", () => {
   });
 
   test("classifyDefiner prefers the allowlist, then constant shapes, then PLAIN", () => {
-    const list = loadDuplicateAllowlist(root);
+    const list = loadDuplicateAllowlist(allowPath);
     const read = (p: string) =>
       p === "src/c.ts" ? "import { q } from 'x';\nexport const alias = q;" : "";
     const [, , , c, , v] = files;

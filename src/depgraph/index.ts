@@ -10,8 +10,13 @@
  * census gate and before the coverage summary; they come back as an extension (task D10).
  */
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
-import { type DepgraphConfig, loadConfigFile, mergeDepgraphConfig } from "../config.ts";
+import { join, resolve } from "node:path";
+import {
+  type DepgraphConfig,
+  loadConfigFile,
+  mergeDepgraphConfig,
+  resolveUnderRoot,
+} from "../config.ts";
 import { withOneLf, writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
 import { sortCodeUnits } from "../sort.ts";
@@ -38,8 +43,8 @@ import {
   checkCensusNoRegen,
 } from "./inventory.ts";
 import { parseFile } from "./parser.ts";
-import { OUTPUT_SUBDIR, outputDirOf, relativePosix, srcDirOf } from "./paths.ts";
-import { withBanner } from "./reporters/banner.ts";
+import { OUTPUT_SUBDIR, relativePosix, srcDirOf } from "./paths.ts";
+import { type BannerOptions, withBanner } from "./reporters/banner.ts";
 import { generateTestCoverageJson, generateTestCoverageMarkdown } from "./reporters/coverage.ts";
 import {
   generateDuplicateSymbolsJson,
@@ -56,7 +61,7 @@ import { generateSurfacesJson } from "./reporters/surfaces.ts";
 import { generateUnusedReport } from "./reporters/unused.ts";
 import { generateYaml } from "./reporters/yaml.ts";
 import { collectEntryPoints, isJsonObject, rootPackageEntries, selfPackage } from "./roots.ts";
-import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, TEST_DIR_NAMES } from "./scanner.ts";
+import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, setWalkSkip } from "./scanner.ts";
 import type { PackageJson, ParsedFile, Statistics, UnusedExport } from "./types.ts";
 import { detectWorkspaces } from "./workspaces.ts";
 
@@ -66,7 +71,9 @@ export { type DepgraphOptions, parseDepgraphArgs } from "./args.ts";
 export const DEPGRAPH_HELP = `Usage: repo-tools depgraph [options] [project-root]
 
 Write the dependency graph and the architecture reports of a TypeScript tree into
-<root>/${OUTPUT_SUBDIR}.
+the output folder (default: <root>/${OUTPUT_SUBDIR}). A flag wins over the
+config file, and the config file wins over the default. Every path is relative
+to the root.
 
 Options:
   --root=<path>        Project root (default: the current directory). An
@@ -74,11 +81,19 @@ Options:
   --config=<path>      Config file, relative to the root (default:
                        repo-tools.config.json at the root, when it exists).
                        An unknown key, an absolute path or invalid JSON exits 1.
+  --src=<a,b>          Source folders (default: auto, src/ if present, else each
+                       top-level folder with TypeScript). Single-package mode.
+  --tests=<a,b>        Test folders, under the root and each package folder
+                       (default: test,tests).
+  --out=<dir>          Output folder (default: ${OUTPUT_SUBDIR}).
+  --exclude=<a,b>      Replace the folder names that every walk skips (default:
+                       node_modules,dist,build,coverage,.git).
+  --also-exclude=<a,b> Add folder names that every walk skips.
   --all, -a            Monorepo mode: include dormant and unreachable files.
   --reachable-only     Restrict the graph to the files reachable from a root.
                        Single-package mode analyzes all files by default.
   --strict-orphans     Exit 1 when an orphaned source file exists. Without it,
-                       an orphan gives a warning.
+                       an orphan gives a warning. Config: depgraph.strictOrphans.
   --strict-census      Exit 1 when the file census differs from a full walk of
                        the root. Without it, the difference gives a warning.
   --include-tests, -t  No operation. Kept for compatibility: the test coverage
@@ -120,28 +135,39 @@ export async function run(argv: string[], io: Io): Promise<number> {
   }
   try {
     const options = parseDepgraphArgs(argv, process.cwd());
+    // `--strict-orphans` is the command-line form of `depgraph.strictOrphans`.
+    if (options.strictOrphans) options.settings.strictOrphans = true;
     const root = resolve(options.root);
     const config = mergeDepgraphConfig(options.settings, loadConfigFile(root, options.config));
+    setWalkSkip([...config.exclude, ...config.alsoExclude]);
     return runPipeline(options, config, io);
   } catch (err) {
     io.stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;
+  } finally {
+    setWalkSkip();
   }
 }
 
 /** The pipeline. Returns the exit code. */
-function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io): number {
+function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): number {
   const log = (line: string): void => io.stdout(`${line}\n`);
   const root = resolve(options.root);
-  const outputDir = outputDirOf(root);
-  const out = (name: string): string => `${OUTPUT_SUBDIR}/${name}`;
+  const outputDir = resolveUnderRoot(root, config.out);
+  const outRel = relativePosix(root, outputDir) || ".";
+  const out = (name: string): string => `${outRel}/${name}`;
+  const strictOrphans = config.strictOrphans;
+  const banner: BannerOptions = {
+    command: config.regenerateCommand,
+    marker: config.verificationMarker,
+  };
   // Every report ends with exactly one LF (rule R1).
   const write = (name: string, text: string): void => writeReport(join(outputDir, name), text);
   // Fix F34: the walks record each link that they do not follow; this run starts a new list.
   linkLog.skipped.clear();
 
   if (options.checkCensus) {
-    const failure = checkCensusNoRegen(root, outputDir, options.strictOrphans);
+    const failure = checkCensusNoRegen(root, outputDir, strictOrphans);
     logSkippedLinks(log, skippedLinks(root));
     if (failure) {
       io.stderr(failure);
@@ -172,8 +198,14 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
   }
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
-    log(`Created output directory: ${OUTPUT_SUBDIR}`);
+    log(`Created output directory: ${outRel}`);
   }
+  // In single-package mode `depgraph.src` (or `--src`) names the source roots; "auto" finds them.
+  const sourceDirs = isMonorepo
+    ? []
+    : config.src === "auto"
+      ? resolveSourceDirs(root)
+      : config.src.map((dir) => resolveUnderRoot(root, dir));
   const tsFiles: string[] = [];
   if (isMonorepo) {
     for (const [, ws] of workspaces) {
@@ -182,10 +214,10 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
       log(`  ${ws.directory}/src: ${pkgFiles.length} files`);
     }
   } else {
-    for (const dir of resolveSourceDirs(root)) {
+    for (const dir of sourceDirs) {
       const found = getAllTsFiles(dir);
       tsFiles.push(...found);
-      log(`  ${relative(root, dir) || "."}: ${found.length} files`);
+      log(`  ${relativePosix(root, dir) || "."}: ${found.length} files`);
     }
   }
   log(`Found ${tsFiles.length} TypeScript files total`);
@@ -237,7 +269,7 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
 
   const testFilePaths: string[] = [];
   const pushTestDirs = (base: string): void => {
-    for (const name of TEST_DIR_NAMES) testFilePaths.push(...getAllTestFiles(join(base, name)));
+    for (const name of config.tests) testFilePaths.push(...getAllTestFiles(join(base, name)));
   };
   if (isMonorepo) {
     for (const [, ws] of workspaces) {
@@ -247,7 +279,9 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
     pushTestDirs(root);
   } else {
     pushTestDirs(root);
-    testFilePaths.push(...getAllTestFiles(srcDirOf(root)));
+    // The tests inside the source roots: `src/` by default, else each configured root.
+    const testRoots = config.src === "auto" ? [srcDirOf(root)] : sourceDirs;
+    for (const dir of testRoots) testFilePaths.push(...getAllTestFiles(dir));
   }
   const parsedTestFiles: ParsedFile[] = [...new Set(testFilePaths)].map((f) =>
     parseFile(parseCtx, f),
@@ -279,7 +313,7 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
   log(`Written: ${out("dependency-graph.json")}`);
   write("dependency-graph.yaml", generateYaml(json));
   log(`Written: ${out("dependency-graph.yaml")}`);
-  write("DEPENDENCY_GRAPH.md", withBanner(markdown));
+  write("DEPENDENCY_GRAPH.md", withBanner(markdown, banner));
   log(`Written: ${out("DEPENDENCY_GRAPH.md")}`);
   const compactSummary = generateCompactSummary(
     activeParsedFiles,
@@ -298,10 +332,18 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
   write("package-export-surfaces.json", generateSurfacesJson(modules, publicSurface));
   log(`Written: ${out("package-export-surfaces.json")}`);
 
-  const dup = detectDuplicateSymbols(activeParsedFiles, publicSurface, root);
+  const dup = detectDuplicateSymbols(
+    activeParsedFiles,
+    publicSurface,
+    root,
+    resolveUnderRoot(root, config.duplicateAllowlist),
+  );
   const duplicateReport = buildDuplicateReport(dup);
   write("duplicate-symbols.json", generateDuplicateSymbolsJson(duplicateReport));
-  write("duplicate-symbols.md", withBanner(generateDuplicateSymbolsMarkdown(duplicateReport)));
+  write(
+    "duplicate-symbols.md",
+    withBanner(generateDuplicateSymbolsMarkdown(duplicateReport), banner),
+  );
   log(
     `Written: ${out("duplicate-symbols.md")} ` +
       `(${duplicateReport.summary.runtimeDuplicates} runtime TRUE_DUPLICATE / ` +
@@ -316,9 +358,10 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
     activeParsedFiles,
     parsedTestFiles,
     root,
+    resolveUnderRoot(root, config.coveragePolicy),
   );
   // The Markdown report first: the JSON report sorts the file lists in place.
-  write("TEST_COVERAGE.md", withBanner(generateTestCoverageMarkdown(testCoverage)));
+  write("TEST_COVERAGE.md", withBanner(generateTestCoverageMarkdown(testCoverage), banner));
   log(`Written: ${out("TEST_COVERAGE.md")}`);
   const coverageJson = generateTestCoverageJson(testCoverage);
   write("test-coverage.json", JSON.stringify(coverageJson, null, 2));
@@ -337,7 +380,7 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
   const dormant = splitDormant(dormantSet, parsedFiles, parsedTestFiles, resolveWorkspaces);
   write(
     "unused-analysis.md",
-    withBanner(generateUnusedReport(unusedAnalysis, dormant, workspaces)),
+    withBanner(generateUnusedReport(unusedAnalysis, dormant, workspaces), banner),
   );
   log(`\nWritten: ${out("unused-analysis.md")}`);
 
@@ -348,12 +391,13 @@ function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io):
     censusRoots,
     reachableSet,
     dormant.testReachable,
+    isMonorepo ? undefined : sourceDirs,
   );
   // The self-check runs before the write: its maximal walk can meet more links (fix F34).
-  const failure = censusFailure(root, inventory, options.strictOrphans, options.strictCensus);
+  const failure = censusFailure(root, inventory, strictOrphans, options.strictCensus);
   inventory.skippedLinks = skippedLinks(root);
   write("file-inventory.json", generateFileInventoryJson(inventory));
-  write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory)));
+  write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory), banner));
   log(
     `Written: ${out("FILE_INVENTORY.md")} (${inventory.totalFiles} files: ` +
       Object.entries(inventory.byDisposition)

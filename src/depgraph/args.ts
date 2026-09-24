@@ -57,7 +57,34 @@ const VALUE_FLAGS: Readonly<
   "--config": (o, value) => {
     o.config = relativePath("--config", value);
   },
+  "--src": (o, value) => {
+    o.settings.src = value === "auto" ? "auto" : pathList("--src", value);
+  },
+  "--tests": (o, value) => {
+    o.settings.tests = pathList("--tests", value);
+  },
+  "--out": (o, value) => {
+    o.settings.out = relativePath("--out", value);
+  },
+  "--exclude": (o, value) => {
+    o.settings.exclude = list("--exclude", value);
+  },
+  "--also-exclude": (o, value) => {
+    o.settings.alsoExclude = list("--also-exclude", value);
+  },
 };
+
+/** Splits a comma list. Throws on an empty item. */
+function list(flag: string, value: string): string[] {
+  const items = value.split(",");
+  if (items.some((item) => item === "")) throw new Error(`flag ${flag} holds an empty item`);
+  return items;
+}
+
+/** Splits a comma list of paths. Throws on an empty item or an absolute path. */
+function pathList(flag: string, value: string): string[] {
+  return list(flag, value).map((item) => relativePath(flag, item));
+}
 
 /** Returns `value`, or throws when it is an absolute path. Path flags resolve against the root. */
 function relativePath(flag: string, value: string): string {
