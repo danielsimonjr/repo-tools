@@ -1,8 +1,9 @@
 /**
  * Characterization test of the depgraph port: each golden set must come back byte for byte.
  *
- * The goldens hold the NTFS listing order and the `localeCompare` order of Bun, so this test
- * runs on Windows only until fixes F2 and F22 land.
+ * Fixes F2 (sorted folder listings) and F22 (code-unit sorts) make the goldens independent of
+ * the operating system, so this test runs on every CI operating system. A difference between
+ * Linux, macOS and Windows is a determinism defect.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
@@ -34,7 +35,7 @@ const sets = [
   { set: "mono-repo/all", fixture: "mono-repo", flags: ["--all"] },
 ];
 
-describe.skipIf(process.platform !== "win32")("depgraph port equals the goldens", () => {
+describe("depgraph port equals the goldens", () => {
   for (const { set, fixture, flags } of sets) {
     test(`${set}: every report and the exit code`, async () => {
       const root = join(work, set.replace("/", "-"));

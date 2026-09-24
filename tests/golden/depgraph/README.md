@@ -23,5 +23,5 @@ Known facts in these goldens:
 - `_stdout.txt` holds the fixture root (masked). The port writes no absolute path to standard
   output (design criterion 4). `_stdout.port.txt` is the port's own standard output, and the
   characterization test compares it byte for byte.
-- The goldens hold the listing order of NTFS on Windows and the `localeCompare` order of Bun.
-  The characterization tests therefore run on Windows only, until fixes F2 and F22 land.
+- Fixes F2 and F22 made the goldens independent of the folder listing order and of the ICU
+  data. The characterization tests run on Linux, macOS and Windows.
