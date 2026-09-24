@@ -6,6 +6,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `compress` (K5): `--level` and `--format` are validated. An unknown value (for example
+  `--level fast`) exits 1 with a message that lists the valid values, and writes no file. The
+  original tool accepted any value and used other settings without a message.
+
 ### Added
 
 - Subcommand `compress` (design 3.4 and 4): a port of the CTON context compressor. It writes a

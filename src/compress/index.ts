@@ -13,7 +13,9 @@ import {
   calculateStats,
   detectFormat,
   type FileFormat,
+  FORMATS,
   getCompressor,
+  LEVELS,
 } from "./formats.ts";
 import { decompress } from "./legend.ts";
 
@@ -364,6 +366,15 @@ export async function run(
   deps: CompressDeps = defaultDeps,
 ): Promise<number> {
   const o = parseArgs(argv);
+  // K5: the original tool accepted any value and fell back to other settings without a message.
+  if (!(LEVELS as readonly string[]).includes(o.level)) {
+    io.stderr(`Error: invalid level '${o.level}'. Use one of: ${LEVELS.join(", ")}.\n`);
+    return 1;
+  }
+  if (o.format !== "auto" && !(FORMATS as readonly string[]).includes(o.format)) {
+    io.stderr(`Error: invalid format '${o.format}'. Use one of: ${FORMATS.join(", ")}.\n`);
+    return 1;
+  }
   try {
     if (o.batch) return runBatch(o, io, deps);
     if (!o.input) {

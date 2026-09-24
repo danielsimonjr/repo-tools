@@ -443,7 +443,7 @@ const COMPRESSORS: Record<FileFormat, Compressor> = {
   html: compressXml,
 };
 
-/** Returns the compressor for `format`. An unknown format gets the text compressor. */
+/** Returns the compressor for `format`. */
 export function getCompressor(format: FileFormat): Compressor {
-  return Object.hasOwn(COMPRESSORS, format) ? COMPRESSORS[format] : compressText;
+  return COMPRESSORS[format];
 }
