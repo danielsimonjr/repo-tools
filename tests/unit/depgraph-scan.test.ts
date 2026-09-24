@@ -201,10 +201,10 @@ describe("roots", () => {
 });
 
 describe("workspaces", () => {
-  test("readWorkspacePatterns reads npm, yarn and pnpm forms and drops negations", () => {
+  test("readWorkspacePatterns reads npm, yarn and pnpm forms and keeps negations (F36)", () => {
     expect(
       readWorkspacePatterns(makeTree({ "package.json": '{"workspaces":["a","!b"]}' })),
-    ).toEqual(["a"]);
+    ).toEqual(["a", "!b"]);
     expect(
       readWorkspacePatterns(makeTree({ "package.json": '{"workspaces":{"packages":["p/*"]}}' })),
     ).toEqual(["p/*"]);
@@ -212,7 +212,7 @@ describe("workspaces", () => {
       readWorkspacePatterns(
         makeTree({ "pnpm-workspace.yaml": "packages:\n  - 'x/*'\n  - '!y'\n" }),
       ),
-    ).toEqual(["x/*"]);
+    ).toEqual(["x/*", "!y"]);
   });
 
   test("readWorkspacePatterns detects two undeclared packages by structure", () => {

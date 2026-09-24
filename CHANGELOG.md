@@ -20,6 +20,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F36: a negated workspace pattern excludes the package folders that it matches, in
+  `package.json` `workspaces` (npm and Yarn) and in `pnpm-workspace.yaml`. `!packages/skip` and
+  a glob such as `!packages/old-*` work, with or without a leading `./` or a trailing `/`. The
+  port removed the negated pattern from the list and never excluded the folder, so a
+  `packages/*` pattern still made `packages/skip` a workspace package. The census self-check
+  still walks every `.ts` file, so a `.ts` file in an excluded folder fails it as "on disk but
+  absent from the census".
 - depgraph F35: `package.json` type guards. A root `package.json` that is `null` or not a JSON
   object gives the warning "package.json is not a JSON object, using defaults" (the port
   crashed with a TypeError, exit 1). A workspace `package.json` that is not a JSON object is

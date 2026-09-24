@@ -18,8 +18,9 @@ import type { WorkspacePackage } from "./types.ts";
  * 3. Structure: each top-level directory (not a dot-directory, not `node_modules` or `tools`)
  *    that holds a `package.json` and a `src/`, when there are two or more.
  *
- * Negated patterns (`!x`) are removed. A pattern that is not a string is ignored with a warning
- * (fix F35).
+ * Negated patterns (`!x`) stay in the list, in their place; `detectWorkspaces` applies them (fix
+ * F36). A declaration with no positive pattern is no declaration. A pattern that is not a string
+ * is ignored with a warning (fix F35).
  */
 export function readWorkspacePatterns(root: string, warn: Warn = () => {}): string[] {
   const strings = (list: unknown[], file: string): string[] =>
@@ -33,7 +34,7 @@ export function readWorkspacePatterns(root: string, warn: Warn = () => {}): stri
     const ws = isJsonObject(rootPkg) ? rootPkg.workspaces : undefined;
     const list = Array.isArray(ws) ? ws : isJsonObject(ws) ? ws.packages : undefined;
     const patterns = Array.isArray(list) ? strings(list, "package.json") : undefined;
-    if (patterns?.length) return patterns.filter((p) => !p.startsWith("!"));
+    if (patterns?.some((p) => !p.startsWith("!"))) return patterns;
   } catch {
     // No package.json, or not valid JSON: try pnpm.
   }
@@ -43,7 +44,7 @@ export function readWorkspacePatterns(root: string, warn: Warn = () => {}): stri
       | { packages?: unknown[] }
       | undefined;
     if (Array.isArray(cfg?.packages)) {
-      return strings(cfg.packages, "pnpm-workspace.yaml").filter((p) => !p.startsWith("!"));
+      return strings(cfg.packages, "pnpm-workspace.yaml");
     }
   } catch {
     // No pnpm-workspace.yaml: try the structural fallback.
@@ -97,10 +98,35 @@ function addPackage(
   });
 }
 
+/** A pattern folder in one form: no leading `./`, no trailing `/`. */
+function normalizePattern(pattern: string): string {
+  return toPosix(pattern)
+    .replace(/^(?:\.\/)+/, "")
+    .replace(/\/+$/, "");
+}
+
+/**
+ * True when the package folder `dir` (root-relative, POSIX) matches the glob `pattern`: `**`
+ * matches any text, `*` matches any text without a `/`, and every other character is itself.
+ */
+export function matchesWorkspaceGlob(pattern: string, dir: string): boolean {
+  const body = normalizePattern(pattern)
+    .split("**")
+    .map((part) =>
+      part
+        .split("*")
+        .map((text) => text.replace(/[.+?^${}()|[\]\\]/g, "\\$&"))
+        .join("[^/]*"),
+    )
+    .join(".*");
+  return new RegExp(`^${body}$`).test(normalizePattern(dir));
+}
+
 /**
  * The workspace packages of the repo at `root`, keyed by npm name. A pattern that ends in `/*`
- * lists its parent directory. Any other pattern is one package directory. Returns an empty map
- * in single-package mode.
+ * lists its parent directory. Any other pattern is one package directory. A negated pattern
+ * (`!packages/skip`, `!packages/old-*`) removes each package folder that it matches, whatever
+ * its place in the list (fix F36). Returns an empty map in single-package mode.
  */
 export function detectWorkspaces(
   root: string,
@@ -109,15 +135,19 @@ export function detectWorkspaces(
   const workspaces = new Map<string, WorkspacePackage>();
   try {
     const patterns = readWorkspacePatterns(root, warn);
+    const negated = patterns.filter((p) => p.startsWith("!")).map((p) => p.slice(1));
+    const add = (pkgDir: string): void => {
+      if (negated.some((n) => matchesWorkspaceGlob(n, toPosix(pkgDir)))) return;
+      addPackage(root, pkgDir, workspaces, warn);
+    };
     for (const pattern of patterns) {
+      if (pattern.startsWith("!")) continue;
       if (pattern.endsWith("/*")) {
         const parentDir = pattern.slice(0, -2);
         if (!existsSync(join(root, parentDir))) continue;
-        for (const entry of listNames(join(root, parentDir))) {
-          addPackage(root, join(parentDir, entry), workspaces, warn);
-        }
+        for (const entry of listNames(join(root, parentDir))) add(join(parentDir, entry));
       } else {
-        addPackage(root, pattern, workspaces, warn);
+        add(pattern);
       }
     }
   } catch {
