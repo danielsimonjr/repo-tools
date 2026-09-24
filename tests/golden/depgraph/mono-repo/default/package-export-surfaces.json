@@ -1,0 +1,14 @@
+{
+  "generated": "<DATE>",
+  "surfaces": {
+    "packages/cli": [
+      "format"
+    ],
+    "packages/core": [
+      "add",
+      "double",
+      "INTERNAL_FLAG",
+      "Pair"
+    ]
+  }
+}

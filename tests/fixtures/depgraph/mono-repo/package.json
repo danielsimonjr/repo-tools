@@ -1,0 +1,6 @@
+{
+  "name": "mono-repo",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"]
+}

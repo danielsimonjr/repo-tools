@@ -1,0 +1,28 @@
+{
+  "generated": "<DATE>",
+  "surfaces": {
+    "Z": [
+      "zed",
+      "ZedShape"
+    ],
+    "entry": [
+      "alpha",
+      "AlphaOptions",
+      "Bravo",
+      "render"
+    ],
+    "root": [
+      "alpha",
+      "Bravo",
+      "dynamicValue",
+      "forgotten",
+      "helper",
+      "ping",
+      "pong",
+      "unusedConstant"
+    ],
+    "util": [
+      "clamp"
+    ]
+  }
+}

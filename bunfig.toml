@@ -1,0 +1,4 @@
+[test]
+# Run only the unit tests: fixture repos hold their own *.test.ts files as data, and agent
+# worktrees can sit under .claude/ inside the repo.
+root = "./tests/unit"

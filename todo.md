@@ -11,4 +11,5 @@
 
 ## Part 2
 
-- [ ] `depgraph`. Blocked until the design change for review blockers 1-8 is approved.
+- [x] D0 Fixture repositories and the characterization goldens of the pre-port generator.
+- [ ] D1-D12 `depgraph` port and fixes (plan part 2).

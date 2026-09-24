@@ -8,6 +8,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph test base (task D0): two fixture repositories (`mini-repo`, a single package with
+  case-order names, an exports subpath, a bin, a barrel, a dynamic import, a runtime cycle, a
+  type-only cycle, an orphan, a `.d.ts` and a `.tsx` file; `mono-repo`, npm workspaces with an
+  exports subpath, a `dist/src` bin, two tsup entry arrays and a cross-package import) and the
+  characterization goldens of the pre-port generator for both, with and without `--all`.
+  `bunfig.toml` limits `bun test` to `tests/unit`, because the fixtures hold their own test
+  files as data.
 - Shared helpers: `src/sort.ts` sorts in UTF-16 code-unit order (fix F22: no `localeCompare`,
   so the order does not depend on the ICU data of the runtime), and `src/io.ts` writes files
   with LF line endings and formats JSON with one trailing LF.

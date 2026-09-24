@@ -1,0 +1,7 @@
+{
+  "name": "@scope/cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": { "scope-cli": "./dist/src/main.js" },
+  "dependencies": { "@scope/core": "1.0.0" }
+}

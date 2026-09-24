@@ -1,0 +1,9 @@
+{
+  "name": "@scope/core",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./internal": "./dist/internal.js"
+  }
+}

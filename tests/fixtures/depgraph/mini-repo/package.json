@@ -1,0 +1,12 @@
+{
+  "name": "mini-repo",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./util": "./dist/util/index.js"
+  },
+  "bin": {
+    "mini": "./dist/cli.js"
+  }
+}

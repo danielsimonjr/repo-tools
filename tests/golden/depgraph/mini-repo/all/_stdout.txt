@@ -1,0 +1,61 @@
+Scanning codebase for dependencies...
+Created output directory: <ROOT>\docs\architecture
+  src: 15 files
+Found 15 TypeScript files total
+Parsed all files
+Categorized into 4 modules
+Found 2 circular dependencies (1 runtime, 1 type-only)
+Generated statistics
+Built dependency matrix
+Written: docs/architecture/dependency-graph.json
+Written: docs/architecture/dependency-graph.yaml
+Written: docs/architecture/DEPENDENCY_GRAPH.md
+Written: docs/architecture/dependency-summary.compact.json (1.0KB)
+Written: docs/architecture/package-export-surfaces.json
+Written: docs/architecture/duplicate-symbols.md (0 runtime TRUE_DUPLICATE / 0 runtime flagged, 0 type TRUE_DUPLICATE / 0 type flagged)
+
+Analyzing test coverage...
+Found 2 test files
+Written: docs/architecture/TEST_COVERAGE.md
+Written: docs/architecture/test-coverage.json
+
+Dependency graph generation complete!
+  - 15 files analyzed
+  - 16 exports found (7 re-exports)
+  - 4 type-only imports detected
+  - 2 circular dependencies:
+      1 runtime (require attention)
+      1 type-only (safe)
+  - 4 potentially unused files
+  - 2 potentially unused exports
+
+Potentially unused files:
+  - src/ambient.d.ts
+  - src/cli.ts
+  - src/orphan.ts
+  - src/util/index.ts
+
+Potentially unused exports:
+  src/a.ts:
+    - unusedConstant (constant)
+  src/dyn.ts:
+    - dynamicValue (constant)
+
+Written: <ROOT>\docs\architecture\unused-analysis.md
+
+=== Test Coverage Analysis ===
+  - 2 test files analyzed
+  - 5/15 source files have tests (33.3%)
+  - 10 source files without tests
+
+Source files without test coverage:
+  - src/Z/loop.ts
+  - src/_x.ts
+  - src/ambient.d.ts
+  - src/cli.ts
+  - src/dyn.ts
+  - src/orphan.ts
+  - src/ping.ts
+  - src/pong.ts
+  - src/register.ts
+  - src/util/index.ts

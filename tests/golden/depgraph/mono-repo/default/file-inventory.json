@@ -1,0 +1,88 @@
+{
+  "generated": "<DATE>",
+  "totalFiles": 9,
+  "byDisposition": {
+    "reachable": 3,
+    "build-entry": 3,
+    "test-only": 0,
+    "orphan": 1,
+    "test": 1,
+    "tool": 0,
+    "config": 1,
+    "example": 0
+  },
+  "byArea": {
+    "src": 7,
+    "tests": 1,
+    "config": 1
+  },
+  "byPackage": {
+    "@scope/cli": 2,
+    "@scope/core": 7
+  },
+  "files": [
+    {
+      "file": "packages/cli/src/format.ts",
+      "package": "@scope/cli",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 5
+    },
+    {
+      "file": "packages/cli/src/main.ts",
+      "package": "@scope/cli",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 6
+    },
+    {
+      "file": "packages/core/src/index.ts",
+      "package": "@scope/core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 4
+    },
+    {
+      "file": "packages/core/src/internal.ts",
+      "package": "@scope/core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 3
+    },
+    {
+      "file": "packages/core/src/math.ts",
+      "package": "@scope/core",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 12
+    },
+    {
+      "file": "packages/core/src/types.ts",
+      "package": "@scope/core",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 3
+    },
+    {
+      "file": "packages/core/src/worker.ts",
+      "package": "@scope/core",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 5
+    },
+    {
+      "file": "packages/core/tests/math.test.ts",
+      "package": "@scope/core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "packages/core/tsup.config.ts",
+      "package": "@scope/core",
+      "area": "config",
+      "disposition": "config",
+      "loc": 7
+    }
+  ]
+}

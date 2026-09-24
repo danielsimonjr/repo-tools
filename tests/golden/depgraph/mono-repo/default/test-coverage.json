@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "generatedAt": "<DATETIME>",
+    "totalSourceFiles": 6,
+    "totalTestFiles": 1,
+    "testedCount": 1,
+    "untestedCount": 5,
+    "coveragePercent": "16.7",
+    "effectiveCoverage": {
+      "policyLoaded": false,
+      "activeFiles": 6,
+      "testedActive": 1,
+      "activeUntested": 5,
+      "excludedTotal": 0,
+      "percent": "16.7",
+      "breakdown": {
+        "active_untested": 5
+      }
+    }
+  },
+  "untestedFiles": [
+    "packages/cli/src/format.ts",
+    "packages/cli/src/main.ts",
+    "packages/core/src/index.ts",
+    "packages/core/src/internal.ts",
+    "packages/core/src/types.ts"
+  ],
+  "testedFiles": [
+    "packages/core/src/math.ts"
+  ],
+  "coverageMap": {
+    "packages/cli/src/format.ts": [],
+    "packages/cli/src/main.ts": [],
+    "packages/core/src/index.ts": [],
+    "packages/core/src/internal.ts": [],
+    "packages/core/src/math.ts": [
+      "packages/core/tests/math.test.ts"
+    ],
+    "packages/core/src/types.ts": []
+  },
+  "testToSourceMap": {
+    "packages/core/tests/math.test.ts": [
+      "packages/core/src/math.ts"
+    ]
+  },
+  "classifiedUntested": [
+    {
+      "file": "packages/cli/src/format.ts",
+      "category": null
+    },
+    {
+      "file": "packages/cli/src/main.ts",
+      "category": null
+    },
+    {
+      "file": "packages/core/src/index.ts",
+      "category": null
+    },
+    {
+      "file": "packages/core/src/internal.ts",
+      "category": null
+    },
+    {
+      "file": "packages/core/src/types.ts",
+      "category": null
+    }
+  ]
+}
