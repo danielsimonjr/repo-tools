@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F40 (corrects F25): a member call on a dynamic import is a runtime edge also when a
+  type-argument list comes before the call. `import('./x').then<T>(cb)` was a type-only edge;
+  it is now runtime, as `import('./x').then(cb)` is. `type T = import('./x').Name` and
+  `import('./x').Box<T>` with no call after it stay type-only. No golden changes.
 - depgraph F39: the comment stripper (`src/mask.ts`) recognizes regular-expression literals. A
   `/` starts a regex after an operator, a punctuator, `=>`, a keyword such as `return`, or at the
   start; after a name, a number, `)` or `]` it is a division. A quote, a backtick or a `/` in a

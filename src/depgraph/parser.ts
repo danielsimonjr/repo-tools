@@ -150,12 +150,35 @@ function reExportNames(list: string): [imported: string[], exported: string[]] {
  * member names, then no call), as in a type alias, an annotation or an interface member. Every
  * other `import()` is a runtime expression: `await import()`, `import().then(...)`, a bare
  * statement, an assignment, an array element, a return value.
+ *
+ * Fix F40: a member call is runtime also when a type-argument list comes before the call, as in
+ * `import('./x').then<T>(cb)`.
  */
 export function isTypePositionImport(code: string, start: number, end: number): boolean {
   if (/\btypeof\s*$/.test(code.slice(Math.max(0, start - 32), start))) return true;
   const member = /^\s*(?:\.\s*[A-Za-z_$][\w$]*\s*)+/.exec(code.slice(end));
   if (!member) return false;
-  return code.charAt(end + member[0].length) !== "(";
+  let at = end + member[0].length;
+  if (code.charAt(at) === "<") at = typeArgumentsEnd(code, at);
+  return !/^\s*\(/.test(code.slice(at));
+}
+
+/**
+ * The offset after the `>` that closes the type-argument list that opens at `code[open]`, or
+ * `open` when the list does not close before a `;` or the end. The `>` of an arrow (`=>`) in a
+ * function type does not close the list.
+ */
+function typeArgumentsEnd(code: string, open: number): number {
+  let depth = 0;
+  for (let i = open; i < code.length; i++) {
+    const c = code[i];
+    if (c === "<") depth += 1;
+    else if (c === ">" && code[i - 1] !== "=") {
+      depth -= 1;
+      if (depth === 0) return i + 1;
+    } else if (c === ";") return open;
+  }
+  return open;
 }
 
 /** Parses the imports and exports of the file at the absolute path `filePath`. */
