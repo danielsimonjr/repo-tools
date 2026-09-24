@@ -2,8 +2,8 @@
  * The file inventory (census): every `.ts` file of the census walk with its area and its
  * disposition, and the census self-check against the maximal repo walk.
  *
- * The rows sort in code-unit order (fix F22). Port note: the inventory exists in monorepo mode
- * only (fix M1).
+ * The rows sort in code-unit order (fix F22). Fix M1: the inventory and the self-check run in
+ * both modes, and an orphan fails the self-check only with `--strict-orphans`.
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -147,20 +147,39 @@ export function buildFileInventory(
   };
 }
 
+/** The orphan files of a census, sorted. */
+function orphansOf(inventory: FileInventory): string[] {
+  return inventory.files
+    .filter((f) => f.disposition === "orphan")
+    .map((f) => f.file)
+    .sort();
+}
+
+/** The orphan block of the self-check text. */
+function orphanText(orphans: string[]): string {
+  let msg = `  ${orphans.length} ORPHAN file(s) — a src file reachable from no root and no test. Each is a\n`;
+  msg += "  build/worker/subpath root the tool did not detect (wire it / seed it — see\n";
+  msg += "  the tsup.config / exports / bin root handling), or dead\n";
+  msg += "  code to delete:\n";
+  msg += `${orphans.map((f) => `    ! ${f}`).join("\n")}\n`;
+  return msg;
+}
+
 /**
- * The census self-check. Returns null when the census equals the maximal repo walk and holds
- * no orphan. Otherwise returns the failure text: files on disk but not in the census, census
- * entries not on disk, and orphans.
+ * The census self-check. Returns null when the census equals the maximal repo walk and, with
+ * `strictOrphans`, holds no orphan. Otherwise returns the failure text: files on disk but not
+ * in the census, census entries not on disk, and (with `strictOrphans`) orphans.
  */
-export function censusFailure(root: string, inventory: FileInventory): string | null {
+export function censusFailure(
+  root: string,
+  inventory: FileInventory,
+  strictOrphans = false,
+): string | null {
   const onDisk = new Set(walkRepoTsFiles(root));
   const census = new Set(inventory.files.map((f) => f.file));
   const missingFromCensus = [...onDisk].filter((f) => !census.has(f)).sort();
   const missingFromDisk = [...census].filter((f) => !onDisk.has(f)).sort();
-  const orphans = inventory.files
-    .filter((f) => f.disposition === "orphan")
-    .map((f) => f.file)
-    .sort();
+  const orphans = strictOrphans ? orphansOf(inventory) : [];
   if (missingFromCensus.length === 0 && missingFromDisk.length === 0 && orphans.length === 0) {
     return null;
   }
@@ -173,30 +192,38 @@ export function censusFailure(root: string, inventory: FileInventory): string | 
     msg += `  ${missingFromDisk.length} file(s) in the census but MISSING on disk (stale entry — regenerate with \`repo-tools depgraph\`):\n`;
     msg += `${missingFromDisk.map((f) => `    - ${f}`).join("\n")}\n`;
   }
-  if (orphans.length > 0) {
-    msg += `  ${orphans.length} ORPHAN file(s) — a src file reachable from no root and no test. Each is a\n`;
-    msg += "  build/worker/subpath root the tool did not detect (wire it / seed it — see\n";
-    msg += "  the tsup.config / exports / bin root handling), or dead\n";
-    msg += "  code to delete:\n";
-    msg += `${orphans.map((f) => `    ! ${f}`).join("\n")}\n`;
-  }
+  if (orphans.length > 0) msg += orphanText(orphans);
   return msg;
 }
 
-/** The pass line of the census self-check. */
+/**
+ * The orphan warning of a self-check without `--strict-orphans` (fix M1), or null when the
+ * census holds no orphan.
+ */
+export function censusOrphanWarning(inventory: FileInventory): string | null {
+  const orphans = orphansOf(inventory);
+  return orphans.length > 0 ? `Warning: file census:\n${orphanText(orphans)}` : null;
+}
+
+/** The pass line of the census self-check, with the orphan count. */
 export function censusPassLine(inventory: FileInventory): string {
-  return `File census self-check passed: ${inventory.totalFiles} files == maximal repo walk (independent), 0 orphans.`;
+  const n = orphansOf(inventory).length;
+  return `File census self-check passed: ${inventory.totalFiles} files == maximal repo walk (independent), ${n} orphan${n === 1 ? "" : "s"}.`;
 }
 
 /**
  * `--check-census`: checks the committed `file-inventory.json` in `outputDir` against a fresh
  * maximal walk, without a graph scan. Returns null on a pass, else the failure text.
  */
-export function checkCensusNoRegen(root: string, outputDir: string): string | null {
+export function checkCensusNoRegen(
+  root: string,
+  outputDir: string,
+  strictOrphans = false,
+): string | null {
   const invPath = join(outputDir, "file-inventory.json");
   if (!existsSync(invPath)) {
     return "file-census check: file-inventory.json not found — run `repo-tools depgraph` first to generate it.\n";
   }
   const inventory = JSON.parse(readFileSync(invPath, "utf-8")) as FileInventory;
-  return censusFailure(root, inventory);
+  return censusFailure(root, inventory, strictOrphans);
 }

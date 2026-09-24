@@ -20,6 +20,19 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph M1: the single-package model. The inventory (`FILE_INVENTORY.md`,
+  `file-inventory.json`), the census self-check and the dormancy split run in both modes; the
+  port ran them in monorepo mode only, so single-package dormancy was always 0. In
+  single-package mode the root package is the one package: `src/index.ts`, and the `exports`
+  subpaths, `bin` targets, scripts and tsup entries of the root `package.json` are build roots.
+  An `exports` subpath that names a folder (`./util`) reaches `src/util/index.ts` when
+  `src/util.ts` does not exist. The single-package graph still holds every file and reports
+  the dormancy; the new flag `--reachable-only` restricts the graph to reachable files. An
+  orphan now gives a warning on standard error, and fails the run only with the new flag
+  `--strict-orphans` (also with `--check-census`); the port failed a monorepo run on any
+  orphan. In the `mini-repo` goldens, `src/cli.ts` and `src/util/index.ts` are build entries,
+  not unused files, `clamp` is in the `util` export surface, `src/orphan.ts` is a dormant
+  orphan, and the run writes the two inventory reports.
 - depgraph F37: the object form of the tsup `entry` option (`entry: { worker: 'src/worker.ts' }`)
   names build roots, as the array form does (F14). Each string value after a `:` is an entry,
   in file order. The port read the array form only, so an object-form entry was an orphan and

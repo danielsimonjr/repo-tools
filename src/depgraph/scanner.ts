@@ -137,9 +137,10 @@ export function walkRepoTsFiles(root: string): string[] {
 const CENSUS_DIRS = ["tests", "test", "bench", "tools", "examples", "docs", "scripts"];
 
 /**
- * The census file discovery: each workspace package directory, the directories in
- * `CENSUS_DIRS`, and the `.ts` files at the root. Narrower than `walkRepoTsFiles` on purpose,
- * so that the census self-check finds a location that the census does not list.
+ * The census file discovery: each workspace package directory (in single-package mode, each
+ * source root of `resolveSourceDirs`, fix M1), the directories in `CENSUS_DIRS`, and the `.ts`
+ * files at the root. Narrower than `walkRepoTsFiles` on purpose, so that the census self-check
+ * finds a location that the census does not list.
  */
 export function collectCensusFiles(
   root: string,
@@ -156,6 +157,7 @@ export function collectCensusFiles(
     }
   };
   for (const [, ws] of workspaces) walk(join(root, ws.directory));
+  if (workspaces.size === 0) for (const dir of resolveSourceDirs(root)) walk(dir);
   for (const d of CENSUS_DIRS) walk(join(root, d));
   for (const e of listEntries(root)) {
     if (isLinkEntry(root, e)) continue;

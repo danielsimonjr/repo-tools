@@ -13,6 +13,7 @@ import {
 import {
   buildFileInventory,
   censusFailure,
+  censusOrphanWarning,
   censusPassLine,
   checkCensusNoRegen,
   classifyArea,
@@ -101,9 +102,13 @@ describe("inventory", () => {
   });
 
   test("censusFailure reports orphans, unlisted files and stale entries", () => {
-    const text = censusFailure(root, inventory) ?? "";
+    const text = censusFailure(root, inventory, true) ?? "";
     expect(text).toContain("1 ORPHAN file(s)");
     expect(text).toContain("! packages/core/src/lost.ts");
+    // Fix M1: without --strict-orphans an orphan is a warning, not a failure.
+    expect(censusFailure(root, inventory)).toBeNull();
+    expect(censusOrphanWarning(inventory)).toContain("! packages/core/src/lost.ts");
+    expect(censusPassLine(inventory)).toContain("1 orphan.");
     const clean = {
       ...inventory,
       files: inventory.files.filter((r) => r.disposition !== "orphan"),
@@ -122,7 +127,8 @@ describe("inventory", () => {
       ...inventory,
       files: inventory.files.map((r) => ({ ...r, disposition: "reachable" as const })),
     };
-    expect(censusFailure(root, passing)).toBeNull();
+    expect(censusFailure(root, passing, true)).toBeNull();
+    expect(censusOrphanWarning(passing)).toBeNull();
     expect(censusPassLine(passing)).toContain("8 files == maximal repo walk");
   });
 
@@ -132,7 +138,8 @@ describe("inventory", () => {
     expect(checkCensusNoRegen(root, out)?.endsWith("\n")).toBe(true);
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, "file-inventory.json"), JSON.stringify(inventory));
-    expect(checkCensusNoRegen(root, out)).toContain("ORPHAN");
+    expect(checkCensusNoRegen(root, out, true)).toContain("ORPHAN");
+    expect(checkCensusNoRegen(root, out)).toBeNull();
   });
 });
 

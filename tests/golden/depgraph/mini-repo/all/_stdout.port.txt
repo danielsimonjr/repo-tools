@@ -3,6 +3,10 @@ Created output directory: docs/architecture
   src: 15 files
 Found 15 TypeScript files total
 Parsed all files
+Entry points: 3
+Reachable files: 13
+Dormant files: 2
+Analyzing all 15 files (dormancy reported; use --reachable-only to restrict)
 Categorized into 4 modules
 Found 2 cyclic components (1 runtime, 1 type-only)
 Generated statistics
@@ -20,20 +24,19 @@ Written: docs/architecture/TEST_COVERAGE.md
 Written: docs/architecture/test-coverage.json
 
 Dependency graph generation complete!
+  - 13 reachable files, 2 dormant files
   - 15 files analyzed
   - 16 exports found (7 re-exports)
   - 3 type-only imports detected
   - 2 cyclic components:
       1 runtime, 2 files (require attention)
       1 type-only, 2 files (safe)
-  - 4 potentially unused files
+  - 2 potentially unused files
   - 2 potentially unused exports
 
 Potentially unused files:
   - src/ambient.d.ts
-  - src/cli.ts
   - src/orphan.ts
-  - src/util/index.ts
 
 Potentially unused exports:
   src/a.ts:
@@ -42,6 +45,8 @@ Potentially unused exports:
     - dynamicValue (constant)
 
 Written: docs/architecture/unused-analysis.md
+Written: docs/architecture/FILE_INVENTORY.md (16 files: 10 reachable, 3 build-entry, 0 test-only, 1 orphan, 2 test, 0 tool, 0 config, 0 example)
+File census self-check passed: 16 files == maximal repo walk (independent), 1 orphan.
 
 === Test Coverage Analysis ===
   - 2 test files analyzed

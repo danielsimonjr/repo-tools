@@ -121,7 +121,11 @@ export function exportsSubpathEntries(
   if (isJsonObject(pkg.exports)) {
     for (const key of Object.keys(pkg.exports)) {
       if (key === "." || !key.startsWith("./")) continue;
-      addIfExists(join(pkgDir, "src", `${key.slice(2)}.ts`));
+      // Fix M1: a subpath can name a folder. `./util` is `src/util.ts`, else `src/util/index.ts`.
+      const file = join(pkgDir, "src", `${key.slice(2)}.ts`);
+      addIfExists(
+        existsSync(join(root, file)) ? file : join(pkgDir, "src", key.slice(2), "index.ts"),
+      );
     }
   }
   const binValues =
@@ -163,6 +167,21 @@ export function exportsSubpathEntries(
   // only when a `build` or `dev` script called a bare `tsup`.
   for (const entry of tsupConfigEntries(root, pkgDir)) addIfExists(entry);
   return entries;
+}
+
+/**
+ * The extra build roots of the root package in single-package mode (fix M1): the
+ * `exportsSubpathEntries` of the root `package.json`. Returns an empty list when the file is
+ * missing, is not valid JSON, or is not a JSON object.
+ */
+export function rootPackageEntries(root: string, warn: Warn = () => {}): string[] {
+  let pkg: unknown;
+  try {
+    pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf-8"));
+  } catch {
+    return [];
+  }
+  return isJsonObject(pkg) ? exportsSubpathEntries(root, "", pkg, warn) : [];
 }
 
 /**
@@ -220,16 +239,21 @@ export function runtimeLaunchedEntries(root: string, parsed: ParsedFile[]): stri
 }
 
 /**
- * The monorepo entry points: each package `src/index.ts` and extra entry that was parsed, then
- * the config-referenced entries, then the runtime-launched siblings. No path appears twice.
+ * The entry points: each package `src/index.ts` and extra entry that was parsed, then the
+ * config-referenced entries, then the runtime-launched siblings. No path appears twice. In
+ * single-package mode (no workspace) the root package is the one package: `src/index.ts` and
+ * `rootEntries` (fix M1).
  */
 export function collectEntryPoints(
   root: string,
   workspaces: Map<string, WorkspacePackage>,
   parsedFiles: ParsedFile[],
+  rootEntries: readonly string[] = [],
 ): string[] {
   const entryPoints: string[] = [];
-  for (const [, ws] of workspaces) {
+  const packages =
+    workspaces.size > 0 ? [...workspaces.values()] : [{ srcDir: "src", extraEntries: rootEntries }];
+  for (const ws of packages) {
     const candidates = [toPosix(`${ws.srcDir}/index.ts`), ...ws.extraEntries];
     for (const entryPath of candidates) {
       const found = parsedFiles.find((f) => f.path === entryPath);

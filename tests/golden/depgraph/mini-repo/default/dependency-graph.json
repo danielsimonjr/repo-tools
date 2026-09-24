@@ -434,7 +434,7 @@
     "typeOnlyCyclicComponents": 1,
     "runtimeFilesInCycles": 2,
     "typeOnlyFilesInCycles": 2,
-    "unusedFilesCount": 4,
+    "unusedFilesCount": 2,
     "unusedExportsCount": 2
   }
 }

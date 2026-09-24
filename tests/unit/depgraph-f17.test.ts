@@ -113,7 +113,8 @@ describe("F17: classifier roots for unused and dormant files", () => {
         "packages/lib/src/dead.ts": "/** Dead: the control. */\nexport const dead = 1;\n",
       },
     );
-    const result = await runDepgraph(root);
+    // Fix M1: an orphan fails the census gate with --strict-orphans only.
+    const result = await runDepgraph(root, ["--strict-orphans"]);
     const d = dispositions(result.report("file-inventory.json"));
     expect(d["packages/lib/src/bindings.ts"]).toBe("build-entry");
     expect(d["packages/lib/src/worker.ts"]).toBe("build-entry");

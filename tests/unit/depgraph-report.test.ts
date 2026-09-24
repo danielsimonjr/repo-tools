@@ -206,9 +206,14 @@ describe("pipeline entry", () => {
       root: "x",
       includeTests: true,
       all: true,
+      reachableOnly: false,
+      strictOrphans: false,
       checkCensus: true,
       help: false,
     });
+    // Fix M1: the two single-package model flags.
+    const m1 = parseDepgraphArgs(["--reachable-only", "--strict-orphans"], "cwd");
+    expect([m1.reachableOnly, m1.strictOrphans]).toEqual([true, true]);
     expect(parseDepgraphArgs([root], "cwd").root).toBe(root);
     expect(parseDepgraphArgs(["no-such-path"], "cwd").root).toBe("cwd");
   });
@@ -219,6 +224,12 @@ describe("pipeline entry", () => {
     expect(r.out).toBe(DEPGRAPH_HELP);
   });
 
+  test("--check-census fails without a committed inventory", async () => {
+    const r = await capture([`--root=${root}`, "--check-census"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("not found");
+  });
+
   test("run writes the reports and prints root-relative paths", async () => {
     const r = await capture([`--root=${root}`]);
     expect(r.code).toBe(0);
@@ -226,13 +237,8 @@ describe("pipeline entry", () => {
     expect(r.out).not.toContain(root);
     const md = readFileSync(join(root, "docs/architecture/DEPENDENCY_GRAPH.md"), "utf8");
     expect(md.startsWith(VERIFICATION_MARKER)).toBe(true);
-    expect(existsSync(join(root, "docs/architecture/file-inventory.json"))).toBe(false);
-  });
-
-  test("--check-census fails without a committed inventory", async () => {
-    const r = await capture([`--root=${root}`, "--check-census"]);
-    expect(r.code).toBe(1);
-    expect(r.err).toContain("not found");
+    // Fix M1: a single-package run writes the inventory too.
+    expect(existsSync(join(root, "docs/architecture/file-inventory.json"))).toBe(true);
   });
 
   test("loadExtensions loads nothing in the port", () => {

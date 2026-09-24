@@ -37,9 +37,12 @@ describe("F7: dist/ imports land on src/", () => {
     const cov = coverage(result.report("test-coverage.json"));
     expect(cov.testedFiles).toContain("src/x.ts");
     expect(cov.testedFiles).toContain("src/y.ts");
-    const unused = result.report("unused-analysis.md");
-    expect(unused).not.toContain("`src/x.ts`");
-    expect(unused).not.toContain("`src/y.ts`");
+    // Fix M1: the dormancy sections list src/x.ts and src/y.ts as test-only, so the check reads
+    // the unused-file list only.
+    const unusedFiles =
+      result.report("unused-analysis.md").split("\n## Potentially Unused Files\n")[1] ?? "";
+    expect(unusedFiles.split("\n## ")[0]).not.toContain("`src/x.ts`");
+    expect(unusedFiles.split("\n## ")[0]).not.toContain("`src/y.ts`");
   });
 
   test("monorepo: a bin of dist/src/cli.js is a root, and a dist/ import lands on src/", async () => {

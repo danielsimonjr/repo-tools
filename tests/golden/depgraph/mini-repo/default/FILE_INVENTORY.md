@@ -8,50 +8,55 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 9
+**Total files**: 16
 
 ## Disposition counts
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 3 | A `src/` file in the module graph, reachable from a root. |
-| `build-entry` | 4 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
+| `reachable` | 10 | A `src/` file in the module graph, reachable from a root. |
+| `build-entry` | 3 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only` | 0 | A `src/` file not reachable from src roots but imported by a test. |
-| `orphan` | 0 | A `src/` file reachable from nothing — a delete/wire candidate (fails the gate with `--strict-orphans`). |
-| `test` | 1 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`). |
+| `orphan` | 1 | A `src/` file reachable from nothing — a delete/wire candidate (fails the gate with `--strict-orphans`). |
+| `test` | 2 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`). |
 | `tool` | 0 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks). |
-| `config` | 1 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root). |
+| `config` | 0 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root). |
 | `example` | 0 | An `examples/` or `docs/` reference/illustration source. |
-| **Total** | **9** | |
+| **Total** | **16** | |
 
 ## Per-area counts
 
 | Area | Files |
 | --- | --: |
-| `config` | 1 |
-| `src` | 7 |
-| `tests` | 1 |
+| `src` | 14 |
+| `tests` | 2 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `@scope/cli` | 2 |
-| `@scope/core` | 7 |
+| `(root)` | 16 |
 
 ## All files
 
 | file | package | area | disposition |
 | --- | --- | --- | --- |
-| `packages/cli/src/format.ts` | @scope/cli | src | reachable |
-| `packages/cli/src/main.ts` | @scope/cli | src | build-entry |
-| `packages/core/src/index.ts` | @scope/core | src | build-entry |
-| `packages/core/src/internal.ts` | @scope/core | src | build-entry |
-| `packages/core/src/math.ts` | @scope/core | src | reachable |
-| `packages/core/src/types.ts` | @scope/core | src | reachable |
-| `packages/core/src/worker.ts` | @scope/core | src | build-entry |
-| `packages/core/tests/math.test.ts` | @scope/core | tests | test |
-| `packages/core/tsup.config.ts` | @scope/core | config | config |
+| `src/B.ts` | (root) | src | reachable |
+| `src/Z/index.ts` | (root) | src | reachable |
+| `src/Z/loop.ts` | (root) | src | reachable |
+| `src/Z/zed.ts` | (root) | src | reachable |
+| `src/_x.ts` | (root) | src | reachable |
+| `src/a.ts` | (root) | src | reachable |
+| `src/cli.ts` | (root) | src | build-entry |
+| `src/dyn.ts` | (root) | src | reachable |
+| `src/index.ts` | (root) | src | build-entry |
+| `src/orphan.ts` | (root) | src | orphan |
+| `src/ping.ts` | (root) | src | reachable |
+| `src/pong.ts` | (root) | src | reachable |
+| `src/register.ts` | (root) | src | reachable |
+| `src/util/index.ts` | (root) | src | build-entry |
+| `tests/a.test.ts` | (root) | tests | test |
+| `tests/barrel.test.ts` | (root) | tests | test |
 
 ## Skipped links
 

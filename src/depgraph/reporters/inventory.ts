@@ -11,7 +11,7 @@ export const FILE_DISPOSITION_LEGEND: Array<[FileDisposition, string]> = [
   ["test-only", "A `src/` file not reachable from src roots but imported by a test."],
   [
     "orphan",
-    "A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).",
+    "A `src/` file reachable from nothing — a delete/wire candidate (fails the gate with `--strict-orphans`).",
   ],
   ["test", "A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`)."],
   ["tool", "A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks)."],
@@ -35,7 +35,7 @@ export function generateFileInventoryMarkdown(inv: FileInventory): string {
       "reference sources — tagged with a disposition. A completeness census: no `.ts` may be " +
       "silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, " +
       "location-agnostic repo walk (broader than this census’s enumerated discovery) and " +
-      "HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.",
+      "HARD-FAILS the run if any `.ts` on disk is unaccounted, or (with `--strict-orphans`) if any `orphan` exists.",
   );
   lines.push("");
   lines.push(

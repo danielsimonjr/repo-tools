@@ -6,9 +6,9 @@
 
 ## Summary
 
-- **Potentially unused files**: 4
-- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 0
-  - **Orphaned (reachable from nothing — delete/wire candidates)**: 0
+- **Potentially unused files**: 2
+- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 1
+  - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
   - **Test-only (exercised by a test, ships nothing)**: 0
 - **Potentially unused exports**: 2
   - **Unreferenced anywhere (deletion candidates)**: 2
@@ -21,7 +21,9 @@ to delete, or a root the tool cannot see (a new build/worker entry, a
 `new URL()`-loaded script, or a side-effect-only module) — in which case wire it
 or seed it. Verify before deleting.
 
-_None._
+### `(root)` (1)
+
+- `src/orphan.ts`
 
 ## Dormant Files — Test-only (ships nothing, but exercised)
 
@@ -36,9 +38,7 @@ _None._
 These files are not imported by any other file in the codebase:
 
 - `src/ambient.d.ts`
-- `src/cli.ts`
 - `src/orphan.ts`
-- `src/util/index.ts`
 
 ## Unreferenced Anywhere (deletion candidates)
 

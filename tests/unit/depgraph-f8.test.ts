@@ -26,6 +26,9 @@ describe("F8: test imports count as usage", () => {
     const unused = result.report("unused-analysis.md");
     expect(unused).toContain("neverUsed");
     expect(unused).not.toContain("usedByTest");
-    expect(unused).not.toContain("`src/helper.ts`");
+    // Fix M1: the dormancy sections list src/helper.ts as test-only, so the check reads the
+    // unused-file list only.
+    const unusedFiles = unused.split("\n## Potentially Unused Files\n")[1] ?? "";
+    expect(unusedFiles.split("\n## ")[0]).not.toContain("`src/helper.ts`");
   });
 });

@@ -1,0 +1,135 @@
+{
+  "totalFiles": 16,
+  "byDisposition": {
+    "reachable": 10,
+    "build-entry": 3,
+    "test-only": 0,
+    "orphan": 1,
+    "test": 2,
+    "tool": 0,
+    "config": 0,
+    "example": 0
+  },
+  "byArea": {
+    "src": 14,
+    "tests": 2
+  },
+  "byPackage": {
+    "(root)": 16
+  },
+  "files": [
+    {
+      "file": "src/B.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 14
+    },
+    {
+      "file": "src/Z/index.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 2
+    },
+    {
+      "file": "src/Z/loop.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 7
+    },
+    {
+      "file": "src/Z/zed.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 11
+    },
+    {
+      "file": "src/_x.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 5
+    },
+    {
+      "file": "src/a.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 18
+    },
+    {
+      "file": "src/cli.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 7
+    },
+    {
+      "file": "src/dyn.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 3
+    },
+    {
+      "file": "src/index.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 8
+    },
+    {
+      "file": "src/orphan.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 3
+    },
+    {
+      "file": "src/ping.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 7
+    },
+    {
+      "file": "src/pong.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 6
+    },
+    {
+      "file": "src/register.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 3
+    },
+    {
+      "file": "src/util/index.ts",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 5
+    },
+    {
+      "file": "tests/a.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/barrel.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    }
+  ],
+  "skippedLinks": []
+}

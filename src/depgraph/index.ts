@@ -30,6 +30,7 @@ import { buildDuplicateReport, detectDuplicateSymbols } from "./duplicates.ts";
 import {
   buildFileInventory,
   censusFailure,
+  censusOrphanWarning,
   censusPassLine,
   checkCensusNoRegen,
 } from "./inventory.ts";
@@ -51,7 +52,7 @@ import {
 import { generateSurfacesJson } from "./reporters/surfaces.ts";
 import { generateUnusedReport } from "./reporters/unused.ts";
 import { generateYaml } from "./reporters/yaml.ts";
-import { collectEntryPoints, isJsonObject } from "./roots.ts";
+import { collectEntryPoints, isJsonObject, rootPackageEntries } from "./roots.ts";
 import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, TEST_DIR_NAMES } from "./scanner.ts";
 import type { PackageJson, ParsedFile, Statistics, UnusedExport } from "./types.ts";
 import { detectWorkspaces } from "./workspaces.ts";
@@ -66,6 +67,10 @@ Options:
   --root=<path>        Project root (default: the current directory). A first
                        argument that is an existing path also sets the root.
   --all, -a            Monorepo mode: include dormant and unreachable files.
+  --reachable-only     Restrict the graph to the files reachable from a root.
+                       Single-package mode analyzes all files by default.
+  --strict-orphans     Exit 1 when an orphaned source file exists. Without it,
+                       an orphan gives a warning.
   --include-tests, -t  No operation. Kept for compatibility: the test coverage
                        reports are always written.
   --check-census       Check the committed file-inventory.json against a fresh
@@ -73,7 +78,8 @@ Options:
   --help, -h           Show this help.
 
 Exit codes: 0 on success. 1 when no TypeScript file is found, when the census
-self-check fails (monorepo mode), or when --check-census fails.
+self-check fails, when an orphan exists with --strict-orphans, or when
+--check-census fails.
 `;
 
 /** The parsed command line. */
@@ -81,6 +87,10 @@ export interface DepgraphOptions {
   root: string;
   includeTests: boolean;
   all: boolean;
+  /** Fix M1: restrict the graph to reachable files (single-package mode too). */
+  reachableOnly: boolean;
+  /** Fix M1: an orphan fails the census self-check. */
+  strictOrphans: boolean;
   checkCensus: boolean;
   help: boolean;
 }
@@ -94,6 +104,8 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     root: cwd,
     includeTests: false,
     all: false,
+    reachableOnly: false,
+    strictOrphans: false,
     checkCensus: false,
     help: false,
   };
@@ -101,6 +113,8 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     if (arg.startsWith("--root=")) options.root = arg.slice(7);
     else if (arg === "--include-tests" || arg === "-t") options.includeTests = true;
     else if (arg === "--all" || arg === "-a") options.all = true;
+    else if (arg === "--reachable-only") options.reachableOnly = true;
+    else if (arg === "--strict-orphans") options.strictOrphans = true;
     else if (arg === "--check-census") options.checkCensus = true;
     else if (arg === "--help" || arg === "-h") options.help = true;
     else if (!arg.startsWith("-") && existsSync(arg)) options.root = arg;
@@ -154,7 +168,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   linkLog.skipped.clear();
 
   if (options.checkCensus) {
-    const failure = checkCensusNoRegen(root, outputDir);
+    const failure = checkCensusNoRegen(root, outputDir, options.strictOrphans);
     logSkippedLinks(log, skippedLinks(root));
     if (failure) {
       io.stderr(failure);
@@ -169,8 +183,11 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   // Scan.
   log("Scanning codebase for dependencies...");
   if (options.includeTests) log("note: --include-tests is a no-op; test analysis is always on.");
-  const workspaces = detectWorkspaces(root, (message) => io.stderr(`Warning: ${message}\n`));
+  const warn = (message: string): void => io.stderr(`Warning: ${message}\n`);
+  const workspaces = detectWorkspaces(root, warn);
   const isMonorepo = workspaces.size > 0;
+  // Fix M1: in single-package mode the root package.json names the extra build roots.
+  const rootEntries = isMonorepo ? [] : rootPackageEntries(root, warn);
   if (isMonorepo) {
     log(`Monorepo detected: ${workspaces.size} workspace packages`);
     for (const [name, ws] of workspaces) log(`  - ${name} (${ws.directory}/)`);
@@ -205,26 +222,32 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const parsedFiles = tsFiles.map((f) => parseFile(parseCtx, f));
   log("Parsed all files");
 
-  // Analyze.
-  let reachableSet: Set<string> | undefined;
-  let dormantSet: Set<string> | undefined;
+  // Analyze. Fix M1: reachability and dormancy run in both modes. The monorepo graph holds the
+  // reachable files (`--all` widens it). The single-package graph holds every file, and the
+  // dormancy is reported (`--reachable-only` restricts it).
+  const entryPoints = collectEntryPoints(root, workspaces, parsedFiles, rootEntries);
+  log(`Entry points: ${entryPoints.length}`);
+  const censusRoots = new Set(entryPoints);
+  const reachableSet = findReachableFiles(entryPoints, parsedFiles, workspaces);
+  const dormantSet = new Set(
+    parsedFiles.filter((f) => !reachableSet.has(f.path)).map((f) => f.path),
+  );
+  log(`Reachable files: ${reachableSet.size}`);
+  log(`Dormant files: ${dormantSet.size}`);
   let activeParsedFiles = parsedFiles;
-  let censusRoots = new Set<string>();
-  if (isMonorepo) {
-    const entryPoints = collectEntryPoints(root, workspaces, parsedFiles);
-    log(`Entry points: ${entryPoints.length}`);
-    censusRoots = new Set(entryPoints);
-    const reachable = findReachableFiles(entryPoints, parsedFiles, workspaces);
-    reachableSet = reachable;
-    dormantSet = new Set(parsedFiles.filter((f) => !reachable.has(f.path)).map((f) => f.path));
-    log(`Reachable files: ${reachable.size}`);
-    log(`Dormant files: ${dormantSet.size}`);
-    if (!options.all) {
-      activeParsedFiles = parsedFiles.filter((f) => reachable.has(f.path));
-      log(`Analyzing ${activeParsedFiles.length} reachable files (use --all to include dormant)`);
-    } else {
-      log(`Analyzing all ${activeParsedFiles.length} files (including dormant)`);
-    }
+  if (options.reachableOnly || (isMonorepo && !options.all)) {
+    activeParsedFiles = parsedFiles.filter((f) => reachableSet.has(f.path));
+    log(
+      options.reachableOnly
+        ? `Analyzing ${activeParsedFiles.length} reachable files (--reachable-only)`
+        : `Analyzing ${activeParsedFiles.length} reachable files (use --all to include dormant)`,
+    );
+  } else if (isMonorepo) {
+    log(`Analyzing all ${activeParsedFiles.length} files (including dormant)`);
+  } else {
+    log(
+      `Analyzing all ${activeParsedFiles.length} files (dormancy reported; use --reachable-only to restrict)`,
+    );
   }
 
   const modules = categorizeFiles(activeParsedFiles, isMonorepo, workspaces);
@@ -253,7 +276,13 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     parseFile(parseCtx, f),
   );
 
-  const unusedAnalysis = detectUnused(activeParsedFiles, parsedTestFiles, root, workspaces);
+  const unusedAnalysis = detectUnused(
+    activeParsedFiles,
+    parsedTestFiles,
+    root,
+    workspaces,
+    rootEntries,
+  );
   const stats = generateStatistics(activeParsedFiles, modules, cycles, unusedAnalysis, root);
   log("Generated statistics");
   const matrix = buildDependencyMatrix(activeParsedFiles);
@@ -288,7 +317,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   // One public surface for the whole run: the export surfaces (fix F15) and the duplicate
   // detector read it. A per-module surface misses a file that a root in another module
   // re-exports.
-  const publicSurface = computePublicSurface(activeParsedFiles, root, workspaces);
+  const publicSurface = computePublicSurface(activeParsedFiles, root, workspaces, rootEntries);
   write("package-export-surfaces.json", generateSurfacesJson(modules, publicSurface));
   log(`Written: ${out("package-export-surfaces.json")}`);
 
@@ -321,8 +350,8 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   logSummary(log, {
     isMonorepo,
     workspaceCount: workspaces.size,
-    reachable: reachableSet?.size,
-    dormant: dormantSet?.size,
+    reachable: reachableSet.size,
+    dormant: dormantSet.size,
     stats,
     unusedFiles: unusedAnalysis.unusedFiles,
     unusedExports: unusedAnalysis.unusedExports,
@@ -335,36 +364,35 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   );
   log(`\nWritten: ${out("unused-analysis.md")}`);
 
-  // Gate: the census and its self-check (monorepo mode only).
-  if (isMonorepo && reachableSet) {
-    const inventory = buildFileInventory(
-      root,
-      workspaces,
-      censusRoots,
-      reachableSet,
-      dormant.testReachable,
-    );
-    // The self-check runs before the write: its maximal walk can meet more links (fix F34).
-    const failure = censusFailure(root, inventory);
-    inventory.skippedLinks = skippedLinks(root);
-    write("file-inventory.json", generateFileInventoryJson(inventory));
-    write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory)));
-    log(
-      `Written: ${out("FILE_INVENTORY.md")} (${inventory.totalFiles} files: ` +
-        Object.entries(inventory.byDisposition)
-          .map(([k, v]) => `${v} ${k}`)
-          .join(", ") +
-        ")",
-    );
-    logSkippedLinks(log, inventory.skippedLinks);
-    if (failure) {
-      io.stderr(failure);
-      return 1;
-    }
-    log(censusPassLine(inventory));
-  } else {
-    logSkippedLinks(log, skippedLinks(root));
+  // Gate: the census and its self-check, in both modes (fix M1).
+  const inventory = buildFileInventory(
+    root,
+    workspaces,
+    censusRoots,
+    reachableSet,
+    dormant.testReachable,
+  );
+  // The self-check runs before the write: its maximal walk can meet more links (fix F34).
+  const failure = censusFailure(root, inventory, options.strictOrphans);
+  inventory.skippedLinks = skippedLinks(root);
+  write("file-inventory.json", generateFileInventoryJson(inventory));
+  write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory)));
+  log(
+    `Written: ${out("FILE_INVENTORY.md")} (${inventory.totalFiles} files: ` +
+      Object.entries(inventory.byDisposition)
+        .map(([k, v]) => `${v} ${k}`)
+        .join(", ") +
+      ")",
+  );
+  logSkippedLinks(log, inventory.skippedLinks);
+  if (failure) {
+    io.stderr(failure);
+    return 1;
   }
+  // Fix M1: without `--strict-orphans` an orphan gives a warning, not a failure.
+  const orphanWarning = censusOrphanWarning(inventory);
+  if (orphanWarning) io.stderr(orphanWarning);
+  log(censusPassLine(inventory));
 
   // The pre-port WASM, parallel and WebGPU pairing reports ran here (see the module comment).
 
@@ -413,20 +441,16 @@ function logSummary(
   s: {
     isMonorepo: boolean;
     workspaceCount: number;
-    reachable: number | undefined;
-    dormant: number | undefined;
+    reachable: number;
+    dormant: number;
     stats: Statistics;
     unusedFiles: string[];
     unusedExports: UnusedExport[];
   },
 ): void {
   log("\nDependency graph generation complete!");
-  if (s.isMonorepo) {
-    log(`  - ${s.workspaceCount} workspace packages scanned`);
-    if (s.reachable !== undefined) {
-      log(`  - ${s.reachable} reachable files, ${s.dormant || 0} dormant files`);
-    }
-  }
+  if (s.isMonorepo) log(`  - ${s.workspaceCount} workspace packages scanned`);
+  log(`  - ${s.reachable} reachable files, ${s.dormant} dormant files`);
   log(`  - ${s.stats.totalTypeScriptFiles} files analyzed`);
   log(`  - ${s.stats.totalExports} exports found (${s.stats.totalReExports} re-exports)`);
   log(`  - ${s.stats.totalTypeOnlyImports} type-only imports detected`);

@@ -2,7 +2,8 @@
  * Graph analysis: modules, the dependency matrix, reachability, the public surface, unused files
  * and exports, dormancy and the statistics. The cycles are in `cycles.ts` (fix F26).
  *
- * Port note, kept on purpose until the fix lands: dormancy exists in monorepo mode only (fix M1).
+ * Fix M1: reachability and dormancy run in both modes. In single-package mode the root package
+ * gives the roots: `src/index.ts` and the entries of the root `package.json`.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -139,15 +140,16 @@ export function findReachableFiles(
 }
 
 /**
- * The public surface: each `src/index.ts`, each workspace extra entry and each
- * config-referenced entry is a root. A root and every file that a chain of `export *` from a
- * root reaches is public in full. A named re-export from a public file makes that one name
- * public.
+ * The public surface: each `src/index.ts`, each workspace extra entry, each root package entry
+ * (`rootEntries`, single-package mode, fix M1) and each config-referenced entry is a root. A
+ * root and every file that a chain of `export *` from a root reaches is public in full. A named
+ * re-export from a public file makes that one name public.
  */
 export function computePublicSurface(
   files: ParsedFile[],
   root: string,
   workspaces: Map<string, WorkspacePackage>,
+  rootEntries: readonly string[] = [],
 ): PublicSurface {
   const byPath = new Map(files.map((f) => [f.path, f] as const));
   const publicWildcardFiles = new Set<string>();
@@ -168,6 +170,7 @@ export function computePublicSurface(
   for (const ws of workspaces.values()) {
     for (const entry of ws.extraEntries) extraEntryPaths.add(entry);
   }
+  for (const entry of rootEntries) extraEntryPaths.add(entry);
   for (const entry of configReferencedEntries(root)) extraEntryPaths.add(entry);
   for (const file of files) {
     if (isSrcIndex(file.path) || extraEntryPaths.has(file.path)) {
@@ -184,13 +187,15 @@ function addImported(symbols: Set<string>, imports: string[]): void {
 
 /**
  * The unused files and exports of `files`. The imports of `files` and `testFiles` count as
- * use. A public-surface export is never unused.
+ * use. A public-surface export is never unused. `rootEntries` are the root package entries of
+ * single-package mode (fix M1).
  */
 export function detectUnused(
   files: ParsedFile[],
   testFiles: ParsedFile[],
   root: string,
   workspaces: Map<string, WorkspacePackage>,
+  rootEntries: readonly string[] = [],
 ): UnusedAnalysis {
   const filePaths = new Set(files.map((f) => f.path));
   const importedFiles = new Set<string>();
@@ -223,6 +228,7 @@ export function detectUnused(
     files,
     root,
     workspaces,
+    rootEntries,
   );
 
   const unusedFiles: string[] = [];
@@ -351,8 +357,8 @@ export interface DormantSplit {
 }
 
 /**
- * Splits `dormantSet` into orphaned and test-only files. Without a dormant set (single-package
- * mode) every list is empty.
+ * Splits `dormantSet` into orphaned and test-only files. Without a dormant set every list is
+ * empty.
  */
 export function splitDormant(
   dormantSet: Set<string> | undefined,
