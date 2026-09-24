@@ -40,3 +40,69 @@ jobs:
       - run: bun run lint
       - run: bun test
 
+  executable:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: bun-linux-x64
+            exe: repo-tools-linux-x64
+            probe: ext-probe
+          - os: windows-latest
+            target: bun-windows-x64
+            exe: repo-tools-windows-x64.exe
+            probe: ext-probe.exe
+          - os: macos-14
+            target: bun-darwin-arm64
+            exe: repo-tools-darwin-arm64
+            probe: ext-probe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      # Node 20 is the oldest version that package.json "engines" allows.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: bun scripts/build.ts --compile --target=${{ matrix.target }}
+      - run: bun scripts/smoke.ts -- bin/${{ matrix.exe }}
+      - run: bun scripts/smoke.ts -- node dist/cli.js
+      - run: bun scripts/smoke.ts -- bun dist/cli.js
+      # Design 13.3 step 7: a compiled executable imports an external .mjs extension.
+      - run: bun build --compile --target=${{ matrix.target }} scripts/ext-probe.ts --outfile bin/${{ matrix.probe }}
+      - name: extension probe from another directory
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP"
+          "$GITHUB_WORKSPACE/bin/${{ matrix.probe }}" "$GITHUB_WORKSPACE/tests/fixtures/extension/probe.mjs" "$RUNNER_TEMP/ext-out"
+      - run: npm pack --dry-run
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      # The release publishes this CI-built tarball after a hash check (design 11.4).
+      - name: npm pack and hash
+        run: |
+          mkdir -p pack
+          npm pack --pack-destination pack
+          cd pack && sha256sum *.tgz > SHA256SUMS && cat SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: npm-package
+          path: pack/
+          if-no-files-found: error

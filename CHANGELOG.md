@@ -11,6 +11,22 @@ All notable changes to this project are recorded in this file. The format follow
 - CLI shell `repo-tools` with the subcommands `depgraph`, `chunk` and `compress`. `--help`, `-h`
   and no argument print the subcommand list. `--version` prints the package version. An unknown
   subcommand exits 1. A subcommand that is not built yet exits 1 with a message.
+- Build: `bun run build` writes the Node-compatible ESM bundle `dist/cli.js` with a node
+  shebang. `bun run compile` writes one compiled executable for the host (or `--target`) into
+  `bin/`. Targets: `bun-windows-x64`, `bun-linux-x64`, `bun-darwin-arm64`. An unknown flag or
+  target exits 1.
+- Smoke test `scripts/smoke.ts`: runs `--version`, `--help` and an unknown subcommand against one
+  way to run the tool (the executable, `node dist/cli.js` or `bun dist/cli.js`).
+- Extension-load probe `scripts/ext-probe.ts`: CI compiles it with the product's flags and proves
+  that a compiled executable imports an external `.mjs` extension and runs its `preflight` and
+  `report` hooks, on all three operating systems, before any extension code exists.
+- CI job `executable` on Linux, Windows and macOS (arm64): compile, smoke the executable and the
+  bundle under Node 20 and Bun, run the extension probe, and `npm pack --dry-run`. CI job
+  `package`: uploads the npm tarball and its SHA-256 as a workflow artifact. Workflow
+  `build.yml` (tag `v*` or manual): checks that a tag equals the `package.json` version, builds
+  the three executables, uploads each one unzipped, and writes and verifies one `SHA256SUMS`.
+  A downloaded Linux or macOS executable has no execute bit; run `chmod +x` on it. No workflow
+  creates a release or holds a token.
 - Privacy check `scripts/privacy-check.ts`. It scans the content in the git index (every
   tracked blob, symlink targets included) and every commit object reachable from HEAD, and it
   fails when the commit count differs from `git rev-list --count`. It fails on:

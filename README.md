@@ -26,6 +26,9 @@ bun src/bin.ts --help
 | `bun test` | Runs the unit tests. |
 | `bun run typecheck` | Runs the TypeScript type check. |
 | `bun run lint` | Runs the lint and format check. |
+| `bun run build` | Writes the Node bundle `dist/cli.js`. |
+| `bun run compile` | Writes the compiled executable for this platform into `bin/`. |
+| `bun run smoke -- <command...>` | Runs the smoke test against one way to run the tool. |
 | `bun run privacy` | Runs the privacy check on the tracked files and the commit messages. |
 | `bun run hooks` | Installs the `commit-msg` hook that runs the privacy check on each message. |
 

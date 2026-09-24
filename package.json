@@ -26,7 +26,10 @@
     "lint": "biome check --error-on-warnings .",
     "test": "bun test",
     "hooks": "git config core.hooksPath .githooks",
-    "privacy": "bun scripts/privacy-check.ts"
+    "privacy": "bun scripts/privacy-check.ts",
+    "build": "bun scripts/build.ts",
+    "compile": "bun scripts/build.ts --compile",
+    "smoke": "bun scripts/smoke.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
