@@ -144,6 +144,12 @@ describe("commit messages", () => {
     expect(rules(scanCommitMessage("abc1234", "Copyright Zorblatt\n", DENY))).toEqual(["denylist"]);
   });
 
+  test("the Dependabot sign-off trailer passes; another github.com address fails", () => {
+    const signOff = `Signed-off-by: dependabot[bot] <support${"@"}github.com>\n`;
+    expect(scanCommitMessage("abc1234", `chore(deps): bump x\n\n${signOff}`, DENY)).toEqual([]);
+    expect(rules(scanText("a.md", `mail someone${"@"}github.com\n`, DENY))).toEqual(["email"]);
+  });
+
   test("a normal message with a noreply trailer passes", () => {
     const msg = `feat: x\n\nCo-Authored-By: Claude <noreply${"@"}anthropic.com>\n`;
     expect(scanCommitMessage("abc1234", msg, DENY)).toEqual([]);

@@ -8,6 +8,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- Privacy check: the address in the `Signed-off-by: dependabot[bot]` trailer is allowed, so a
+  Dependabot pull request no longer fails the email rule on its own trailer.
 - depgraph F3: every Markdown report starts with the verification marker and the do-not-edit
   banner, and the banner names the regenerate command. The default command is
   `repo-tools depgraph` (it was `npm run docs:deps`, a script name of one consumer); a null

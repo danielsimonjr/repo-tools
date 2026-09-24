@@ -51,9 +51,14 @@ const WINDOWS_USER_PATH = /(?:\b[a-z]:[\\/]+|\\)users[\\/]+[^\\/\s]/i;
 const POSIX_HOME_PATH =
   /(?:^|[\s"'`=(:,;[{<>|])\/(?:[a-z]\/|mnt\/[a-z]\/)?(?:home|users)\/[^/\s"'`]/i;
 const EMAIL = /(?<![\w.%+-])[\w.%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}/gi;
-/** Whole-address allowance: GitHub noreply, a `noreply@` sender, and the GitHub SSH user. */
+/**
+ * Whole-address allowance: GitHub noreply, a `noreply@` sender, the GitHub SSH user, and the
+ * Dependabot sign-off address.
+ */
+// `support@github.com` is the public address in the `Signed-off-by: dependabot[bot]` trailer of
+// every Dependabot commit; without it, no Dependabot pull request could pass this check.
 const ALLOWED_EMAIL =
-  /^(?:[^@\s]+@users\.noreply\.github\.com|noreply@[a-z0-9.-]+|git@github\.com)$/i;
+  /^(?:[^@\s]+@users\.noreply\.github\.com|noreply@[a-z0-9.-]+|git@github\.com|support@github\.com)$/i;
 const SESSION_URL = /claude\.ai\/code\/session_/i;
 const TOKEN = /[\p{L}\p{N}_-]+/gu;
 /** Invisible characters that can split a word without changing how it reads. */
