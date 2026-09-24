@@ -218,7 +218,10 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     }
   }
 
-  const addInternal = (regex: RegExp, edge: { typeOnly?: boolean; reExport?: boolean }): void => {
+  const addInternal = (
+    regex: RegExp,
+    edge: { typeOnly?: boolean; reExport?: boolean; sideEffect?: boolean },
+  ): void => {
     for (const match of code.matchAll(regex)) {
       const source = match[1] ?? "";
       if (!result.internalDependencies.some((d) => d.file === source)) {
@@ -227,7 +230,10 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     }
   };
   // Bare side-effect imports: `import './x.js';` (relative only).
-  addInternal(/(?:^|\n)\s*import\s+['"](\.[^'"]+)['"]\s*;?/g, { typeOnly: false });
+  addInternal(/(?:^|\n)\s*import\s+['"](\.[^'"]+)['"]\s*;?/g, {
+    typeOnly: false,
+    sideEffect: true,
+  });
   // `import('./x.js')` in any position, recorded as type-only (fix F25).
   addInternal(/\bimport\s*\(\s*['"](\.[^'"]+)['"]\s*\)/g, { typeOnly: true });
   // Re-export edges: `export * from`, `export * as ns from`, `export { a } from`,

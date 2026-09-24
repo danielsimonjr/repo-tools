@@ -126,7 +126,7 @@ describe("parseFile", () => {
     expect(file.internalDependencies).toEqual([
       { file: "./t.js", imports: ["T"], typeOnly: true },
       { file: "./u.js", imports: ["U", "v"], typeOnly: false },
-      { file: "./side.js", imports: [], typeOnly: false },
+      { file: "./side.js", imports: [], typeOnly: false, sideEffect: true },
       { file: "./dyn.js", imports: [], typeOnly: true },
       { file: "./all.js", imports: [], reExport: true },
       { file: "./r.js", imports: [], reExport: true },

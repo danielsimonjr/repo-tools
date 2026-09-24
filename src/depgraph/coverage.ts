@@ -2,7 +2,7 @@
  * Test coverage by direct import: which source files the test files import, directly or through
  * barrel re-exports, and the optional coverage policy that marks files as intentionally untested.
  *
- * Port note: a side-effect edge does not carry coverage through a chain (fix F10).
+ * Fix F10: coverage follows chains of bare side-effect imports.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -198,11 +198,33 @@ export function analyzeTestCoverage(
       coverageMap.set(sourcePath, tests);
     }
   };
+  const sourceByPath = new Map(sourceFiles.map((f) => [f.path, f]));
+  // Fix F10: a loaded file runs its bare side-effect imports (`import './x.js';`), so coverage
+  // follows those edges transitively. A namespace import (`import * as x`) is a binding and
+  // is not followed: that would credit the whole re-export closure of a barrel.
+  const addSideEffectClosure = (
+    fromPath: string,
+    testPath: string,
+    importedSources: string[],
+    visited: Set<string>,
+  ): void => {
+    for (const dep of sourceByPath.get(fromPath)?.internalDependencies ?? []) {
+      if (!dep.sideEffect) continue;
+      const target = resolvePath(fromPath, dep.file);
+      if (!sourceFilePaths.has(target) || visited.has(target)) continue;
+      visited.add(target);
+      addCoverage(target, testPath, importedSources);
+      addSideEffectClosure(target, testPath, importedSources, visited);
+    }
+  };
   const addTraced = (path: string, testPath: string, importedSources: string[]): void => {
     addCoverage(path, testPath, importedSources);
+    const visited = new Set<string>([path]);
+    addSideEffectClosure(path, testPath, importedSources, visited);
     for (const reExportedPath of traceReExports(path, reExportMap)) {
       if (sourceFilePaths.has(reExportedPath)) {
         addCoverage(reExportedPath, testPath, importedSources);
+        addSideEffectClosure(reExportedPath, testPath, importedSources, visited);
       }
     }
   };

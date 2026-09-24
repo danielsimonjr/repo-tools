@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F10: test coverage follows chains of bare side-effect imports. When a test imports
+  `a`, and `a` holds `import './b.js';` and `b` holds `import './c.js';`, then `b` and `c` are
+  covered (a command registry is this shape). A namespace import does not carry coverage, and a
+  side-effect cycle ends.
 - depgraph F9 (already in the port; a regression test pins it): each `package.json` `exports`
   subpath is a reachability root, so its target file and the files it imports are reachable.
 - depgraph F8 (already in the port; a regression test pins it): an import in a test file counts

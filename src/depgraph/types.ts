@@ -11,6 +11,8 @@ export interface Dependency {
   reExport?: boolean;
   /** True when the edge carries types only. */
   typeOnly?: boolean;
+  /** True for a bare side-effect import (`import './x.js';`): it binds no name (fix F10). */
+  sideEffect?: boolean;
 }
 
 /** An import from a package that is not a workspace member and not a Node built-in. */
