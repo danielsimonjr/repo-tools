@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- README: the status line said that the three subcommands are not built yet. It now states
+  the current state: all three work, `depgraph` runs with its default settings, and `compress -d`
+  restores JSON only.
 - depgraph F44: a `.d.ts` file is never a "potentially unused file". A declaration file declares
   ambient types and no file imports it, so the list named every ambient declaration. In the
   `mini-repo` fixture, `src/ambient.d.ts` leaves the list (2 -> 1).

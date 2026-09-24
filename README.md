@@ -8,7 +8,12 @@
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 
-Status: under construction. The CLI shell is available. The three subcommands are not built yet.
+Status: pre-release. No version is published yet.
+
+- All three subcommands work.
+- `depgraph` runs with its default settings. The configuration file and some flags of the design
+  are not built yet.
+- `compress -d` restores JSON files only.
 
 ## Run
 
