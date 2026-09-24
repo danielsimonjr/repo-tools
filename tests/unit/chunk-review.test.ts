@@ -182,7 +182,11 @@ describe("chunk path safety (reviewer finding 1)", () => {
 
 const FIXTURES = join(import.meta.dir, "../fixtures/chunk");
 
-/** Copies fixture `file` to `<work>/<name>/`, splits it, merges it, and returns both texts. */
+/**
+ * Copies fixture `file` to `<work>/<name>/`, splits it, merges it into a new file, and returns
+ * both texts. The merge writes a new file (`-o`), so a merge that writes nothing cannot pass as
+ * a round trip: the new file then does not exist.
+ */
 async function splitMerge(name: string, file: string, mergeFlags: string[] = []) {
   const dir = join(work, name);
   const src = put(join(dir, file), readFileSync(join(FIXTURES, file), "utf8"));
@@ -191,8 +195,10 @@ async function splitMerge(name: string, file: string, mergeFlags: string[] = [])
   expect(s.code).toBe(0);
   const base = file.slice(0, file.lastIndexOf("."));
   const manifest = join(dir, `${base}_chunks`, "manifest.json");
-  const m = await chunk(["merge", manifest, ...mergeFlags]);
-  return { dir, src, manifest, before, after: readFileSync(src, "utf8"), merge: m };
+  const out = join(dir, `merged-${file}`);
+  const m = await chunk(["merge", manifest, "-o", out, ...mergeFlags]);
+  const after = existsSync(out) ? readFileSync(out, "utf8") : undefined;
+  return { dir, src, manifest, before, after, merge: m };
 }
 
 describe("chunk K7: no data loss on merge", () => {
@@ -286,10 +292,11 @@ describe("chunk K8: split then merge is byte-identical (property over every fixt
       '{\n    "__proto__": {"k": 1},\n    "big": 12345678901234567890,\n    "b": [1, 2]\n}\n';
     const src = put(join(dir, "fmt.json"), text);
     expect((await chunk(["split", src])).code).toBe(0);
-    const m = await chunk(["merge", join(dir, "fmt_chunks", "manifest.json")]);
+    const out = join(dir, "merged.json");
+    const m = await chunk(["merge", join(dir, "fmt_chunks", "manifest.json"), "-o", out]);
     expect(m.err).toBe("");
     expect(m.code).toBe(0);
-    expect(readFileSync(src, "utf8")).toBe(text);
+    expect(readFileSync(out, "utf8")).toBe(text);
   });
 });
 
@@ -298,10 +305,11 @@ describe("chunk JSON merge keeps a __proto__ key (finding 7)", () => {
     const dir = join(work, "proto");
     const src = put(join(dir, "proto.json"), '{"__proto__":{"k":1},"b":2}\n');
     expect((await chunk(["split", src])).code).toBe(0);
-    const m = await chunk(["merge", join(dir, "proto_chunks", "manifest.json")]);
+    const out = join(dir, "merged.json");
+    const m = await chunk(["merge", join(dir, "proto_chunks", "manifest.json"), "-o", out]);
     expect(m.err).toBe("");
     expect(m.code).toBe(0);
-    const merged = JSON.parse(readFileSync(src, "utf8"));
+    const merged = JSON.parse(readFileSync(out, "utf8"));
     expect(Object.keys(merged)).toEqual(["__proto__", "b"]);
     expect(JSON.stringify(merged)).toBe('{"__proto__":{"k":1},"b":2}');
   });
@@ -354,10 +362,11 @@ describe("chunk CRLF line endings (item c)", () => {
       const base = file.slice(0, file.lastIndexOf("."));
       const manifest = join(dir, `${base}_chunks`, "manifest.json");
       expect(JSON.parse(readFileSync(manifest, "utf8")).lineEnding).toBe("crlf");
-      const m = await chunk(["merge", manifest]);
+      const out = join(dir, `merged-${file}`);
+      const m = await chunk(["merge", manifest, "-o", out]);
       expect(m.err).toBe("");
       expect(m.code).toBe(0);
-      expect(readFileSync(src).equals(Buffer.from(text))).toBe(true);
+      expect(readFileSync(out).equals(Buffer.from(text))).toBe(true);
     });
   }
 

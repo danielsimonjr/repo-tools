@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- The `chunk` round-trip tests merge into a new file (`-o`) and compare that file with the
+  input. Before, they merged over the source and compared the source, so a merge that wrote
+  nothing passed: with the final write removed, 19 of 20 of these tests passed; now 15 of 20
+  fail, as they must.
 - `chunk` does not let a manifest target its own chunk folder. `merge` and `status` exit 1 when
   the `sourceFile` is in the chunk folder (by path text or by real path), and `merge` exits 1
   when `-o` names a file in the chunk folder. `split -o` exits 1 when the chunk folder holds the
