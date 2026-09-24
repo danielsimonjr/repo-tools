@@ -430,6 +430,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- README: a "Build an executable" section (prerequisites, the lockfile install, `bun run compile`,
+  cross-platform targets, file names and sizes, how to run and smoke-test the executable) and a
+  "Reports" section that names every file `depgraph` writes and what each answers.
 - depgraph port review: the `node dist/x.js` script-root pattern keeps the pre-port byte that
   stops it from matching, so the port seeds no such root (the pre-port behaviour; fix F33
   changes it later). The `--check-census` "not found" message ends with a newline. The
