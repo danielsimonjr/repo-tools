@@ -18,6 +18,11 @@ All notable changes to this project are recorded in this file. The format follow
 - `compress`: batch compression skips a file with `.compact` in its name and prints the number
   of skipped files. The original tool compressed its own output again, for example into
   `README.compact.compact.md`. Batch decompression (`-d`) still selects `.compact` files.
+- `compress`: a directory without `--batch` exits 1 with a message. The original tool stopped
+  with an `EISDIR` stack trace. In batch mode, a directory without `--pattern` exits 1 with a
+  message (the original reported an `EISDIR` failure for the folder), and `--pattern` with a
+  file in place of a directory exits 1 with a message (the original stopped with `ENOTDIR`).
+  `--batch --pattern` without a directory searches the working folder, as before.
 
 ### Added
 

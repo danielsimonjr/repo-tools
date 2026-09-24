@@ -4,7 +4,7 @@
  * Writes a compact copy of a file for a model context, in the CTON format, or restores a compact
  * file. Single-file mode and batch mode are available.
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
 import type { Io } from "../io-types.ts";
 import { compareCodeUnits } from "../sort.ts";
@@ -27,7 +27,9 @@ export const HELP = `Usage: repo-tools compress <input...> [options]
 Writes a compact copy of each input file (the CTON format), or restores a compact file.
 
 Arguments:
-  <input>              The file to compress. In batch mode, the directory to search.
+  <input>              The file to compress. In batch mode with --pattern, the directory
+                       to search (default: the working folder). In batch mode without
+                       --pattern, the files to compress.
 
 Options:
   -o, --output <file>  The output file. Default: <input>.compact<ext>.
@@ -225,6 +227,11 @@ export function findFiles(
   return found;
 }
 
+/** True when `path` exists and is a directory. */
+function isDirectory(path: string): boolean {
+  return statSync(path, { throwIfNoEntry: false })?.isDirectory() ?? false;
+}
+
 /** Returns `<dir>/<base>.compact<ext>` for `file`. */
 function compactName(file: string): string {
   const ext = extname(file);
@@ -271,9 +278,18 @@ function runBatch(o: Options, io: Io, deps: CompressDeps): number {
       io.stderr(`Error: Directory not found: ${searchDir}\n`);
       return 1;
     }
+    if (!isDirectory(searchDir)) {
+      io.stderr(`Error: ${searchDir} is not a directory. With --pattern, give a directory.\n`);
+      return 1;
+    }
     files = findFiles(searchDir, o.pattern, o.recursive, deps);
     say(`Found ${files.length} files matching "${o.pattern}"${o.recursive ? " (recursive)" : ""}`);
   } else if (o.inputs.length > 0) {
+    const dir = o.inputs.find(isDirectory);
+    if (dir !== undefined) {
+      io.stderr(`Error: ${dir} is a directory. Use --pattern <glob> to select files in it.\n`);
+      return 1;
+    }
     files = o.inputs.filter((f) => existsSync(f));
     const missing = o.inputs.filter((f) => !existsSync(f));
     if (missing.length > 0) {
@@ -396,6 +412,10 @@ export async function run(
     }
     if (!existsSync(o.input)) {
       io.stderr(`Error: Input file not found: ${o.input}\n`);
+      return 1;
+    }
+    if (isDirectory(o.input)) {
+      io.stderr(`Error: ${o.input} is a directory. Use --batch --pattern <glob> for a folder.\n`);
       return 1;
     }
     const format = o.format === "auto" ? detectFormat(o.input) : o.format;

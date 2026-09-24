@@ -135,6 +135,53 @@ describe("batch mode does not compress its own output", () => {
   });
 });
 
+describe("directories and --batch", () => {
+  test("a directory without --batch exits 1 with a message", async () => {
+    const dir = folder("sample.json");
+    for (const args of [[dir], ["-d", dir]]) {
+      const r = await compress(args);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain("is a directory");
+      expect(r.err).toContain("--batch");
+    }
+  });
+
+  test("--batch with a directory and no --pattern exits 1 with a message", async () => {
+    const dir = folder("sample.json");
+    const r = await compress(["-b", dir]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("is a directory");
+    expect(r.err).toContain("--pattern");
+    expect(readdirSync(dir)).toEqual(["sample.json"]);
+  });
+
+  test("--batch --pattern with a file in place of a directory exits 1 with a message", async () => {
+    const dir = folder("sample.json");
+    const r = await compress(["-b", "-p", "*.json", join(dir, "sample.json")]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("is not a directory");
+  });
+
+  test("--batch --pattern with a missing directory exits 1", async () => {
+    const r = await compress(["-b", "-p", "*.json", join(work, "no-such-folder")]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("Directory not found");
+  });
+
+  test("--batch --pattern without a directory searches the working folder", async () => {
+    const dir = folder("sample.json");
+    const r = await compressIn(dir, ["-b", "-p", "*.json", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(readdirSync(dir).sort(compareCodeUnits)).toEqual(["sample.compact.json", "sample.json"]);
+  });
+
+  test("--batch without a pattern and without files exits 1 with a message", async () => {
+    const r = await compressIn(folder(), ["-b"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("No files to process");
+  });
+});
+
 describe("K5: --level and --format are validated", () => {
   test("an unknown level exits 1 with a message and writes no file", async () => {
     const dir = folder("sample.json");
