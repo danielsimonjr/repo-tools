@@ -12,7 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { extname, join, relative } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
-import { type CompressDeps, run } from "../../src/compress/index.ts";
+import { type CompressDeps, findFiles, run } from "../../src/compress/index.ts";
 import { decompress, renameKeys } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
 
@@ -464,5 +464,37 @@ describe('JSON: a "__proto__" key is kept', () => {
     expect(Object.hasOwn(renamed, "__proto__")).toBe(true);
     expect(Object.getPrototypeOf(renamed)).toBe(Object.prototype);
     expect(renamed.polluted).toBeUndefined();
+  });
+});
+
+describe("the batch pattern escapes every RegExp metacharacter", () => {
+  function names(pattern: string, files: string[]): string[] {
+    const dir = folder();
+    for (const f of files) writeFileSync(join(dir, f), "x");
+    return findFiles(dir, pattern, false).map((f) => relative(dir, f));
+  }
+
+  test('"a+b.md" matches only a+b.md, not aab.md', () => {
+    expect(names("a+b.md", ["a+b.md", "aab.md", "aaab.md"])).toEqual(["a+b.md"]);
+  });
+
+  test('"[x].md" does not throw and matches only [x].md', () => {
+    expect(names("[x].md", ["[x].md", "x.md"])).toEqual(["[x].md"]);
+  });
+
+  test('"a[.md" does not throw and matches only a[.md', () => {
+    expect(names("a[.md", ["a[.md", "a.md"])).toEqual(["a[.md"]);
+  });
+
+  test("the other metacharacters are literal too", () => {
+    const files = ["(a)$^{1}.md", "a.md", "ab.md"];
+    expect(names("(a)$^{1}.md", files)).toEqual(["(a)$^{1}.md"]);
+    // "|" is not valid in a Windows file name, so the test uses a pattern that must match nothing.
+    expect(names("a|zz.md", files)).toEqual([]);
+  });
+
+  test("* and ? keep their glob meaning", () => {
+    expect(names("a?.md", ["a.md", "ab.md", "abc.md"])).toEqual(["ab.md"]);
+    expect(names("*.md", ["a.md", "b.txt"])).toEqual(["a.md"]);
   });
 });

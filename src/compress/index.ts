@@ -194,9 +194,16 @@ function batchSummaryText(results: readonly BatchResult[]): string {
   return lines.join("\n");
 }
 
-/** Converts a simple glob (`*` and `?`) to a case-insensitive regular expression. */
+/**
+ * Converts a simple glob (`*` and `?`) to a case-insensitive regular expression. Every other
+ * character is literal: each RegExp metacharacter is escaped, so `a+b.md` does not match
+ * `aab.md` and `a[.md` does not throw.
+ */
 function globToRegExp(pattern: string): RegExp {
-  const source = pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\?/g, ".");
+  const source = pattern
+    .replace(/[.+^${}()|[\]\\/]/g, "\\$&")
+    .replace(/\*/g, ".*")
+    .replace(/\?/g, ".");
   return new RegExp(`^${source}$`, "i");
 }
 

@@ -42,6 +42,9 @@ All notable changes to this project are recorded in this file. The format follow
 - `compress` JSON keeps a `__proto__` key. The key rename defines each key as an own property.
   Before, the rename assigned the key `__proto__`, which set the prototype of the copy: `-d` on
   `{"__proto__":{"k":1},"b":2}` gave `{"b":2}`.
+- `compress --pattern` escapes every RegExp metacharacter. Only `*` and `?` are wildcards.
+  Before, only `.` was escaped: `a+b.md` also matched `aab.md`, `[x].md` matched `x.md`, and
+  `a[.md` stopped the run with a `SyntaxError`.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the
