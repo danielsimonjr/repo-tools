@@ -28,9 +28,20 @@ describe("F22: code-unit order", () => {
   test("export surfaces list names in code-unit order: upper case, '_', then lower case", () => {
     const modules = {
       root: {
-        "src/a.ts": { exports: { named: ["b", "B", "_a", "a", "Z", "z"] } },
+        "src/a.ts": { path: "src/a.ts", exports: { named: ["b", "B", "_a", "a", "Z", "z"] } },
       },
     } as unknown as ModuleMap;
-    expect(buildPackageExportSurfaces(modules).root).toEqual(["B", "Z", "_a", "a", "b", "z"]);
+    const allPublic = {
+      publicWildcardFiles: new Set(["src/a.ts"]),
+      publicNamed: new Set<string>(),
+    };
+    expect(buildPackageExportSurfaces(modules, allPublic).root).toEqual([
+      "B",
+      "Z",
+      "_a",
+      "a",
+      "b",
+      "z",
+    ]);
   });
 });

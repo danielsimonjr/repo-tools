@@ -20,6 +20,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F15: `package-export-surfaces.json` lists the public surface of each package only: the
+  names of a package root (`src/index.ts`, an `exports` subpath, a `bin` target, a config entry)
+  and of each file that a re-export chain from a root makes public. An export that only relative
+  imports inside the package use is internal and is not listed (the port listed every named
+  export). The run computes one public surface for all modules, so a file that a root in another
+  module re-exports stays public. Known limit: in single-package mode the `exports` subpaths and
+  `bin` targets of the root `package.json` are not roots yet (single-package mode is fix M1).
 - depgraph F14: every `entry: [...]` array of a tsup config names build roots (the port read
   only the first), and each `tsup.config.*` file (`.ts`, `.mts`, `.cts`, `.js`, `.mjs`, `.cjs`,
   `.json`) is read whenever it exists, also when no `build` or `dev` script calls `tsup`. In

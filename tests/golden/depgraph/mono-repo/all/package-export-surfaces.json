@@ -1,13 +1,10 @@
 {
   "surfaces": {
-    "packages/cli": [
-      "format"
-    ],
+    "packages/cli": [],
     "packages/core": [
       "INTERNAL_FLAG",
       "Pair",
       "add",
-      "double",
       "workerResult"
     ]
   }

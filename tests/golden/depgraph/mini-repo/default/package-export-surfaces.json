@@ -12,16 +12,8 @@
     ],
     "root": [
       "Bravo",
-      "alpha",
-      "dynamicValue",
-      "forgotten",
-      "helper",
-      "ping",
-      "pong",
-      "unusedConstant"
+      "alpha"
     ],
-    "util": [
-      "clamp"
-    ]
+    "util": []
   }
 }

@@ -5,6 +5,7 @@ import { load } from "js-yaml";
 import {
   buildDependencyMatrix,
   categorizeFiles,
+  computePublicSurface,
   detectCircularDependencies,
   detectUnused,
   generateStatistics,
@@ -189,10 +190,13 @@ describe("unused, coverage, inventory and surface reporters", () => {
   test("the surface reporters group names by package key", () => {
     expect(packageKeyOf("packages/core/sub")).toBe("packages/core");
     expect(packageKeyOf("core/sub")).toBe("core");
-    const surfaces = buildPackageExportSurfaces(modules);
+    const surface = computePublicSurface(files, root, none);
+    const surfaces = buildPackageExportSurfaces(modules, surface);
     expect(surfaces.lib).toEqual([]);
-    expect(surfaces.root).toEqual(["A", "a", "b", "spare"]);
-    expect(JSON.parse(generateSurfacesJson(modules))).not.toHaveProperty("generated");
+    // Fix F15: `src/index.ts` re-exports `a` only; `A`, `b` and `spare` are internal.
+    expect(surfaces.root).toEqual(["a"]);
+    expect(surfaces.entry).toEqual(["a"]);
+    expect(JSON.parse(generateSurfacesJson(modules, surface))).not.toHaveProperty("generated");
   });
 });
 

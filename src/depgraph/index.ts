@@ -277,14 +277,14 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   write("dependency-summary.compact.json", compactSummary);
   const compactKb = (Buffer.byteLength(withOneLf(compactSummary), "utf8") / 1024).toFixed(1);
   log(`Written: ${out("dependency-summary.compact.json")} (${compactKb}KB)`);
-  write("package-export-surfaces.json", generateSurfacesJson(modules));
+  // One public surface for the whole run: the export surfaces (fix F15) and the duplicate
+  // detector read it. A per-module surface misses a file that a root in another module
+  // re-exports.
+  const publicSurface = computePublicSurface(activeParsedFiles, root, workspaces);
+  write("package-export-surfaces.json", generateSurfacesJson(modules, publicSurface));
   log(`Written: ${out("package-export-surfaces.json")}`);
 
-  const dup = detectDuplicateSymbols(
-    activeParsedFiles,
-    computePublicSurface(activeParsedFiles, root, workspaces),
-    root,
-  );
+  const dup = detectDuplicateSymbols(activeParsedFiles, publicSurface, root);
   const duplicateReport = buildDuplicateReport(dup);
   write("duplicate-symbols.json", generateDuplicateSymbolsJson(duplicateReport));
   write("duplicate-symbols.md", withBanner(generateDuplicateSymbolsMarkdown(duplicateReport)));
