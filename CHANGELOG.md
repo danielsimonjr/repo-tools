@@ -100,6 +100,27 @@ All notable changes to this project are recorded in this file. The format follow
   other keys and in values (`"items"` became `"itemetadatas"`). Now a JSON object with a
   top-level object round-trips to a deep-equal value. The compact format does not change. The
   three JSON restore goldens now hold the correct output.
+- `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`
+  separators. You can move the source file and the chunk folder together, and `merge` still
+  finds the source. The manifest holds no absolute path. `merge` and `status` print the
+  resolved source path.
+- `chunk` (fix K2): the manifest has no `createdAt` field. Two splits of one file give
+  byte-identical manifests. `merge` and `status` print the `Created:` line only for an old
+  manifest that has the field.
+- `chunk` (fix K3): chunk hashes and the source hash are SHA-256 (64 hex digits). The old
+  32-bit hash gave the same value for different texts, for example `Aa` and `BB`, so `status`
+  and `merge` reported a changed chunk as unchanged.
+- `chunk`: `split` writes manifest version `2.0.0`, because K1, K2 and K3 change the format
+  that a 1.1.0 reader expects. The manifest file ends with one LF. `merge` and `status` still
+  read a 1.1.0 manifest, with an absolute or a relative `sourceFile`, and compare its chunks
+  with the old 32-bit hash. A manifest of another major version exits 1 with a message.
+- `chunk`: invalid flag values exit 1 with a message and write no files. This applies to a
+  `--type` other than `auto`, `markdown`, `json` or `typescript`, a `--level` that is not a
+  number of 1 or more, and a `--max-lines` that is not a number of 0 or more. The original
+  wrote chunk files named `...undefined` for an unknown type, ignored a NaN level or max-lines,
+  and crashed on level 0. A directory given as the file or the manifest exits 1 with a message;
+  the original crashed with `EISDIR`.
+- `chunk split`: the merge hint names `repo-tools chunk merge`, not the old `chunker merge`.
 
 ### Added
 
@@ -239,27 +260,3 @@ All notable changes to this project are recorded in this file. The format follow
   permissions and holds no token. Dependabot updates the actions and the dev dependencies.
 - Project scaffold: Bun and TypeScript (strict), `bun:test`, Biome lint and format, MIT license,
   LF line endings through `.gitattributes`.
-
-### Fixed
-
-- `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`
-  separators. You can move the source file and the chunk folder together, and `merge` still
-  finds the source. The manifest holds no absolute path. `merge` and `status` print the
-  resolved source path.
-- `chunk` (fix K2): the manifest has no `createdAt` field. Two splits of one file give
-  byte-identical manifests. `merge` and `status` print the `Created:` line only for an old
-  manifest that has the field.
-- `chunk` (fix K3): chunk hashes and the source hash are SHA-256 (64 hex digits). The old
-  32-bit hash gave the same value for different texts, for example `Aa` and `BB`, so `status`
-  and `merge` reported a changed chunk as unchanged.
-- `chunk`: `split` writes manifest version `2.0.0`, because K1, K2 and K3 change the format
-  that a 1.1.0 reader expects. The manifest file ends with one LF. `merge` and `status` still
-  read a 1.1.0 manifest, with an absolute or a relative `sourceFile`, and compare its chunks
-  with the old 32-bit hash. A manifest of another major version exits 1 with a message.
-- `chunk`: invalid flag values exit 1 with a message and write no files. This applies to a
-  `--type` other than `auto`, `markdown`, `json` or `typescript`, a `--level` that is not a
-  number of 1 or more, and a `--max-lines` that is not a number of 0 or more. The original
-  wrote chunk files named `...undefined` for an unknown type, ignored a NaN level or max-lines,
-  and crashed on level 0. A directory given as the file or the manifest exits 1 with a message;
-  the original crashed with `EISDIR`.
-- `chunk split`: the merge hint names `repo-tools chunk merge`, not the old `chunker merge`.
