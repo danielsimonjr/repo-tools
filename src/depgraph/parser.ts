@@ -269,34 +269,37 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     { reExport: true },
   );
 
-  // Named exports record the exported name (the alias after `as`).
+  // Named exports record the exported name (the alias after `as`). Fix F28: a declared name
+  // holds `$` too, as a JavaScript identifier does.
   for (const match of code.matchAll(/export\s*{\s*([^}]+)\s*}/g)) {
     result.exports.named.push(...splitNames(match[1] ?? "", (p) => p[p.length - 1] ?? ""));
   }
-  for (const match of code.matchAll(/export\s+(?:const|let|var)\s+(\w+)/g)) {
+  for (const match of code.matchAll(/export\s+(?:const|let|var)\s+([\w$]+)/g)) {
     result.exports.constants.push(match[1] ?? "");
     result.exports.named.push(match[1] ?? "");
   }
-  for (const match of code.matchAll(/export\s+(?:async\s+)?function\s+(\w+)/g)) {
+  for (const match of code.matchAll(/export\s+(?:async\s+)?function\s+([\w$]+)/g)) {
     result.exports.functions.push(match[1] ?? "");
     result.exports.named.push(match[1] ?? "");
   }
-  for (const match of code.matchAll(/export\s+class\s+(\w+)/g)) {
+  for (const match of code.matchAll(/export\s+class\s+([\w$]+)/g)) {
     result.exports.classes.push(match[1] ?? "");
     result.exports.named.push(match[1] ?? "");
   }
-  for (const match of code.matchAll(/export\s+interface\s+(\w+)/g)) {
+  for (const match of code.matchAll(/export\s+interface\s+([\w$]+)/g)) {
     result.exports.interfaces.push(match[1] ?? "");
     result.exports.types.push(match[1] ?? "");
   }
-  for (const match of code.matchAll(/export\s+type\s+(\w+)/g)) {
+  for (const match of code.matchAll(/export\s+type\s+([\w$]+)/g)) {
     result.exports.types.push(match[1] ?? "");
   }
-  for (const match of code.matchAll(/export\s+enum\s+(\w+)/g)) {
+  for (const match of code.matchAll(/export\s+enum\s+([\w$]+)/g)) {
     result.exports.enums.push(match[1] ?? "");
     result.exports.named.push(match[1] ?? "");
   }
-  const defaultMatch = code.match(/export\s+default\s+(?:class|function|const|let|var)?\s*(\w+)?/);
+  const defaultMatch = code.match(
+    /export\s+default\s+(?:class|function|const|let|var)?\s*([\w$]+)?/,
+  );
   if (defaultMatch) result.exports.default = defaultMatch[1] || "default";
 
   /** Records a re-export of `names` from `reSource` as a workspace or an internal edge. */

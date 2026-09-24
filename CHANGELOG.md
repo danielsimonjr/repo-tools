@@ -20,6 +20,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F28: a symbol name is escaped before it goes into a regular expression, and the
+  in-file reference count matches the name between identifier boundaries. A `$` in a name was a
+  RegExp anchor, and `\b` does not hold next to a `$`. The export declarations also read a `$`
+  in a name, so `export const $store` is an export (the port read `a$b` as `a` and skipped
+  `$store`).
 - depgraph F27: comment removal does not cut a `//` or a `/*` inside a string literal. The port
   removed comments with regular expressions, so `const u = 'http://x'; import('./b.js');` lost
   its import, and a `'src/*'` string removed every line up to the next `*/`. The parser and the

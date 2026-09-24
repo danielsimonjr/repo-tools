@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "../mask.ts";
 import { filesInCycles } from "./cycles.ts";
+import { escapeRegExpLiteral } from "./duplicates.ts";
 import { resolvePath, workspaceEntryPath } from "./resolver.ts";
 import { configReferencedEntries } from "./roots.ts";
 import type {
@@ -250,11 +251,14 @@ export function detectUnused(
           fileContent = "";
         }
       }
-      const all = (fileContent.match(new RegExp(`\\b${name}\\b`, "g")) || []).length;
+      // Fix F28: the name is escaped, and an identifier boundary replaces `\b`, which does not
+      // hold before or after a `$`.
+      const id = `(?<![\\w$])${escapeRegExpLiteral(name)}(?![\\w$])`;
+      const all = (fileContent.match(new RegExp(id, "g")) || []).length;
       const defs = (
         fileContent.match(
           new RegExp(
-            `export\\s+(?:async\\s+)?(?:function|const|let|var|class|interface|type|enum)\\s+${name}\\b`,
+            `export\\s+(?:async\\s+)?(?:function|const|let|var|class|interface|type|enum)\\s+${id}`,
             "g",
           ),
         ) || []
