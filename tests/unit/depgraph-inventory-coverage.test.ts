@@ -97,6 +97,7 @@ describe("inventory", () => {
       tool: 1,
       config: 1,
       example: 1,
+      bench: 0,
     });
     expect(inventory.byPackage).toEqual({ "(root)": 3, "@scope/core": 5 });
   });
