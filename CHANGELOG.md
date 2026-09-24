@@ -137,6 +137,10 @@ All notable changes to this project are recorded in this file. The format follow
   every line of a CRLF file. The field is optional and the manifest stays version 2.0.0: an LF
   file writes no field, and an older 2.0.0 reader ignores it. For a file with mixed line
   endings, `split` prints a warning, and the chunks and the merge use LF.
+- `chunk`: an unknown flag (for example `--ouput`), a flag of another action, a flag without
+  its value and a second file exit 1 with a message, and write nothing. The original ignored
+  them: `-o` without a value wrote to the default folder, and a mistyped flag ran with the
+  default settings. Flags can now come before the file.
 - `chunk merge` keeps a `__proto__` key of a JSON object. The merge used `Object.assign`, so a
   `__proto__` key set the prototype of the result and the key was lost from the file.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`

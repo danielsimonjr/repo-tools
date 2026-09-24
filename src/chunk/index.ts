@@ -80,28 +80,122 @@ interface Options {
   allowShrink?: boolean;
 }
 
-/** Parses the flags after the action and the target, as the original chunker does. */
-function parseOptions(args: string[]): Options {
+/** One flag: its long name, the actions that accept it, and how it sets the options. */
+interface Flag {
+  long: string;
+  actions: readonly string[];
+  /** Sets the option. A flag with a value receives it; a switch receives undefined. */
+  apply: (options: Options, value: string) => void;
+  takesValue: boolean;
+}
+
+const FLAGS: Record<string, Flag> = {
+  "--output": {
+    long: "--output",
+    actions: ["split", "merge"],
+    takesValue: true,
+    apply: (o, v) => {
+      o.output = v;
+    },
+  },
+  "--level": {
+    long: "--level",
+    actions: ["split"],
+    takesValue: true,
+    apply: (o, v) => {
+      o.level = Number.parseInt(v, 10);
+    },
+  },
+  "--max-lines": {
+    long: "--max-lines",
+    actions: ["split"],
+    takesValue: true,
+    apply: (o, v) => {
+      o.maxLines = Number.parseInt(v, 10);
+    },
+  },
+  "--type": {
+    long: "--type",
+    actions: ["split"],
+    takesValue: true,
+    apply: (o, v) => {
+      o.type = v;
+    },
+  },
+  "--dry-run": {
+    long: "--dry-run",
+    actions: ["split", "merge"],
+    takesValue: false,
+    apply: (o) => {
+      o.dryRun = true;
+    },
+  },
+  "--yes": {
+    long: "--yes",
+    actions: ["merge", "status"],
+    takesValue: false,
+    apply: (o) => {
+      o.yes = true;
+    },
+  },
+  "--allow-shrink": {
+    long: "--allow-shrink",
+    actions: ["merge"],
+    takesValue: false,
+    apply: (o) => {
+      o.allowShrink = true;
+    },
+  },
+};
+
+const SHORT_FLAGS: Record<string, string> = {
+  "-o": "--output",
+  "-l": "--level",
+  "-m": "--max-lines",
+  "-t": "--type",
+};
+
+function flagFor(arg: string): Flag | undefined {
+  const long = SHORT_FLAGS[arg] ?? arg;
+  return Object.hasOwn(FLAGS, long) ? FLAGS[long] : undefined;
+}
+
+/** The target file and the options of one action, or an error message. */
+type Parsed = { target?: string; options: Options; error?: undefined } | { error: string };
+
+/**
+ * Parses the arguments after the action. Flags can come before or after the target. An
+ * unknown flag, a flag of another action, a flag without its value and a second target give
+ * an error (item a: the original ignored them and ran with other settings).
+ */
+function parseArgs(action: string, args: readonly string[]): Parsed {
   const options: Options = {};
+  let target: string | undefined;
   for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg === "-o" || arg === "--output") {
-      options.output = args[++i];
-    } else if (arg === "-l" || arg === "--level") {
-      options.level = Number.parseInt(args[++i] ?? "", 10);
-    } else if (arg === "-m" || arg === "--max-lines") {
-      options.maxLines = Number.parseInt(args[++i] ?? "", 10);
-    } else if (arg === "-t" || arg === "--type") {
-      options.type = args[++i];
-    } else if (arg === "--dry-run") {
-      options.dryRun = true;
-    } else if (arg === "--yes") {
-      options.yes = true;
-    } else if (arg === "--allow-shrink") {
-      options.allowShrink = true;
+    const arg = args[i] ?? "";
+    if (arg.startsWith("-") && arg.length > 1) {
+      const flag = flagFor(arg);
+      if (!flag?.actions.includes(action)) {
+        return { error: `unknown option '${arg}' for chunk ${action}` };
+      }
+      const name = arg === flag.long ? flag.long : `${arg}/${flag.long}`;
+      if (flag.takesValue) {
+        const value = args[i + 1];
+        if (value === undefined || flagFor(value) !== undefined) {
+          return { error: `${name} needs a value` };
+        }
+        flag.apply(options, value);
+        i++;
+      } else {
+        flag.apply(options, "");
+      }
+    } else if (target === undefined) {
+      target = arg;
+    } else {
+      return { error: `unexpected argument '${arg}' (chunk ${action} takes one file)` };
     }
   }
-  return options;
+  return { target, options };
 }
 
 const FILE_TYPES = ["auto", "markdown", "json", "typescript"];
@@ -456,12 +550,21 @@ function status(manifestFile: string, options: Options, io: Io): number {
  * @param io - Where to write normal output and error output.
  */
 export async function run(argv: string[], io: Io): Promise<number> {
-  const [action, target = "", ...flags] = argv;
+  const [action, ...rest] = argv;
   if (action === undefined || action === "help") {
     io.stdout(CHUNK_HELP);
     return 0;
   }
-  const options = parseOptions(flags);
+  if (action !== "split" && action !== "merge" && action !== "status") {
+    io.stderr(`Unknown command: ${action}\n\n${CHUNK_HELP}`);
+    return 1;
+  }
+  const parsed = parseArgs(action, rest);
+  if (parsed.error !== undefined) {
+    io.stderr(`Error: ${parsed.error}\n`);
+    return 1;
+  }
+  const { target = "", options } = parsed;
   const optionError = invalidOption(options);
   if (optionError) {
     io.stderr(`Error: ${optionError}\n`);
@@ -483,16 +586,13 @@ export async function run(argv: string[], io: Io): Promise<number> {
           return 1;
         }
         return merge(target, options, io);
-      case "status":
+      default: // "status"
         if (!target) {
           io.stderr("Error: Please specify a manifest.json file\n");
           io.stderr("Usage: repo-tools chunk status <manifest.json>\n");
           return 1;
         }
         return status(target, options, io);
-      default:
-        io.stderr(`Unknown command: ${action}\n\n${CHUNK_HELP}`);
-        return 1;
     }
   } catch (error) {
     io.stderr(`Error: ${error instanceof Error ? error.message : String(error)}\n`);

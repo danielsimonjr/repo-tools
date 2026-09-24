@@ -307,6 +307,43 @@ describe("chunk JSON merge keeps a __proto__ key (finding 7)", () => {
   });
 });
 
+describe("chunk exit codes for bad flags (item a)", () => {
+  for (const [what, args, needle] of [
+    ["an unknown flag", ["split", "<src>", "--ouput", "x"], "--ouput"],
+    ["-o without a value", ["split", "<src>", "-o"], "--output"],
+    ["-t without a value", ["split", "<src>", "-t"], "--type"],
+    ["merge --output without a value", ["merge", "<manifest>", "--output"], "--output"],
+    ["a merge flag on status", ["status", "<manifest>", "--allow-shrink"], "--allow-shrink"],
+    ["a split flag on merge", ["merge", "<manifest>", "-l", "2"], "-l"],
+    ["a second file", ["split", "<src>", "<src>"], "unexpected argument"],
+  ] as const) {
+    test(`${what} exits 1 with a message and writes nothing`, async () => {
+      const dir = join(work, "flags", what.replace(/\W+/g, "-"));
+      const src = put(join(dir, "guide.md"), readFileSync(join(FIXTURES, "guide.md"), "utf8"));
+      const manifest = join(dir, "guide_chunks", "manifest.json");
+      if (args[0] !== "split") expect((await chunk(["split", src])).code).toBe(0);
+      const before = args[0] === "split" ? "" : readFileSync(manifest, "utf8");
+      const argv = args.map((a) => (a === "<src>" ? src : a === "<manifest>" ? manifest : a));
+      const r = await chunk(argv);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(needle);
+      expect(r.out).toBe("");
+      if (args[0] === "split") expect(existsSync(manifest)).toBe(false);
+      else expect(readFileSync(manifest, "utf8")).toBe(before);
+      expect(readFileSync(src, "utf8")).toBe(readFileSync(join(FIXTURES, "guide.md"), "utf8"));
+    });
+  }
+
+  test("flags before the file work", async () => {
+    const dir = join(work, "flags", "before");
+    const src = put(join(dir, "guide.md"), readFileSync(join(FIXTURES, "guide.md"), "utf8"));
+    const r = await chunk(["split", "-m", "8", "--dry-run", src]);
+    expect(r.err).toBe("");
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("[DRY RUN]");
+  });
+});
+
 describe("chunk CRLF line endings (item c)", () => {
   for (const file of ["guide.md", "config.json", "parser.ts", "module.ts", "list.json"]) {
     test(`${file} with CRLF line endings round-trips byte for byte`, async () => {
