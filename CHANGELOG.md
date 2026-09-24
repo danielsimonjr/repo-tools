@@ -27,6 +27,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph exit rows (D10a, design section 3.2 and criterion 4). A root (`--root=` or the
+  positional root) that is not an existing directory exits 1 before any folder is made; the port
+  made `<root>/docs/architecture` inside a missing root. Zero source files exit 1 and make no
+  output folder; the port made an empty `docs/architecture` first (port defect 23). The
+  "Created output directory" line keeps its place in standard output. Every text on standard
+  error shows the root as `<root>`: a system error named the absolute path (for example
+  `EEXIST ... mkdir '<absolute path>'` when the output folder is a file). No golden changes.
 - depgraph flags are strict (D10a). An unknown flag, a flag without its value (`--root`,
   `--root=`), a value on a flag that takes none (`--all=yes`) and a second root (two positional
   arguments, or `--root=` and a positional argument) exit 1 with a message on standard error,

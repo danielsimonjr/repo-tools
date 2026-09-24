@@ -26,6 +26,14 @@ export function relativePosix(root: string, path: string): string {
   return toPosix(relative(root, path));
 }
 
+/**
+ * Returns `text` with each occurrence of `root`, in its native and its POSIX form, replaced by
+ * `<root>` (design criterion 4: no absolute path on standard error).
+ */
+export function maskRoot(text: string, root: string): string {
+  return text.split(root).join("<root>").split(toPosix(root)).join("<root>");
+}
+
 /** Returns the absolute `src` directory of `root`. */
 export function srcDirOf(root: string): string {
   return join(root, "src");

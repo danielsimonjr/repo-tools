@@ -50,7 +50,7 @@ import {
   checkCensusNoRegen,
 } from "./inventory.ts";
 import { parseFile } from "./parser.ts";
-import { OUTPUT_SUBDIR, relativePosix, srcDirOf } from "./paths.ts";
+import { maskRoot, OUTPUT_SUBDIR, relativePosix, srcDirOf } from "./paths.ts";
 import { type BannerOptions, withBanner } from "./reporters/banner.ts";
 import { generateTestCoverageJson, generateTestCoverageMarkdown } from "./reporters/coverage.ts";
 import {
@@ -118,7 +118,9 @@ Options:
   --help, -h           Show this help.
 
 Exit codes: 0 on success. 1 on an unknown flag, a flag without its value or an
-invalid value (the run then writes nothing), when no TypeScript file is found,
+invalid value (the run then writes nothing), when the root is not an existing
+directory (no folder is made), when no TypeScript file is found (no output folder
+is made), when the --api-entry file of --api-surface does not exist,
 when the census self-check fails with --strict-census, when an orphan exists
 with --strict-orphans, or when --check-census fails.
 `;
@@ -148,16 +150,21 @@ export async function run(argv: string[], io: Io): Promise<number> {
     io.stdout(DEPGRAPH_HELP);
     return 0;
   }
+  // Design criterion 4: standard error shows the root as `<root>`, never as an absolute path.
+  let root: string | undefined;
+  const stderr = (text: string): void => io.stderr(root ? maskRoot(text, root) : text);
   try {
     const options = parseDepgraphArgs(argv, process.cwd());
     // `--strict-orphans` is the command-line form of `depgraph.strictOrphans`.
     if (options.strictOrphans) options.settings.strictOrphans = true;
-    const root = resolve(options.root);
+    root = resolve(options.root);
+    // Before any read or write: a missing root must not get an output folder.
+    if (!isDirectory(root)) throw new Error("the root <root> is not an existing directory");
     const config = mergeDepgraphConfig(options.settings, loadConfigFile(root, options.config));
     setWalkSkip([...config.exclude, ...config.alsoExclude]);
-    return runPipeline(options, config, io);
+    return runPipeline(options, config, { stdout: io.stdout, stderr });
   } catch (err) {
-    io.stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
+    stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;
   } finally {
     setWalkSkip();
@@ -218,31 +225,35 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
     for (const [name, ws] of workspaces) log(`  - ${name} (${ws.directory}/)`);
     if (options.all) log("Including dormant/unreachable files (--all)");
   }
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-    log(`Created output directory: ${outRel}`);
-  }
   // In single-package mode `depgraph.src` (or `--src`) names the source roots; "auto" finds them.
   const sourceDirs = isMonorepo
     ? []
     : config.src === "auto"
       ? resolveSourceDirs(root)
       : config.src.map((dir) => resolveUnderRoot(root, dir));
+  // The scan lines wait until the file count is known: with zero files the run makes no output
+  // folder, and with files the "Created" line keeps its place before them.
+  const scanLines: string[] = [];
   const tsFiles: string[] = [];
   if (isMonorepo) {
     for (const [, ws] of workspaces) {
       const pkgFiles = getAllTsFiles(join(root, ws.srcDir));
       tsFiles.push(...pkgFiles);
-      log(`  ${ws.directory}/src: ${pkgFiles.length} files`);
+      scanLines.push(`  ${ws.directory}/src: ${pkgFiles.length} files`);
     }
   } else {
     for (const dir of sourceDirs) {
       const found = getAllTsFiles(dir);
       tsFiles.push(...found);
-      log(`  ${relativePosix(root, dir) || "."}: ${found.length} files`);
+      scanLines.push(`  ${relativePosix(root, dir) || "."}: ${found.length} files`);
     }
   }
-  log(`Found ${tsFiles.length} TypeScript files total`);
+  scanLines.push(`Found ${tsFiles.length} TypeScript files total`);
+  if (tsFiles.length > 0 && !existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
+    log(`Created output directory: ${outRel}`);
+  }
+  for (const line of scanLines) log(line);
   if (tsFiles.length === 0) {
     io.stderr("No TypeScript files found\n");
     return 1;
@@ -471,6 +482,11 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
     }
   }
   return 0;
+}
+
+/** True when `path` is an existing directory. */
+function isDirectory(path: string): boolean {
+  return existsSync(path) && statSync(path).isDirectory();
 }
 
 /** True when `path` is an existing file. */
