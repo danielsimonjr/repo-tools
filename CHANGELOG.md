@@ -20,6 +20,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F9 (already in the port; a regression test pins it): each `package.json` `exports`
+  subpath is a reachability root, so its target file and the files it imports are reachable.
 - depgraph F8 (already in the port; a regression test pins it): an import in a test file counts
   as usage, so an export or a file that only a test uses is not reported as unused.
 - depgraph F7: an import of compiled output lands on its source file. `../dist/x.js` resolves
