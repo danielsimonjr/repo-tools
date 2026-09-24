@@ -27,6 +27,9 @@
   symbol-users, is-public, node-safety, cycles, the browser-safety gate, and the derived files
   `dependency-reverse.json` and `node-safety.json`. After D10b, before D11.
 - [ ] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.
+  Also: `bun run compile` refuses to build when `node_modules` does not match `bun.lock`
+  (a frozen install does not prune a stale nested package), proven with a planted stale nested
+  package, RED then GREEN; the README build step matches.
 - [ ] D12 Public design document and the release-candidate report.
 - [x] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
