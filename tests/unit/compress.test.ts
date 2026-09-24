@@ -101,6 +101,40 @@ describe("K6: the batch walk is sorted in code-unit order", () => {
   });
 });
 
+describe("batch mode does not compress its own output", () => {
+  test("a second batch run skips the .compact files", async () => {
+    const dir = folder("sample.json", "sample.md");
+    const args = ["-b", "-p", "*", ".", "--no-stats"];
+    expect((await compressIn(dir, args)).code).toBe(0);
+    const second = await compressIn(dir, args);
+    expect(second.code).toBe(0);
+    expect(second.out).toContain('Skipped 2 file(s) with ".compact" in the name.');
+    expect(readdirSync(dir).sort(compareCodeUnits)).toEqual([
+      "sample.compact.json",
+      "sample.compact.md",
+      "sample.json",
+      "sample.md",
+    ]);
+  });
+
+  test("an explicit .compact file in batch mode is skipped, and no file is left exits 1", async () => {
+    const dir = folder("sample.json");
+    await compressIn(dir, ["sample.json", "--no-stats"]);
+    const r = await compressIn(dir, ["-b", "sample.compact.json"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("No files to process");
+    expect(readdirSync(dir)).not.toContain("sample.compact.compact.json");
+  });
+
+  test("batch decompress still selects the .compact files", async () => {
+    const dir = folder("sample.md");
+    await compressIn(dir, ["sample.md", "--no-stats"]);
+    const r = await compressIn(dir, ["-d", "-b", "-p", "*.compact.md", ".", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("sample.compact.md → sample.md");
+  });
+});
+
 describe("K5: --level and --format are validated", () => {
   test("an unknown level exits 1 with a message and writes no file", async () => {
     const dir = folder("sample.json");

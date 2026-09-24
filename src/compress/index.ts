@@ -280,6 +280,14 @@ function runBatch(o: Options, io: Io, deps: CompressDeps): number {
       io.stderr(`Warning: ${missing.length} file(s) not found: ${missing.join(", ")}\n`);
     }
   }
+  if (!o.decompress) {
+    // The original tool compressed its own output again (README.compact.compact.md).
+    const compact = files.filter((f) => basename(f).includes(".compact"));
+    if (compact.length > 0) {
+      files = files.filter((f) => !basename(f).includes(".compact"));
+      say(`Skipped ${compact.length} file(s) with ".compact" in the name.`);
+    }
+  }
   if (files.length === 0) {
     io.stderr(
       "Error: No files to process. Use -p to specify a pattern or provide file arguments.\n",

@@ -15,6 +15,9 @@ All notable changes to this project are recorded in this file. The format follow
   original tool used the `readdir` order, which differs by file system, so the batch output and
   the order of the written files differed by machine. The sort is by entry name, not by full
   path, because the path separator differs by OS.
+- `compress`: batch compression skips a file with `.compact` in its name and prints the number
+  of skipped files. The original tool compressed its own output again, for example into
+  `README.compact.compact.md`. Batch decompression (`-d`) still selects `.compact` files.
 
 ### Added
 
