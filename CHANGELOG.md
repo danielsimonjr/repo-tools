@@ -20,6 +20,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F21: in `DEPENDENCY_GRAPH.md`, an export list of more than 8 names
+  (`LONG_EXPORT_LIST_THRESHOLD`) renders as a fenced `text` block under its label, with the names
+  separated by ", " and wrapped at 100 characters. A list of names is data, not prose; the long
+  inline list read as one long sentence. A list of 8 names or fewer stays inline, and the names
+  and their order do not change. The other reports keep their list form.
 - depgraph F20 (already in the privacy check; a regression test pins it): a repository whose
   git index tracks a `.exe` file fails the privacy check with a `binary` finding, and this
   repository tracks no `.exe` file.

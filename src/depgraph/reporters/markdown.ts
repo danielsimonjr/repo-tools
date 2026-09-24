@@ -2,7 +2,7 @@
  * DEPENDENCY_GRAPH.md: the module sections, the dependency matrix, the cycles, the Mermaid
  * graph, the statistics and (in monorepo mode) the package dependency section.
  *
- * Port notes: the report holds date stamps (fix F1), and long export lists are inline (fix F21).
+ * Fix F21: an export list of more than 8 names renders as a fenced `text` block.
  */
 import { basename } from "node:path";
 import { generateFallbackDescription } from "../parser.ts";
@@ -80,6 +80,43 @@ export function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]):
   return lines.join("\n");
 }
 
+/**
+ * An export list with more names than this renders as a fenced `text` block under its label
+ * (fix F21). A list of names is data, not prose: a long inline list reads as one long sentence
+ * to a reader and to a prose checker. A list at or under the threshold stays inline.
+ */
+export const LONG_EXPORT_LIST_THRESHOLD = 8;
+
+/** The maximum line width of the text inside the fenced block, when a name fits. */
+export const EXPORT_LIST_WRAP_WIDTH = 100;
+
+/**
+ * Adds one export list to `lines` (fix F21). Up to `LONG_EXPORT_LIST_THRESHOLD` names: one line
+ * of code spans. More names: the label, then a fenced `text` block with the names separated by
+ * ", " and wrapped at `EXPORT_LIST_WRAP_WIDTH`. The names and their order do not change. An empty
+ * list adds nothing.
+ */
+export function renderExportList(lines: string[], label: string, names: readonly string[]): void {
+  if (names.length === 0) return;
+  if (names.length <= LONG_EXPORT_LIST_THRESHOLD) {
+    lines.push(`- ${label}: \`${names.join("`, `")}\``);
+    return;
+  }
+  lines.push(`- ${label}:`, "", "  ```text");
+  let row = "";
+  names.forEach((name, i) => {
+    const piece = i < names.length - 1 ? `${name},` : name;
+    if (row !== "" && row.length + 1 + piece.length > EXPORT_LIST_WRAP_WIDTH) {
+      lines.push(`  ${row}`);
+      row = piece;
+    } else {
+      row = row === "" ? piece : `${row} ${piece}`;
+    }
+  });
+  if (row !== "") lines.push(`  ${row}`);
+  lines.push("  ```", "");
+}
+
 /** The per-file section of one module file. */
 function fileSection(lines: string[], path: string, file: ParsedFile): void {
   lines.push(`### \`${path}\` - ${file.description || generateFallbackDescription(file)}`);
@@ -125,19 +162,17 @@ function fileSection(lines: string[], path: string, file: ParsedFile): void {
     ex.types.length > 0
   ) {
     lines.push("**Exports:**");
-    const list = (label: string, names: string[]): void => {
-      if (names.length > 0) lines.push(`- ${label}: \`${names.join("`, `")}\``);
-    };
-    list("Classes", ex.classes);
-    list("Interfaces", ex.interfaces);
-    list(
+    renderExportList(lines, "Classes", ex.classes);
+    renderExportList(lines, "Interfaces", ex.interfaces);
+    renderExportList(
+      lines,
       "Types",
       ex.types.filter((t) => !ex.interfaces.includes(t)),
     );
-    list("Enums", ex.enums);
-    list("Functions", ex.functions);
-    list("Constants", ex.constants);
-    list("Re-exports", ex.reExported);
+    renderExportList(lines, "Enums", ex.enums);
+    renderExportList(lines, "Functions", ex.functions);
+    renderExportList(lines, "Constants", ex.constants);
+    renderExportList(lines, "Re-exports", ex.reExported);
     if (ex.default) lines.push(`- Default: \`${ex.default}\``);
     lines.push("");
   }
