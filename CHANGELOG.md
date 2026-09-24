@@ -112,6 +112,21 @@ All notable changes to this project are recorded in this file. The format follow
 - `chunk merge` (K7): a JSON array or an invalid JSON file merges back to its original text.
   `split` writes such a file as one whole-file chunk (`_array` or `_invalid_json`), but `merge`
   read every JSON chunk as an object, skipped the chunk and wrote `{}` over the source file.
+- `chunk` (K8): a split and then a merge of the unchanged chunks gives the source file byte for
+  byte, for each file type. A property test runs this cycle on every chunk fixture: Markdown, a
+  JSON object, a JSON array, invalid JSON, TypeScript, and the de3118a lexer fixture. Before
+  this fix, the TypeScript merge dropped blank lines, plain block comments, the final newline
+  and each top-level statement that is not a declaration (for example `console.log(main());` and
+  `module.exports = ...`). The TypeScript splitter now puts each line of the file into one
+  section: the text between two units goes to the earlier unit up to its last blank line, and a
+  comment directly above a declaration goes to that declaration. A top-level statement becomes a
+  section `_statement`. `export default`, `declare`, `export abstract class`, `const enum` and
+  `declare module` are declarations. A JSON key chunk now holds the member text of the source as
+  it is, and the manifest field `jsonLayout` holds the text around the members, so the JSON
+  merge keeps the formatting, the number text and the key order. A manifest without
+  `jsonLayout` merges by object, as before. Changed goldens: the TypeScript chunks, manifest,
+  merged file and output; the JSON chunks `004-list.json` and `005-nested.json`, manifest,
+  merged file and output.
 - `chunk merge` keeps a `__proto__` key of a JSON object. The merge used `Object.assign`, so a
   `__proto__` key set the prototype of the result and the key was lost from the file.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`

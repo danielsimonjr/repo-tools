@@ -1,8 +1,6 @@
 {
   "nested": {
-    "a": {
-      "b": null
-    },
+    "a": { "b": null },
     "flag": true
   }
 }

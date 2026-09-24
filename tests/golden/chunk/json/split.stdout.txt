@@ -12,14 +12,14 @@ Found 5 section(s):
    1. [decl] name                                        3 lines
    2. [decl] version                                     3 lines
    3. [decl] scripts                                     6 lines
-   4. [decl] list                                        7 lines
-   5. [decl] nested                                      8 lines
+   4. [decl] list                                        3 lines
+   5. [decl] nested                                      6 lines
 
 Manifest written: <DIR>/config_chunks/manifest.json
 
 Summary:
   Total chunks:  5
-  Total lines:   27
+  Total lines:   21
 
 Chunks written to: <DIR>/config_chunks
 

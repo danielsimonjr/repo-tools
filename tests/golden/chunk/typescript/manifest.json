@@ -11,9 +11,9 @@
       "title": "_imports",
       "level": 0,
       "startLine": 1,
-      "endLine": 7,
-      "lineCount": 8,
-      "hash": "de48a836e84bc3882a054f9da01392c2985037c56525e236cb2b01522a6ed722",
+      "endLine": 9,
+      "lineCount": 9,
+      "hash": "129aea56c973253b56dbd7a00d624467a37f0fd89167f301f8f09d73b962abdb",
       "modified": false
     },
     {
@@ -21,10 +21,10 @@
       "filename": "002-function-render.ts",
       "title": "function:render",
       "level": 1,
-      "startLine": 7,
-      "endLine": 18,
-      "lineCount": 9,
-      "hash": "00ec88e85331fd1a3414fbcc5fc1c640bc5f83b1ca3547f60f2b4a78379f0cc1",
+      "startLine": 10,
+      "endLine": 19,
+      "lineCount": 10,
+      "hash": "2eab9a6210462b7837b967bb0a15f29b55ff3540ccb1e3431ad244a55c84f179",
       "modified": false
     },
     {
@@ -32,10 +32,10 @@
       "filename": "003-const-quote-re.ts",
       "title": "const:QUOTE_RE",
       "level": 2,
-      "startLine": 21,
-      "endLine": 21,
-      "lineCount": 1,
-      "hash": "e0c24ea33397679554d222e0f390690716f87aaf1b152963488f6cd7640c6005",
+      "startLine": 20,
+      "endLine": 22,
+      "lineCount": 3,
+      "hash": "f8e9cbcd3257da751c4a3263e75f6b84f35b5930f5d27c64220671dec94d3e34",
       "modified": false
     },
     {
@@ -44,9 +44,9 @@
       "title": "function:escaped",
       "level": 1,
       "startLine": 23,
-      "endLine": 27,
-      "lineCount": 5,
-      "hash": "4400d5a9125e0d0fc1a43830bce936fc70a2b29901551c62149b61fb70fc70bf",
+      "endLine": 28,
+      "lineCount": 6,
+      "hash": "07b8f61699143d167f8f180c077c87e50167c2e439b666ec10d64b753ebe75fa",
       "modified": false
     },
     {
@@ -54,10 +54,10 @@
       "filename": "005-class-box.ts",
       "title": "class:Box",
       "level": 1,
-      "startLine": 32,
-      "endLine": 42,
-      "lineCount": 11,
-      "hash": "1f9b9d8df6d50f32ee71445143d25566973763fefa4e0ed35b43b2c137db570f",
+      "startLine": 29,
+      "endLine": 43,
+      "lineCount": 15,
+      "hash": "e1f37c37abd9c00fbd89b746097a9647207c5ce3c460a4e201aaa62d26895f8a",
       "modified": false
     },
     {
@@ -66,9 +66,9 @@
       "title": "interface:Shape",
       "level": 2,
       "startLine": 44,
-      "endLine": 46,
-      "lineCount": 3,
-      "hash": "d0a2acfac45558ac669993165271c1f0d3d0fecb03f0f578c637b38060fe0029",
+      "endLine": 47,
+      "lineCount": 4,
+      "hash": "835deb2c60b9f6bd9210f923dda2ffc3751e3a9b2db07a1206f8d9d72e2ca405",
       "modified": false
     },
     {
@@ -77,9 +77,9 @@
       "title": "type:Pair",
       "level": 2,
       "startLine": 48,
-      "endLine": 48,
-      "lineCount": 1,
-      "hash": "6ee17d46c01a68e7612679f32271d11715e1b8fbb7118886fa3b23c5b41355d1",
+      "endLine": 49,
+      "lineCount": 2,
+      "hash": "f06bdfd4c114e776fcbe918c4fabcda45ba562ca842e4809c69a7f99801a7e03",
       "modified": false
     },
     {
@@ -88,9 +88,9 @@
       "title": "enum:Color",
       "level": 2,
       "startLine": 50,
-      "endLine": 53,
-      "lineCount": 4,
-      "hash": "d2dd7455deeb5199a15f3a4fb90634042b575eff03597db9ed07494fad5a475c",
+      "endLine": 54,
+      "lineCount": 5,
+      "hash": "0ca6b00a5b023a84045504cf99ab82642760ba34800a791f2981c0603048f515",
       "modified": false
     },
     {
@@ -99,9 +99,9 @@
       "title": "function:helper",
       "level": 1,
       "startLine": 55,
-      "endLine": 57,
-      "lineCount": 3,
-      "hash": "ec37c6f51f5fb3f4e2e71a6200393a9560338a516cb79086e156e4ad1401c231",
+      "endLine": 58,
+      "lineCount": 4,
+      "hash": "60224613898237501bd960092085a413f06d33b87b86e39dd88d23b6970cf511",
       "modified": false
     },
     {
@@ -110,9 +110,9 @@
       "title": "const:LIMIT",
       "level": 2,
       "startLine": 59,
-      "endLine": 59,
-      "lineCount": 1,
-      "hash": "5fa9642479cc7a1f51bddf9693ddc3f284878078fd7f3bc5cd451e5ca78771ca",
+      "endLine": 60,
+      "lineCount": 2,
+      "hash": "12549bfb016a99303b4784af9b1f16f7aa8ed2991a4bf29be24020bfed473a5e",
       "modified": false
     }
   ]

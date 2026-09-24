@@ -5,15 +5,9 @@
     "test": "bun test",
     "lint": "biome check ."
   },
-  "list": [
-    1,
-    2,
-    3
-  ],
+  "list": [1, 2, 3],
   "nested": {
-    "a": {
-      "b": null
-    },
+    "a": { "b": null },
     "flag": true
   }
 }

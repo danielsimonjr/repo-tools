@@ -17,4 +17,4 @@ Modified chunks: 0 of 5
 Backup created: <DIR>/config.json.backup-<ts>
 
 Merged file written: <DIR>/config.json
-Total lines: 19
+Total lines: 14

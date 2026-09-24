@@ -76,18 +76,19 @@ describe("chunk port reproduces the original chunker (characterization goldens)"
     const points = (m: { chunks: { title: string; lineCount: number }[] }) =>
       m.chunks.map((ch) => `${ch.title}:${ch.lineCount}`);
     expect(points(manifest)).toEqual(points(golden));
-    // A lexer without the de3118a fix merges everything after `render` into one chunk.
+    // A lexer without the de3118a fix merges everything after `render` into one chunk. The line
+    // counts include the blank lines and comments that K8 keeps between declarations.
     expect(points(manifest)).toEqual([
-      "_imports:8",
-      "function:render:9",
-      "const:QUOTE_RE:1",
-      "function:escaped:5",
-      "class:Box:11",
-      "interface:Shape:3",
-      "type:Pair:1",
-      "enum:Color:4",
-      "function:helper:3",
-      "const:LIMIT:1",
+      "_imports:9",
+      "function:render:10",
+      "const:QUOTE_RE:3",
+      "function:escaped:6",
+      "class:Box:15",
+      "interface:Shape:4",
+      "type:Pair:2",
+      "enum:Color:5",
+      "function:helper:4",
+      "const:LIMIT:2",
     ]);
   });
 });

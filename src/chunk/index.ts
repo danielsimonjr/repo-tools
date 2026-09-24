@@ -24,8 +24,9 @@ import {
 import {
   chunkFilename,
   detectFileType,
+  type JsonSplit,
   mergeJson,
-  type Section,
+  mergeJsonLayout,
   splitJson,
   splitMarkdown,
   splitTypeScript,
@@ -55,7 +56,8 @@ Status options:
 File types:
   Markdown (.md, .markdown)          Splits at headings of level 1 to <n>.
   JSON (.json)                       Splits at the top-level keys of an object.
-  TypeScript, JavaScript (.ts, .js)  Splits at top-level declarations.
+  TypeScript, JavaScript (.ts, .js)  Splits at top-level declarations and statements.
+  A merge of unchanged chunks gives the source file again, byte for byte.
   Other extensions are read as Markdown.
 
 Workflow:
@@ -136,14 +138,14 @@ function lineWriter(io: Io): (text?: string) => void {
   return (text = "") => io.stdout(`${text}\n`);
 }
 
-function splitSections(fileType: FileType, content: string, level: number): Section[] {
+function splitSections(fileType: FileType, content: string, level: number): JsonSplit {
   switch (fileType) {
     case "json":
       return splitJson(content);
     case "typescript":
-      return splitTypeScript(content);
+      return { sections: splitTypeScript(content) };
     default:
-      return splitMarkdown(content, level);
+      return { sections: splitMarkdown(content, level) };
   }
 }
 
@@ -188,7 +190,7 @@ function split(inputFile: string, options: Options, io: Io): number {
   log(`Dry Run:     ${dryRun}`);
   log();
 
-  const sections = splitSections(fileType, content, splitLevel);
+  const { sections, layout } = splitSections(fileType, content, splitLevel);
   if (sections.length === 0) {
     log("No sections found to split.");
     return 0;
@@ -224,6 +226,7 @@ function split(inputFile: string, options: Options, io: Io): number {
     fileType,
     splitLevel,
     chunks,
+    ...(layout ? { jsonLayout: layout } : {}),
   };
   const manifestPath = join(outputDir, MANIFEST_NAME);
   if (!dryRun) {
@@ -305,7 +308,16 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   // A JSON array or invalid JSON is one whole-file chunk of level 0 (`_array`, `_invalid_json`).
   // Its text is the file text, so merge keeps it as it is (fix K7).
   const keyChunks = fileType === "json" && !manifest.chunks.every((c) => c.level === 0);
-  const mergedContent = keyChunks ? mergeJson(chunkContents, io.stderr) : chunkContents.join("\n");
+  // A JSON object split by this build has a layout and merges by text (fix K8). An older
+  // manifest has no layout and merges by object.
+  let mergedContent: string;
+  if (!keyChunks) {
+    mergedContent = chunkContents.join("\n");
+  } else if (manifest.jsonLayout) {
+    mergedContent = mergeJsonLayout(chunkContents, manifest.jsonLayout);
+  } else {
+    mergedContent = mergeJson(chunkContents, io.stderr);
+  }
   const outputPath = options.output ? resolve(options.output) : sourcePath;
 
   if (readSource && existsSync(sourcePath)) {

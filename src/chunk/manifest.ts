@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { posix, relative, resolve, sep, win32 } from "node:path";
 import { toJson, writeLf } from "../io.ts";
+import type { JsonLayout } from "./splitters.ts";
 
 export type FileType = "markdown" | "json" | "typescript";
 
@@ -34,6 +35,12 @@ export interface Manifest {
   fileType: FileType;
   splitLevel: number;
   chunks: ChunkInfo[];
+  /**
+   * Only for a JSON object: the text around the top-level members (fix K8). `merge` puts the
+   * chunk members back into it, so the file comes back byte for byte. A manifest without this
+   * field merges as before, by object.
+   */
+  jsonLayout?: JsonLayout;
 }
 
 /**
@@ -154,6 +161,18 @@ export function validateManifest(value: unknown): Manifest {
     }
     if (typeof c.hash !== "string") fail(`chunks[${i}].hash must be a string`);
   });
+  if (m.jsonLayout !== undefined) {
+    const l = m.jsonLayout as Record<string, unknown> | null;
+    const valid =
+      typeof l === "object" &&
+      l !== null &&
+      typeof l.prefix === "string" &&
+      typeof l.suffix === "string" &&
+      Array.isArray(l.separators) &&
+      l.separators.every((s) => typeof s === "string") &&
+      l.separators.length === Math.max(m.chunks.length - 1, 0);
+    if (!valid) fail("jsonLayout needs prefix, suffix and one separator between two chunks");
+  }
   return m as unknown as Manifest;
 }
 

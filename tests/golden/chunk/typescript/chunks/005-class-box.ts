@@ -1,3 +1,6 @@
+/* A block comment
+   that spans lines { and holds a brace
+*/
 export class Box {
   private value = 0;
 

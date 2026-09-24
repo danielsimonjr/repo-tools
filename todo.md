@@ -38,7 +38,7 @@
   the manifest shape.
 - [ ] chunk K7: no data loss on merge (JSON array and invalid JSON; no smaller or empty result over
   a non-empty source without `--allow-shrink`).
-- [ ] chunk K8: split then merge is byte-identical for every supported type (property test),
+- [x] chunk K8: split then merge is byte-identical for every supported type (property test),
   including top-level TypeScript statements and `export default`.
 - [ ] chunk: keep a `__proto__` key on JSON merge; restore CRLF line endings on merge.
 - [x] compress: no key collision between an abbreviation and an existing short key.

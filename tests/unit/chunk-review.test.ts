@@ -198,6 +198,61 @@ describe("chunk K7: no data loss on merge", () => {
   }
 });
 
+/** Every chunk fixture that holds a source file; parser.ts is the de3118a lexer fixture. */
+const ROUND_TRIP_FIXTURES = [
+  "guide.md",
+  "config.json",
+  "list.json",
+  "broken.json",
+  "parser.ts",
+  "module.ts",
+];
+
+describe("chunk K8: split then merge is byte-identical (property over every fixture)", () => {
+  for (const file of ROUND_TRIP_FIXTURES) {
+    test(`${file}: merge of the unchanged chunks gives the input byte for byte`, async () => {
+      const r = await splitMerge(`k8-${file}`, file);
+      expect(r.merge.err).toBe("");
+      expect(r.merge.code).toBe(0);
+      expect(r.after).toBe(r.before);
+    });
+  }
+
+  test("module.ts: export default, abstract, declare and top-level statements have chunks", async () => {
+    const r = await splitMerge("k8-titles", "module.ts");
+    const titles = JSON.parse(readFileSync(r.manifest, "utf8")).chunks.map(
+      (c: { title: string }) => c.title,
+    );
+    expect(titles).toEqual([
+      "_imports",
+      "function:main",
+      "class:Shape",
+      "const:VERSION",
+      "function:external",
+      "namespace:Tools",
+      "_statement",
+      "_statement",
+      "_statement",
+      "enum:Mode",
+      "function:noSemicolons",
+      "const:asi",
+      "const:after",
+    ]);
+  });
+
+  test("a JSON object keeps its formatting, its key order and a __proto__ key", async () => {
+    const dir = join(work, "k8-json-format");
+    const text =
+      '{\n    "__proto__": {"k": 1},\n    "big": 12345678901234567890,\n    "b": [1, 2]\n}\n';
+    const src = put(join(dir, "fmt.json"), text);
+    expect((await chunk(["split", src])).code).toBe(0);
+    const m = await chunk(["merge", join(dir, "fmt_chunks", "manifest.json")]);
+    expect(m.err).toBe("");
+    expect(m.code).toBe(0);
+    expect(readFileSync(src, "utf8")).toBe(text);
+  });
+});
+
 describe("chunk JSON merge keeps a __proto__ key (finding 7)", () => {
   test('{"__proto__":{"k":1},"b":2} round-trips with its __proto__ key', async () => {
     const dir = join(work, "proto");

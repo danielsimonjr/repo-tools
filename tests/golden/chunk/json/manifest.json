@@ -10,8 +10,8 @@
       "filename": "001-name.json",
       "title": "name",
       "level": 1,
-      "startLine": 1,
-      "endLine": 3,
+      "startLine": 2,
+      "endLine": 2,
       "lineCount": 3,
       "hash": "cd8b5bf63208c5b0c4f3247878a0985fe87ecd6e9ec3702589fc2d704c46c651",
       "modified": false
@@ -21,8 +21,8 @@
       "filename": "002-version.json",
       "title": "version",
       "level": 1,
-      "startLine": 2,
-      "endLine": 4,
+      "startLine": 3,
+      "endLine": 3,
       "lineCount": 3,
       "hash": "9bb133a0d62136cccff273cdccb1f9830a06531f23b21ec04198453ecfe0e5fe",
       "modified": false
@@ -32,8 +32,8 @@
       "filename": "003-scripts.json",
       "title": "scripts",
       "level": 1,
-      "startLine": 3,
-      "endLine": 8,
+      "startLine": 4,
+      "endLine": 7,
       "lineCount": 6,
       "hash": "b8a2b76d620a8448aaf235300fea2ab3db96495a7baf535a3964e6c8faa81779",
       "modified": false
@@ -43,10 +43,10 @@
       "filename": "004-list.json",
       "title": "list",
       "level": 1,
-      "startLine": 4,
-      "endLine": 10,
-      "lineCount": 7,
-      "hash": "becf906b5ad60d8dc12ff4514c58c1481b4317be256fdf9db97bb6668880ff32",
+      "startLine": 8,
+      "endLine": 8,
+      "lineCount": 3,
+      "hash": "8c621bbef748273e0dadb5498891e12babf13cd0ae1d0b45d2f713102415bf61",
       "modified": false
     },
     {
@@ -54,11 +54,21 @@
       "filename": "005-nested.json",
       "title": "nested",
       "level": 1,
-      "startLine": 5,
+      "startLine": 9,
       "endLine": 12,
-      "lineCount": 8,
-      "hash": "e38ab41f73d1a41bdaa68133a8cc89ac1f4849a38a94b5b4ab99753043a0240d",
+      "lineCount": 6,
+      "hash": "7572f43ffa1bf698a8b7699faaae691fdeaa801abe1cd53e4c6e3d21085fe62e",
       "modified": false
     }
-  ]
+  ],
+  "jsonLayout": {
+    "prefix": "{\n  ",
+    "separators": [
+      ",\n  ",
+      ",\n  ",
+      ",\n  ",
+      ",\n  "
+    ],
+    "suffix": "\n}\n"
+  }
 }

@@ -8,19 +8,19 @@ Chunks:
 
   #   Filename                                      Lines   Status
   ──────────────────────────────────────────────────────────────────────
-   1  001-imports.ts                                    8   [90munchanged[0m
-   2  002-function-render.ts                            9   [90munchanged[0m
-   3  003-const-quote-re.ts                             1   [90munchanged[0m
-   4  004-function-escaped.ts                           5   [90munchanged[0m
-   5  005-class-box.ts                                 11   [90munchanged[0m
-   6  006-interface-shape.ts                            3   [90munchanged[0m
-   7  007-type-pair.ts                                  1   [90munchanged[0m
-   8  008-enum-color.ts                                 4   [90munchanged[0m
-   9  009-function-helper.ts                            3   [90munchanged[0m
-  10  010-const-limit.ts                                1   [90munchanged[0m
+   1  001-imports.ts                                    9   [90munchanged[0m
+   2  002-function-render.ts                           10   [90munchanged[0m
+   3  003-const-quote-re.ts                             3   [90munchanged[0m
+   4  004-function-escaped.ts                           6   [90munchanged[0m
+   5  005-class-box.ts                                 15   [90munchanged[0m
+   6  006-interface-shape.ts                            4   [90munchanged[0m
+   7  007-type-pair.ts                                  2   [90munchanged[0m
+   8  008-enum-color.ts                                 5   [90munchanged[0m
+   9  009-function-helper.ts                            4   [90munchanged[0m
+  10  010-const-limit.ts                                2   [90munchanged[0m
 
 Summary:
   Total chunks:    10
   Modified:        0
   Missing:         0
-  Total lines:     46
+  Total lines:     60

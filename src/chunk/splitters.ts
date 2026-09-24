@@ -141,14 +141,114 @@ export function splitMarkdown(content: string, splitLevel: number): Section[] {
 // ============================================================================
 
 /**
+ * The text of a JSON object around its top-level members: the text before the first member,
+ * the text between each pair of members, and the text after the last member. With the member
+ * texts, the layout gives the file again byte for byte (fix K8).
+ */
+export interface JsonLayout {
+  prefix: string;
+  separators: string[];
+  suffix: string;
+}
+
+/** The result of `splitJson`. `layout` is present when the file is a JSON object. */
+export interface JsonSplit {
+  sections: Section[];
+  layout?: JsonLayout;
+}
+
+/** One top-level member of a JSON object: its key and the offsets of its text. */
+interface JsonMember {
+  key: string;
+  start: number;
+  end: number;
+}
+
+function skipWhitespace(text: string, i: number): number {
+  let j = i;
+  while (j < text.length && /\s/.test(text[j] ?? "")) j++;
+  return j;
+}
+
+/** Returns the offset after the JSON string that starts at `i`. */
+function endOfString(text: string, i: number): number {
+  let j = i + 1;
+  while (j < text.length && text[j] !== '"') j += text[j] === "\\" ? 2 : 1;
+  return j + 1;
+}
+
+/** Returns the offset after the JSON value that starts at or after `i`. */
+function endOfValue(text: string, i: number): number {
+  let j = skipWhitespace(text, i);
+  const first = text[j];
+  if (first === '"') return endOfString(text, j);
+  if (first === "{" || first === "[") {
+    let depth = 0;
+    while (j < text.length) {
+      const c = text[j];
+      if (c === '"') {
+        j = endOfString(text, j);
+        continue;
+      }
+      if (c === "{" || c === "[") depth++;
+      if (c === "}" || c === "]") depth--;
+      j++;
+      if (depth === 0) return j;
+    }
+    return j;
+  }
+  while (j < text.length && !/[\s,}\]]/.test(text[j] ?? "")) j++;
+  return j;
+}
+
+/** Returns the top-level members of a valid JSON object text. */
+function scanMembers(text: string): JsonMember[] {
+  const members: JsonMember[] = [];
+  let i = skipWhitespace(text, 0) + 1; // After "{".
+  for (;;) {
+    i = skipWhitespace(text, i);
+    if (text[i] !== '"') return members; // "}" of an empty object.
+    const start = i;
+    const keyEnd = endOfString(text, i);
+    const key = JSON.parse(text.slice(i, keyEnd)) as string;
+    i = skipWhitespace(text, keyEnd) + 1; // After ":".
+    i = endOfValue(text, i);
+    members.push({ key, start, end: i });
+    i = skipWhitespace(text, i);
+    if (text[i] !== ",") return members;
+    i++;
+  }
+}
+
+/** Returns the 1-based line number of offset `i` in `text`. */
+function lineAt(text: string, i: number): number {
+  let line = 1;
+  for (let j = 0; j < i; j++) if (text[j] === "\n") line++;
+  return line;
+}
+
+/**
  * Splits a JSON object into one section per top-level key. An array becomes one section
  * `_array`. Invalid JSON becomes one section `_invalid_json`.
+ *
+ * A key section holds the member text of the source, as it is, in a JSON object:
+ * `{`, a line break, the indent and the member, then a line break and `}`. The member keeps its
+ * formatting, its number text and its key, also a duplicate key or `__proto__`. The layout holds
+ * the text around the members, so `mergeJsonLayout` gives the file again byte for byte (fix K8).
  */
-export function splitJson(content: string): Section[] {
+export function splitJson(content: string): JsonSplit {
   const normalized = normalizeLineEndings(content);
-  const whole = (title: string): Section[] => [
-    { title, level: 0, content: normalized, startLine: 1, endLine: normalized.split("\n").length },
-  ];
+  const whole = (title: string): JsonSplit => ({
+    sections: [
+      {
+        title,
+        level: 0,
+        content: normalized,
+        startLine: 1,
+        endLine: normalized.split("\n").length,
+      },
+    ],
+  });
   let parsed: unknown;
   try {
     parsed = JSON.parse(normalized);
@@ -156,18 +256,57 @@ export function splitJson(content: string): Section[] {
     return whole("_invalid_json");
   }
   if (Array.isArray(parsed)) return whole("_array");
-  if (typeof parsed !== "object" || parsed === null) return [];
-  const record = parsed as Record<string, unknown>;
-  return Object.keys(record).map((key, i) => {
-    const chunkContent = JSON.stringify({ [key]: record[key] }, null, 2);
+  if (typeof parsed !== "object" || parsed === null) return { sections: [] };
+  const members = scanMembers(normalized);
+  const first = members[0];
+  const last = members[members.length - 1];
+  if (first === undefined || last === undefined) return { sections: [] };
+  const sections = members.map((m) => {
+    const lineStart = normalized.lastIndexOf("\n", m.start - 1) + 1;
+    const lead = normalized.slice(lineStart, m.start);
+    const indent = /^[ \t]*$/.test(lead) && lead !== "" ? lead : "  ";
     return {
-      title: key,
+      title: m.key,
       level: 1,
-      content: chunkContent,
-      startLine: i + 1, // Approximate, as in the original.
-      endLine: i + chunkContent.split("\n").length,
+      content: `{\n${indent}${normalized.slice(m.start, m.end)}\n}`,
+      startLine: lineAt(normalized, m.start),
+      endLine: lineAt(normalized, m.end),
     };
   });
+  const separators = members.slice(1).map((m, i) => normalized.slice(members[i]?.end, m.start));
+  return {
+    sections,
+    layout: {
+      prefix: normalized.slice(0, first.start),
+      separators,
+      suffix: normalized.slice(last.end),
+    },
+  };
+}
+
+/**
+ * Merges JSON key chunks with the layout of the source file (fix K8). Each chunk must be a JSON
+ * object; its members go into the place of the original member, as text. A chunk without
+ * members is left out with its separator. Throws when a chunk or the result is not valid JSON.
+ */
+export function mergeJsonLayout(chunks: string[], layout: JsonLayout): string {
+  let body = "";
+  let count = 0;
+  chunks.forEach((chunk, i) => {
+    const trimmed = chunk.trim();
+    const parsed: unknown = JSON.parse(trimmed);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      throw new Error(`JSON chunk ${i + 1} is not a JSON object`);
+    }
+    const members = trimmed.slice(1, -1).trim();
+    if (members === "") return;
+    body += count === 0 ? members : `${layout.separators[i - 1] ?? ",\n  "}${members}`;
+    count++;
+  });
+  const tail = layout.suffix.slice(layout.suffix.lastIndexOf("}") + 1);
+  const merged = count === 0 ? `{}${tail}` : `${layout.prefix}${body}${layout.suffix}`;
+  JSON.parse(merged);
+  return merged;
 }
 
 /**
@@ -341,70 +480,65 @@ function countBrackets(line: string, state: LexState): { brackets: number; paren
 
 const TS_PATTERNS = {
   import: /^import\s+/,
-  exportFrom: /^export\s+\{[^}]*\}\s+from/,
+  exportFrom: /^export\s+(?:type\s+)?\{[^}]*\}\s+from/,
   exportAll: /^export\s+\*\s+from/,
-  function: /^(?:async\s+)?function\s+(\w+)/,
-  class: /^class\s+(\w+)/,
-  interface: /^interface\s+(\w+)/,
-  type: /^type\s+(\w+)/,
-  const: /^(?:export\s+)?const\s+(\w+)/,
-  let: /^(?:export\s+)?let\s+(\w+)/,
-  var: /^(?:export\s+)?var\s+(\w+)/,
-  enum: /^(?:export\s+)?enum\s+(\w+)/,
-  arrowFunction: /^(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/,
-  arrowFunctionSimple: /^(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s+)?\w+\s*=>/,
+  function: /^(?:export\s+)?(?:async\s+)?function\s*\*?\s*([\w$]+)/,
+  anonymousFunction: /^(?:export\s+)?(?:async\s+)?function\b/,
+  class: /^(?:export\s+)?(?:abstract\s+)?class\s+([\w$]+)/,
+  anonymousClass: /^(?:export\s+)?(?:abstract\s+)?class\b/,
+  interface: /^(?:export\s+)?interface\s+([\w$]+)/,
+  type: /^(?:export\s+)?type\s+([\w$]+)/,
+  const: /^(?:export\s+)?const\s+([\w$]+)/,
+  let: /^(?:export\s+)?let\s+([\w$]+)/,
+  var: /^(?:export\s+)?var\s+([\w$]+)/,
+  enum: /^(?:export\s+)?(?:const\s+)?enum\s+([\w$]+)/,
+  arrowFunction: /^(?:export\s+)?const\s+([\w$]+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/,
+  arrowFunctionSimple: /^(?:export\s+)?const\s+([\w$]+)\s*=\s*(?:async\s+)?[\w$]+\s*=>/,
   decorator: /^@(\w+)(?:\([^)]*\))?$/,
-  namespace: /^(?:export\s+)?namespace\s+(\w+)/,
-  classMethod:
-    /^\s+(?:public|private|protected|static|async|readonly)*\s*(?:get|set)?\s*(\w+)\s*[<(]/,
+  namespace: /^(?:export\s+)?(?:namespace|module)\s+["']?([\w$.-]+)/,
 };
 
-/** Returns `prefix:name` from the first capture of `re` in `line`, or `fallback`. */
-function titleFrom(line: string, re: RegExp, prefix: string, fallback: string): string {
-  const m = line.match(re);
-  return m ? `${prefix}:${m[1] ?? ""}` : fallback;
-}
-
-/** The title and level of a top-level declaration line, or null. */
+/** The title and level of a top-level declaration line. */
 interface Declaration {
   title: string;
   level: number;
-  className?: string;
 }
 
-function matchDeclaration(t: string): Declaration | null {
+/** Returns `prefix:name` from the first capture of `re` in `line`, or null. */
+function named(line: string, re: RegExp, prefix: string, level: number): Declaration | null {
+  const m = line.match(re);
+  return m ? { title: `${prefix}:${m[1] ?? ""}`, level } : null;
+}
+
+/**
+ * Returns the title and level of a top-level declaration, or null for another line.
+ * `export default` and `declare` are modifiers: `export default function main` gives
+ * `function:main`, and `declare const X` gives `const:X`.
+ */
+function matchDeclaration(line: string): Declaration | null {
   const p = TS_PATTERNS;
-  if (p.exportAll.test(t) || p.exportFrom.test(t)) return { title: "_exports", level: 0 };
-  if (p.arrowFunction.test(t) || p.arrowFunctionSimple.test(t)) {
-    return { title: titleFrom(t, /const\s+(\w+)/, "function", "_function"), level: 1 };
-  }
-  if (p.function.test(t) || /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.test(t)) {
-    return { title: titleFrom(t, /function\s+(\w+)/, "function", "_function"), level: 1 };
-  }
-  if (p.namespace.test(t)) {
-    return { title: titleFrom(t, /namespace\s+(\w+)/, "namespace", "_namespace"), level: 1 };
-  }
-  if (p.class.test(t) || /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/.test(t)) {
-    const m = t.match(/class\s+(\w+)/);
-    return {
-      title: m ? `class:${m[1] ?? ""}` : "_class",
-      level: 1,
-      className: m ? (m[1] ?? "") : "",
-    };
-  }
-  if (p.interface.test(t) || /^(?:export\s+)?interface\s+(\w+)/.test(t)) {
-    return { title: titleFrom(t, /interface\s+(\w+)/, "interface", "_interface"), level: 2 };
-  }
-  if (p.type.test(t) || /^(?:export\s+)?type\s+(\w+)/.test(t)) {
-    return { title: titleFrom(t, /type\s+(\w+)/, "type", "_type"), level: 2 };
-  }
-  if (p.enum.test(t) || /^(?:export\s+)?enum\s+(\w+)/.test(t)) {
-    return { title: titleFrom(t, /enum\s+(\w+)/, "enum", "_enum"), level: 2 };
-  }
-  if (p.const.test(t)) return { title: titleFrom(t, /const\s+(\w+)/, "const", "_const"), level: 2 };
-  if (p.let.test(t)) return { title: titleFrom(t, /let\s+(\w+)/, "let", "_let"), level: 2 };
-  if (p.var.test(t)) return { title: titleFrom(t, /var\s+(\w+)/, "var", "_var"), level: 2 };
-  return null;
+  if (p.exportAll.test(line) || p.exportFrom.test(line)) return { title: "_exports", level: 0 };
+  const isDefault = /^export\s+default\s+/.test(line);
+  const t = line
+    .replace(/^export\s+default\s+/, "export ")
+    .replace(/^(export\s+)?declare\s+/, "$1");
+  const found =
+    named(t, p.arrowFunction, "function", 1) ??
+    named(t, p.arrowFunctionSimple, "function", 1) ??
+    named(t, p.function, "function", 1) ??
+    named(t, p.namespace, "namespace", 1) ??
+    named(t, p.class, "class", 1) ??
+    named(t, p.interface, "interface", 2) ??
+    named(t, p.type, "type", 2) ??
+    named(t, p.enum, "enum", 2) ??
+    named(t, p.const, "const", 2) ??
+    named(t, p.let, "let", 2) ??
+    named(t, p.var, "var", 2);
+  if (found) return found;
+  if (p.anonymousFunction.test(t))
+    return { title: isDefault ? "function:default" : "_function", level: 1 };
+  if (p.anonymousClass.test(t)) return { title: isDefault ? "class:default" : "_class", level: 1 };
+  return isDefault ? { title: "_default", level: 1 } : null;
 }
 
 function countChar(line: string, ch: "{" | "}"): number {
@@ -413,208 +547,164 @@ function countChar(line: string, ch: "{" | "}"): number {
   return n;
 }
 
+/** A top-level unit of a TypeScript file: its title, its level and its first and last line. */
+interface Span {
+  title: string;
+  level: number;
+  /** The index of the first line (a decorator, or the declaration line). */
+  start: number;
+  /** The index of the last line that is not blank. */
+  end: number;
+}
+
 /**
- * Splits TypeScript or JavaScript at top-level declarations. Imports form one section
- * `_imports`. JSDoc comments and decorators join the next declaration. A file without
- * declarations becomes one section `_content`.
+ * Returns the sections of `lines` for the top-level units `spans` (fix K8). The sections cover
+ * every line once and in order, so the section texts joined with LF give the file again byte for
+ * byte. The text between two units goes to the earlier unit up to and with its last blank line;
+ * the rest (a comment directly above a declaration) goes to the later unit. The text before the
+ * first unit goes to the first unit, and the text after the last unit to the last unit.
+ */
+function partition(lines: string[], spans: Span[]): Section[] {
+  const bounds = spans.map((span, k) => {
+    if (k === 0) return 0;
+    const prevEnd = spans[k - 1]?.end ?? 0;
+    for (let j = span.start - 1; j > prevEnd; j--) {
+      if ((lines[j] ?? "").trim() === "") return j + 1;
+    }
+    return prevEnd + 1;
+  });
+  return spans.map((span, k) => {
+    const from = bounds[k] ?? 0;
+    const to = bounds[k + 1] ?? lines.length;
+    return {
+      title: span.title,
+      level: span.level,
+      content: lines.slice(from, to).join("\n"),
+      startLine: from + 1,
+      endLine: to,
+    };
+  });
+}
+
+/**
+ * Splits TypeScript or JavaScript at top-level units: imports form one section `_imports`, a
+ * declaration forms one section, and another top-level statement forms one section
+ * `_statement`. Decorators join the next declaration. A file without units becomes one section
+ * `_content`.
+ *
+ * Blank lines and comments between units stay in a section (see `partition`), so `merge` gives
+ * the file again byte for byte (fix K8). The original dropped them, and it dropped every
+ * top-level statement that is not a declaration.
  */
 export function splitTypeScript(content: string): Section[] {
   const normalized = normalizeLineEndings(content);
   const lines = normalized.split("\n");
-  const sections: Section[] = [];
+  const spans: Span[] = [];
 
-  let current: { title: string; level: number; lines: string[]; startLine: number } | null = null;
-  let importLines: string[] = [];
-  let importStart = -1;
-  let importBracketDepth = 0;
+  let current: { title: string; level: number; start: number } | null = null;
   let bracketDepth = 0;
   let parenDepth = 0;
-  let inClass = false;
-  let currentClassName = "";
-  let classDepth = 0;
-  let pendingComments: string[] = [];
-  let commentStartLine = -1;
-  let inMultilineComment = false;
-  let decorators: string[] = [];
-  let decoratorStartLine = -1;
   let lex = freshLexState();
+  let importStart = -1;
+  let importEnd = -1;
+  let importDepth = 0;
+  let decoratorStart = -1;
+  let inComment = false;
 
-  const saveCurrentSection = (endLine: number): void => {
-    if (current && current.lines.length > 0) {
-      const allLines = [...decorators, ...pendingComments, ...current.lines];
-      const adjustedStartLine = current.startLine - decorators.length - pendingComments.length;
-      sections.push({
-        title: current.title,
-        level: current.level,
-        content: allLines.join("\n"),
-        startLine: adjustedStartLine > 0 ? adjustedStartLine : current.startLine,
-        endLine,
-      });
+  const isBlank = (i: number): boolean => (lines[i] ?? "").trim() === "";
+  const close = (end: number): void => {
+    if (current) {
+      let last = end;
+      while (last > current.start && isBlank(last)) last--;
+      spans.push({ ...current, end: last });
     }
     current = null;
-    bracketDepth = 0;
-    parenDepth = 0;
-    lex = freshLexState();
-    pendingComments = [];
-    commentStartLine = -1;
-    decorators = [];
-    decoratorStartLine = -1;
   };
-
-  const saveImports = (endLine: number): void => {
-    if (importLines.length > 0) {
-      sections.push({
-        title: "_imports",
-        level: 0,
-        content: importLines.join("\n"),
-        startLine: importStart + 1,
-        endLine,
-      });
-      importLines = [];
-      importStart = -1;
+  const flushImports = (): void => {
+    if (importStart !== -1) {
+      spans.push({ title: "_imports", level: 0, start: importStart, end: importEnd });
     }
+    importStart = -1;
+    importEnd = -1;
+    importDepth = 0;
   };
+  /** True when a line at column 0 starts a new unit after a statement without a semicolon. */
+  const startsUnit = (line: string, trimmed: string): boolean =>
+    /^\S/.test(line) &&
+    !lex.inString &&
+    !lex.inBlockComment &&
+    !lex.inRegex &&
+    lex.templateExpressionDepth === 0 &&
+    (TS_PATTERNS.import.test(trimmed) ||
+      TS_PATTERNS.decorator.test(trimmed) ||
+      matchDeclaration(trimmed) !== null);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i] ?? "";
     const trimmed = line.trim();
 
-    // JSDoc comments (/** ... */) wait for the next declaration.
-    if (trimmed.startsWith("/**")) {
-      inMultilineComment = true;
-      if (commentStartLine === -1) commentStartLine = i;
-      pendingComments.push(line);
-      if (trimmed.includes("*/")) inMultilineComment = false;
-      continue;
-    }
-    if (inMultilineComment) {
-      pendingComments.push(line);
-      if (trimmed.includes("*/")) inMultilineComment = false;
-      continue;
-    }
-
-    if (TS_PATTERNS.decorator.test(trimmed)) {
-      if (decoratorStartLine === -1) decoratorStartLine = i;
-      decorators.push(line);
-      continue;
-    }
-
-    // Outside a declaration, blank lines and line comments are skipped.
-    if (!current && (trimmed === "" || trimmed.startsWith("//"))) {
-      if (importLines.length > 0) importLines.push(line);
-      if (trimmed === "") continue;
-    }
-
-    // A plain block comment that opens on this line and closes later.
-    if (trimmed.startsWith("/*") && !trimmed.startsWith("/**") && !trimmed.includes("*/")) {
-      if (current) current.lines.push(line);
-      continue;
-    }
-
     if (current) {
-      current.lines.push(line);
-      const { brackets, parens } = countBrackets(line, lex);
-      bracketDepth += brackets;
-      parenDepth += parens;
-
-      if (inClass) {
-        classDepth += brackets;
-        if (classDepth === 1 && TS_PATTERNS.classMethod.test(trimmed)) {
-          const methodMatch = trimmed.match(/(?:get|set)?\s*(\w+)\s*[<(]/);
-          if (methodMatch) {
-            saveCurrentSection(i);
-            current = {
-              title: `class:${currentClassName}.${methodMatch[1] ?? ""}`,
-              level: 2,
-              lines: [line],
-              startLine: i + 1,
-            };
-            const methodBrackets = countBrackets(line, lex);
-            bracketDepth = methodBrackets.brackets;
-            parenDepth = methodBrackets.parens;
-            continue;
-          }
-        }
+      if (!(bracketDepth <= 0 && parenDepth <= 0 && startsUnit(line, trimmed))) {
+        const { brackets, parens } = countBrackets(line, lex);
+        bracketDepth += brackets;
+        parenDepth += parens;
+        if (bracketDepth <= 0 && parenDepth <= 0 && /[;},]$/.test(trimmed)) close(i);
+        continue;
       }
-
-      if (bracketDepth <= 0 && parenDepth <= 0) {
-        if (trimmed.endsWith(";") || trimmed.endsWith("}") || trimmed.endsWith(",")) {
-          saveCurrentSection(i + 1);
-          if (inClass && classDepth <= 0) {
-            inClass = false;
-            currentClassName = "";
-          }
-        }
-      }
-      continue;
+      close(i - 1); // A statement without a semicolon ends before the next unit.
     }
 
-    // Imports form one group. A multi-line import continues until its braces balance.
+    if (importDepth > 0) {
+      importEnd = i;
+      importDepth += countChar(line, "{") - countChar(line, "}");
+      continue;
+    }
+    if (inComment) {
+      if (trimmed.includes("*/")) inComment = false;
+      continue;
+    }
+    if (trimmed === "" || trimmed.startsWith("//")) continue;
+    if (trimmed.startsWith("/*")) {
+      if (!trimmed.includes("*/")) {
+        inComment = true;
+        continue;
+      }
+      if (trimmed.endsWith("*/")) continue;
+    }
+
     if (TS_PATTERNS.import.test(trimmed)) {
+      decoratorStart = -1;
       if (importStart === -1) importStart = i;
-      importLines.push(line);
-      importBracketDepth += countChar(line, "{") - countChar(line, "}");
+      importEnd = i;
+      importDepth += countChar(line, "{") - countChar(line, "}");
       continue;
     }
-    if (importLines.length > 0 && importBracketDepth > 0) {
-      importLines.push(line);
-      importBracketDepth += countChar(line, "{") - countChar(line, "}");
+    flushImports();
+    if (TS_PATTERNS.decorator.test(trimmed)) {
+      if (decoratorStart === -1) decoratorStart = i;
       continue;
     }
-    if (importLines.length > 0) {
-      saveImports(i);
-      importBracketDepth = 0;
-    }
 
-    const decl = matchDeclaration(trimmed);
-    if (decl) {
-      if (decl.className !== undefined) {
-        currentClassName = decl.className;
-        inClass = true;
-        classDepth = 0;
-      }
-      // The original resets the depth for a multi-line generic; the count below replaces it.
-      current = {
-        title: decl.title,
-        level: decl.level,
-        lines: [line],
-        startLine:
-          decoratorStartLine !== -1
-            ? decoratorStartLine + 1
-            : commentStartLine !== -1
-              ? commentStartLine + 1
-              : i + 1,
-      };
-      const { brackets, parens } = countBrackets(line, lex);
-      bracketDepth = brackets;
-      parenDepth = parens;
-      if (
-        bracketDepth <= 0 &&
-        parenDepth <= 0 &&
-        (trimmed.endsWith(";") || trimmed.endsWith("}"))
-      ) {
-        saveCurrentSection(i + 1);
-      }
-    } else if (trimmed !== "" && !trimmed.startsWith("//")) {
-      // A line that is not a declaration drops the pending comments and decorators.
-      pendingComments = [];
-      commentStartLine = -1;
-      decorators = [];
-      decoratorStartLine = -1;
-    }
+    const decl = matchDeclaration(trimmed) ?? { title: "_statement", level: 1 };
+    current = {
+      title: decl.title,
+      level: decl.level,
+      start: decoratorStart !== -1 ? decoratorStart : i,
+    };
+    decoratorStart = -1;
+    lex = freshLexState();
+    const { brackets, parens } = countBrackets(line, lex);
+    bracketDepth = brackets;
+    parenDepth = parens;
+    if (bracketDepth <= 0 && parenDepth <= 0 && /[;}]$/.test(trimmed)) close(i);
   }
+  flushImports();
+  close(lines.length - 1);
 
-  saveImports(lines.length);
-  saveCurrentSection(lines.length);
-
-  if (sections.length === 0) {
-    sections.push({
-      title: "_content",
-      level: 0,
-      content: normalized,
-      startLine: 1,
-      endLine: lines.length,
-    });
+  if (spans.length === 0) {
+    return [
+      { title: "_content", level: 0, content: normalized, startLine: 1, endLine: lines.length },
+    ];
   }
-  return sections;
+  return partition(lines, spans);
 }

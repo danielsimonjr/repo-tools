@@ -22,4 +22,4 @@ Modified chunks: 0 of 10
 Backup created: <DIR>/parser.ts.backup-<ts>
 
 Merged file written: <DIR>/parser.ts
-Total lines: 46
+Total lines: 60
