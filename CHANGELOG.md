@@ -20,6 +20,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `chunk merge` and `chunk status` compare the real paths when they check that the source file
+  is in the parent folder of the chunk folder. Before, the check compared the path text only:
+  a `sourceFile` such as `../link/t.md`, where `link` is a junction or a symbolic link to an
+  outside folder, passed the check, and `merge` wrote the outside file with exit 0. Now the real
+  path of the parent folder and of the nearest existing folder of the source file must agree.
+  A path that does not resolve is outside. `--yes` still confirms an outside source file.
 - `compress` JSON: an abbreviation does not equal a key in the data. The set of used
   abbreviations now starts with every key in the document and with the reserved keys `_legend`
   and `data`. Before, the input `{"name":"a","n":"b"}` at `medium` gave the compact file

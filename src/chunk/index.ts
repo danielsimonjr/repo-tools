@@ -4,7 +4,15 @@
  *
  * Output goes to `io`. Errors return exit code 1; this module never ends the process.
  */
-import { copyFileSync, existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  lstatSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { writeLf } from "../io.ts";
 import type { Io } from "../io-types.ts";
@@ -219,13 +227,46 @@ function directoryError(path: string): string | undefined {
   return statSync(path).isDirectory() ? `${path} is a directory, not a file` : undefined;
 }
 
+/** Returns true when the path text `path` is outside the path text `folder`. */
+function isOutsideText(folder: string, path: string): boolean {
+  const rel = relative(folder, path);
+  return rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel);
+}
+
+/**
+ * Returns the real path of `path`: the real path of its nearest existing ancestor, with the
+ * remaining names added. Returns undefined when that ancestor is a link that does not resolve.
+ */
+function realPath(path: string): string | undefined {
+  let existing = resolve(path);
+  const rest: string[] = [];
+  while (!lstatSync(existing, { throwIfNoEntry: false })) {
+    const up = dirname(existing);
+    if (up === existing) return undefined;
+    rest.unshift(basename(existing));
+    existing = up;
+  }
+  try {
+    return join(realpathSync.native(existing), ...rest);
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Returns true when `path` is outside `folder`. The source file of a manifest must be in the
  * parent folder of the chunk folder, or below it, unless the user confirms another place.
+ *
+ * The check compares the path texts and also the real paths, so a junction or a symbolic link
+ * in the path cannot point out of `folder`. A path that does not resolve is outside.
  */
 function isOutside(folder: string, path: string): boolean {
-  const rel = relative(folder, path);
-  return rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel);
+  if (isOutsideText(folder, path)) return true;
+  const realFolder = realPath(folder);
+  const realTarget = realPath(path);
+  return (
+    realFolder === undefined || realTarget === undefined || isOutsideText(realFolder, realTarget)
+  );
 }
 
 /** Returns the error text for a source file outside the parent folder of the chunk folder. */
