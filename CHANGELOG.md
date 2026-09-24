@@ -8,6 +8,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- Shared helpers: `src/sort.ts` sorts in UTF-16 code-unit order (fix F22: no `localeCompare`,
+  so the order does not depend on the ICU data of the runtime), and `src/io.ts` writes files
+  with LF line endings and formats JSON with one trailing LF.
 - CLI shell `repo-tools` with the subcommands `depgraph`, `chunk` and `compress`. `--help`, `-h`
   and no argument print the subcommand list. `--version` prints the package version. An unknown
   subcommand exits 1. A subcommand that is not built yet exits 1 with a message.
