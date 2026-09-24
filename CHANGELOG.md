@@ -88,3 +88,6 @@ All notable changes to this project are recorded in this file. The format follow
 - `chunk` (fix K2): the manifest has no `createdAt` field. Two splits of one file give
   byte-identical manifests. `merge` and `status` print the `Created:` line only for an old
   manifest that has the field.
+- `chunk` (fix K3): chunk hashes and the source hash are SHA-256 (64 hex digits). The old
+  32-bit hash gave the same value for different texts, for example `Aa` and `BB`, so `status`
+  and `merge` reported a changed chunk as unchanged.

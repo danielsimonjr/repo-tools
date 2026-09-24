@@ -4,6 +4,7 @@
  * A manifest lives in the chunk folder as `manifest.json`. It records the source file, the file
  * type and one entry for each chunk file.
  */
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { relative, resolve, sep } from "node:path";
 import { writeLf } from "../io.ts";
@@ -41,14 +42,13 @@ export const MANIFEST_VERSION = "1.1.0";
 /** The file name of the manifest in a chunk folder. */
 export const MANIFEST_NAME = "manifest.json";
 
-/** Returns a 32-bit hash of `content` as 8 hex digits. Detects changes to a chunk. */
+/**
+ * Returns the SHA-256 of the UTF-8 bytes of `content` as 64 hex digits. Detects changes to a
+ * chunk or to the source file (fix K3: the old 32-bit hash let edits such as "Aa" to "BB" pass
+ * as unchanged).
+ */
 export function contentHash(content: string): string {
-  let hash = 0;
-  for (let i = 0; i < content.length; i++) {
-    hash = (hash << 5) - hash + content.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).padStart(8, "0");
+  return createHash("sha256").update(content, "utf8").digest("hex");
 }
 
 /**

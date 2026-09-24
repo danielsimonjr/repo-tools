@@ -193,4 +193,31 @@ describe("chunk fixes", () => {
     expect(readFileSync(s.manifest).equals(first)).toBe(true);
     expect(JSON.parse(first.toString())).not.toHaveProperty("createdAt");
   });
+
+  test("K3: status reports a change that the old 32-bit hash cannot see", async () => {
+    // The hash of the original chunker: h = h * 31 + code unit, 32-bit, then Math.abs.
+    const oldHash = (text: string) => {
+      let h = 0;
+      for (let i = 0; i < text.length; i++) h = ((h << 5) - h + text.charCodeAt(i)) | 0;
+      return Math.abs(h).toString(16).padStart(8, "0");
+    };
+    const before = "# T\n\nAa\n";
+    const after = "# T\n\nBB\n";
+    expect(oldHash(after)).toBe(oldHash(before)); // "Aa" and "BB" collide.
+
+    const dir = join(work, "k3");
+    const src = join(dir, "t.md");
+    stageFixture(CASES[0] as GoldenCase, dir);
+    writeFileSync(src, before);
+    expect((await chunk(["split", src])).code).toBe(0);
+    writeFileSync(join(dir, "t_chunks", "001-t.md"), after);
+    const s = await chunk(["status", join(dir, "t_chunks", "manifest.json")]);
+    expect(s.code).toBe(0);
+    expect(s.out).toContain("Modified:        1");
+    expect(s.out).toContain("MODIFIED");
+
+    const manifest = JSON.parse(readText(join(dir, "t_chunks", "manifest.json")));
+    expect(manifest.chunks[0].hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(manifest.sourceHash).toMatch(/^[0-9a-f]{64}$/);
+  });
 });

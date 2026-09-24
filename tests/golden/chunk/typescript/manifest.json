@@ -1,7 +1,7 @@
 {
   "version": "1.1.0",
   "sourceFile": "../parser.ts",
-  "sourceHash": "3720ad98",
+  "sourceHash": "bc6de55b322896667f7126449769a64bf8a036f4846659686a7ef9adc1ee8e96",
   "fileType": "typescript",
   "splitLevel": 1,
   "chunks": [
@@ -13,7 +13,7 @@
       "startLine": 1,
       "endLine": 7,
       "lineCount": 8,
-      "hash": "655fa0e3",
+      "hash": "de48a836e84bc3882a054f9da01392c2985037c56525e236cb2b01522a6ed722",
       "modified": false
     },
     {
@@ -24,7 +24,7 @@
       "startLine": 7,
       "endLine": 18,
       "lineCount": 9,
-      "hash": "6a178686",
+      "hash": "00ec88e85331fd1a3414fbcc5fc1c640bc5f83b1ca3547f60f2b4a78379f0cc1",
       "modified": false
     },
     {
@@ -35,7 +35,7 @@
       "startLine": 21,
       "endLine": 21,
       "lineCount": 1,
-      "hash": "777d3aac",
+      "hash": "e0c24ea33397679554d222e0f390690716f87aaf1b152963488f6cd7640c6005",
       "modified": false
     },
     {
@@ -46,7 +46,7 @@
       "startLine": 23,
       "endLine": 27,
       "lineCount": 5,
-      "hash": "65624a63",
+      "hash": "4400d5a9125e0d0fc1a43830bce936fc70a2b29901551c62149b61fb70fc70bf",
       "modified": false
     },
     {
@@ -57,7 +57,7 @@
       "startLine": 32,
       "endLine": 42,
       "lineCount": 11,
-      "hash": "2feca25b",
+      "hash": "1f9b9d8df6d50f32ee71445143d25566973763fefa4e0ed35b43b2c137db570f",
       "modified": false
     },
     {
@@ -68,7 +68,7 @@
       "startLine": 44,
       "endLine": 46,
       "lineCount": 3,
-      "hash": "5adee339",
+      "hash": "d0a2acfac45558ac669993165271c1f0d3d0fecb03f0f578c637b38060fe0029",
       "modified": false
     },
     {
@@ -79,7 +79,7 @@
       "startLine": 48,
       "endLine": 48,
       "lineCount": 1,
-      "hash": "2c907a14",
+      "hash": "6ee17d46c01a68e7612679f32271d11715e1b8fbb7118886fa3b23c5b41355d1",
       "modified": false
     },
     {
@@ -90,7 +90,7 @@
       "startLine": 50,
       "endLine": 53,
       "lineCount": 4,
-      "hash": "0401dff4",
+      "hash": "d2dd7455deeb5199a15f3a4fb90634042b575eff03597db9ed07494fad5a475c",
       "modified": false
     },
     {
@@ -101,7 +101,7 @@
       "startLine": 55,
       "endLine": 57,
       "lineCount": 3,
-      "hash": "7e7c601f",
+      "hash": "ec37c6f51f5fb3f4e2e71a6200393a9560338a516cb79086e156e4ad1401c231",
       "modified": false
     },
     {
@@ -112,7 +112,7 @@
       "startLine": 59,
       "endLine": 59,
       "lineCount": 1,
-      "hash": "34d3242b",
+      "hash": "5fa9642479cc7a1f51bddf9693ddc3f284878078fd7f3bc5cd451e5ca78771ca",
       "modified": false
     }
   ]
