@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F5: before it writes dependency-graph.yaml, depgraph probes the loaded js-yaml. When
+  that copy ignores the `quoteStyle` option, the run stops with exit 1 and a message, and writes
+  no YAML with the wrong quote characters. The report sets `quoteStyle: 'single'` explicitly.
 - depgraph F4: dependency-graph.yaml is built with js-yaml 5.4.2 (pinned exactly; it was
   4.3.2). js-yaml 5 has no default export and no `quotingType` option, and ships its own types,
   so `@types/js-yaml` is removed. The YAML of every golden set is byte-identical.
