@@ -437,6 +437,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph config file (D10a, `src/config.ts`). `repo-tools.config.json` at the root, or the
+  file that `--config=<path>` names, holds a `depgraph` object with the keys of design section
+  5.1: `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `duplicateAllowlist`,
+  `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`,
+  `apiSurface.out`, `apiSurface.entry`, `apiSurface.stabilityTags` and `extensions`. Each key
+  has a default and a type. Precedence: a command-line flag, then the config file, then the
+  default. Every path in the config and in `--config` is relative to the root, not to the
+  current folder. An unknown key, a value of the wrong type, an absolute path, a missing
+  `--config` file, an unreadable file and invalid JSON exit 1 before any write; the error text
+  shows the root as `<root>`. The default of `tests` is `["test", "tests"]`, the two folder
+  names that the pipeline reads today. This commit loads and checks the config; the next
+  commits connect the keys to the pipeline.
 - README: a "Build an executable" section (prerequisites, the lockfile install, `bun run compile`,
   cross-platform targets, file names and sizes, how to run and smoke-test the executable) and a
   "Reports" section that names every file `depgraph` writes and what each answers.

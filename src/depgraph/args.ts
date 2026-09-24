@@ -6,9 +6,15 @@
  * text names the flag only, never the value, so no path of the user goes to standard error.
  */
 
+import { type DepgraphSettings, isAbsolutePath } from "../config.ts";
+
 /** The parsed command line. */
 export interface DepgraphOptions {
   root: string;
+  /** The config file named by `--config`, relative to the root. */
+  config?: string;
+  /** The settings that the command line sets; they win over the config file. */
+  settings: DepgraphSettings;
   includeTests: boolean;
   all: boolean;
   /** Fix M1: restrict the graph to reachable files (single-package mode too). */
@@ -48,7 +54,18 @@ const VALUE_FLAGS: Readonly<
   Record<string, (o: DepgraphOptions, value: string, setRoot: (v: string) => void) => void>
 > = {
   "--root": (_o, value, setRoot) => setRoot(value),
+  "--config": (o, value) => {
+    o.config = relativePath("--config", value);
+  },
 };
+
+/** Returns `value`, or throws when it is an absolute path. Path flags resolve against the root. */
+function relativePath(flag: string, value: string): string {
+  if (isAbsolutePath(value)) {
+    throw new Error(`flag ${flag} holds an absolute path; use a path relative to the root`);
+  }
+  return value;
+}
 
 /**
  * Parses the depgraph arguments. A first argument that is not a flag sets the root. Throws an
@@ -57,6 +74,7 @@ const VALUE_FLAGS: Readonly<
 export function parseDepgraphArgs(argv: readonly string[], cwd: string): DepgraphOptions {
   const options: DepgraphOptions = {
     root: cwd,
+    settings: {},
     includeTests: false,
     all: false,
     reachableOnly: false,

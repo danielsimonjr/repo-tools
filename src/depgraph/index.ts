@@ -11,6 +11,7 @@
  */
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { type DepgraphConfig, loadConfigFile, mergeDepgraphConfig } from "../config.ts";
 import { withOneLf, writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
 import { sortCodeUnits } from "../sort.ts";
@@ -70,6 +71,9 @@ Write the dependency graph and the architecture reports of a TypeScript tree int
 Options:
   --root=<path>        Project root (default: the current directory). An
                        argument that is not a flag also sets the root.
+  --config=<path>      Config file, relative to the root (default:
+                       repo-tools.config.json at the root, when it exists).
+                       An unknown key, an absolute path or invalid JSON exits 1.
   --all, -a            Monorepo mode: include dormant and unreachable files.
   --reachable-only     Restrict the graph to the files reachable from a root.
                        Single-package mode analyzes all files by default.
@@ -115,7 +119,10 @@ export async function run(argv: string[], io: Io): Promise<number> {
     return 0;
   }
   try {
-    return runPipeline(parseDepgraphArgs(argv, process.cwd()), io);
+    const options = parseDepgraphArgs(argv, process.cwd());
+    const root = resolve(options.root);
+    const config = mergeDepgraphConfig(options.settings, loadConfigFile(root, options.config));
+    return runPipeline(options, config, io);
   } catch (err) {
     io.stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;
@@ -123,7 +130,7 @@ export async function run(argv: string[], io: Io): Promise<number> {
 }
 
 /** The pipeline. Returns the exit code. */
-function runPipeline(options: DepgraphOptions, io: Io): number {
+function runPipeline(options: DepgraphOptions, _config: DepgraphConfig, io: Io): number {
   const log = (line: string): void => io.stdout(`${line}\n`);
   const root = resolve(options.root);
   const outputDir = outputDirOf(root);

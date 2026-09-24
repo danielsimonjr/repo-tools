@@ -204,6 +204,7 @@ describe("pipeline entry", () => {
   test("parseDepgraphArgs reads the flags", () => {
     expect(parseDepgraphArgs(["--root=x", "-a", "-t", "--check-census"], "cwd")).toEqual({
       root: "x",
+      settings: {},
       includeTests: true,
       all: true,
       reachableOnly: false,
