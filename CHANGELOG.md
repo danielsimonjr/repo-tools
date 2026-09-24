@@ -31,6 +31,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port, part 4 (task D5): `analysis.ts` (modules, the dependency matrix, reachability,
+  the depth-first cycle search, the public surface, unused files and exports, the statistics
+  and the dormant split). The cycle search and the in-file reference count keep the pre-port
+  behavior until fixes F26 and F24.
 - depgraph port, part 3 (tasks D3 and D4, second half): `resolver.ts` (relative specifier to a
   `.ts` path, package specifier to a workspace package and its entry file) and `parser.ts`
   (imports, side-effect imports, `import()` expressions, re-exports, export declarations, the
