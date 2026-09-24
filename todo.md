@@ -9,7 +9,7 @@
 - [ ] T5 `compress` port with fixes K5 and K6 (design 3.4, 6.4).
   - [x] Port with characterization goldens from the original tool.
   - [x] K5: validate `--level` and `--format`.
-  - [ ] K6: sort the batch walk in code-unit order.
+  - [x] K6: sort the batch walk in code-unit order.
   - [ ] Batch mode skips `.compact` files.
   - [ ] A directory without `--batch`, and `--batch` without a directory, exit 1 with a message.
   - [ ] JSON `-d` restores keys by structure (the original corrupts values).

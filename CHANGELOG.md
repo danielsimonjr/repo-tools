@@ -11,6 +11,10 @@ All notable changes to this project are recorded in this file. The format follow
 - `compress` (K5): `--level` and `--format` are validated. An unknown value (for example
   `--level fast`) exits 1 with a message that lists the valid values, and writes no file. The
   original tool accepted any value and used other settings without a message.
+- `compress` (K6): the batch walk sorts the entry names of each folder in code-unit order. The
+  original tool used the `readdir` order, which differs by file system, so the batch output and
+  the order of the written files differed by machine. The sort is by entry name, not by full
+  path, because the path separator differs by OS.
 
 ### Added
 

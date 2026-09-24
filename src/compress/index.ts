@@ -7,6 +7,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
 import type { Io } from "../io-types.ts";
+import { compareCodeUnits } from "../sort.ts";
 import {
   type CompressionLevel,
   type CompressionStats,
@@ -195,8 +196,9 @@ function globToRegExp(pattern: string): RegExp {
 }
 
 /**
- * Returns the files in `dir` whose names match `pattern`. With `recursive`, it also searches
- * the subdirectories, except hidden directories and `node_modules`.
+ * Returns the files in `dir` whose names match `pattern`, each folder in code-unit order of its
+ * entry names. With `recursive`, it also searches the subdirectories, except hidden directories
+ * and `node_modules`.
  */
 export function findFiles(
   dir: string,
@@ -207,7 +209,10 @@ export function findFiles(
   const regex = globToRegExp(pattern);
   const found: string[] = [];
   const scan = (current: string): void => {
-    for (const entry of deps.readdir(current)) {
+    // K6: readdir order depends on the file system. Sort the names of each folder in code-unit
+    // order; a sort of full paths would differ by OS, because the separator differs.
+    const entries = [...deps.readdir(current)].sort((a, b) => compareCodeUnits(a.name, b.name));
+    for (const entry of entries) {
       const full = join(current, entry.name);
       if (entry.isDirectory()) {
         if (recursive && !entry.name.startsWith(".") && entry.name !== "node_modules") scan(full);
