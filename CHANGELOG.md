@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F13 (already in the port; a regression test pins it): the packages of a pnpm
+  workspace come from `pnpm-workspace.yaml`. The new fixture `tests/fixtures/depgraph/pnpm-repo`
+  has a `packages/*` glob and a plain folder pattern, and every package is found.
 - depgraph F12: a single-package repo without `src/` keeps its files in the graph. The scan of
   each top-level source folder was already in the port, but the module map took only `src/`
   paths, so `dependency-graph.json` held no modules. Now `<dir>/x.ts` goes to module `<dir>`

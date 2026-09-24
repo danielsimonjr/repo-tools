@@ -1,0 +1,4 @@
+# pnpm keeps its workspace globs here, not in package.json.
+packages:
+  - 'packages/*'
+  - apps/web

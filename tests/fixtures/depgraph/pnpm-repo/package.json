@@ -1,0 +1,5 @@
+{
+  "name": "pnpm-repo",
+  "private": true,
+  "type": "module"
+}
