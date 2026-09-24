@@ -27,6 +27,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph: the error for an absolute path in a path flag (`--config`, `--src`, `--tests`,
+  `--out`, `--api-surface`, `--api-entry`) or a config path now reads "holds an absolute path;
+  pass a path relative to the root" (D10a ruling (b)). One constant holds the text for the flag
+  parser and the config loader, and a test fixes the full text of each. The text names the flag
+  or the key, never the value.
 - depgraph: `--src` or `depgraph.src` in monorepo mode exits 1 with the message "--src
   (depgraph.src) applies to single-package repos; this root is a workspace", and the run writes
   nothing (D10a ruling (c)). The run ignored the value: the workspace source folders are the

@@ -193,6 +193,29 @@ describe("config file: the run", () => {
     await expectFailure(root, [`--config=${join(root, CONFIG_FILE)}`], /absolute path/);
   });
 
+  // Ruling (b) of D10a: the error text tells the user to pass a path relative to the root.
+  const PASS_RELATIVE = "holds an absolute path; pass a path relative to the root";
+
+  test("each path flag with an absolute path gives the pass-relative message", async () => {
+    const root = pkg();
+    const abs = join(root, "x");
+    for (const flag of ["--config", "--src", "--tests", "--out", "--api-surface", "--api-entry"]) {
+      const r = await runDepgraph(root, [`${flag}=${abs}`]);
+      expect(r.code).toBe(1);
+      expect(r.stderr).toBe(`repo-tools depgraph: flag ${flag} ${PASS_RELATIVE}\n`);
+    }
+    expect(existsSync(join(root, "docs"))).toBe(false);
+  });
+
+  test("a config path with an absolute path gives the pass-relative message", async () => {
+    const root = pkg({ [CONFIG_FILE]: JSON.stringify({ depgraph: { out: "/tmp/x" } }) });
+    const r = await runDepgraph(root);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toBe(
+      `repo-tools depgraph: config <root>/${CONFIG_FILE}: 'depgraph.out' ${PASS_RELATIVE}\n`,
+    );
+  });
+
   test("a valid config file runs", async () => {
     const root = pkg({ [CONFIG_FILE]: JSON.stringify({ depgraph: { strictOrphans: false } }) });
     expect((await runDepgraph(root)).code).toBe(0);

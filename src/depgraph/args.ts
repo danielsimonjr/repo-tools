@@ -6,7 +6,7 @@
  * text names the flag only, never the value, so no path of the user goes to standard error.
  */
 
-import { type DepgraphSettings, isAbsolutePath } from "../config.ts";
+import { ABSOLUTE_PATH_TEXT, type DepgraphSettings, isAbsolutePath } from "../config.ts";
 
 /** The parsed command line. */
 export interface DepgraphOptions {
@@ -101,7 +101,7 @@ function pathList(flag: string, value: string): string[] {
 /** Returns `value`, or throws when it is an absolute path. Path flags resolve against the root. */
 function relativePath(flag: string, value: string): string {
   if (isAbsolutePath(value)) {
-    throw new Error(`flag ${flag} holds an absolute path; use a path relative to the root`);
+    throw new Error(`flag ${flag} ${ABSOLUTE_PATH_TEXT}`);
   }
   return value;
 }

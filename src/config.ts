@@ -66,6 +66,12 @@ export type DepgraphSettings = Partial<Omit<DepgraphConfig, "apiSurface">> & {
 /** The default entry file of the per-export facts report. */
 export const DEFAULT_API_ENTRY = "src/index.ts";
 
+/**
+ * The error text for an absolute path in a path flag or a config path (D10a ruling (b)). The
+ * text names the flag or the key, never the value, so no user path goes to standard error.
+ */
+export const ABSOLUTE_PATH_TEXT = "holds an absolute path; pass a path relative to the root";
+
 /** True when `path` is absolute on any operating system (`/x`, `C:\x`, `C:/x`, `\\host\x`). */
 export function isAbsolutePath(path: string): boolean {
   return posix.isAbsolute(path) || win32.isAbsolute(path);
@@ -131,8 +137,7 @@ function checkValue(
   };
   const relPath = (v: unknown, what: string): string => {
     const p = text(v, what);
-    if (isAbsolutePath(p))
-      throw fail(`'${key}' holds an absolute path; use a path relative to the root`);
+    if (isAbsolutePath(p)) throw fail(`'${key}' ${ABSOLUTE_PATH_TEXT}`);
     return p;
   };
   const list = (v: unknown, item: (x: unknown) => string, what: string): string[] => {
@@ -224,7 +229,7 @@ export function parseConfig(parsed: unknown, label: string): DepgraphSettings {
  */
 export function loadConfigFile(root: string, configPath?: string): DepgraphSettings {
   if (configPath !== undefined && isAbsolutePath(configPath)) {
-    throw new Error("flag --config holds an absolute path; use a path relative to the root");
+    throw new Error(`flag --config ${ABSOLUTE_PATH_TEXT}`);
   }
   const rel = configPath ?? CONFIG_FILE;
   const label = `<root>/${rel.replace(/\\/g, "/")}`;
