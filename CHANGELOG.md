@@ -31,6 +31,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port, part 2 (tasks D2 and D4, first half): `scanner.ts` (the graph walk, the test
+  walk, the source-root rule, the census walk and the maximal repo walk), `workspaces.ts` (npm,
+  Yarn and pnpm workspaces, and the structural fallback) and `roots.ts` (`exports` subpaths,
+  `bin` targets, script entries, `tsc -p` tsconfig entries, tsup config entries, root config
+  references and `new URL()` launches). `roots.ts` moves in this commit because workspace
+  detection reads the build roots of each package. The walks keep the listing order of the file
+  system until fix F2. Runtime dependency: `js-yaml` 4.3.2, pinned to the version of the
+  characterization goldens.
 - depgraph port, part 1 (task D1): `src/depgraph/types.ts` holds the shared types of the
   pipeline. `src/depgraph/paths.ts` gives POSIX paths relative to the root. `src/mask.ts` is the
   one comment and string masking module: `blankCommentsAndStrings` and `stripComments` read the
