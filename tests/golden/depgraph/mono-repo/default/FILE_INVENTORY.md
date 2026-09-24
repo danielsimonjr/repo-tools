@@ -1,6 +1,6 @@
 <!-- repo-map:no-verification -->
 <!-- GENERATED FILE -- do not edit by hand.
-     Regenerate with `npm run docs:deps`. -->
+     Regenerate with `repo-tools depgraph`. -->
 
 # Complete File Inventory
 

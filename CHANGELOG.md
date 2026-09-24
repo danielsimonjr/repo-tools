@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F3: every Markdown report starts with the verification marker and the do-not-edit
+  banner, and the banner names the regenerate command. The default command is
+  `repo-tools depgraph` (it was `npm run docs:deps`, a script name of one consumer); a null
+  marker omits the marker line. The configuration keys come with task D10.
 - depgraph F1: no report holds a date stamp. The `lastUpdated`, compact `d`, `generated` and
   `generatedAt` fields and the `**Generated**` and `**Last Updated**` lines are gone, so two runs
   on one tree give the same bytes on any day. A test runs every golden set under two mocked

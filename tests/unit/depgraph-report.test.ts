@@ -14,11 +14,7 @@ import { loadExtensions } from "../../src/depgraph/extensions.ts";
 import { DEPGRAPH_HELP, parseDepgraphArgs, run } from "../../src/depgraph/index.ts";
 import { buildFileInventory } from "../../src/depgraph/inventory.ts";
 import { parseFile } from "../../src/depgraph/parser.ts";
-import {
-  GENERATED_REPORT_BANNER,
-  VERIFICATION_MARKER,
-  withBanner,
-} from "../../src/depgraph/reporters/banner.ts";
+import { bannerFor, VERIFICATION_MARKER, withBanner } from "../../src/depgraph/reporters/banner.ts";
 import {
   generateTestCoverageJson,
   generateTestCoverageMarkdown,
@@ -96,8 +92,8 @@ describe("banner", () => {
     expect(withBanner("# X\n").startsWith(`${VERIFICATION_MARKER}\n<!-- GENERATED FILE`)).toBe(
       true,
     );
-    expect(withBanner("# X\n")).toBe(`${GENERATED_REPORT_BANNER}# X\n`);
-    expect(GENERATED_REPORT_BANNER.endsWith("-->\n\n")).toBe(true);
+    expect(withBanner("# X\n")).toBe(`${bannerFor({})}# X\n`);
+    expect(bannerFor({}).endsWith("-->\n\n")).toBe(true);
   });
 });
 
