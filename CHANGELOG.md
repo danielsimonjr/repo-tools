@@ -27,6 +27,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph: `--src` or `depgraph.src` in monorepo mode exits 1 with the message "--src
+  (depgraph.src) applies to single-package repos; this root is a workspace", and the run writes
+  nothing (D10a ruling (c)). The run ignored the value: the workspace source folders are the
+  roots in monorepo mode, so a typing error in `--src` stayed hidden. `--src=auto` is the
+  default and still runs. No golden changes.
 - depgraph exit rows (D10a, design section 3.2 and criterion 4). A root (`--root=` or the
   positional root) that is not an existing directory exits 1 before any folder is made; the port
   made `<root>/docs/architecture` inside a missing root. Zero source files exit 1 and make no

@@ -89,7 +89,8 @@ Options:
                        repo-tools.config.json at the root, when it exists).
                        An unknown key, an absolute path or invalid JSON exits 1.
   --src=<a,b>          Source folders (default: auto, src/ if present, else each
-                       top-level folder with TypeScript). Single-package mode.
+                       top-level folder with TypeScript). Single-package mode
+                       only: in a monorepo, --src or depgraph.src exits 1.
   --tests=<a,b>        Test folders, under the root and each package folder
                        (default: test,tests).
   --out=<dir>          Output folder (default: ${OUTPUT_SUBDIR}).
@@ -206,14 +207,24 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
     return 1;
   }
 
+  const warn = (message: string): void => io.stderr(`Warning: ${message}\n`);
+  const workspaces = detectWorkspaces(root, warn);
+  const isMonorepo = workspaces.size > 0;
+  // Ruling (c) of D10a: in monorepo mode the workspace source folders are the roots. The run
+  // stops before it writes, because an ignored `--src` hides a typing error.
+  if (isMonorepo && config.src !== "auto") {
+    io.stderr(
+      "repo-tools depgraph: --src (depgraph.src) applies to single-package repos; " +
+        "this root is a workspace\n",
+    );
+    return 1;
+  }
+
   const packageJson = readPackageJson(root, io);
 
   // Scan.
   log("Scanning codebase for dependencies...");
   if (options.includeTests) log("note: --include-tests is a no-op; test analysis is always on.");
-  const warn = (message: string): void => io.stderr(`Warning: ${message}\n`);
-  const workspaces = detectWorkspaces(root, warn);
-  const isMonorepo = workspaces.size > 0;
   // Fix M1: in single-package mode the root package.json names the extra build roots.
   const rootEntries = isMonorepo ? [] : rootPackageEntries(root, warn);
   // Fix F43: in single-package mode an import of the package's own name resolves to its source.

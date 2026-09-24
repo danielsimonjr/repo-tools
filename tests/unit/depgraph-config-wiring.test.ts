@@ -115,6 +115,38 @@ describe("--src and depgraph.src", () => {
     const paths = graphPaths(readOut(root, "docs/architecture", "dependency-graph.json"));
     expect(paths).toEqual(["lib/a.ts"]);
   });
+
+  // Ruling (c) of D10a: in monorepo mode the workspace source folders are the roots. A `--src`
+  // that the run ignores would hide a typing error, so the run stops before it writes.
+  const mono = {
+    "package.json": JSON.stringify({ name: "mono", private: true, workspaces: ["packages/*"] }),
+    "packages/core/package.json": JSON.stringify({ name: "@m/core", version: "1.0.0" }),
+    "packages/core/src/index.ts": "/** Entry. */\nexport const core = 1;\n",
+  };
+
+  test("--src in a monorepo exits 1, says why and writes nothing", async () => {
+    const root = makeTree(mono);
+    const r = await runDepgraph(root, ["--src=packages"]);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain(
+      "--src (depgraph.src) applies to single-package repos; this root is a workspace",
+    );
+    expect(r.stdout).toBe("");
+    expect(existsSync(join(root, "docs"))).toBe(false);
+  });
+
+  test("depgraph.src in a monorepo exits 1 the same way", async () => {
+    const root = makeTree({ ...mono, [CONFIG_FILE]: config({ src: ["packages"] }) });
+    const r = await runDepgraph(root);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("this root is a workspace");
+    expect(existsSync(join(root, "docs"))).toBe(false);
+  });
+
+  test("--src=auto in a monorepo is the default and runs", async () => {
+    const root = makeTree(mono);
+    expect((await runDepgraph(root, ["--src=auto"])).code).toBe(0);
+  });
 });
 
 describe("--tests and depgraph.tests", () => {
