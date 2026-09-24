@@ -66,6 +66,10 @@ export function categorizeFiles(
       const parts = file.path.split("/");
       if (parts.length >= 2 && parts[0] === "src") {
         add(parts.length === 2 ? "root" : (parts[1] ?? "").replace(".ts", ""), file);
+      } else if (parts.length >= 2) {
+        // Fix F12: a repo without `src/` has top-level source folders. `<dir>/x.ts` goes to
+        // module `<dir>`, and `<dir>/<sub>/x.ts` goes to module `<dir>/<sub>`.
+        add(parts.length === 2 ? (parts[0] ?? "") : `${parts[0]}/${parts[1]}`, file);
       }
     }
   }

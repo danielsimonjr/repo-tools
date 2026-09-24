@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F12: a single-package repo without `src/` keeps its files in the graph. The scan of
+  each top-level source folder was already in the port, but the module map took only `src/`
+  paths, so `dependency-graph.json` held no modules. Now `<dir>/x.ts` goes to module `<dir>`
+  and `<dir>/<sub>/x.ts` to module `<dir>/<sub>`.
 - depgraph F11 (already in the port; a regression test pins it): a dynamic `import('./x.js')`
   is a dependency edge, so its target is not an unused file. Fix F25 sets the kind of the edge.
 - depgraph F10: test coverage follows chains of bare side-effect imports. When a test imports
