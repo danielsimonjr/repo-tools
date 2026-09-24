@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { run } from "../../src/chunk/index.ts";
@@ -7,6 +7,7 @@ import { main } from "../../src/cli.ts";
 import {
   CASES,
   chunkFiles,
+  FIXTURES,
   GOLDEN,
   type GoldenCase,
   maskManifest,
@@ -154,5 +155,33 @@ describe("chunk CLI wiring", () => {
     expect(r.code).toBe(0);
     expect(r.out).toContain("[DRY RUN]");
     expect(() => readFileSync(join(dir, "guide_chunks", "manifest.json"))).toThrow();
+  });
+});
+
+/** Splits a fresh copy of the Markdown fixture in `work/<name>` and returns its paths. */
+async function splitGuide(name: string, extra: string[] = []) {
+  const dir = join(work, name);
+  const src = stageFixture(CASES[0] as GoldenCase, dir);
+  const r = await chunk(["split", src, ...extra]);
+  expect(r.code).toBe(0);
+  const chunks = join(dir, "guide_chunks");
+  return { dir, src, chunks, manifest: join(chunks, "manifest.json") };
+}
+
+describe("chunk fixes", () => {
+  test("K1: the manifest stores sourceFile relative to the manifest folder", async () => {
+    const s = await splitGuide("k1/before");
+    const text = readText(s.manifest);
+    expect(JSON.parse(text).sourceFile).toBe("../guide.md");
+    expect(text).not.toContain(JSON.stringify(work).slice(1, -1));
+
+    // Move the source file and its chunk folder together, then merge.
+    const moved = join(work, "k1", "after");
+    renameSync(s.dir, moved);
+    const m = await chunk(["merge", join(moved, "guide_chunks", "manifest.json")]);
+    expect(m.err).toBe("");
+    expect(m.code).toBe(0);
+    expect(m.out).toContain(`Merged file written: ${join(moved, "guide.md")}`);
+    expect(readText(join(moved, "guide.md"))).toBe(readText(join(FIXTURES, "guide.md")));
   });
 });

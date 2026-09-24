@@ -16,6 +16,8 @@ import {
   MANIFEST_VERSION,
   type Manifest,
   readManifest,
+  relativeSource,
+  resolveSource,
   writeManifest,
 } from "./manifest.ts";
 import {
@@ -169,7 +171,7 @@ function split(inputFile: string, options: Options, io: Io): number {
 
   const manifest: Manifest = {
     version: MANIFEST_VERSION,
-    sourceFile: absoluteInput,
+    sourceFile: relativeSource(outputDir, absoluteInput),
     sourceHash,
     createdAt: new Date().toISOString(),
     fileType,
@@ -208,12 +210,13 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   }
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
+  const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
   const fileType = manifest.fileType || "markdown";
 
   log("\nchunker - Merging Chunks");
   log("=".repeat(50));
   log(`Manifest:    ${absoluteManifest}`);
-  log(`Source:      ${manifest.sourceFile}`);
+  log(`Source:      ${sourcePath}`);
   log(`File Type:   ${fileType}`);
   log(`Created:     ${manifest.createdAt}`);
   log(`Chunks:      ${manifest.chunks.length}`);
@@ -239,10 +242,10 @@ function merge(manifestFile: string, options: Options, io: Io): number {
 
   const mergedContent =
     fileType === "json" ? mergeJson(chunkContents, io.stderr) : chunkContents.join("\n");
-  const outputPath = options.output ? resolve(options.output) : manifest.sourceFile;
+  const outputPath = options.output ? resolve(options.output) : sourcePath;
 
-  if (existsSync(manifest.sourceFile)) {
-    const currentSourceHash = contentHash(readFileSync(manifest.sourceFile, "utf8"));
+  if (existsSync(sourcePath)) {
+    const currentSourceHash = contentHash(readFileSync(sourcePath, "utf8"));
     if (currentSourceHash !== manifest.sourceHash) {
       log("\nWARNING: Source file has changed since split!");
       log(`  Original hash: ${manifest.sourceHash}`);
@@ -278,11 +281,12 @@ function status(manifestFile: string, io: Io): number {
   }
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
+  const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
   const fileType = manifest.fileType || "markdown";
 
   log("\nchunker - Chunk Status");
   log("=".repeat(50));
-  log(`Source:    ${manifest.sourceFile}`);
+  log(`Source:    ${sourcePath}`);
   log(`File Type: ${fileType}`);
   log(`Created:   ${manifest.createdAt}`);
   if (fileType === "markdown") log(`Level:     h${manifest.splitLevel}`);
@@ -325,8 +329,8 @@ function status(manifestFile: string, io: Io): number {
   log(`  Modified:        ${modifiedCount}`);
   log(`  Missing:         ${missingCount}`);
   log(`  Total lines:     ${totalLines}`);
-  if (existsSync(manifest.sourceFile)) {
-    if (contentHash(readFileSync(manifest.sourceFile, "utf8")) !== manifest.sourceHash) {
+  if (existsSync(sourcePath)) {
+    if (contentHash(readFileSync(sourcePath, "utf8")) !== manifest.sourceHash) {
       log("\n\x1b[33mWARNING: Source file modified since split!\x1b[0m");
     }
   }

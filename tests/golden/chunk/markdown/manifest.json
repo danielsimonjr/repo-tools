@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "sourceFile": "<sourceFile>",
+  "sourceFile": "../guide.md",
   "sourceHash": "366b9f96",
   "createdAt": "<createdAt>",
   "fileType": "markdown",

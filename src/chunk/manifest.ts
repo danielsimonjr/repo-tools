@@ -5,6 +5,7 @@
  * type and one entry for each chunk file.
  */
 import { readFileSync } from "node:fs";
+import { relative, resolve, sep } from "node:path";
 import { writeLf } from "../io.ts";
 
 export type FileType = "markdown" | "json" | "typescript";
@@ -47,6 +48,22 @@ export function contentHash(content: string): string {
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16).padStart(8, "0");
+}
+
+/**
+ * Returns the path of `sourcePath` relative to the manifest folder, with `/` separators. The
+ * manifest then stays valid when the source file and the chunk folder move together (fix K1).
+ */
+export function relativeSource(manifestDir: string, sourcePath: string): string {
+  return relative(manifestDir, sourcePath).split(sep).join("/");
+}
+
+/**
+ * Returns the absolute source path of a manifest. A relative `sourceFile` resolves against the
+ * manifest folder. An absolute `sourceFile` (an old manifest) stays as it is.
+ */
+export function resolveSource(manifestDir: string, sourceFile: string): string {
+  return resolve(manifestDir, sourceFile);
 }
 
 /** Reads and parses a manifest file. Throws on a read error or on invalid JSON. */

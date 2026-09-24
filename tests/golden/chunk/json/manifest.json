@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "sourceFile": "<sourceFile>",
+  "sourceFile": "../config.json",
   "sourceHash": "6c8dbccf",
   "createdAt": "<createdAt>",
   "fileType": "json",

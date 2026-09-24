@@ -78,3 +78,10 @@ All notable changes to this project are recorded in this file. The format follow
   permissions and holds no token. Dependabot updates the actions and the dev dependencies.
 - Project scaffold: Bun and TypeScript (strict), `bun:test`, Biome lint and format, MIT license,
   LF line endings through `.gitattributes`.
+
+### Fixed
+
+- `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`
+  separators. You can move the source file and the chunk folder together, and `merge` still
+  finds the source. The manifest holds no absolute path. `merge` and `status` print the
+  resolved source path.
