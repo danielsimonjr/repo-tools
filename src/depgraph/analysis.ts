@@ -296,7 +296,8 @@ export function detectUnused(
 
   const unusedFiles: string[] = [];
   for (const file of files) {
-    if (file.path === "src/index.ts") continue;
+    // Fix F17: every package `src/index.ts` is an entry root, also when it re-exports nothing.
+    if (file.path === "src/index.ts" || file.path.endsWith("/src/index.ts")) continue;
     if (file.name === "index" && file.exports.reExported.length > 0) continue;
     if (extraEntryPaths.has(file.path)) continue;
     if (!importedFiles.has(file.path)) unusedFiles.push(file.path);

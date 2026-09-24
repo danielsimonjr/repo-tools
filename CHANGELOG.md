@@ -20,6 +20,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F17: a package `src/index.ts` that re-exports nothing is an entry root, not a
+  "potentially unused file" (the port exempted only the root `src/index.ts`). Regression tests
+  now pin the other classifier roots, which were already in the port: a `bin` target, an
+  `exports` subpath entry with its `export type { } from` names, an export that only a test uses
+  (not unused) and a file that only a test reaches (`test-only`), and the build roots that a
+  `tsc -p` tsconfig and a config `new URL()` seed.
 - depgraph F16 (already in the port; a regression test pins it): the default output folder is
   `docs/architecture`, in lower case. A run creates exactly one folder under `docs/`, with that
   exact name, in single-package mode and in monorepo mode.
