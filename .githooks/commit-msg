@@ -1,0 +1,3 @@
+#!/bin/sh
+# Rejects a commit message that fails the privacy check (for example a session URL).
+exec bun scripts/privacy-check.ts --commit-msg "$1"

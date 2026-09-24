@@ -91,5 +91,5 @@ export async function main(argv: readonly string[], io: Io): Promise<number> {
     io.stderr(`repo-tools ${first}: not implemented in this build\n`);
     return 1;
   }
-  return sub.run([...rest], io);
+  return sub.run(rest, io);
 }

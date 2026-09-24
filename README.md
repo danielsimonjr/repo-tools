@@ -26,6 +26,8 @@ bun src/bin.ts --help
 | `bun test` | Runs the unit tests. |
 | `bun run typecheck` | Runs the TypeScript type check. |
 | `bun run lint` | Runs the lint and format check. |
+| `bun run privacy` | Runs the privacy check on the tracked files and the commit messages. |
+| `bun run hooks` | Installs the `commit-msg` hook that runs the privacy check on each message. |
 
 ## License
 
