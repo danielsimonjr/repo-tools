@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F20 (already in the privacy check; a regression test pins it): a repository whose
+  git index tracks a `.exe` file fails the privacy check with a `binary` finding, and this
+  repository tracks no `.exe` file.
 - depgraph F19 (already in the port; a regression test pins it): a test that imports a barrel
   covers each file that the barrel re-exports, through `export *`, `export { } from` and a
   chain of barrels. A file that no barrel re-exports stays untested.
