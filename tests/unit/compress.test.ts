@@ -1,6 +1,14 @@
 /** Unit tests for the `compress` fixes and the round trip (T5 steps 2 and 3). */
 import { afterAll, describe, expect, test } from "bun:test";
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join, relative } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
@@ -346,5 +354,40 @@ describe("K9: -d supports JSON only", () => {
   test("the help says that -d supports JSON only", async () => {
     const r = await compress([]);
     expect(r.out).toContain("JSON only");
+  });
+});
+
+describe("batch -d never writes to its input", () => {
+  /** The reviewer's folder, and a JSON file with a legend that is not a .compact file. */
+  function reviewerFolder(): string {
+    const dir = folder();
+    writeFileSync(join(dir, "conf.yaml"), "# name: keep this comment\n---\nname: x\n# tail\n");
+    writeFileSync(join(dir, "d.csv"), "#note row\nname,count\nn,1\n");
+    writeFileSync(join(dir, "plain.json"), '{"_legend":{"n":"name"},"n":1}');
+    return dir;
+  }
+
+  test('-b -d -p "*.*" on files without ".compact" exits 1 and changes no byte', async () => {
+    const dir = reviewerFolder();
+    const before = snapshot(dir);
+    const r = await compressIn(dir, ["-b", "-d", "-p", "*.*", "."]);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain('Skipped 3 file(s) without ".compact" in the name.');
+    expect(r.err).toContain("No files to process");
+    expect(snapshot(dir)).toEqual(before);
+  });
+
+  test("batch -d restores only the .compact file next to the other files", async () => {
+    const dir = reviewerFolder();
+    copyFileSync(join(fixtures, "sample.json"), join(dir, "sample.json"));
+    await compressIn(dir, ["sample.json", "--no-stats"]);
+    rmSync(join(dir, "sample.json"));
+    const before = snapshot(dir);
+    const r = await compressIn(dir, ["-b", "-d", "-p", "*.json", ".", "--no-stats"]);
+    expect(r.code).toBe(0);
+    expect(r.out).toContain('Skipped 1 file(s) without ".compact" in the name.');
+    const after = new Map(snapshot(dir));
+    for (const [name, text] of before) expect(after.get(name)).toBe(text);
+    expect([...after.keys()]).toContain("sample.json");
   });
 });

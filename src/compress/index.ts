@@ -240,6 +240,17 @@ function compactName(file: string): string {
   return join(dirname(file), `${basename(file, ext)}.compact${ext}`);
 }
 
+/**
+ * Returns the output name of `-d` for `file`: the name without ".compact". When that name is
+ * the input name, it returns `<dir>/<base>.restored<ext>`, so `-d` never writes to its input.
+ */
+function restoredName(file: string): string {
+  const output = file.replace(".compact", "");
+  if (output !== file) return output;
+  const ext = extname(file);
+  return join(dirname(file), `${basename(file, ext)}.restored${ext}`);
+}
+
 // A compact file is written byte for byte (a plain write, not `writeLf`): the output keeps the
 // line endings of the input, so a restored file can equal its original.
 function writeExact(path: string, text: string): void {
@@ -253,7 +264,7 @@ function processBatch(files: readonly string[], o: Options): BatchResult[] {
       const format = o.format === "auto" ? detectFormat(file) : o.format;
       if (o.decompress) {
         const restored = decompress(content, format);
-        const outputFile = file.replace(".compact", "");
+        const outputFile = restoredName(file);
         if (!o.dryRun) writeExact(outputFile, restored);
         return { file, success: true, outputFile, stats: calculateStats(content, restored) };
       }
@@ -298,13 +309,16 @@ function runBatch(o: Options, io: Io, deps: CompressDeps): number {
       io.stderr(`Warning: ${missing.length} file(s) not found: ${missing.join(", ")}\n`);
     }
   }
-  if (!o.decompress) {
-    // The original tool compressed its own output again (README.compact.compact.md).
-    const compact = files.filter((f) => basename(f).includes(".compact"));
-    if (compact.length > 0) {
-      files = files.filter((f) => !basename(f).includes(".compact"));
-      say(`Skipped ${compact.length} file(s) with ".compact" in the name.`);
-    }
+  // Compression skips the .compact files: the original tool compressed its own output again
+  // (README.compact.compact.md). Decompression takes only the .compact files: the original tool
+  // restored any matched file, and wrote the result over the input when the name had no
+  // ".compact" (conf.yaml, d.csv).
+  const isCompact = (f: string) => basename(f).includes(".compact");
+  const skipped = files.filter((f) => isCompact(f) !== o.decompress);
+  if (skipped.length > 0) {
+    files = files.filter((f) => isCompact(f) === o.decompress);
+    const how = o.decompress ? "without" : "with";
+    say(`Skipped ${skipped.length} file(s) ${how} ".compact" in the name.`);
   }
   if (files.length === 0) {
     io.stderr(
@@ -334,14 +348,7 @@ function preview(text: string): string {
 
 function runDecompress(o: Options, format: FileFormat, io: Io): number {
   const content = readFileSync(o.input, "utf8");
-  let output = o.output;
-  if (!output) {
-    output = o.input.replace(".compact", "");
-    if (output === o.input) {
-      const ext = extname(o.input);
-      output = join(dirname(o.input), `${basename(o.input, ext)}.restored${ext}`);
-    }
-  }
+  const output = o.output || restoredName(o.input);
   io.stdout(`Decompressing: ${o.input}\nFormat: ${format}\n`);
   const restored = decompress(content, format);
   const s = calculateStats(content, restored);

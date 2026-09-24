@@ -30,6 +30,11 @@ All notable changes to this project are recorded in this file. The format follow
   `data` as `{"_legend":{...},"data":<value>}`. `-d` unwraps `data` when `_legend` and `data`
   are the only keys. Before, a top-level array became an object with the keys `"0"`, `"1"`, ...,
   and a single value came back as `{"data":<value>}`.
+- `compress -b -d` processes only the files with `.compact` in the name, and prints the number
+  of skipped files. It never writes to its input: when the output name equals the input name,
+  it writes `<name>.restored<ext>`, as single mode does. Before, `compress -b -d -p "*.*" dir`
+  restored every matched file and wrote the result over the input when the name had no
+  `.compact` (for example `conf.yaml` and `d.csv`).
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the
