@@ -19,4 +19,29 @@
 ## Part 2
 
 - [x] D0 Fixture repositories and the characterization goldens of the pre-port generator.
-- [ ] D1-D12 `depgraph` port and fixes (plan part 2).
+- [ ] D1-D8 `depgraph` port to byte parity with the goldens (branch `d-port`, under review).
+- [ ] D9 API-surface module. Landed in 486d8f3; the CLI flag comes with D10.
+- [ ] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
+  the extension loader.
+- [ ] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.
+- [ ] D12 Public design document and the release-candidate report.
+- [ ] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
+  `tsup.config.*` read when it exists), F15-F26, F27-F32, M1.
+
+## Review fixes for `chunk` and `compress` (review of 486d8f3..5743c5d)
+
+- [ ] chunk: refuse a manifest chunk file name that leaves the chunk folder, refuse an absolute
+  `sourceFile` in a 2.x manifest, confirm a merge target outside the parent folder, and validate
+  the manifest shape.
+- [ ] chunk K7: no data loss on merge (JSON array and invalid JSON; no smaller or empty result over
+  a non-empty source without `--allow-shrink`).
+- [ ] chunk K8: split then merge is byte-identical for every supported type (property test),
+  including top-level TypeScript statements and `export default`.
+- [ ] chunk: keep a `__proto__` key on JSON merge; restore CRLF line endings on merge.
+- [ ] compress: no key collision between an abbreviation and an existing short key.
+- [ ] compress: keep the shape of a top-level JSON array or single value.
+- [ ] compress K9: `-d` supports JSON only; other formats exit 1 with a message.
+- [ ] compress: batch `-d` never writes to its input; `-d` changes only the file base name.
+- [ ] compress: keep a `__proto__` key; escape every glob metacharacter; refuse an unsafe integer.
+- [ ] chunk and compress: exit 1 on an unknown flag, a flag without a value, a missing batch
+  input, and a second input without `-b`.
