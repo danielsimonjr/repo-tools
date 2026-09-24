@@ -220,4 +220,55 @@ describe("chunk fixes", () => {
     expect(manifest.chunks[0].hash).toMatch(/^[0-9a-f]{64}$/);
     expect(manifest.sourceHash).toMatch(/^[0-9a-f]{64}$/);
   });
+
+  test("split writes manifest version 2.0.0", async () => {
+    const s = await splitGuide("v2");
+    expect(JSON.parse(readText(s.manifest)).version).toBe("2.0.0");
+  });
+
+  /**
+   * Replaces the manifest of a fresh split with the 1.1.0 manifest that the original tool wrote
+   * for the same file (32-bit hashes, createdAt), with `sourceFile` set to `source`.
+   */
+  async function legacySplit(name: string, source: (src: string) => string) {
+    const s = await splitGuide(name);
+    const v1 = readText(join(FIXTURES, "manifest-1.1.0.json")).replace(
+      '"<sourceFile>"',
+      JSON.stringify(source(s.src)),
+    );
+    writeFileSync(s.manifest, v1);
+    return s;
+  }
+
+  for (const [kind, source] of [
+    ["an absolute", (src: string) => src],
+    ["a relative", () => "../guide.md"],
+  ] as const) {
+    test(`status and merge read a 1.1.0 manifest with ${kind} sourceFile`, async () => {
+      const s = await legacySplit(`v1-${kind.split(" ")[1]}`, source);
+      const clean = await chunk(["status", s.manifest]);
+      expect(clean.err).toBe("");
+      expect(clean.code).toBe(0);
+      expect(clean.out).toContain("Modified:        0");
+      expect(clean.out).not.toContain("WARNING");
+
+      const edited = join(s.chunks, "003-install.md");
+      writeFileSync(edited, `${readText(edited)}More text.\n`);
+      expect((await chunk(["status", s.manifest])).out).toContain("Modified:        1");
+
+      const m = await chunk(["merge", s.manifest]);
+      expect(m.err).toBe("");
+      expect(m.code).toBe(0);
+      expect(m.out).not.toContain("WARNING");
+      expect(readText(s.src)).toContain("level-2 section.\nMore text.\n\n## Use\n");
+    });
+  }
+
+  test("a manifest of an unknown major version exits 1", async () => {
+    const s = await splitGuide("v3");
+    writeFileSync(s.manifest, readText(s.manifest).replace('"2.0.0"', '"3.0.0"'));
+    const r = await chunk(["status", s.manifest]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("3.0.0");
+  });
 });

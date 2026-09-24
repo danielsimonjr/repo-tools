@@ -91,3 +91,7 @@ All notable changes to this project are recorded in this file. The format follow
 - `chunk` (fix K3): chunk hashes and the source hash are SHA-256 (64 hex digits). The old
   32-bit hash gave the same value for different texts, for example `Aa` and `BB`, so `status`
   and `merge` reported a changed chunk as unchanged.
+- `chunk`: `split` writes manifest version `2.0.0`, because K1, K2 and K3 change the format
+  that a 1.1.0 reader expects. The manifest file ends with one LF. `merge` and `status` still
+  read a 1.1.0 manifest, with an absolute or a relative `sourceFile`, and compare its chunks
+  with the old 32-bit hash. A manifest of another major version exits 1 with a message.

@@ -12,6 +12,7 @@ import {
   type ChunkInfo,
   contentHash,
   type FileType,
+  hashFor,
   MANIFEST_NAME,
   MANIFEST_VERSION,
   type Manifest,
@@ -210,6 +211,7 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
+  const hash = hashFor(manifest);
   const fileType = manifest.fileType || "markdown";
 
   log("\nchunker - Merging Chunks");
@@ -230,7 +232,7 @@ function merge(manifestFile: string, options: Options, io: Io): number {
       return 1;
     }
     const content = readFileSync(chunkPath, "utf8");
-    const modified = contentHash(content) !== chunk.hash;
+    const modified = hash(content) !== chunk.hash;
     if (modified) modifiedCount++;
     log(
       `  ${String(chunk.index).padStart(2)}. ${chunk.filename.padEnd(45)} ${modified ? "[MODIFIED]" : "[unchanged]"}`,
@@ -244,7 +246,7 @@ function merge(manifestFile: string, options: Options, io: Io): number {
   const outputPath = options.output ? resolve(options.output) : sourcePath;
 
   if (existsSync(sourcePath)) {
-    const currentSourceHash = contentHash(readFileSync(sourcePath, "utf8"));
+    const currentSourceHash = hash(readFileSync(sourcePath, "utf8"));
     if (currentSourceHash !== manifest.sourceHash) {
       log("\nWARNING: Source file has changed since split!");
       log(`  Original hash: ${manifest.sourceHash}`);
@@ -281,6 +283,7 @@ function status(manifestFile: string, io: Io): number {
   const manifest = readManifest(absoluteManifest);
   const chunksDir = dirname(absoluteManifest);
   const sourcePath = resolveSource(chunksDir, manifest.sourceFile);
+  const hash = hashFor(manifest);
   const fileType = manifest.fileType || "markdown";
 
   log("\nchunker - Chunk Status");
@@ -308,7 +311,7 @@ function status(manifestFile: string, io: Io): number {
     } else {
       const content = readFileSync(chunkPath, "utf8");
       lines = content.split("\n").length;
-      if (contentHash(content) !== chunk.hash) {
+      if (hash(content) !== chunk.hash) {
         state = "MODIFIED";
         modifiedCount++;
       } else {
@@ -329,7 +332,7 @@ function status(manifestFile: string, io: Io): number {
   log(`  Missing:         ${missingCount}`);
   log(`  Total lines:     ${totalLines}`);
   if (existsSync(sourcePath)) {
-    if (contentHash(readFileSync(sourcePath, "utf8")) !== manifest.sourceHash) {
+    if (hash(readFileSync(sourcePath, "utf8")) !== manifest.sourceHash) {
       log("\n\x1b[33mWARNING: Source file modified since split!\x1b[0m");
     }
   }
