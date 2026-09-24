@@ -7,7 +7,7 @@
 import { extname } from "node:path";
 import {
   applySubstringCompression,
-  assertSafeIntegers,
+  assertSafeNumbers,
   findRepeatedSubstrings,
   generateAbbreviation,
   renameKeys,
@@ -103,7 +103,7 @@ function collectKeys(value: unknown, freq: Map<string, number>): void {
 
 const compressJson: Compressor = (content, level) => {
   const data: unknown = JSON.parse(content);
-  assertSafeIntegers(content);
+  assertSafeNumbers(content);
   const legend: Record<string, string> = {};
   const freq = new Map<string, number>();
   collectKeys(data, freq);

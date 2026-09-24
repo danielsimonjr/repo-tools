@@ -20,6 +20,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `compress` JSON refuses every number whose value `JSON.parse` changes, not only an unsafe
+  integer. Compression and `-d` exit 1 with a message that names the number, and write no file,
+  for a number that is not finite (`1e400`, which became `null`), a number with a fraction or
+  an exponent above 9007199254740991 (`1e300`, `12345678901234567890.5`, which became
+  `12345678901234567000`, and `-d` on that compact file then exited 1), and a number with more
+  digits than a JavaScript number keeps (`0.1234567890123456789`; `1e-400`, which became `0`).
+  A number whose shortest JavaScript form has the same value is accepted, also with 16 or 17
+  digits (`0.30000000000000004`). The library function `assertSafeIntegers` is now
+  `assertSafeNumbers`. The help text tells the rule.
 - `chunk merge` names the chunk number and the chunk file name when a JSON chunk is not valid
   JSON or is not a JSON object, for example `JSON chunk 2 (002-b.json) is not valid JSON: ...`.
   Before, the message was only the parser error, for example `JSON Parse error: Unexpected EOF`.

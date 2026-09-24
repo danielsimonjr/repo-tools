@@ -56,8 +56,10 @@ Levels:
   aggressive  The smallest output. The output can be difficult to read.
 
 JSON:
-  An integer outside the safe range (-9007199254740991 to 9007199254740991) is refused
-  (exit 1), because JSON.parse would change its value. An integer-like key ("2", "10")
+  A number that JSON.parse would change is refused (exit 1): an integer outside the safe
+  range (-9007199254740991 to 9007199254740991), a number that is not finite (1e400), a
+  fraction or exponent above that range (1e300), and a number with more digits than a
+  JavaScript number keeps (0.1234567890123456789). An integer-like key ("2", "10")
   moves to the start of its object, in numeric order, as JSON.parse orders it.
 
 Exit codes: 0 when all files are done, 1 on an error. An unknown option, an option without

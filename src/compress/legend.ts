@@ -143,17 +143,60 @@ export function applySubstringCompression(
 
 const NUMBER_TOKEN = /-?\d+(\.\d+)?([eE][+-]?\d+)?/y;
 const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+const DECIMAL = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/;
 
 /**
- * Throws when the JSON source text holds an integer outside the safe integer range of a
- * JavaScript number (plus or minus 2^53 - 1). `JSON.parse` changes such an integer
- * (12345678901234567890 becomes 12345678901234567000), so the data would change without a
- * message. The check reads the source text, because the parsed value has already lost the digits.
- * A number with a fraction or an exponent is not an integer token and is not checked.
- *
- * @throws Error that names the first unsafe integer.
+ * Returns the decimal value of the number text `token` in one form: the sign, the significant
+ * digits and the exponent ("-15e-1" for "-1.50"). Zero gives "0". Two texts with one value give
+ * one result.
  */
-export function assertSafeIntegers(text: string): void {
+function decimalValue(token: string): string {
+  const [, sign = "", int = "", frac = "", exp = "0"] = DECIMAL.exec(token) ?? [];
+  const all = `${int}${frac}`.replace(/^0+/, "");
+  const digits = all.replace(/0+$/, "");
+  if (digits === "") return "0";
+  const exponent = Number(exp) - frac.length + (all.length - digits.length);
+  return `${sign}${digits}e${exponent}`;
+}
+
+/**
+ * Returns why `JSON.parse` would change the value of the number text `token`, or undefined when
+ * the value stays the same.
+ */
+function numberChange(token: string, integer: boolean): string | undefined {
+  const range = `the safe integer range (-${MAX_SAFE} to ${MAX_SAFE})`;
+  if (integer) {
+    const value = BigInt(token);
+    return value > MAX_SAFE || value < -MAX_SAFE ? `is outside ${range}` : undefined;
+  }
+  const value = Number(token);
+  if (!Number.isFinite(value)) return "is not a finite JavaScript number";
+  // JSON.stringify writes such a value as an integer, which is outside the range above.
+  if (Math.abs(value) > Number.MAX_SAFE_INTEGER) return `is outside ${range}`;
+  if (decimalValue(String(value)) !== decimalValue(token)) {
+    return `has more digits than a JavaScript number keeps (it becomes ${value})`;
+  }
+  return undefined;
+}
+
+/**
+ * Throws when the JSON source text holds a number whose value `JSON.parse` changes:
+ *
+ * - an integer outside the safe integer range of a JavaScript number (plus or minus 2^53 - 1):
+ *   12345678901234567890 becomes 12345678901234567000;
+ * - a number that is not finite as a JavaScript number: 1e400 becomes Infinity, and
+ *   JSON.stringify writes null;
+ * - a number with a fraction or an exponent whose magnitude is more than 2^53 - 1: 1e300 and
+ *   12345678901234567890.5;
+ * - a number with more digits than a JavaScript number keeps: 0.1234567890123456789, and 1e-400,
+ *   which becomes 0.
+ *
+ * The data would change without a message. The check reads the source text, because the parsed
+ * value has already lost the digits. Numbers in the text of a string are not checked.
+ *
+ * @throws Error that names the first number that would change.
+ */
+export function assertSafeNumbers(text: string): void {
   let i = 0;
   while (i < text.length) {
     const ch = text[i] ?? "";
@@ -166,14 +209,13 @@ export function assertSafeIntegers(text: string): void {
       NUMBER_TOKEN.lastIndex = i;
       const match = NUMBER_TOKEN.exec(text);
       const token = match?.[0] ?? ch;
-      if (match && match[1] === undefined && match[2] === undefined) {
-        const value = BigInt(token);
-        if (value > MAX_SAFE || value < -MAX_SAFE) {
-          throw new Error(
-            `the JSON holds the integer ${token}, which is outside the safe integer range ` +
-              `(-${MAX_SAFE} to ${MAX_SAFE}). JSON.parse would change it, so the file is not processed.`,
-          );
-        }
+      const change = match
+        ? numberChange(token, match[1] === undefined && match[2] === undefined)
+        : undefined;
+      if (change !== undefined) {
+        throw new Error(
+          `the JSON holds the number ${token}, which ${change}. JSON.parse would change it, so the file is not processed.`,
+        );
       }
       i += token.length;
     } else {
@@ -217,7 +259,7 @@ function decompressJson(content: string): string {
   } catch {
     return content;
   }
-  assertSafeIntegers(content);
+  assertSafeNumbers(content);
   if (data === null || typeof data !== "object" || Array.isArray(data)) return content;
   const { _legend: legend, ...rest } = data as Record<string, unknown>;
   if (!legend || typeof legend !== "object") return content;

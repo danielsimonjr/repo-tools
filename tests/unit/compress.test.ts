@@ -530,13 +530,14 @@ describe("JSON: an unsafe integer is refused", () => {
     expect(readdirSync(dir)).toEqual(["big.compact.json"]);
   });
 
-  test("the edge of the safe range, a string, a float and an exponent are accepted", () => {
+  test("the edge of the safe range, a string, a float, an exponent and 17 digits are accepted", () => {
     const input = JSON.stringify({
       max: 9007199254740991,
       min: -9007199254740991,
       text: "12345678901234567890",
       float: 0.5,
-      exp: 1e300,
+      exp: 1.5e-7,
+      shortest: 0.30000000000000004,
       "12345678901234567890": [1, -2],
     });
     expect(jsonRoundTrip(JSON.parse(input), "medium").restored).toEqual(JSON.parse(input));
@@ -594,5 +595,39 @@ describe("the command line: an error exits 1 with a message and writes no file",
     expect(r.code).toBe(1);
     expect(r.err).toContain("option '-o' needs a value");
     expect(readdirSync(dir)).toEqual(["sample.md"]);
+  });
+});
+
+describe("JSON: a number that JSON.parse would change is refused (second review, finding 5)", () => {
+  for (const [token, reason] of [
+    ["1e400", "finite"],
+    ["-1e400", "finite"],
+    ["12345678901234567890.5", "safe integer range"],
+    ["1e300", "safe integer range"],
+    ["1.5e20", "safe integer range"],
+    ["0.1234567890123456789", "digits"],
+    ["1e-400", "digits"],
+  ] as const) {
+    test(`compress and -d exit 1 on ${token}, and write no file`, async () => {
+      const dir = folder();
+      writeFileSync(join(dir, "n.json"), `{"v":${token}}`);
+      const r = await compressIn(dir, ["n.json", "--no-stats"]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(token);
+      expect(r.err).toContain(reason);
+      writeFileSync(join(dir, "m.compact.json"), `{"_legend":{},"v":${token}}`);
+      const d = await compressIn(dir, ["-d", "m.compact.json", "--no-stats"]);
+      expect(d.code).toBe(1);
+      expect(d.err).toContain(token);
+      expect(readdirSync(dir).sort(compareCodeUnits)).toEqual(["m.compact.json", "n.json"]);
+    });
+  }
+
+  test("a number in the text of a string is not checked", async () => {
+    const dir = folder();
+    writeFileSync(join(dir, "s.json"), '{"v":"1e400 and 0.1234567890123456789"}');
+    const r = await compressIn(dir, ["s.json", "--no-stats"]);
+    expect(r.err).toBe("");
+    expect(r.code).toBe(0);
   });
 });
