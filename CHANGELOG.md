@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F16 (already in the port; a regression test pins it): the default output folder is
+  `docs/architecture`, in lower case. A run creates exactly one folder under `docs/`, with that
+  exact name, in single-package mode and in monorepo mode.
 - depgraph F15: `package-export-surfaces.json` lists the public surface of each package only: the
   names of a package root (`src/index.ts`, an `exports` subpath, a `bin` target, a config entry)
   and of each file that a re-export chain from a root makes public. An export that only relative
