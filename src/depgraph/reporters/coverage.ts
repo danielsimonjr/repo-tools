@@ -16,14 +16,9 @@ function percent(tested: number, total: number): string {
 }
 
 /** The TEST_COVERAGE.md body (without the banner). */
-export function generateTestCoverageMarkdown(
-  coverage: TestCoverageAnalysis,
-  today: string,
-): string {
+export function generateTestCoverageMarkdown(coverage: TestCoverageAnalysis): string {
   const lines: string[] = [];
   lines.push("# Test Coverage Analysis");
-  lines.push("");
-  lines.push(`**Generated**: ${today}`);
   lines.push("");
   const totalSource = coverage.sourceFiles.length;
   const totalTested = coverage.testedFiles.length;
@@ -122,7 +117,7 @@ export function generateTestCoverageMarkdown(
 }
 
 /** The test-coverage.json object. Sorts the tested and untested lists in place. */
-export function generateTestCoverageJson(coverage: TestCoverageAnalysis, nowIso: string): object {
+export function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
   const coverageMapObj: Record<string, string[]> = {};
   for (const [source, tests] of coverage.coverageMap) coverageMapObj[source] = tests;
   const testToSourceObj: Record<string, string[]> = {};
@@ -130,7 +125,6 @@ export function generateTestCoverageJson(coverage: TestCoverageAnalysis, nowIso:
   const b = coverage.policyBreakdown;
   return {
     metadata: {
-      generatedAt: nowIso,
       totalSourceFiles: coverage.sourceFiles.length,
       totalTestFiles: coverage.testFiles.length,
       testedCount: coverage.testedFiles.length,

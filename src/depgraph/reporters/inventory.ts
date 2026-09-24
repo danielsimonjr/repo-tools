@@ -29,8 +29,6 @@ export function generateFileInventoryMarkdown(inv: FileInventory): string {
   const lines: string[] = [];
   lines.push("# Complete File Inventory");
   lines.push("");
-  lines.push(`**Generated**: ${inv.generated} (by tools/create-dependency-graph)`);
-  lines.push("");
   lines.push(
     "Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root " +
       "cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` " +

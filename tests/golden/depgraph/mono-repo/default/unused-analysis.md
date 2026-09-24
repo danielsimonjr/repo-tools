@@ -4,8 +4,6 @@
 
 # Unused Files and Exports Analysis
 
-**Generated**: <DATE>
-
 ## Summary
 
 - **Potentially unused files**: 0

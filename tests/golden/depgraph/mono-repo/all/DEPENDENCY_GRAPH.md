@@ -4,7 +4,7 @@
 
 # mono-repo - Dependency Graph
 
-**Version**: undefined | **Last Updated**: <DATE>
+**Version**: undefined
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -205,5 +205,4 @@ graph TD
 
 ---
 
-*Last Updated*: <DATE>
 *Version*: undefined

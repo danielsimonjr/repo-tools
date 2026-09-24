@@ -142,16 +142,16 @@ describe("duplicate detection and report", () => {
       ALIAS_DELEGATION: 1,
       ALLOWLISTED: 1,
     });
-    const report = buildDuplicateReport(dup, "DAY");
-    expect(report.generated).toBe("DAY");
+    const report = buildDuplicateReport(dup);
+    expect(report).not.toHaveProperty("generated");
     expect(report.note).toBe(DUPLICATE_SYMBOLS_NOTE);
     expect(report.summary.typeDuplicates).toBe(1);
   });
 
   test("the reporters render the tables and the JSON", () => {
-    const report = buildDuplicateReport(dup, "DAY");
+    const report = buildDuplicateReport(dup);
     const md = generateDuplicateSymbolsMarkdown(report);
-    expect(md.startsWith("# Duplicate Symbols\n\n**Generated**: DAY")).toBe(true);
+    expect(md.startsWith("# Duplicate Symbols\n\nNames that are OWN-DEFINED")).toBe(true);
     expect(md).toContain("| `same` | function | `src/a.ts` (unknown, public, PLAIN)<br>`src/b.ts`");
     expect(md).toContain("(unknown, internal, ALLOWLISTED: per-package version)");
     expect(md).toContain("| `op` | constant |");

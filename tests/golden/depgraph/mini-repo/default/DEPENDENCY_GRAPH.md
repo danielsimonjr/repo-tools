@@ -4,7 +4,7 @@
 
 # mini-repo - Dependency Graph
 
-**Version**: 1.0.0 | **Last Updated**: <DATE>
+**Version**: 1.0.0
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -326,5 +326,4 @@ graph TD
 
 ---
 
-*Last Updated*: <DATE>
 *Version*: 1.0.0

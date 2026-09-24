@@ -10,7 +10,7 @@ Built dependency matrix
 Written: docs/architecture/dependency-graph.json
 Written: docs/architecture/dependency-graph.yaml
 Written: docs/architecture/DEPENDENCY_GRAPH.md
-Written: docs/architecture/dependency-summary.compact.json (1.0KB)
+Written: docs/architecture/dependency-summary.compact.json (0.9KB)
 Written: docs/architecture/package-export-surfaces.json
 Written: docs/architecture/duplicate-symbols.md (0 runtime TRUE_DUPLICATE / 0 runtime flagged, 0 type TRUE_DUPLICATE / 0 type flagged)
 

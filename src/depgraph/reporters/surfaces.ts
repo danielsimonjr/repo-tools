@@ -32,10 +32,6 @@ export function buildPackageExportSurfaces(modules: ModuleMap): Record<string, s
 }
 
 /** The package-export-surfaces.json text (2-space JSON, no trailing newline). */
-export function generateSurfacesJson(modules: ModuleMap, today: string): string {
-  return JSON.stringify(
-    { generated: today, surfaces: buildPackageExportSurfaces(modules) },
-    null,
-    2,
-  );
+export function generateSurfacesJson(modules: ModuleMap): string {
+  return JSON.stringify({ surfaces: buildPackageExportSurfaces(modules) }, null, 2);
 }

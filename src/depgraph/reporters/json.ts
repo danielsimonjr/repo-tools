@@ -21,7 +21,6 @@ export function generateJSON(
   stats: Statistics,
   circularDeps: CircularDependencyResult,
   packageJson: PackageJson,
-  today: string,
 ): object {
   const modulesJson: Record<string, Record<string, object>> = {};
   for (const [category, categoryFiles] of Object.entries(modules)) {
@@ -64,7 +63,6 @@ export function generateJSON(
     metadata: {
       name: packageJson.name,
       version: packageJson.version,
-      lastUpdated: today,
       totalFiles: stats.totalTypeScriptFiles,
       totalModules: stats.totalModules,
       totalExports: stats.totalExports,
@@ -102,13 +100,11 @@ export function generateCompactSummary(
   stats: Statistics,
   circularDeps: CircularDependencyResult,
   packageJson: PackageJson,
-  today: string,
 ): string {
   const summary = {
     m: {
       n: packageJson.name,
       v: packageJson.version,
-      d: today,
       f: stats.totalTypeScriptFiles,
       e: stats.totalExports,
       re: stats.totalReExports,

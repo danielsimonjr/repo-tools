@@ -139,7 +139,6 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const write = (name: string, text: string): void => {
     writeFileSync(join(outputDir, name), text);
   };
-  const today = new Date().toISOString().split("T")[0] ?? "";
 
   if (options.checkCensus) {
     const failure = checkCensusNoRegen(root, outputDir);
@@ -246,7 +245,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   log("Built dependency matrix");
 
   // Report.
-  const json = generateJSON(activeParsedFiles, modules, stats, circularDeps, packageJson, today);
+  const json = generateJSON(activeParsedFiles, modules, stats, circularDeps, packageJson);
   let markdown = generateMarkdown(
     activeParsedFiles,
     modules,
@@ -254,7 +253,6 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     circularDeps,
     matrix,
     packageJson,
-    today,
   );
   if (isMonorepo) {
     markdown = insertPackageSection(
@@ -275,12 +273,11 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     stats,
     circularDeps,
     packageJson,
-    today,
   );
   write("dependency-summary.compact.json", compactSummary);
   const compactKb = (Buffer.byteLength(compactSummary, "utf8") / 1024).toFixed(1);
   log(`Written: ${out("dependency-summary.compact.json")} (${compactKb}KB)`);
-  write("package-export-surfaces.json", generateSurfacesJson(modules, today));
+  write("package-export-surfaces.json", generateSurfacesJson(modules));
   log(`Written: ${out("package-export-surfaces.json")}`);
 
   const dup = detectDuplicateSymbols(
@@ -288,7 +285,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     computePublicSurface(activeParsedFiles, root, workspaces),
     root,
   );
-  const duplicateReport = buildDuplicateReport(dup, today);
+  const duplicateReport = buildDuplicateReport(dup);
   write("duplicate-symbols.json", generateDuplicateSymbolsJson(duplicateReport));
   write("duplicate-symbols.md", withBanner(generateDuplicateSymbolsMarkdown(duplicateReport)));
   log(
@@ -307,9 +304,9 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     root,
   );
   // The Markdown report first: the JSON report sorts the file lists in place.
-  write("TEST_COVERAGE.md", withBanner(generateTestCoverageMarkdown(testCoverage, today)));
+  write("TEST_COVERAGE.md", withBanner(generateTestCoverageMarkdown(testCoverage)));
   log(`Written: ${out("TEST_COVERAGE.md")}`);
-  const coverageJson = generateTestCoverageJson(testCoverage, new Date().toISOString());
+  const coverageJson = generateTestCoverageJson(testCoverage);
   write("test-coverage.json", JSON.stringify(coverageJson, null, 2));
   log(`Written: ${out("test-coverage.json")}`);
 
@@ -327,7 +324,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   const dormant = splitDormant(dormantSet, parsedFiles, parsedTestFiles, workspaces);
   write(
     "unused-analysis.md",
-    withBanner(generateUnusedReport(unusedAnalysis, dormant, workspaces, today)),
+    withBanner(generateUnusedReport(unusedAnalysis, dormant, workspaces)),
   );
   log(`\nWritten: ${out("unused-analysis.md")}`);
 
@@ -339,7 +336,6 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
       censusRoots,
       reachableSet,
       dormant.testReachable,
-      today,
     );
     write("file-inventory.json", generateFileInventoryJson(inventory));
     write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory)));

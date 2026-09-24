@@ -110,10 +110,8 @@ describe("markdown reporter", () => {
   });
 
   test("generateMarkdown holds the sections, the cycle and the statistics", () => {
-    const md = generateMarkdown(files, modules, stats, cycles, matrix, pkg, "DAY");
-    expect(
-      md.startsWith("# demo - Dependency Graph\n\n**Version**: 1.2.3 | **Last Updated**: DAY"),
-    ).toBe(true);
+    const md = generateMarkdown(files, modules, stats, cycles, matrix, pkg);
+    expect(md.startsWith("# demo - Dependency Graph\n\n**Version**: 1.2.3\n")).toBe(true);
     expect(md).toContain("### `src/index.ts` - Entry.");
     expect(md).toContain("- src/a.ts -> src/b.ts -> src/a.ts");
     expect(md).toContain("| Total TypeScript Files | 4 |");
@@ -136,7 +134,7 @@ describe("markdown reporter", () => {
 });
 
 describe("json and yaml reporters", () => {
-  const json = generateJSON(files, modules, stats, cycles, pkg, "DAY") as Record<string, unknown>;
+  const json = generateJSON(files, modules, stats, cycles, pkg) as Record<string, unknown>;
 
   test("generateJSON keeps the report key order and drops empty lists", () => {
     expect(Object.keys(json)).toEqual([
@@ -147,15 +145,15 @@ describe("json and yaml reporters", () => {
       "statistics",
     ]);
     const text = dependencyGraphJsonText(json);
-    expect(text).toContain('"lastUpdated": "DAY"');
+    expect(text).not.toContain("lastUpdated");
     expect(text).not.toContain('"enums"');
     expect(text.endsWith("}")).toBe(true);
   });
 
   test("generateCompactSummary is minified with short keys", () => {
-    const text = generateCompactSummary(files, modules, stats, cycles, pkg, "DAY");
+    const text = generateCompactSummary(files, modules, stats, cycles, pkg);
     const obj = JSON.parse(text);
-    expect(obj.m).toEqual({ n: "demo", v: "1.2.3", d: "DAY", f: 4, e: stats.totalExports, re: 1 });
+    expect(obj.m).toEqual({ n: "demo", v: "1.2.3", f: 4, e: stats.totalExports, re: 1 });
     expect(obj.c.rtp).toEqual(["a→b→a"]);
     expect(text).not.toContain("\n");
   });
@@ -168,24 +166,24 @@ describe("json and yaml reporters", () => {
 describe("unused, coverage, inventory and surface reporters", () => {
   test("generateUnusedReport lists unused files and exports", () => {
     const split = { testReachable: new Set<string>(), dormantAll: [], orphaned: [], testOnly: [] };
-    const md = generateUnusedReport(unused, split, none, "DAY");
-    expect(md).toContain("**Generated**: DAY");
+    const md = generateUnusedReport(unused, split, none);
+    expect(md).not.toContain("**Generated**");
     expect(md).toContain("- `src/lib/c.ts`");
     expect(md).toContain("- `spare` (constant)");
   });
 
   test("generateTestCoverageMarkdown groups untested files and the JSON sorts them", () => {
     const cov = analyzeTestCoverage(files, tests, root);
-    const md = generateTestCoverageMarkdown(cov, "DAY");
+    const md = generateTestCoverageMarkdown(cov);
     expect(md).toContain("| Coverage (raw, direct-import) | **25.0%** |");
     expect(md).toContain("### lib/");
-    const obj = generateTestCoverageJson(cov, "NOW") as { metadata: { generatedAt: string } };
-    expect(obj.metadata.generatedAt).toBe("NOW");
+    const obj = generateTestCoverageJson(cov) as { metadata: Record<string, unknown> };
+    expect(obj.metadata).not.toHaveProperty("generatedAt");
     expect(cov.untestedFiles).toEqual(["src/b.ts", "src/index.ts", "src/lib/c.ts"]);
   });
 
   test("the inventory reporters render every row", () => {
-    const inv = buildFileInventory(root, none, new Set(), new Set(), new Set(), "DAY");
+    const inv = buildFileInventory(root, none, new Set(), new Set(), new Set());
     const md = generateFileInventoryMarkdown(inv);
     expect(FILE_DISPOSITION_LEGEND.map(([d]) => d)).toContain("orphan");
     expect(md).toContain("| `tests/a.test.ts` | (root) | tests | test |");
@@ -198,7 +196,7 @@ describe("unused, coverage, inventory and surface reporters", () => {
     const surfaces = buildPackageExportSurfaces(modules);
     expect(surfaces.lib).toEqual([]);
     expect(surfaces.root).toEqual(["A", "a", "b", "spare"]);
-    expect(JSON.parse(generateSurfacesJson(modules, "DAY")).generated).toBe("DAY");
+    expect(JSON.parse(generateSurfacesJson(modules))).not.toHaveProperty("generated");
   });
 });
 

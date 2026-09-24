@@ -4,8 +4,6 @@
 
 # Test Coverage Analysis
 
-**Generated**: <DATE>
-
 ## Summary
 
 | Metric | Count |

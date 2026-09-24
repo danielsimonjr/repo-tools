@@ -73,11 +73,10 @@ describe("inventory", () => {
     new Set(["packages/core/src/index.ts"]),
     new Set(["packages/core/src/index.ts", "packages/core/src/used.ts"]),
     new Set(["packages/core/src/tested.ts"]),
-    "DAY",
   );
 
   test("buildFileInventory gives each file a disposition and counts them", () => {
-    expect(inventory.generated).toBe("DAY");
+    expect(inventory).not.toHaveProperty("generated");
     expect(inventory.files.map((r) => [r.file, r.disposition])).toEqual([
       ["examples/e.ts", "example"],
       ["packages/core/src/index.ts", "build-entry"],

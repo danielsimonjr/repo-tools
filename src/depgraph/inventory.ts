@@ -37,7 +37,6 @@ export interface FileInventoryRow {
 
 /** The census and its counts. */
 export interface FileInventory {
-  generated: string;
   totalFiles: number;
   byDisposition: Record<string, number>;
   byArea: Record<string, number>;
@@ -87,7 +86,6 @@ export function buildFileInventory(
   roots: Set<string>,
   reachable: Set<string>,
   testReachable: Set<string>,
-  today: string,
 ): FileInventory {
   const rows: FileInventoryRow[] = [];
   for (const rel of collectCensusFiles(root, workspaces)) {
@@ -138,7 +136,6 @@ export function buildFileInventory(
     byPackage[r.package] = (byPackage[r.package] ?? 0) + 1;
   }
   return {
-    generated: today,
     totalFiles: rows.length,
     byDisposition,
     byArea,

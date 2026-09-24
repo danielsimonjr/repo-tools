@@ -52,7 +52,6 @@ export interface DuplicateSymbolEntry {
 
 /** The content of duplicate-symbols.json. */
 export interface DuplicateSymbolsReport {
-  generated: string;
   note: string;
   summary: {
     runtimeDuplicates: number;
@@ -375,14 +374,13 @@ export function detectDuplicateSymbols(
 }
 
 /** The full report of one run. */
-export function buildDuplicateReport(
-  dup: { runtime: DuplicateSymbolEntry[]; types: DuplicateSymbolEntry[] },
-  today: string,
-): DuplicateSymbolsReport {
+export function buildDuplicateReport(dup: {
+  runtime: DuplicateSymbolEntry[];
+  types: DuplicateSymbolEntry[];
+}): DuplicateSymbolsReport {
   const runtimeByTag = tallyByTag(dup.runtime);
   const typeByTag = tallyByTag(dup.types);
   return {
-    generated: today,
     note: DUPLICATE_SYMBOLS_NOTE,
     summary: {
       runtimeDuplicates: runtimeByTag.TRUE_DUPLICATE,

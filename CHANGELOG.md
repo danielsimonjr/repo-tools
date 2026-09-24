@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F1: no report holds a date stamp. The `lastUpdated`, compact `d`, `generated` and
+  `generatedAt` fields and the `**Generated**` and `**Last Updated**` lines are gone, so two runs
+  on one tree give the same bytes on any day. A test runs every golden set under two mocked
+  clocks and requires identical bytes and no ISO date.
 - depgraph F22: every depgraph sort uses UTF-16 code-unit order; no source file calls
   `localeCompare`, so the order does not depend on the ICU data of the runtime. The export
   surfaces and the coverage lists of both fixtures change in order only.

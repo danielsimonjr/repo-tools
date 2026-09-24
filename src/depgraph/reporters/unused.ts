@@ -45,7 +45,6 @@ export function generateUnusedReport(
   unused: UnusedAnalysis,
   dormant: DormantSplit,
   workspaces: Map<string, WorkspacePackage>,
-  today: string,
 ): string {
   const deadExports = unused.unusedExports.filter((e) => e.inFileRefs === 0);
   const contractExports = unused.unusedExports.filter((e) => e.inFileRefs > 0);
@@ -61,7 +60,6 @@ export function generateUnusedReport(
   };
 
   let r = "# Unused Files and Exports Analysis\n\n";
-  r += `**Generated**: ${today}\n\n`;
   r += "## Summary\n\n";
   r += `- **Potentially unused files**: ${unused.unusedFiles.length}\n`;
   r += `- **Dormant files** (runtime code on disk, unreachable from any entry/build root): ${dormant.dormantAll.length}\n`;

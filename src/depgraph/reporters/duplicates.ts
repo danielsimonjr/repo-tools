@@ -48,7 +48,6 @@ function renderTaggedSection(
 /** The duplicate-symbols.md body (without the banner). */
 export function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): string {
   let md = "# Duplicate Symbols\n\n";
-  md += `**Generated**: ${report.generated} (by tools/create-dependency-graph)\n\n`;
   md += "Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files across ";
   md += "the monorepo, then CLASSIFIED (see `DupEntryTag`) so the actionable subset is clear: ";
   md += "`TRUE_DUPLICATE` (real merge targets) vs `DISPATCH_VARIANT` (>=2 `mathTyped(...)` ";

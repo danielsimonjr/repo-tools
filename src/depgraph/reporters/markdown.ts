@@ -153,12 +153,11 @@ export function generateMarkdown(
   circularDeps: CircularDependencyResult,
   matrix: DependencyMatrix,
   packageJson: PackageJson,
-  today: string,
 ): string {
   const lines: string[] = [];
   lines.push(`# ${packageJson.name || "Project"} - Dependency Graph`);
   lines.push("");
-  lines.push(`**Version**: ${packageJson.version} | **Last Updated**: ${today}`);
+  lines.push(`**Version**: ${packageJson.version}`);
   lines.push("");
   lines.push(
     "This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.",
@@ -279,7 +278,6 @@ export function generateMarkdown(
   lines.push(`| Runtime Circular Deps | ${stats.runtimeCircularDeps} |`);
   lines.push(`| Type-only Circular Deps | ${stats.typeOnlyCircularDeps} |`);
   lines.push("", "---", "");
-  lines.push(`*Last Updated*: ${today}`);
   lines.push(`*Version*: ${packageJson.version}`);
   lines.push("");
   return lines.join("\n");
