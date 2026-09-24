@@ -1,0 +1,23 @@
+
+chunker - Chunk Status
+==================================================
+Source:    <DIR>/guide.md
+File Type: markdown
+Created:   <createdAt>
+Level:     h2
+
+Chunks:
+
+  #   Filename                                      Lines   Status
+  ──────────────────────────────────────────────────────────────────────
+   1  001-preamble.md                                   4   [90munchanged[0m
+   2  002-guide.md                                      4   [90munchanged[0m
+   3  003-install.md                                    8   [90munchanged[0m
+   4  004-use.md                                       11   [90munchanged[0m
+   5  005-notes-symbols-quotes.md                       4   [90munchanged[0m
+
+Summary:
+  Total chunks:    5
+  Modified:        0
+  Missing:         0
+  Total lines:     31

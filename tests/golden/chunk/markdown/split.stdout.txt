@@ -1,0 +1,29 @@
+
+chunker - Splitting File
+==================================================
+Source:      <DIR>/guide.md
+Output:      <DIR>/guide_chunks
+File Type:   markdown
+Split Level: h2 (##)
+Max Lines:   8
+Dry Run:     false
+
+Found 5 section(s):
+
+   1. [pre ] _preamble                                   4 lines
+   2. [h1  ] Guide                                       4 lines
+   3. [h2  ] Install                                     8 lines
+   4. [h2  ] Use                                        11 lines ⚠️  [LARGE]
+   5. [h2  ] Notes: symbols & "quotes"                   4 lines
+
+Manifest written: <DIR>/guide_chunks/manifest.json
+
+Summary:
+  Total chunks:  5
+  Total lines:   31
+  Large chunks:  1 (>8 lines)
+
+Chunks written to: <DIR>/guide_chunks
+
+To edit: Modify individual chunk files in the directory
+To merge: chunker merge "<DIR>/guide_chunks/manifest.json"

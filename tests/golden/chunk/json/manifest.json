@@ -1,0 +1,65 @@
+{
+  "version": "1.1.0",
+  "sourceFile": "<sourceFile>",
+  "sourceHash": "6c8dbccf",
+  "createdAt": "<createdAt>",
+  "fileType": "json",
+  "splitLevel": 1,
+  "chunks": [
+    {
+      "index": 1,
+      "filename": "001-name.json",
+      "title": "name",
+      "level": 1,
+      "startLine": 1,
+      "endLine": 3,
+      "lineCount": 3,
+      "hash": "21a47333",
+      "modified": false
+    },
+    {
+      "index": 2,
+      "filename": "002-version.json",
+      "title": "version",
+      "level": 1,
+      "startLine": 2,
+      "endLine": 4,
+      "lineCount": 3,
+      "hash": "49968a01",
+      "modified": false
+    },
+    {
+      "index": 3,
+      "filename": "003-scripts.json",
+      "title": "scripts",
+      "level": 1,
+      "startLine": 3,
+      "endLine": 8,
+      "lineCount": 6,
+      "hash": "686b8ed4",
+      "modified": false
+    },
+    {
+      "index": 4,
+      "filename": "004-list.json",
+      "title": "list",
+      "level": 1,
+      "startLine": 4,
+      "endLine": 10,
+      "lineCount": 7,
+      "hash": "37e489b2",
+      "modified": false
+    },
+    {
+      "index": 5,
+      "filename": "005-nested.json",
+      "title": "nested",
+      "level": 1,
+      "startLine": 5,
+      "endLine": 12,
+      "lineCount": 8,
+      "hash": "3261d4dd",
+      "modified": false
+    }
+  ]
+}

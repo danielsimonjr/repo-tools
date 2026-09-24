@@ -1,0 +1,21 @@
+
+chunker - Merging Chunks
+==================================================
+Manifest:    <DIR>/guide_chunks/manifest.json
+Source:      <DIR>/guide.md
+File Type:   markdown
+Created:     <createdAt>
+Chunks:      5
+
+   1. 001-preamble.md                               [unchanged]
+   2. 002-guide.md                                  [unchanged]
+   3. 003-install.md                                [unchanged]
+   4. 004-use.md                                    [unchanged]
+   5. 005-notes-symbols-quotes.md                   [unchanged]
+
+Modified chunks: 0 of 5
+
+Backup created: <DIR>/guide.md.backup-<ts>
+
+Merged file written: <DIR>/guide.md
+Total lines: 31

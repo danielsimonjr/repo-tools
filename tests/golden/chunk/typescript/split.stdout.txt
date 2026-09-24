@@ -1,0 +1,32 @@
+
+chunker - Splitting File
+==================================================
+Source:      <DIR>/parser.ts
+Output:      <DIR>/parser_chunks
+File Type:   typescript
+Max Lines:   500
+Dry Run:     false
+
+Found 10 section(s):
+
+   1. [meta] _imports                                    8 lines
+   2. [decl] function:render                             9 lines
+   3. [type] const:QUOTE_RE                              1 lines
+   4. [decl] function:escaped                            5 lines
+   5. [decl] class:Box                                  11 lines
+   6. [type] interface:Shape                             3 lines
+   7. [type] type:Pair                                   1 lines
+   8. [type] enum:Color                                  4 lines
+   9. [decl] function:helper                             3 lines
+  10. [type] const:LIMIT                                 1 lines
+
+Manifest written: <DIR>/parser_chunks/manifest.json
+
+Summary:
+  Total chunks:  10
+  Total lines:   46
+
+Chunks written to: <DIR>/parser_chunks
+
+To edit: Modify individual chunk files in the directory
+To merge: chunker merge "<DIR>/parser_chunks/manifest.json"

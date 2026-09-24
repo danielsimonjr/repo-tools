@@ -1,0 +1,65 @@
+{
+  "version": "1.1.0",
+  "sourceFile": "<sourceFile>",
+  "sourceHash": "366b9f96",
+  "createdAt": "<createdAt>",
+  "fileType": "markdown",
+  "splitLevel": 2,
+  "chunks": [
+    {
+      "index": 1,
+      "filename": "001-preamble.md",
+      "title": "_preamble",
+      "level": 0,
+      "startLine": 1,
+      "endLine": 4,
+      "lineCount": 4,
+      "hash": "2ac26383",
+      "modified": false
+    },
+    {
+      "index": 2,
+      "filename": "002-guide.md",
+      "title": "Guide",
+      "level": 1,
+      "startLine": 5,
+      "endLine": 8,
+      "lineCount": 4,
+      "hash": "65ed87bb",
+      "modified": false
+    },
+    {
+      "index": 3,
+      "filename": "003-install.md",
+      "title": "Install",
+      "level": 2,
+      "startLine": 9,
+      "endLine": 16,
+      "lineCount": 8,
+      "hash": "26d83239",
+      "modified": false
+    },
+    {
+      "index": 4,
+      "filename": "004-use.md",
+      "title": "Use",
+      "level": 2,
+      "startLine": 17,
+      "endLine": 27,
+      "lineCount": 11,
+      "hash": "4a9b3805",
+      "modified": false
+    },
+    {
+      "index": 5,
+      "filename": "005-notes-symbols-quotes.md",
+      "title": "Notes: symbols & \"quotes\"",
+      "level": 2,
+      "startLine": 28,
+      "endLine": 31,
+      "lineCount": 4,
+      "hash": "287060e6",
+      "modified": false
+    }
+  ]
+}

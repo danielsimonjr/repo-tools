@@ -1,0 +1,21 @@
+
+chunker - Merging Chunks
+==================================================
+Manifest:    <DIR>/config_chunks/manifest.json
+Source:      <DIR>/config.json
+File Type:   json
+Created:     <createdAt>
+Chunks:      5
+
+   1. 001-name.json                                 [unchanged]
+   2. 002-version.json                              [unchanged]
+   3. 003-scripts.json                              [unchanged]
+   4. 004-list.json                                 [unchanged]
+   5. 005-nested.json                               [unchanged]
+
+Modified chunks: 0 of 5
+
+Backup created: <DIR>/config.json.backup-<ts>
+
+Merged file written: <DIR>/config.json
+Total lines: 19

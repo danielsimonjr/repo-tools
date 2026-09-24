@@ -8,6 +8,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- Subcommand `repo-tools chunk` (design 3.3, section 4): `split <file>`, `merge <manifest.json>`
+  and `status <manifest.json>`, with `-o`, `-l`, `-m`, `-t` and `--dry-run`. The code is a port
+  of the original chunker in `src/chunk/` (`index.ts`, `splitters.ts`, `manifest.ts`). Goldens
+  in `tests/golden/chunk/` hold the output of the original tool on three fixtures, and the port
+  gives the same bytes. The TypeScript splitter keeps the lexer fixes for template literals,
+  strings in template expressions, regex literals, comments and escaped quotes (fix K4). `Io`
+  moves to `src/io-types.ts`, so a subcommand does not import `cli.ts`.
 - depgraph API-surface module (task D9): `src/depgraph/api-surface.ts`, ported from the
   universal-physics-tensor dependency-graph tool with its behaviour unchanged. It reads source
   text without a compiler API and exports `maskNonCode`, `extractExportDetails`,

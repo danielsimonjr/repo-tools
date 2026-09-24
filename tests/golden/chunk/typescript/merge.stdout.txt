@@ -1,0 +1,26 @@
+
+chunker - Merging Chunks
+==================================================
+Manifest:    <DIR>/parser_chunks/manifest.json
+Source:      <DIR>/parser.ts
+File Type:   typescript
+Created:     <createdAt>
+Chunks:      10
+
+   1. 001-imports.ts                                [unchanged]
+   2. 002-function-render.ts                        [unchanged]
+   3. 003-const-quote-re.ts                         [unchanged]
+   4. 004-function-escaped.ts                       [unchanged]
+   5. 005-class-box.ts                              [unchanged]
+   6. 006-interface-shape.ts                        [unchanged]
+   7. 007-type-pair.ts                              [unchanged]
+   8. 008-enum-color.ts                             [unchanged]
+   9. 009-function-helper.ts                        [unchanged]
+  10. 010-const-limit.ts                            [unchanged]
+
+Modified chunks: 0 of 10
+
+Backup created: <DIR>/parser.ts.backup-<ts>
+
+Merged file written: <DIR>/parser.ts
+Total lines: 46

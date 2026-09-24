@@ -1,0 +1,120 @@
+{
+  "version": "1.1.0",
+  "sourceFile": "<sourceFile>",
+  "sourceHash": "3720ad98",
+  "createdAt": "<createdAt>",
+  "fileType": "typescript",
+  "splitLevel": 1,
+  "chunks": [
+    {
+      "index": 1,
+      "filename": "001-imports.ts",
+      "title": "_imports",
+      "level": 0,
+      "startLine": 1,
+      "endLine": 7,
+      "lineCount": 8,
+      "hash": "655fa0e3",
+      "modified": false
+    },
+    {
+      "index": 2,
+      "filename": "002-function-render.ts",
+      "title": "function:render",
+      "level": 1,
+      "startLine": 7,
+      "endLine": 18,
+      "lineCount": 9,
+      "hash": "6a178686",
+      "modified": false
+    },
+    {
+      "index": 3,
+      "filename": "003-const-quote-re.ts",
+      "title": "const:QUOTE_RE",
+      "level": 2,
+      "startLine": 21,
+      "endLine": 21,
+      "lineCount": 1,
+      "hash": "777d3aac",
+      "modified": false
+    },
+    {
+      "index": 4,
+      "filename": "004-function-escaped.ts",
+      "title": "function:escaped",
+      "level": 1,
+      "startLine": 23,
+      "endLine": 27,
+      "lineCount": 5,
+      "hash": "65624a63",
+      "modified": false
+    },
+    {
+      "index": 5,
+      "filename": "005-class-box.ts",
+      "title": "class:Box",
+      "level": 1,
+      "startLine": 32,
+      "endLine": 42,
+      "lineCount": 11,
+      "hash": "2feca25b",
+      "modified": false
+    },
+    {
+      "index": 6,
+      "filename": "006-interface-shape.ts",
+      "title": "interface:Shape",
+      "level": 2,
+      "startLine": 44,
+      "endLine": 46,
+      "lineCount": 3,
+      "hash": "5adee339",
+      "modified": false
+    },
+    {
+      "index": 7,
+      "filename": "007-type-pair.ts",
+      "title": "type:Pair",
+      "level": 2,
+      "startLine": 48,
+      "endLine": 48,
+      "lineCount": 1,
+      "hash": "2c907a14",
+      "modified": false
+    },
+    {
+      "index": 8,
+      "filename": "008-enum-color.ts",
+      "title": "enum:Color",
+      "level": 2,
+      "startLine": 50,
+      "endLine": 53,
+      "lineCount": 4,
+      "hash": "0401dff4",
+      "modified": false
+    },
+    {
+      "index": 9,
+      "filename": "009-function-helper.ts",
+      "title": "function:helper",
+      "level": 1,
+      "startLine": 55,
+      "endLine": 57,
+      "lineCount": 3,
+      "hash": "7e7c601f",
+      "modified": false
+    },
+    {
+      "index": 10,
+      "filename": "010-const-limit.ts",
+      "title": "const:LIMIT",
+      "level": 2,
+      "startLine": 59,
+      "endLine": 59,
+      "lineCount": 1,
+      "hash": "34d3242b",
+      "modified": false
+    }
+  ]
+}

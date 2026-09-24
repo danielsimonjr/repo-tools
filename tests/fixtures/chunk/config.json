@@ -1,0 +1,13 @@
+{
+  "name": "sample",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "bun test",
+    "lint": "biome check ."
+  },
+  "list": [1, 2, 3],
+  "nested": {
+    "a": { "b": null },
+    "flag": true
+  }
+}

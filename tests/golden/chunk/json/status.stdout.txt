@@ -1,0 +1,22 @@
+
+chunker - Chunk Status
+==================================================
+Source:    <DIR>/config.json
+File Type: json
+Created:   <createdAt>
+
+Chunks:
+
+  #   Filename                                      Lines   Status
+  ──────────────────────────────────────────────────────────────────────
+   1  001-name.json                                     3   [90munchanged[0m
+   2  002-version.json                                  3   [90munchanged[0m
+   3  003-scripts.json                                  6   [90munchanged[0m
+   4  004-list.json                                     7   [90munchanged[0m
+   5  005-nested.json                                   8   [90munchanged[0m
+
+Summary:
+  Total chunks:    5
+  Modified:        0
+  Missing:         0
+  Total lines:     27

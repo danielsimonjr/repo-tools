@@ -1,0 +1,27 @@
+
+chunker - Splitting File
+==================================================
+Source:      <DIR>/config.json
+Output:      <DIR>/config_chunks
+File Type:   json
+Max Lines:   500
+Dry Run:     false
+
+Found 5 section(s):
+
+   1. [decl] name                                        3 lines
+   2. [decl] version                                     3 lines
+   3. [decl] scripts                                     6 lines
+   4. [decl] list                                        7 lines
+   5. [decl] nested                                      8 lines
+
+Manifest written: <DIR>/config_chunks/manifest.json
+
+Summary:
+  Total chunks:  5
+  Total lines:   27
+
+Chunks written to: <DIR>/config_chunks
+
+To edit: Modify individual chunk files in the directory
+To merge: chunker merge "<DIR>/config_chunks/manifest.json"

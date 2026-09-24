@@ -5,12 +5,10 @@
  * and calls the subcommand entry. A subcommand module never imports this file.
  */
 import pkg from "../package.json" with { type: "json" };
+import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
+import type { Io } from "./io-types.ts";
 
-/** Output sinks. Tests capture them; `bin.ts` connects them to the process. */
-export interface Io {
-  stdout: (text: string) => void;
-  stderr: (text: string) => void;
-}
+export type { Io } from "./io-types.ts";
 
 /** One subcommand: its one-line summary, its help text and its entry. */
 interface Subcommand {
@@ -27,7 +25,8 @@ const REGISTRY = {
   },
   chunk: {
     summary: "Split a large file into chunks, merge the chunks back, or show changed chunks.",
-    help: "Usage: repo-tools chunk <split|merge|status> <file> [options]\n",
+    help: CHUNK_HELP,
+    run: runChunk,
   },
   compress: {
     summary: "Write a compact copy of a file for a model context, or restore it.",
