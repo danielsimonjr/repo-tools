@@ -123,6 +123,22 @@ export function matchesWorkspaceGlob(pattern: string, dir: string): boolean {
 }
 
 /**
+ * Returns a test for the folders that a negated workspace pattern (`!packages/skip`) excludes.
+ * The census walks leave those folders out (fix F41).
+ */
+export function negatedWorkspaceFolders(root: string): (relDir: string) => boolean {
+  let negated: string[] = [];
+  try {
+    negated = readWorkspacePatterns(root)
+      .filter((p) => p.startsWith("!"))
+      .map((p) => p.slice(1));
+  } catch {
+    negated = [];
+  }
+  return (relDir) => negated.some((n) => matchesWorkspaceGlob(n, relDir));
+}
+
+/**
  * The workspace packages of the repo at `root`, keyed by npm name. A pattern that ends in `/*`
  * lists its parent directory. Any other pattern is one package directory. A negated pattern
  * (`!packages/skip`, `!packages/old-*`) removes each package folder that it matches, whatever

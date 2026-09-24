@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { compareCodeUnits } from "../sort.ts";
 import { collectCensusFiles, walkRepoTsFiles } from "./scanner.ts";
 import type { WorkspacePackage } from "./types.ts";
+import { negatedWorkspaceFolders } from "./workspaces.ts";
 
 /** What a census file is. */
 export type FileDisposition =
@@ -91,7 +92,7 @@ export function buildFileInventory(
   testReachable: Set<string>,
 ): FileInventory {
   const rows: FileInventoryRow[] = [];
-  for (const rel of collectCensusFiles(root, workspaces)) {
+  for (const rel of collectCensusFiles(root, workspaces, negatedWorkspaceFolders(root))) {
     const area = classifyArea(rel);
     let disposition: FileDisposition;
     if (area === "src") {
@@ -179,7 +180,7 @@ export function censusFailure(
   inventory: FileInventory,
   strictOrphans = false,
 ): string | null {
-  const onDisk = new Set(walkRepoTsFiles(root));
+  const onDisk = new Set(walkRepoTsFiles(root, negatedWorkspaceFolders(root)));
   const census = new Set(inventory.files.map((f) => f.file));
   const missingFromCensus = [...onDisk].filter((f) => !census.has(f)).sort();
   const missingFromDisk = [...census].filter((f) => !onDisk.has(f)).sort();

@@ -109,6 +109,12 @@ export function resolveSourceDirs(root: string): string[] {
   return roots;
 }
 
+/**
+ * True for a root-relative POSIX folder that the census leaves out: a folder that a negated
+ * workspace pattern excludes (fix F41).
+ */
+export type Excluded = (relDir: string) => boolean;
+
 /** True when a census walk skips the directory entry `name`. */
 function censusSkips(name: string): boolean {
   return name === "node_modules" || name === "dist" || name.startsWith(".");
@@ -118,12 +124,13 @@ function censusSkips(name: string): boolean {
  * The maximal repo walk: every `.ts` file except `.d.ts` under `root`. Skips `node_modules`,
  * `dist` and dot-directories. Returns root-relative POSIX paths, sorted by `Array#sort`.
  */
-export function walkRepoTsFiles(root: string): string[] {
+export function walkRepoTsFiles(root: string, excluded: Excluded = () => false): string[] {
   const out: string[] = [];
   const walk = (dir: string): void => {
     for (const e of listEntries(dir)) {
       if (censusSkips(e.name) || isLinkEntry(dir, e)) continue;
       const p = join(dir, e.name);
+      if (e.isDirectory() && excluded(relativePosix(root, p))) continue;
       if (e.isDirectory()) walk(p);
       else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts"))
         out.push(relativePosix(root, p));
@@ -154,13 +161,15 @@ const CENSUS_DIRS = [
 export function collectCensusFiles(
   root: string,
   workspaces: Map<string, WorkspacePackage>,
+  excluded: Excluded = () => false,
 ): string[] {
   const set = new Set<string>();
   const walk = (dir: string): void => {
-    if (!isWalkable(dir)) return;
+    if (!isWalkable(dir) || excluded(relativePosix(root, dir))) return;
     for (const e of listEntries(dir)) {
       if (censusSkips(e.name) || isLinkEntry(dir, e)) continue;
       const p = join(dir, e.name);
+      if (e.isDirectory() && excluded(relativePosix(root, p))) continue;
       if (e.isDirectory()) walk(p);
       else if (e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) set.add(relativePosix(root, p));
     }

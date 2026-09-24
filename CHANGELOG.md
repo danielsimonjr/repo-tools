@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F41: both census walks skip a folder that a negated workspace pattern excludes
+  (`!packages/skip`), so its files no longer fail the census as "absent" (exit 1). F36 had removed
+  the package from the workspaces but not from the census walk.
 - depgraph M1 follow-up: the census walks `benchmarks/` and classes its files as `bench` (a new
   disposition). A single package with benchmark scripts failed the census as "absent" and exited 1.
 - depgraph M1: the single-package model. The inventory (`FILE_INVENTORY.md`,
