@@ -20,7 +20,11 @@
 
 - [x] D0 Fixture repositories and the characterization goldens of the pre-port generator.
 - [x] D1-D8 `depgraph` port to byte parity with the goldens (reviewed; one fidelity fix).
-- [ ] D9 API-surface module. Landed in 486d8f3; the CLI flag comes with D10.
+- [x] D9 API-surface module. Landed in 486d8f3; the CLI flag comes with D10.
+- [x] D10a `depgraph` config file, strict flags, path and exclude flags, `--api-surface` (8b974ea).
+- [ ] D10b the duplicate gate (`--check-duplicates`, `--no-regen`, `--write-duplicate-baseline`), the
+  extension loader with `--no-extensions`, and `.tsx` input. Also: `--src` in a monorepo exits 1
+  with a clear message, and the absolute-path error says to pass a root-relative path.
 - [ ] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
   the extension loader.
 - [ ] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
@@ -47,6 +51,12 @@
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
 data. Other findings are filed here.
 
+- [ ] The skip list (`node_modules, dist, build, coverage, .git`) also skips a real source folder
+  such as `src/build/`, with no warning.
+- [ ] The census messages and the TEST_COVERAGE note name fixed values instead of the configured
+  regenerate command and coverage-policy path.
+- [ ] The walk skip list is module state: two runs in one process would interfere.
+- [ ] The config file rejects a top-level `$schema` key.
 - [ ] A type-position `import('./c').C` records no names, so an export used only that way reads
   as unreferenced.
 - [ ] Single-package mode: the `exports "."` target or `main` is a root only when it is
@@ -56,7 +66,7 @@ data. Other findings are filed here.
 - [ ] Import edges by package name (self or workspace) are not in the cycle detection.
 - [ ] The regex rule of the comment stripper misreads `a++ / b / c` and `if (x) /re/.test(s)`.
 - [ ] With a bare `import './x'` and an `import('./x')` in one file, the `*` goes on the bare edge.
-- [ ] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
+- [x] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
   created; standard error shows the root as `<root>`, never an absolute path.
 
 ## Review fixes for `chunk` and `compress` (review of 486d8f3..5743c5d)
