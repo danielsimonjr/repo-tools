@@ -27,7 +27,8 @@
 - [ ] D12 Public design document and the release-candidate report.
 - [ ] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
   `tsup.config.*` read when it exists), F15-F26, F27-F32, F33 (script roots), F34 (link-safe
-  walk), F35 (package.json guards), M1.
+  walk), F35 (package.json guards), F36 (negated workspace patterns), F37 (tsup object-form
+  `entry`), M1.
 - [ ] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
   created; standard error shows the root as `<root>`, never an absolute path.
 
