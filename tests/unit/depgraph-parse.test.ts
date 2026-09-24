@@ -142,7 +142,7 @@ describe("parseFile", () => {
 
   test("records exports by kind", () => {
     expect(file.exports).toEqual({
-      named: ["w", "s", "K", "f", "C", "E", "r", "Q"],
+      named: ["w", "s", "K", "f", "C", "E", "Q"],
       default: "main",
       types: ["I", "Y"],
       interfaces: ["I"],
@@ -150,7 +150,8 @@ describe("parseFile", () => {
       classes: ["C"],
       functions: ["f"],
       constants: ["K"],
-      reExported: ["* from ./all.js", "* from @scope/core", "r", "Q", "type * from ./types.js"],
+      // Fix F29: `export { r as s } from` exports `s` only.
+      reExported: ["* from ./all.js", "* from @scope/core", "s", "Q", "type * from ./types.js"],
     });
   });
 

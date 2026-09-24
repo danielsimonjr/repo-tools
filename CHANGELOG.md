@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F29: `export { r as s } from './x.js'` records `s` only as an export of the
+  re-exporting file, and `export type { T as U } from` records `U` only. The port recorded the
+  source name too (`r` and `s`), so `totalExports` and the export lists were too high. The
+  re-export edge still carries the source name `r`, so `r` stays used in `./x.js`.
 - depgraph F28: a symbol name is escaped before it goes into a regular expression, and the
   in-file reference count matches the name between identifier boundaries. A `$` in a name was a
   RegExp anchor, and `\b` does not hold next to a `$`. The export declarations also read a `$`

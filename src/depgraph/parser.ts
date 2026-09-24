@@ -136,6 +136,14 @@ function splitNames(list: string, pick: (parts: string[]) => string): string[] {
 }
 
 /**
+ * The names of an `export { a, b as c } from` list (fix F29): the imported names (`a`, `b`),
+ * which the re-export edge carries, and the exported names (`a`, `c`), which the file exports.
+ */
+function reExportNames(list: string): [imported: string[], exported: string[]] {
+  return [splitNames(list, (p) => p[0] ?? ""), splitNames(list, (p) => p[p.length - 1] ?? "")];
+}
+
+/**
  * True when the `import(...)` at `code[start, end)` is in a type position (fix F25). The rule is
  * by exclusion. A type position is `typeof import(...)`, or `import(...).Name` (a chain of
  * member names, then no call), as in a type alias, an annotation or an interface member. Every
@@ -328,16 +336,16 @@ export function parseFile(ctx: ParseContext, filePath: string): ParsedFile {
     result.exports.reExported.push(`* from ${reSource}`);
   }
   for (const match of code.matchAll(/export\s*{\s*([^}]+)\s*}\s*from\s+['"]([^'"]+)['"]/g)) {
-    const names = splitNames(match[1] ?? "", (p) => p[0] ?? "");
-    addReExport(match[2] ?? "", names, false);
-    result.exports.named.push(...names);
-    result.exports.reExported.push(...names);
+    const [imported, exported] = reExportNames(match[1] ?? "");
+    addReExport(match[2] ?? "", imported, false);
+    result.exports.named.push(...exported);
+    result.exports.reExported.push(...exported);
   }
   for (const match of code.matchAll(/export\s+type\s*{\s*([^}]+)\s*}\s*from\s+['"]([^'"]+)['"]/g)) {
-    const names = splitNames(match[1] ?? "", (p) => p[0] ?? "");
-    addReExport(match[2] ?? "", names, true);
-    result.exports.named.push(...names);
-    result.exports.reExported.push(...names);
+    const [imported, exported] = reExportNames(match[1] ?? "");
+    addReExport(match[2] ?? "", imported, true);
+    result.exports.named.push(...exported);
+    result.exports.reExported.push(...exported);
   }
   for (const match of code.matchAll(/export\s+type\s+\*\s+from\s+['"]([^'"]+)['"]/g)) {
     addReExport(match[1] ?? "", ["*"], true);
