@@ -20,6 +20,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F44: a `.d.ts` file is never a "potentially unused file". A declaration file declares
+  ambient types and no file imports it, so the list named every ambient declaration. In the
+  `mini-repo` fixture, `src/ambient.d.ts` leaves the list (2 -> 1).
 - depgraph F43: in single-package mode, an import of the package's own npm name (`'my-pkg'`,
   `'my-pkg/sub'`) resolves to its own source. The target of the `exports` entry (the first
   condition that is not `types`), else `main`, maps from `dist/` to `src/` and from `.js` to

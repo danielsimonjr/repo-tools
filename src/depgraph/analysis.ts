@@ -235,6 +235,8 @@ export function detectUnused(
     if (isSrcIndex(file.path)) continue;
     if (file.name === "index" && file.exports.reExported.length > 0) continue;
     if (extraEntryPaths.has(file.path)) continue;
+    // Fix F44: a `.d.ts` file declares ambient types. No file imports it, so it is never unused.
+    if (file.path.endsWith(".d.ts")) continue;
     if (!importedFiles.has(file.path)) unusedFiles.push(file.path);
   }
 

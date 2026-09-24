@@ -6,7 +6,7 @@
 
 ## Summary
 
-- **Potentially unused files**: 2
+- **Potentially unused files**: 1
 - **Dormant files** (runtime code on disk, unreachable from any entry/build root): 1
   - **Orphaned (reachable from nothing — delete/wire candidates)**: 1
   - **Test-only (exercised by a test, ships nothing)**: 0
@@ -37,7 +37,6 @@ _None._
 
 These files are not imported by any other file in the codebase:
 
-- `src/ambient.d.ts`
 - `src/orphan.ts`
 
 ## Unreferenced Anywhere (deletion candidates)

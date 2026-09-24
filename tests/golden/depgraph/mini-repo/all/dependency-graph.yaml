@@ -297,5 +297,5 @@ statistics:
   typeOnlyCyclicComponents: 1
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 2
-  unusedFilesCount: 2
+  unusedFilesCount: 1
   unusedExportsCount: 1

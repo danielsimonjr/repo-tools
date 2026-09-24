@@ -31,11 +31,10 @@ Dependency graph generation complete!
   - 2 cyclic components:
       1 runtime, 2 files (require attention)
       1 type-only, 2 files (safe)
-  - 2 potentially unused files
+  - 1 potentially unused files
   - 1 potentially unused exports
 
 Potentially unused files:
-  - src/ambient.d.ts
   - src/orphan.ts
 
 Potentially unused exports:
