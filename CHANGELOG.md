@@ -31,6 +31,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools depgraph` (task D8, port complete). The reporters (`reporters/markdown.ts`,
+  `json.ts`, `yaml.ts`, `unused.ts`, `inventory.ts`, `coverage.ts`, `surfaces.ts`,
+  `banner.ts`), an extension stub (`extensions.ts`) and the pipeline (`index.ts`: scan, parse,
+  analyze, report, gate) are in. Flags: `--root=<dir>` or a first path argument, `--all`/`-a`,
+  `--include-tests`/`-t` (no operation), `--check-census` and `--help`. The command writes
+  the reports into `<root>/docs/architecture`, and it names paths relative to the root on
+  standard output. Exit 1: no TypeScript file, a failed census self-check (monorepo mode) or a
+  failed `--check-census`. The port reproduces the four characterization golden sets byte for
+  byte (dates and the root masked), and a Windows-only test checks each report and the exit
+  code. The WASM, WebGPU and parallel pairing reports and the WASM build gate of the pre-port
+  generator are not in the core; they come back as an extension. `Io` moves to
+  `src/io-types.ts`, and `src/cli.ts` re-exports it.
 - depgraph port, part 6 (task D7, classifier and report only): `duplicates.ts` (own
   definitions, the allowlist, the definer and entry classes, the canonical hint and the tag
   tally) and `reporters/duplicates.ts` (duplicate-symbols.md and duplicate-symbols.json). The

@@ -7,6 +7,7 @@
 import pkg from "../package.json" with { type: "json" };
 import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
+import { DEPGRAPH_HELP, run as runDepgraph } from "./depgraph/index.ts";
 import type { Io } from "./io-types.ts";
 
 export type { Io } from "./io-types.ts";
@@ -22,7 +23,8 @@ interface Subcommand {
 const REGISTRY = {
   depgraph: {
     summary: "Write the dependency graph and the architecture reports of a TypeScript tree.",
-    help: "Usage: repo-tools depgraph [--root=<path>] [options]\n",
+    help: DEPGRAPH_HELP,
+    run: runDepgraph,
   },
   chunk: {
     summary: "Split a large file into chunks, merge the chunks back, or show changed chunks.",

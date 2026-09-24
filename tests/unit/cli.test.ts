@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pkg from "../../package.json" with { type: "json" };
 import { main, SUBCOMMANDS } from "../../src/cli.ts";
@@ -57,10 +59,15 @@ describe("repo-tools CLI shell (spec 3.1)", () => {
     expect((await run(["--nope"])).code).toBe(1);
   });
 
-  test("a subcommand that is not built yet exits 1 with a message", async () => {
-    const r = await run(["depgraph"]);
-    expect(r.code).toBe(1);
-    expect(r.err).toContain("not implemented");
+  test("depgraph dispatches to its pipeline: a root with no TypeScript exits 1", async () => {
+    const root = mkdtempSync(join(tmpdir(), "repo-tools-cli-"));
+    try {
+      const r = await run(["depgraph", `--root=${root}`]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain("No TypeScript files found");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   test("the entry file runs as a process and returns the same exit codes", async () => {
