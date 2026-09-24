@@ -45,6 +45,12 @@ All notable changes to this project are recorded in this file. The format follow
 - `compress --pattern` escapes every RegExp metacharacter. Only `*` and `?` are wildcards.
   Before, only `.` was escaped: `a+b.md` also matched `aab.md`, `[x].md` matched `x.md`, and
   `a[.md` stopped the run with a `SyntaxError`.
+- `compress` JSON refuses an integer outside the safe integer range (-9007199254740991 to
+  9007199254740991). Compression and `-d` exit 1 with a message that names the integer, and
+  write no file. The check reads the source text. Before, `JSON.parse` changed the value
+  without a message: `12345678901234567890` became `12345678901234567000`. A known limit, now
+  in the help text: an integer-like object key (`"2"`, `"10"`) moves to the start of its
+  object, in numeric order, because `JSON.parse` orders the keys so. The values do not change.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the

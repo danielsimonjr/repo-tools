@@ -498,3 +498,55 @@ describe("the batch pattern escapes every RegExp metacharacter", () => {
     expect(names("*.md", ["a.md", "b.txt"])).toEqual(["a.md"]);
   });
 });
+
+describe("JSON: an unsafe integer is refused", () => {
+  const UNSAFE = '{"id":12345678901234567890,"ok":1}';
+
+  test("compress exits 1 with a message that names the integer, and writes no file", async () => {
+    const dir = folder();
+    writeFileSync(join(dir, "big.json"), UNSAFE);
+    const r = await compressIn(dir, ["big.json", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("12345678901234567890");
+    expect(r.err).toContain("safe integer range");
+    expect(readdirSync(dir)).toEqual(["big.json"]);
+  });
+
+  test("batch compress fails the file and exits 1", async () => {
+    const dir = folder();
+    writeFileSync(join(dir, "big.json"), UNSAFE);
+    const r = await compressIn(dir, ["-b", "big.json", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.out).toContain("safe integer range");
+    expect(readdirSync(dir)).toEqual(["big.json"]);
+  });
+
+  test("-d exits 1 on a compact file with an unsafe integer, and writes no file", async () => {
+    const dir = folder();
+    writeFileSync(join(dir, "big.compact.json"), '{"_legend":{},"n":-9007199254740993}');
+    const r = await compressIn(dir, ["-d", "big.compact.json", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("-9007199254740993");
+    expect(readdirSync(dir)).toEqual(["big.compact.json"]);
+  });
+
+  test("the edge of the safe range, a string, a float and an exponent are accepted", () => {
+    const input = JSON.stringify({
+      max: 9007199254740991,
+      min: -9007199254740991,
+      text: "12345678901234567890",
+      float: 0.5,
+      exp: 1e300,
+      "12345678901234567890": [1, -2],
+    });
+    expect(jsonRoundTrip(JSON.parse(input), "medium").restored).toEqual(JSON.parse(input));
+  });
+
+  test("the help tells that an integer-like key comes first", async () => {
+    const r = await compress([]);
+    expect(r.out).toContain("integer-like key");
+    // The documented behaviour: JSON.parse puts "2" and "10" first, in numeric order.
+    const restored = jsonRoundTrip({ b: 1, "10": 2, "2": 3 }, "medium").restored as object;
+    expect(Object.keys(restored)).toEqual(["2", "10", "b"]);
+  });
+});

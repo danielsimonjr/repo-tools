@@ -54,6 +54,11 @@ Levels:
   medium      A balance of size and readability.
   aggressive  The smallest output. The output can be difficult to read.
 
+JSON:
+  An integer outside the safe range (-9007199254740991 to 9007199254740991) is refused
+  (exit 1), because JSON.parse would change its value. An integer-like key ("2", "10")
+  moves to the start of its object, in numeric order, as JSON.parse orders it.
+
 Exit codes: 0 when all files are done, 1 on an error.
 `;
 

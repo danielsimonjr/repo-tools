@@ -141,6 +141,47 @@ export function applySubstringCompression(
   return { compressed, legend };
 }
 
+const NUMBER_TOKEN = /-?\d+(\.\d+)?([eE][+-]?\d+)?/y;
+const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+
+/**
+ * Throws when the JSON source text holds an integer outside the safe integer range of a
+ * JavaScript number (plus or minus 2^53 - 1). `JSON.parse` changes such an integer
+ * (12345678901234567890 becomes 12345678901234567000), so the data would change without a
+ * message. The check reads the source text, because the parsed value has already lost the digits.
+ * A number with a fraction or an exponent is not an integer token and is not checked.
+ *
+ * @throws Error that names the first unsafe integer.
+ */
+export function assertSafeIntegers(text: string): void {
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i] ?? "";
+    if (ch === '"') {
+      // Skip the string, and each escaped character in it.
+      i++;
+      while (i < text.length && text[i] !== '"') i += text[i] === "\\" ? 2 : 1;
+      i++;
+    } else if (ch === "-" || (ch >= "0" && ch <= "9")) {
+      NUMBER_TOKEN.lastIndex = i;
+      const match = NUMBER_TOKEN.exec(text);
+      const token = match?.[0] ?? ch;
+      if (match && match[1] === undefined && match[2] === undefined) {
+        const value = BigInt(token);
+        if (value > MAX_SAFE || value < -MAX_SAFE) {
+          throw new Error(
+            `the JSON holds the integer ${token}, which is outside the safe integer range ` +
+              `(-${MAX_SAFE} to ${MAX_SAFE}). JSON.parse would change it, so the file is not processed.`,
+          );
+        }
+      }
+      i += token.length;
+    } else {
+      i++;
+    }
+  }
+}
+
 /**
  * Returns a copy of `value` with each object key renamed through `keyMap`.
  *
@@ -176,6 +217,7 @@ function decompressJson(content: string): string {
   } catch {
     return content;
   }
+  assertSafeIntegers(content);
   if (data === null || typeof data !== "object" || Array.isArray(data)) return content;
   const { _legend: legend, ...rest } = data as Record<string, unknown>;
   if (!legend || typeof legend !== "object") return content;
