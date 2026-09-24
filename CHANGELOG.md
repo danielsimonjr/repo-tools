@@ -20,6 +20,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F6 (already in the port; a regression test pins it): a comment inside a multi-line
+  `{ }` import, export or re-export list is not part of a symbol name in any report.
 - depgraph F5: before it writes dependency-graph.yaml, depgraph probes the loaded js-yaml. When
   that copy ignores the `quoteStyle` option, the run stops with exit 1 and a message, and writes
   no YAML with the wrong quote characters. The report sets `quoteStyle: 'single'` explicitly.
