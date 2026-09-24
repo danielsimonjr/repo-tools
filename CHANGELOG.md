@@ -20,6 +20,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F8 (already in the port; a regression test pins it): an import in a test file counts
+  as usage, so an export or a file that only a test uses is not reported as unused.
 - depgraph F7: an import of compiled output lands on its source file. `../dist/x.js` resolves
   to `src/x.ts`, and `../dist/src/x.js` (a build that mirrors the source tree) also resolves to
   `src/x.ts`, so a test of the built package covers the source and counts as usage. A `dist/`
