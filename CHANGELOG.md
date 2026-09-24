@@ -31,6 +31,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port, part 3 (tasks D3 and D4, second half): `resolver.ts` (relative specifier to a
+  `.ts` path, package specifier to a workspace package and its entry file) and `parser.ts`
+  (imports, side-effect imports, `import()` expressions, re-exports, export declarations, the
+  file description and the fallback description). The parser keeps the pre-port behavior: a
+  relative `import()` is a type-only edge (fix F25), and comments are removed with the regex
+  functions of `src/mask.ts` (fix F6).
 - depgraph port, part 2 (tasks D2 and D4, first half): `scanner.ts` (the graph walk, the test
   walk, the source-root rule, the census walk and the maximal repo walk), `workspaces.ts` (npm,
   Yarn and pnpm workspaces, and the structural fallback) and `roots.ts` (`exports` subpaths,
