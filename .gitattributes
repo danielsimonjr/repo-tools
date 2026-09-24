@@ -1,0 +1,4 @@
+* text=auto eol=lf
+tests/fixtures/** -text
+tests/golden/** -text
+*.exe binary

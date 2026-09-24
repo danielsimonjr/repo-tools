@@ -1,0 +1,32 @@
+# repo-tools
+
+`repo-tools` is one command-line tool with three subcommands for TypeScript repositories:
+
+| Subcommand | Job |
+|---|---|
+| `depgraph` | Writes the dependency graph and the architecture reports of a TypeScript tree. |
+| `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
+| `compress` | Writes a compact copy of a file for a model context, and restores it. |
+
+Status: under construction. The CLI shell is available. The three subcommands are not built yet.
+
+## Run
+
+Run the tool from source with Bun:
+
+```sh
+bun install
+bun src/bin.ts --help
+```
+
+## Develop
+
+| Command | Job |
+|---|---|
+| `bun test` | Runs the unit tests. |
+| `bun run typecheck` | Runs the TypeScript type check. |
+| `bun run lint` | Runs the lint and format check. |
+
+## License
+
+MIT. See `LICENSE`.
