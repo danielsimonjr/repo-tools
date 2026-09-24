@@ -5,8 +5,9 @@
  *
  * For each golden set, the script runs `depgraph` on a copy of the fixture and writes every
  * report, `_exit-code.txt` and `_stdout.port.txt`, masked as `tests/golden/depgraph/README.md`
- * describes. It never touches `_stdout.txt`, the pre-port reference. Review the diff: each hunk
- * must belong to the fix that the commit names.
+ * describes. It never touches `_stdout.txt`, the pre-port reference. It also writes the
+ * API-surface report of the mini-repo fixture (`mini-repo/api-surface.json`, design section 6.2).
+ * Review the diff: each hunk must belong to the fix that the commit names.
  */
 import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -19,6 +20,9 @@ export const GOLDEN_SETS = [
   { set: "mono-repo/default", fixture: "mono-repo", flags: [] as string[] },
   { set: "mono-repo/all", fixture: "mono-repo", flags: ["--all"] },
 ];
+
+/** The file name of the API-surface golden of the mini-repo fixture. */
+export const API_SURFACE_FILE = "api-surface.json";
 
 /** The golden masking: the fixture root in both separator forms, date-times and dates. */
 export function maskGolden(text: string, root: string): string {
@@ -57,6 +61,17 @@ async function main(): Promise<void> {
       writeFileSync(join(dest, "_stdout.port.txt"), maskGolden(stdout, root));
       console.log(`${set}: exit ${code}`);
     }
+    const apiRoot = join(work, "api-surface");
+    cpSync(join(repo, "tests/fixtures/depgraph/mini-repo"), apiRoot, { recursive: true });
+    const apiCode = await run([`--root=${apiRoot}`, `--api-surface=${API_SURFACE_FILE}`], {
+      stdout: () => {},
+      stderr: () => {},
+    });
+    writeFileSync(
+      join(repo, "tests/golden/depgraph/mini-repo", API_SURFACE_FILE),
+      maskGolden(readFileSync(join(apiRoot, API_SURFACE_FILE), "utf8"), apiRoot),
+    );
+    console.log(`mini-repo/${API_SURFACE_FILE}: exit ${apiCode}`);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

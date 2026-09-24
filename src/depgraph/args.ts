@@ -72,6 +72,18 @@ const VALUE_FLAGS: Readonly<
   "--also-exclude": (o, value) => {
     o.settings.alsoExclude = list("--also-exclude", value);
   },
+  "--api-surface": (o, value) => {
+    o.settings.apiSurface = { ...o.settings.apiSurface, out: relativePath("--api-surface", value) };
+  },
+  "--api-entry": (o, value) => {
+    o.settings.apiSurface = { ...o.settings.apiSurface, entry: relativePath("--api-entry", value) };
+  },
+  "--stability-tags": (o, value) => {
+    o.settings.apiSurface = {
+      ...o.settings.apiSurface,
+      stabilityTags: list("--stability-tags", value),
+    };
+  },
 };
 
 /** Splits a comma list. Throws on an empty item. */

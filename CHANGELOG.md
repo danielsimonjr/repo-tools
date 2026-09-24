@@ -444,6 +444,17 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph per-export facts report (D10a, design section 6.2). `--api-surface=<file>` (config
+  `depgraph.apiSurface.out`) writes the `buildApiSurfaceReport` output: `schemaVersion` 1, the
+  entry, the stability tags, the counts, each surface symbol with its signature, `async`,
+  stability tag and export path, and the exports of every file of the graph walk.
+  `--api-entry=<path>` (`depgraph.apiSurface.entry`, default `src/index.ts`) sets the entry, and
+  `--stability-tags=<a,b>` (`depgraph.apiSurface.stabilityTags`) sets the tags. The report file
+  and the entry resolve against the root. The report has no timestamp, so two runs give the same
+  bytes. When the report is on and the entry file does not exist, the run exits 1 before any
+  write. Without the flag, no other output changes. New golden:
+  `tests/golden/depgraph/mini-repo/api-surface.json`; `scripts/update-depgraph-goldens.ts`
+  writes it too.
 - depgraph config and flags in the pipeline (D10a). `--src=<a,b>` / `depgraph.src` names the
   source folders of a single package (`auto`: `src/` if present, else each top-level folder with
   TypeScript); the census and the test search follow them. `--tests=<a,b>` / `depgraph.tests`

@@ -9,7 +9,7 @@
  * They read fixed paths of one consumer repo and write nothing on other repos. They ran after the
  * census gate and before the coverage summary; they come back as an extension (task D10).
  */
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
   type DepgraphConfig,
@@ -29,6 +29,13 @@ import {
   generateStatistics,
   splitDormant,
 } from "./analysis.ts";
+import {
+  buildApiSurfaceReport,
+  createTsResolver,
+  extractExportDetails,
+  resolveSurface,
+  type Surface,
+} from "./api-surface.ts";
 import { type DepgraphOptions, parseDepgraphArgs, wantsHelp } from "./args.ts";
 import { analyzeTestCoverage, type TestCoverageAnalysis } from "./coverage.ts";
 import { detectCyclicComponents } from "./cycles.ts";
@@ -89,6 +96,14 @@ Options:
   --exclude=<a,b>      Replace the folder names that every walk skips (default:
                        node_modules,dist,build,coverage,.git).
   --also-exclude=<a,b> Add folder names that every walk skips.
+  --api-surface=<file> Write the per-export facts report (signature, async,
+                       stability tag, export path, counts) to this file. Without
+                       it, no other output changes.
+  --api-entry=<path>   Entry file of the public surface (default: src/index.ts).
+                       A missing entry file exits 1 when the report is on.
+  --stability-tags=<a,b>
+                       Whole-word JSDoc stability tags; the last tag in a block
+                       wins (default: public,internal,experimental,beta,alpha).
   --all, -a            Monorepo mode: include dormant and unreachable files.
   --reachable-only     Restrict the graph to the files reachable from a root.
                        Single-package mode analyzes all files by default.
@@ -175,6 +190,13 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
     }
     log("file-census check passed (no-regen): committed inventory matches the repo.");
     return 0;
+  }
+
+  // The API-surface entry must exist before the run writes anything (design section 6.2).
+  const apiEntry = config.apiSurface.entry.replace(/\\/g, "/");
+  if (config.apiSurface.out !== null && !isFile(resolveUnderRoot(root, apiEntry))) {
+    io.stderr(`repo-tools depgraph: the --api-entry file <root>/${apiEntry} does not exist\n`);
+    return 1;
   }
 
   const packageJson = readPackageJson(root, io);
@@ -367,6 +389,15 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
   write("test-coverage.json", JSON.stringify(coverageJson, null, 2));
   log(`Written: ${out("test-coverage.json")}`);
 
+  if (config.apiSurface.out !== null) {
+    const apiOut = resolveUnderRoot(root, config.apiSurface.out);
+    const surface = writeApiSurface(root, apiEntry, apiOut, parsedFiles, config);
+    log(
+      `Written: ${relativePosix(root, apiOut)} ` +
+        `(${surface.symbols.length} surface symbols, ${surface.unresolved.length} unresolved)`,
+    );
+  }
+
   logSummary(log, {
     isMonorepo,
     workspaceCount: workspaces.size,
@@ -440,6 +471,38 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
     }
   }
   return 0;
+}
+
+/** True when `path` is an existing file. */
+function isFile(path: string): boolean {
+  return existsSync(path) && statSync(path).isFile();
+}
+
+/**
+ * Writes the per-export facts report (design section 6.2) of the entry `entry` to `outPath`, and
+ * returns the surface. The `files` array holds every file of the graph walk (`parsedFiles`).
+ */
+function writeApiSurface(
+  root: string,
+  entry: string,
+  outPath: string,
+  parsedFiles: readonly ParsedFile[],
+  config: DepgraphConfig,
+): Surface {
+  const load = (p: string): string | null => {
+    const abs = join(root, p);
+    return isFile(abs) ? readFileSync(abs, "utf-8") : null;
+  };
+  const resolver = createTsResolver((p) => load(p) !== null);
+  const opts = { stabilityTags: config.apiSurface.stabilityTags };
+  const surface = resolveSurface(entry, load, resolver, opts);
+  const files = parsedFiles.map((f) => ({
+    path: f.path,
+    exports: extractExportDetails(load(f.path) ?? "", opts),
+  }));
+  const report = buildApiSurfaceReport(surface, files, config.apiSurface.stabilityTags);
+  writeReport(outPath, JSON.stringify(report, null, 2));
+  return surface;
 }
 
 /** The links that the walks of this run did not follow, root-relative and sorted (fix F34). */

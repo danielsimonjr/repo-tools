@@ -10,6 +10,7 @@ After that, each fix changes these files in its own commit, and the commit names
 | `mini-repo/all` | `tests/fixtures/depgraph/mini-repo` | `--all` |
 | `mono-repo/default` | `tests/fixtures/depgraph/mono-repo` | none |
 | `mono-repo/all` | `tests/fixtures/depgraph/mono-repo` | `--all` |
+| `mini-repo/api-surface.json` | `tests/fixtures/depgraph/mini-repo` | `--api-surface=api-surface.json` |
 
 Masking: each ISO date-time is replaced by `<DATETIME>`, each ISO date by `<DATE>`, and the
 fixture root by `<ROOT>`. `_exit-code.txt` holds the exit code. `_stdout.txt` holds the
