@@ -214,6 +214,7 @@ describe("pipeline entry", () => {
       checkDuplicates: false,
       noRegen: false,
       writeDuplicateBaseline: false,
+      noExtensions: false,
       help: false,
     });
     // Fix M1: the two single-package model flags.
@@ -247,7 +248,7 @@ describe("pipeline entry", () => {
     expect(existsSync(join(root, "docs/architecture/file-inventory.json"))).toBe(true);
   });
 
-  test("loadExtensions loads nothing in the port", () => {
-    expect(loadExtensions()).toEqual([]);
+  test("loadExtensions loads nothing when the config names no extension", async () => {
+    expect(await loadExtensions(root, [])).toEqual([]);
   });
 });

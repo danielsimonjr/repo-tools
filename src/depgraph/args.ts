@@ -30,6 +30,8 @@ export interface DepgraphOptions {
   noRegen: boolean;
   /** Write the duplicate baseline from the current duplicate-symbols.json. */
   writeDuplicateBaseline: boolean;
+  /** Load no extension (design section 5.2). */
+  noExtensions: boolean;
   help: boolean;
 }
 
@@ -51,6 +53,7 @@ const BOOLEAN_FLAGS: Readonly<Record<string, BooleanKey>> = {
   "--check-duplicates": "checkDuplicates",
   "--no-regen": "noRegen",
   "--write-duplicate-baseline": "writeDuplicateBaseline",
+  "--no-extensions": "noExtensions",
   "--help": "help",
   "-h": "help",
 };
@@ -132,6 +135,7 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     checkDuplicates: false,
     noRegen: false,
     writeDuplicateBaseline: false,
+    noExtensions: false,
     help: false,
   };
   let rootSet = false;

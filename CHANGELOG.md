@@ -461,6 +461,22 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph extension loader and `--no-extensions` (D10b, design section 5.2). Each
+  `depgraph.extensions` entry is a root-relative `.mjs` module with a default export
+  `{ name, preflight?, report? }`; the modules load with `import()` in config order.
+  `preflight(ctx)` runs before the first write, with `ctx = { root, config, mask }`: the config
+  is a frozen copy, and `mask` holds `blankCommentsAndStrings` and `stripComments` of
+  `src/mask.ts`. `report(ctx)` runs after the census gate, where the pre-port pairing reports
+  ran; its context adds `graph` (a frozen copy of the dependency-graph.json content) and
+  `write(relPath, text)`, which writes with LF line endings and one trailing LF and throws on a
+  path that is empty, absolute or outside the output folder. A module that does not exist, is
+  not `.mjs`, does not load or has the wrong shape, and a hook that throws or rejects, exit 1
+  with the path or the extension name on standard error; a load or preflight failure exits
+  before any write. `--no-extensions` loads none. `--check-census`,
+  `--check-duplicates --no-regen` and `--write-duplicate-baseline` run no hook;
+  `--check-duplicates` without `--no-regen` runs both. The pipeline is async. The Node bundle
+  loads a `.mjs` extension (checked by hand with `dist/cli.js`); `scripts/ext-probe.ts` stays for
+  the compiled-executable probe until task D11. No golden changes.
 - depgraph duplicate gate (D10b, design section 3.2). `--check-duplicates` writes the reports
   in process, then exits 1 when duplicate-symbols.json holds a TRUE_DUPLICATE name that the
   baseline does not hold; the error lists each new name with its kind and files. The baseline

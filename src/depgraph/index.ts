@@ -7,7 +7,8 @@
  *
  * Left out of the port: the WASM, WebGPU and parallel pairing reports and the WASM build gate.
  * They read fixed paths of one consumer repo and write nothing on other repos. They ran after the
- * census gate and before the coverage summary; they come back as an extension (task D10).
+ * census gate and before the coverage summary. An extension `report` hook runs at that place
+ * (`extensions.ts`, design section 5.2), so the consumer repo keeps them as an extension.
  */
 import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -50,6 +51,7 @@ import {
   findNewDuplicates,
   trueDuplicateNames,
 } from "./duplicates.ts";
+import { loadExtensions, preflightContext, reportContext, runHook } from "./extensions.ts";
 import {
   buildFileInventory,
   censusFailure,
@@ -123,6 +125,12 @@ Options:
                        the root. Without it, the difference gives a warning.
   --include-tests, -t  No operation. Kept for compatibility: the test coverage
                        reports are always written.
+  --no-extensions      Load no extension of depgraph.extensions. Without it,
+                       each .mjs module there (relative to the root) loads in
+                       config order: its preflight hook runs before the first
+                       write, and its report hook after the analysis. A hook
+                       that throws exits 1. --check-census and --check-duplicates
+                       --no-regen run no hook.
   --check-census       Check the committed file-inventory.json against a fresh
                        walk of the root. Write nothing. Exit 1 on a difference.
   --check-duplicates   Write the reports, then exit 1 when duplicate-symbols.json
@@ -147,8 +155,8 @@ directory (no folder is made), when no TypeScript file is found (no output folde
 is made), when the --api-entry file of --api-surface does not exist,
 when the census self-check fails with --strict-census, when an orphan exists
 with --strict-orphans, when --check-census fails, when --check-duplicates finds
-a new TRUE_DUPLICATE name or no baseline, or when a report that a mode reads
-does not exist.
+a new TRUE_DUPLICATE name or no baseline, when a report that a mode reads does
+not exist, or when an extension does not load or a hook throws.
 `;
 
 /**
@@ -190,8 +198,9 @@ export async function run(argv: string[], io: Io): Promise<number> {
     setWalkSkip([...config.exclude, ...config.alsoExclude]);
     const sinks: Io = { stdout: io.stdout, stderr };
     if (options.writeDuplicateBaseline) return writeDuplicateBaseline(root, config, sinks);
-    if (options.checkDuplicates) return checkDuplicates(options, config, sinks);
-    return runPipeline(options, config, sinks);
+    // `await` keeps a rejected promise (an extension failure) in this catch.
+    if (options.checkDuplicates) return await checkDuplicates(options, config, sinks);
+    return await runPipeline(options, config, sinks);
   } catch (err) {
     stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;
@@ -251,7 +260,11 @@ function namesLabel(count: number): string {
  * duplicate-symbols.json. With `--no-regen` the gate reads the committed report and writes
  * nothing. A missing baseline exits 1: the source gate also stops when it cannot read it.
  */
-function checkDuplicates(options: DepgraphOptions, config: DepgraphConfig, io: Io): number {
+async function checkDuplicates(
+  options: DepgraphOptions,
+  config: DepgraphConfig,
+  io: Io,
+): Promise<number> {
   const root = resolve(options.root);
   const baselineRel = config.duplicateBaseline;
   const baseline = asBaselineNames(
@@ -266,7 +279,7 @@ function checkDuplicates(options: DepgraphOptions, config: DepgraphConfig, io: I
     throw new Error(`the duplicate baseline ${shown(baselineRel)} has an unknown shape`);
   }
   if (!options.noRegen) {
-    const code = runPipeline(options, config, io);
+    const code = await runPipeline(options, config, io);
     if (code !== 0) return code;
   }
   const report = readDuplicateReport(root, config);
@@ -307,8 +320,15 @@ function writeDuplicateBaseline(root: string, config: DepgraphConfig, io: Io): n
   return 0;
 }
 
-/** The pipeline. Returns the exit code. */
-function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): number {
+/**
+ * The pipeline. Returns the exit code. The extensions load after the argument checks; their
+ * `preflight` hooks run before the first write, and their `report` hooks after the census gate.
+ */
+async function runPipeline(
+  options: DepgraphOptions,
+  config: DepgraphConfig,
+  io: Io,
+): Promise<number> {
   const log = (line: string): void => io.stdout(`${line}\n`);
   const root = resolve(options.root);
   const outputDir = resolveUnderRoot(root, config.out);
@@ -354,6 +374,10 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
     );
     return 1;
   }
+
+  // Design section 5.2: `preflight` runs before the first write, in config order.
+  const extensions = options.noExtensions ? [] : await loadExtensions(root, config.extensions);
+  await runHook(extensions, "preflight", preflightContext(root, config));
 
   const packageJson = readPackageJson(root, io);
 
@@ -606,7 +630,9 @@ function runPipeline(options: DepgraphOptions, config: DepgraphConfig, io: Io): 
   if (gapWarning) io.stderr(gapWarning);
   else log(censusPassLine(inventory));
 
-  // The pre-port WASM, parallel and WebGPU pairing reports ran here (see the module comment).
+  // The pre-port WASM, parallel and WebGPU pairing reports ran here. An extension `report`
+  // takes their place (design section 5.2).
+  await runHook(extensions, "report", reportContext(root, config, outputDir, json));
 
   const coveragePercent =
     testCoverage.sourceFiles.length > 0
