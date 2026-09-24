@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { extname, join, relative } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
 import { type CompressDeps, run } from "../../src/compress/index.ts";
-import { decompress } from "../../src/compress/legend.ts";
+import { decompress, renameKeys } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
@@ -444,5 +444,25 @@ describe("-d changes only the base name", () => {
     const r = await compressIn(dir, ["-d", "-f", "json", "data.compact", "--no-stats"]);
     expect(r.code).toBe(0);
     expect(JSON.parse(readFileSync(join(dir, "data"), "utf8"))).toEqual({ name: 1 });
+  });
+});
+
+describe('JSON: a "__proto__" key is kept', () => {
+  const input = '{"__proto__":{"k":1},"b":2,"list":[{"__proto__":null}]}';
+  for (const level of LEVELS) {
+    test(`round trip at ${level}`, () => {
+      const compact = getCompressor("json")(input, level).compressed;
+      const restored = decompress(compact, "json");
+      // Compare the JSON text: an own "__proto__" key and a prototype look the same to toEqual.
+      expect(JSON.stringify(JSON.parse(restored))).toBe(input);
+    });
+  }
+
+  test("renameKeys keeps an own __proto__ key and does not change the prototype", () => {
+    const value = JSON.parse('{"__proto__":{"polluted":true},"a":1}') as object;
+    const renamed = renameKeys(value, new Map([["a", "b"]])) as Record<string, unknown>;
+    expect(Object.hasOwn(renamed, "__proto__")).toBe(true);
+    expect(Object.getPrototypeOf(renamed)).toBe(Object.prototype);
+    expect(renamed.polluted).toBeUndefined();
   });
 });

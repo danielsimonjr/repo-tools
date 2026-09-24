@@ -39,6 +39,9 @@ All notable changes to this project are recorded in this file. The format follow
   extension or at the end. A folder name does not change. Before, `-d` removed the first
   `.compact` anywhere in the path: `p.compact/r.compact.md` gave `p/r.compact.md`. A base name
   with `.compact` in another place (`a.compact-old.json`) gives `a.compact-old.restored.json`.
+- `compress` JSON keeps a `__proto__` key. The key rename defines each key as an own property.
+  Before, the rename assigned the key `__proto__`, which set the prototype of the copy: `-d` on
+  `{"__proto__":{"k":1},"b":2}` gave `{"b":2}`.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the

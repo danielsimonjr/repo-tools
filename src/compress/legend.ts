@@ -141,13 +141,23 @@ export function applySubstringCompression(
   return { compressed, legend };
 }
 
-/** Returns a copy of `value` with each object key renamed through `keyMap`. */
+/**
+ * Returns a copy of `value` with each object key renamed through `keyMap`.
+ *
+ * Each key is defined as an own property. A plain assignment of the key `__proto__` sets the
+ * prototype of the copy, so the key and its value were lost (and the prototype changed).
+ */
 export function renameKeys(value: unknown, keyMap: ReadonlyMap<string, string>): unknown {
   if (Array.isArray(value)) return value.map((item) => renameKeys(item, keyMap));
   if (value !== null && typeof value === "object") {
     const out: Record<string, unknown> = {};
     for (const [key, v] of Object.entries(value)) {
-      out[keyMap.get(key) || key] = renameKeys(v, keyMap);
+      Object.defineProperty(out, keyMap.get(key) || key, {
+        value: renameKeys(v, keyMap),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
     return out;
   }
