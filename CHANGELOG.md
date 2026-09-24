@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `chunk split -o` refuses a chunk folder on another volume (another drive or share) than the
+  source file. It exits 1 with a message and writes nothing. Before, split wrote an absolute
+  `sourceFile` in the manifest, and `merge` and `status` then refused that manifest, so the
+  edited chunks could not be merged.
 - `chunk merge` and `chunk status` read only regular chunk files in the chunk folder. A chunk
   file that is a symbolic link, a junction or a folder, or whose real path is outside the real
   chunk folder, gives exit 1 with a message. Before, a chunk file that was a symbolic link read

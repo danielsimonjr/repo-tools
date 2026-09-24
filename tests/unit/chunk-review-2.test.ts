@@ -176,3 +176,20 @@ describe("chunk: a chunk file must be a regular file in the chunk folder (findin
     });
   }
 });
+
+describe("chunk split: the chunk folder must be on the volume of the source (finding 3)", () => {
+  test("split -o on another drive exits 1 and writes nothing", async () => {
+    if (process.platform !== "win32") {
+      console.warn("skipped: a drive letter exists on Windows only");
+      return;
+    }
+    const src = put(join(work, "volume", "doc.md"), "# A\n\ntext\n");
+    // A drive letter that differs from the drive of the source. Split refuses before it writes,
+    // so the drive does not need to exist.
+    const other = src.toUpperCase().startsWith("Q:") ? "R:" : "Q:";
+    const r = await chunk(["split", src, "-o", `${other}chunks`]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("same volume");
+    expect(r.out).toBe("");
+  });
+});

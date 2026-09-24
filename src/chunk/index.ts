@@ -21,6 +21,7 @@ import {
   contentHash,
   type FileType,
   hashFor,
+  isAbsoluteAnywhere,
   MANIFEST_NAME,
   MANIFEST_VERSION,
   type Manifest,
@@ -337,6 +338,16 @@ function split(inputFile: string, options: Options, io: Io): number {
   const outputDir = options.output
     ? resolve(options.output)
     : join(dirname(absoluteInput), `${baseName}_chunks`);
+  // The manifest holds the source path relative to the chunk folder. Across two volumes (two
+  // drives or shares) no relative path exists, and merge and status refuse an absolute one.
+  const sourceFile = relativeSource(outputDir, absoluteInput);
+  if (isAbsoluteAnywhere(sourceFile)) {
+    io.stderr(
+      `Error: the chunk folder ${outputDir} is on another volume than ${absoluteInput}. Nothing was written. Put the chunk folder on the same volume as the source file.
+`,
+    );
+    return 1;
+  }
 
   log("\nchunker - Splitting File");
   log("=".repeat(50));
@@ -383,7 +394,7 @@ function split(inputFile: string, options: Options, io: Io): number {
 
   const manifest: Manifest = {
     version: MANIFEST_VERSION,
-    sourceFile: relativeSource(outputDir, absoluteInput),
+    sourceFile,
     sourceHash,
     fileType,
     splitLevel,
