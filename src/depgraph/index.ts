@@ -30,6 +30,7 @@ import { buildDuplicateReport, detectDuplicateSymbols } from "./duplicates.ts";
 import {
   buildFileInventory,
   censusFailure,
+  censusGapWarning,
   censusOrphanWarning,
   censusPassLine,
   checkCensusNoRegen,
@@ -71,6 +72,8 @@ Options:
                        Single-package mode analyzes all files by default.
   --strict-orphans     Exit 1 when an orphaned source file exists. Without it,
                        an orphan gives a warning.
+  --strict-census      Exit 1 when the file census differs from a full walk of
+                       the root. Without it, the difference gives a warning.
   --include-tests, -t  No operation. Kept for compatibility: the test coverage
                        reports are always written.
   --check-census       Check the committed file-inventory.json against a fresh
@@ -78,8 +81,8 @@ Options:
   --help, -h           Show this help.
 
 Exit codes: 0 on success. 1 when no TypeScript file is found, when the census
-self-check fails, when an orphan exists with --strict-orphans, or when
---check-census fails.
+self-check fails with --strict-census, when an orphan exists with
+--strict-orphans, or when --check-census fails.
 `;
 
 /** The parsed command line. */
@@ -91,6 +94,8 @@ export interface DepgraphOptions {
   reachableOnly: boolean;
   /** Fix M1: an orphan fails the census self-check. */
   strictOrphans: boolean;
+  /** Fix F42: a census gap fails the census self-check. */
+  strictCensus: boolean;
   checkCensus: boolean;
   help: boolean;
 }
@@ -106,6 +111,7 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     all: false,
     reachableOnly: false,
     strictOrphans: false,
+    strictCensus: false,
     checkCensus: false,
     help: false,
   };
@@ -115,6 +121,7 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     else if (arg === "--all" || arg === "-a") options.all = true;
     else if (arg === "--reachable-only") options.reachableOnly = true;
     else if (arg === "--strict-orphans") options.strictOrphans = true;
+    else if (arg === "--strict-census") options.strictCensus = true;
     else if (arg === "--check-census") options.checkCensus = true;
     else if (arg === "--help" || arg === "-h") options.help = true;
     else if (!arg.startsWith("-") && existsSync(arg)) options.root = arg;
@@ -373,7 +380,7 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
     dormant.testReachable,
   );
   // The self-check runs before the write: its maximal walk can meet more links (fix F34).
-  const failure = censusFailure(root, inventory, options.strictOrphans);
+  const failure = censusFailure(root, inventory, options.strictOrphans, options.strictCensus);
   inventory.skippedLinks = skippedLinks(root);
   write("file-inventory.json", generateFileInventoryJson(inventory));
   write("FILE_INVENTORY.md", withBanner(generateFileInventoryMarkdown(inventory)));
@@ -392,7 +399,10 @@ function runPipeline(options: DepgraphOptions, io: Io): number {
   // Fix M1: without `--strict-orphans` an orphan gives a warning, not a failure.
   const orphanWarning = censusOrphanWarning(inventory);
   if (orphanWarning) io.stderr(orphanWarning);
-  log(censusPassLine(inventory));
+  // Fix F42: without `--strict-census` a census gap gives a warning, not a failure.
+  const gapWarning = options.strictCensus ? null : censusGapWarning(root, inventory);
+  if (gapWarning) io.stderr(gapWarning);
+  else log(censusPassLine(inventory));
 
   // The pre-port WASM, parallel and WebGPU pairing reports ran here (see the module comment).
 

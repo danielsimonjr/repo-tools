@@ -208,6 +208,7 @@ describe("pipeline entry", () => {
       all: true,
       reachableOnly: false,
       strictOrphans: false,
+      strictCensus: false,
       checkCensus: true,
       help: false,
     });

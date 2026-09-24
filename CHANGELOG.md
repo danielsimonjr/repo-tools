@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F42: a census gap (a `.ts` file that the census does not list, or a census entry that
+  is not on disk) gives a warning and exit 0 by default, in both modes. The new flag
+  `--strict-census` makes it fail; `--check-census` stays a strict gate. A single package with
+  `.ts` folders outside `src/` and the census folders no longer exits 1.
 - depgraph F41: both census walks skip a folder that a negated workspace pattern excludes
   (`!packages/skip`), so its files no longer fail the census as "absent" (exit 1). F36 had removed
   the package from the workspaces but not from the census walk.

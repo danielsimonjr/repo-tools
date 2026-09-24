@@ -179,16 +179,34 @@ export function censusFailure(
   root: string,
   inventory: FileInventory,
   strictOrphans = false,
+  strictCensus = true,
 ): string | null {
+  const gaps = censusGaps(root, inventory);
+  const orphans = strictOrphans ? orphansOf(inventory) : [];
+  const gapFails = strictCensus && gaps !== "";
+  if (!gapFails && orphans.length === 0) return null;
+  let msg = "FILE CENSUS SELF-CHECK FAILED.\n";
+  if (gapFails) msg += gaps;
+  if (orphans.length > 0) msg += orphanText(orphans);
+  return msg;
+}
+
+/**
+ * The census gap warning of a run without `--strict-census` (fix F42), or null when the census
+ * equals the maximal repo walk.
+ */
+export function censusGapWarning(root: string, inventory: FileInventory): string | null {
+  const gaps = censusGaps(root, inventory);
+  return gaps === "" ? null : `Warning: file census (--strict-census fails on this):\n${gaps}`;
+}
+
+/** The census gaps against the maximal repo walk, as report text ("" when there is none). */
+function censusGaps(root: string, inventory: FileInventory): string {
   const onDisk = new Set(walkRepoTsFiles(root, negatedWorkspaceFolders(root)));
   const census = new Set(inventory.files.map((f) => f.file));
   const missingFromCensus = [...onDisk].filter((f) => !census.has(f)).sort();
   const missingFromDisk = [...census].filter((f) => !onDisk.has(f)).sort();
-  const orphans = strictOrphans ? orphansOf(inventory) : [];
-  if (missingFromCensus.length === 0 && missingFromDisk.length === 0 && orphans.length === 0) {
-    return null;
-  }
-  let msg = "FILE CENSUS SELF-CHECK FAILED.\n";
+  let msg = "";
   if (missingFromCensus.length > 0) {
     msg += `  ${missingFromCensus.length} file(s) on disk but ABSENT from the census (scoping/discovery gap — teach the census to enumerate this location):\n`;
     msg += `${missingFromCensus.map((f) => `    + ${f}`).join("\n")}\n`;
@@ -197,7 +215,6 @@ export function censusFailure(
     msg += `  ${missingFromDisk.length} file(s) in the census but MISSING on disk (stale entry — regenerate with \`repo-tools depgraph\`):\n`;
     msg += `${missingFromDisk.map((f) => `    - ${f}`).join("\n")}\n`;
   }
-  if (orphans.length > 0) msg += orphanText(orphans);
   return msg;
 }
 
