@@ -131,6 +131,12 @@ All notable changes to this project are recorded in this file. The format follow
   or an empty result over a non-empty file, unless `--allow-shrink` is given. Without the flag,
   merge exits 1, writes nothing and makes no backup. A merge that loses text is more often a
   defect than an edit, and before this fix the loss was silent.
+- `chunk merge` writes a CRLF source file back with CRLF line endings. `split` writes chunk
+  files with LF line endings and records `"lineEnding": "crlf"` in the manifest when every line
+  break of the source is CRLF; `merge` then writes CRLF again. Before this fix, a merge changed
+  every line of a CRLF file. The field is optional and the manifest stays version 2.0.0: an LF
+  file writes no field, and an older 2.0.0 reader ignores it. For a file with mixed line
+  endings, `split` prints a warning, and the chunks and the merge use LF.
 - `chunk merge` keeps a `__proto__` key of a JSON object. The merge used `Object.assign`, so a
   `__proto__` key set the prototype of the result and the key was lost from the file.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`

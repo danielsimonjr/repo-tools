@@ -24,9 +24,11 @@ import {
 import {
   chunkFilename,
   detectFileType,
+  detectLineEnding,
   type JsonSplit,
   mergeJson,
   mergeJsonLayout,
+  normalizeLineEndings,
   splitJson,
   splitMarkdown,
   splitTypeScript,
@@ -194,6 +196,10 @@ function split(inputFile: string, options: Options, io: Io): number {
   log(`Dry Run:     ${dryRun}`);
   log();
 
+  const lineEnding = detectLineEnding(content);
+  if (lineEnding === "mixed") {
+    log("WARNING: the file has mixed line endings. The chunks and a merge use LF.\n");
+  }
   const { sections, layout } = splitSections(fileType, content, splitLevel);
   if (sections.length === 0) {
     log("No sections found to split.");
@@ -231,6 +237,7 @@ function split(inputFile: string, options: Options, io: Io): number {
     splitLevel,
     chunks,
     ...(layout ? { jsonLayout: layout } : {}),
+    ...(lineEnding === "crlf" ? { lineEnding } : {}),
   };
   const manifestPath = join(outputDir, MANIFEST_NAME);
   if (!dryRun) {
@@ -321,6 +328,10 @@ function merge(manifestFile: string, options: Options, io: Io): number {
     mergedContent = mergeJsonLayout(chunkContents, manifest.jsonLayout);
   } else {
     mergedContent = mergeJson(chunkContents, io.stderr);
+  }
+  // Split writes LF chunks; a CRLF source gets its CRLF line breaks again (item c).
+  if (manifest.lineEnding === "crlf") {
+    mergedContent = normalizeLineEndings(mergedContent).replace(/\n/g, "\r\n");
   }
   const outputPath = options.output ? resolve(options.output) : sourcePath;
 

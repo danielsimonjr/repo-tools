@@ -22,6 +22,18 @@ export function normalizeLineEndings(content: string): string {
   return content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }
 
+/**
+ * Returns the line-break style of `content`: "crlf" when every line break is CRLF, "lf" when
+ * there is no CR, and "mixed" for another text.
+ */
+export function detectLineEnding(content: string): "lf" | "crlf" | "mixed" {
+  const crlf = content.split("\r\n").length - 1;
+  if (crlf === 0) return content.includes("\r") ? "mixed" : "lf";
+  const lf = content.split("\n").length - 1;
+  const cr = content.split("\r").length - 1;
+  return lf === crlf && cr === crlf ? "crlf" : "mixed";
+}
+
 /** Returns the file type for the extension of `filePath`. Unknown extensions give Markdown. */
 export function detectFileType(filePath: string): FileType {
   switch (extname(filePath).toLowerCase()) {

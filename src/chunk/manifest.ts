@@ -41,6 +41,12 @@ export interface Manifest {
    * field merges as before, by object.
    */
   jsonLayout?: JsonLayout;
+  /**
+   * "crlf" when every line break of the source file is CRLF. Chunk files always have LF line
+   * breaks; `merge` writes CRLF again. An LF file has no field, and a reader that does not know
+   * the field writes LF, as before.
+   */
+  lineEnding?: "crlf";
 }
 
 /**
@@ -161,6 +167,7 @@ export function validateManifest(value: unknown): Manifest {
     }
     if (typeof c.hash !== "string") fail(`chunks[${i}].hash must be a string`);
   });
+  if (m.lineEnding !== undefined && m.lineEnding !== "crlf") fail('lineEnding must be "crlf"');
   if (m.jsonLayout !== undefined) {
     const l = m.jsonLayout as Record<string, unknown> | null;
     const valid =

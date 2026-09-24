@@ -306,3 +306,33 @@ describe("chunk JSON merge keeps a __proto__ key (finding 7)", () => {
     expect(JSON.stringify(merged)).toBe('{"__proto__":{"k":1},"b":2}');
   });
 });
+
+describe("chunk CRLF line endings (item c)", () => {
+  for (const file of ["guide.md", "config.json", "parser.ts", "module.ts", "list.json"]) {
+    test(`${file} with CRLF line endings round-trips byte for byte`, async () => {
+      const dir = join(work, "crlf", file);
+      const text = readFileSync(join(FIXTURES, file), "utf8").replace(/\n/g, "\r\n");
+      const src = put(join(dir, file), text);
+      expect((await chunk(["split", src])).code).toBe(0);
+      const base = file.slice(0, file.lastIndexOf("."));
+      const manifest = join(dir, `${base}_chunks`, "manifest.json");
+      expect(JSON.parse(readFileSync(manifest, "utf8")).lineEnding).toBe("crlf");
+      const m = await chunk(["merge", manifest]);
+      expect(m.err).toBe("");
+      expect(m.code).toBe(0);
+      expect(readFileSync(src).equals(Buffer.from(text))).toBe(true);
+    });
+  }
+
+  test("an LF file writes no lineEnding field", async () => {
+    const r = await splitMerge("crlf-lf", "guide.md");
+    expect(JSON.parse(readFileSync(r.manifest, "utf8"))).not.toHaveProperty("lineEnding");
+  });
+
+  test("split warns about mixed line endings", async () => {
+    const src = put(join(work, "crlf-mixed", "mixed.md"), "# A\r\n\r\ntext\n## B\n");
+    const r = await chunk(["split", src]);
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("mixed line endings");
+  });
+});
