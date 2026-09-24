@@ -31,6 +31,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port, part 1 (task D1): `src/depgraph/types.ts` holds the shared types of the
+  pipeline. `src/depgraph/paths.ts` gives POSIX paths relative to the root. `src/mask.ts` is the
+  one comment and string masking module: `blankCommentsAndStrings` and `stripComments` read the
+  source as tokens, and the `*Regex` functions keep the comment removal of the pre-port
+  generator byte for byte until the fixes replace it.
 - `compress` round-trip tests (design 13.3 step 5): for JSON, `compress` then `compress -d`
   gives a deep-equal value at each level. For the other 10 formats, the chain from the fixture
   gives the golden restored file. The smoke test `scripts/smoke.ts` has a fourth step: a JSON
