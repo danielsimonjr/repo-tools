@@ -19,7 +19,7 @@
 ## Part 2
 
 - [x] D0 Fixture repositories and the characterization goldens of the pre-port generator.
-- [ ] D1-D8 `depgraph` port to byte parity with the goldens (branch `d-port`, under review).
+- [x] D1-D8 `depgraph` port to byte parity with the goldens (reviewed; one fidelity fix).
 - [ ] D9 API-surface module. Landed in 486d8f3; the CLI flag comes with D10.
 - [ ] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
   the extension loader.
