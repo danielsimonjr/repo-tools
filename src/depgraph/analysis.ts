@@ -5,12 +5,11 @@
  * Port notes, kept on purpose until the fixes land:
  * - `detectCircularDependencies` is a depth-first search that reports the cycles it meets, so
  *   its result depends on the listing order and can miss cycles (fix F26).
- * - The in-file reference count of `detectUnused` reads the raw source, comments included
- *   (fix F24).
  * - Dormancy exists in monorepo mode only (fix M1).
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { stripComments } from "../mask.ts";
 import { resolvePath, workspaceEntryPath } from "./resolver.ts";
 import { configReferencedEntries } from "./roots.ts";
 import type {
@@ -314,7 +313,8 @@ export function detectUnused(
     const inFileRefs = (name: string): number => {
       if (fileContent === undefined) {
         try {
-          fileContent = readFileSync(join(root, file.path), "utf-8");
+          // Fix F24: a name in a comment (its own JSDoc, a `//` note) is not a use.
+          fileContent = stripComments(readFileSync(join(root, file.path), "utf-8"));
         } catch {
           fileContent = "";
         }

@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F24: the in-file reference count of an unused export reads the source without
+  comments. An export named only in its own JSDoc or in a `//` comment stays in "Unreferenced
+  anywhere (deletion candidates)"; the port counted the comment text as a use. A use in code
+  still counts. Comments are removed with the string-aware scanner of `src/mask.ts`.
 - depgraph F23: a dynamic `import()` with a backtick-quoted relative specifier, such as
   ``import(`./x.js`)``, is a dependency edge. A template with a `${` substitution names no fixed
   file and gives no edge. The port read single and double quotes only.
