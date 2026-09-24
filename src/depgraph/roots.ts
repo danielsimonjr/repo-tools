@@ -120,12 +120,10 @@ export function exportsSubpathEntries(
     for (const m of script.matchAll(/(?:^|\s)(src\/[\w./-]+\.ts)\b/g)) {
       addIfExists(join(pkgDir, m[1] ?? ""));
     }
-    // Port fidelity: the pre-port generator's pattern holds a literal backspace byte (0x08)
-    // after `js`, so it never matches a real script and `node dist/x.js` scripts are never
-    // seeded. The port keeps that behaviour as `\x08` until fix F33 turns the seeding on.
+    // Fix F33: `node [--flag ...] ./dist/x.js` seeds `src/x.ts`. The pre-port pattern held a
+    // backspace byte (0x08) where a word boundary was meant, so it never matched.
     for (const m of script.matchAll(
-      // biome-ignore lint/suspicious/noControlCharactersInRegex: the 0x08 is deliberate port fidelity (F33).
-      /node\s+(?:--[\w-]+(?:=\S+)?\s+)*(?:\.\/)?dist\/(\S+?)\.[cm]?js\x08/g,
+      /node\s+(?:--[\w-]+(?:=\S+)?\s+)*(?:\.\/)?dist\/(\S+?)\.[cm]?js\b/g,
     )) {
       addIfExists(join(pkgDir, "src", `${(m[1] ?? "").replace(/^src\//, "")}.ts`));
     }

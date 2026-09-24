@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F33: a `node [--flag ...] ./dist/x.js` package script seeds `src/x.ts` as a build
+  root. The pre-port pattern held a backspace byte (0x08) where a word boundary was meant, so
+  it never matched, and the port kept the byte on purpose. A script-run file was then an
+  orphan, and the census self-check exited 1; it now exits 0.
 - depgraph F32: removing the `.ts` extension removes the suffix only. The port removed the
   first `.ts` text in a path: the runtime cycle label (`c.rtp` of
   `dependency-summary.compact.json`) of `src/a.tsx.ts` was `ax.ts`, and a single-package module

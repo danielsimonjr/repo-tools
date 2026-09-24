@@ -143,11 +143,11 @@ describe("roots", () => {
     expect(seen).toEqual(["pkg/src/run.ts", "pkg/src/bind/b.ts"]);
   });
 
-  test("a `node dist/x.js` script seeds no root (pre-port behaviour; fix F33 changes this)", () => {
+  test("a `node [--flag] ./dist/x.js` script seeds src/x.ts (F33)", () => {
     const entries = exportsSubpathEntries(root, "pkg", {
       scripts: { gen: "node --max-old-space-size=4096 ./dist/tool.js" },
     });
-    expect(entries).not.toContain("pkg/src/tool.ts");
+    expect(entries).toContain("pkg/src/tool.ts");
   });
 
   test("exportsSubpathEntries maps subpaths, bins, scripts and config tsup", () => {
@@ -156,10 +156,11 @@ describe("roots", () => {
       bin: { a: "./dist/src/cli.js" },
       scripts: { build: "tsup", test: "node dist/tool.js", bind: "tsc -p tsconfig.bind.json" },
     });
-    // `node dist/tool.js` seeds nothing: the pre-port pattern cannot match (see roots.ts, F33).
+    // Fix F33: `node dist/tool.js` seeds `src/tool.ts`.
     expect(entries).toEqual([
       "pkg/src/internal.ts",
       "pkg/src/cli.ts",
+      "pkg/src/tool.ts",
       "pkg/src/run.ts",
       "pkg/src/bind/b.ts",
       "pkg/src/one.ts",
