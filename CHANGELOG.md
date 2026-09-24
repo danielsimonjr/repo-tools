@@ -41,6 +41,9 @@ All notable changes to this project are recorded in this file. The format follow
   target exits 1.
 - Smoke test `scripts/smoke.ts`: runs `--version`, `--help` and an unknown subcommand against one
   way to run the tool (the executable, `node dist/cli.js` or `bun dist/cli.js`).
+- Smoke test step 4 (design 13.3): `chunk split` on a copy of a Markdown fixture in a temporary
+  folder, then the copy is deleted, then `chunk merge`. The merged file must equal the fixture
+  byte for byte.
 - Extension-load probe `scripts/ext-probe.ts`: CI compiles it with the product's flags and proves
   that a compiled executable imports an external `.mjs` extension and runs its `preflight` and
   `report` hooks, on all three operating systems, before any extension code exists.

@@ -58,6 +58,24 @@ describe("smoke test script (design 13.3)", () => {
     expect(r.stderr.toString()).toContain("--version");
   });
 
+  test("the smoke test fails when chunk split and merge do not round-trip (13.3 step 4)", () => {
+    // A fake CLI that passes the first three steps but whose `chunk` does nothing.
+    const fake = join(work, "fake-chunk.js");
+    writeFileSync(
+      fake,
+      [
+        "const a = process.argv[2];",
+        `if (a === "--version") console.log(${JSON.stringify(pkg.version)});`,
+        'else if (a === "--help") console.log("depgraph chunk compress");',
+        'else if (a !== "chunk") process.exitCode = 1;',
+        "",
+      ].join("\n"),
+    );
+    const r = smoke(["node", fake]);
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr.toString()).toContain("chunk round trip");
+  });
+
   test("the smoke test fails without a command", () => {
     expect(smoke([]).exitCode).toBe(1);
   });
