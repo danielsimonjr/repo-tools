@@ -304,6 +304,13 @@ describe("chunk fixes", () => {
     });
   }
 
+  test("the merge hint after split names a command that exists", async () => {
+    const dir = join(work, "hint");
+    const r = await chunk(["split", stageFixture(CASES[0] as GoldenCase, dir)]);
+    expect(r.out).toContain(`To merge: repo-tools chunk merge "`);
+    expect(r.out).not.toContain("chunker merge");
+  });
+
   test("a manifest of an unknown major version exits 1", async () => {
     const s = await splitGuide("v3");
     writeFileSync(s.manifest, readText(s.manifest).replace('"2.0.0"', '"3.0.0"'));

@@ -26,4 +26,4 @@ Summary:
 Chunks written to: <DIR>/guide_chunks
 
 To edit: Modify individual chunk files in the directory
-To merge: chunker merge "<DIR>/guide_chunks/manifest.json"
+To merge: repo-tools chunk merge "<DIR>/guide_chunks/manifest.json"

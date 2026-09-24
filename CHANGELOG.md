@@ -101,3 +101,4 @@ All notable changes to this project are recorded in this file. The format follow
   wrote chunk files named `...undefined` for an unknown type, ignored a NaN level or max-lines,
   and crashed on level 0. A directory given as the file or the manifest exits 1 with a message;
   the original crashed with `EISDIR`.
+- `chunk split`: the merge hint names `repo-tools chunk merge`, not the old `chunker merge`.

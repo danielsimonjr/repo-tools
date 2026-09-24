@@ -221,7 +221,7 @@ function split(inputFile: string, options: Options, io: Io): number {
   } else {
     log(`\nChunks written to: ${outputDir}`);
     log("\nTo edit: Modify individual chunk files in the directory");
-    log(`To merge: chunker merge "${manifestPath}"`);
+    log(`To merge: repo-tools chunk merge "${manifestPath}"`);
   }
   return 0;
 }

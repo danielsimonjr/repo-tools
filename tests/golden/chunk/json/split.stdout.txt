@@ -24,4 +24,4 @@ Summary:
 Chunks written to: <DIR>/config_chunks
 
 To edit: Modify individual chunk files in the directory
-To merge: chunker merge "<DIR>/config_chunks/manifest.json"
+To merge: repo-tools chunk merge "<DIR>/config_chunks/manifest.json"
