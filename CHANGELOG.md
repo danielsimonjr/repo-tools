@@ -31,6 +31,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port, part 6 (task D7, classifier and report only): `duplicates.ts` (own
+  definitions, the allowlist, the definer and entry classes, the canonical hint and the tag
+  tally) and `reporters/duplicates.ts` (duplicate-symbols.md and duplicate-symbols.json). The
+  flags `--check-duplicates`, `--no-regen` and `--write-duplicate-baseline` come later.
 - depgraph port, part 5 (task D6): `inventory.ts` (the census: area, disposition and counts per
   file, the census self-check and the no-regenerate check of `--check-census`) and
   `coverage.ts` (direct-import test coverage with barrel tracing, and the optional coverage
