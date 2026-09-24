@@ -36,7 +36,7 @@
 - [x] chunk: refuse a manifest chunk file name that leaves the chunk folder, refuse an absolute
   `sourceFile` in a 2.x manifest, confirm a merge target outside the parent folder, and validate
   the manifest shape.
-- [ ] chunk K7: no data loss on merge (JSON array and invalid JSON; no smaller or empty result over
+- [x] chunk K7: no data loss on merge (JSON array and invalid JSON; no smaller or empty result over
   a non-empty source without `--allow-shrink`).
 - [x] chunk K8: split then merge is byte-identical for every supported type (property test),
   including top-level TypeScript statements and `export default`.

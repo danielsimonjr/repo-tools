@@ -127,6 +127,10 @@ All notable changes to this project are recorded in this file. The format follow
   `jsonLayout` merges by object, as before. Changed goldens: the TypeScript chunks, manifest,
   merged file and output; the JSON chunks `004-list.json` and `005-nested.json`, manifest,
   merged file and output.
+- `chunk merge` (K7): merge does not write a result that is smaller than the file it replaces,
+  or an empty result over a non-empty file, unless `--allow-shrink` is given. Without the flag,
+  merge exits 1, writes nothing and makes no backup. A merge that loses text is more often a
+  defect than an edit, and before this fix the loss was silent.
 - `chunk merge` keeps a `__proto__` key of a JSON object. The merge used `Object.assign`, so a
   `__proto__` key set the prototype of the result and the key was lost from the file.
 - `chunk` (fix K1): the manifest stores `sourceFile` relative to the chunk folder, with `/`

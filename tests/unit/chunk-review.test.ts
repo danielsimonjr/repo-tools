@@ -2,7 +2,15 @@
  * Tests for the review fixes of `repo-tools chunk` (review of 486d8f3..5743c5d).
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/chunk/index.ts";
@@ -196,6 +204,38 @@ describe("chunk K7: no data loss on merge", () => {
       expect(r.after).toBe(r.before);
     });
   }
+
+  /** Splits guide.md, writes `edit` into every chunk, and merges with `flags`. */
+  async function shrink(name: string, edit: string, flags: string[]) {
+    const dir = join(work, name);
+    const src = put(join(dir, "guide.md"), readFileSync(join(FIXTURES, "guide.md"), "utf8"));
+    expect((await chunk(["split", src])).code).toBe(0);
+    const chunks = join(dir, "guide_chunks");
+    const m = JSON.parse(readFileSync(join(chunks, "manifest.json"), "utf8"));
+    for (const c of m.chunks) writeFileSync(join(chunks, c.filename), edit);
+    const r = await chunk(["merge", join(chunks, "manifest.json"), ...flags]);
+    return { dir, src, r, before: readFileSync(join(FIXTURES, "guide.md"), "utf8") };
+  }
+
+  for (const [what, edit] of [
+    ["a smaller", "# Short\n"],
+    ["an empty", ""],
+  ] as const) {
+    test(`merge refuses ${what} result over a non-empty source without --allow-shrink`, async () => {
+      const s = await shrink(`k7-shrink-${what.split(" ")[1]}`, edit, []);
+      expect(s.r.code).toBe(1);
+      expect(s.r.err).toContain("--allow-shrink");
+      expect(readFileSync(s.src, "utf8")).toBe(s.before);
+      expect(readdirSync(s.dir).filter((f) => f.includes(".backup-"))).toEqual([]);
+    });
+  }
+
+  test("merge writes a smaller result with --allow-shrink", async () => {
+    const s = await shrink("k7-shrink-allowed", "# Short\n", ["--allow-shrink"]);
+    expect(s.r.err).toBe("");
+    expect(s.r.code).toBe(0);
+    expect(readFileSync(s.src, "utf8").length).toBeLessThan(s.before.length);
+  });
 });
 
 /** Every chunk fixture that holds a source file; parser.ts is the de3118a lexer fixture. */

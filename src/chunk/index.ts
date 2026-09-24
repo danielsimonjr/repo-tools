@@ -48,6 +48,7 @@ Split options:
 Merge options:
   -o, --output <file>    Output file (default: the source file of the manifest)
   --yes                  Write a source file outside the parent folder of the chunk folder
+  --allow-shrink         Write a result that is smaller than the file it replaces
   --dry-run              Show the result and write no files
 
 Status options:
@@ -74,6 +75,7 @@ interface Options {
   type?: string;
   dryRun?: boolean;
   yes?: boolean;
+  allowShrink?: boolean;
 }
 
 /** Parses the flags after the action and the target, as the original chunker does. */
@@ -93,6 +95,8 @@ function parseOptions(args: string[]): Options {
       options.dryRun = true;
     } else if (arg === "--yes") {
       options.yes = true;
+    } else if (arg === "--allow-shrink") {
+      options.allowShrink = true;
     }
   }
   return options;
@@ -329,6 +333,17 @@ function merge(manifestFile: string, options: Options, io: Io): number {
       if (!options.output)
         log("\nUse --output to write to a different file, or confirm overwrite.");
     }
+  }
+
+  // No smaller or empty result over a non-empty file without --allow-shrink (fix K7). A merge
+  // that loses text is more often a defect than an edit, and the loss is silent.
+  const newSize = Buffer.byteLength(mergedContent, "utf8");
+  const oldSize = existsSync(outputPath) ? statSync(outputPath).size : 0;
+  if (newSize < oldSize && !options.allowShrink) {
+    io.stderr(
+      `Error: the merged result (${newSize} bytes) is smaller than ${outputPath} (${oldSize} bytes). Nothing was written. Use --allow-shrink to write it.\n`,
+    );
+    return 1;
   }
 
   const lineCount = mergedContent.split("\n").length;
