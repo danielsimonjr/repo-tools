@@ -254,3 +254,33 @@ describe("K5: --level and --format are validated", () => {
     expect((await compress([join(dir, "sample.txt"), "-f", "log", "--no-stats"])).code).toBe(0);
   });
 });
+
+/** Compresses `value` as JSON at `level` and restores it. Returns the compact text and the value. */
+function jsonRoundTrip(value: unknown, level: (typeof LEVELS)[number]) {
+  const compact = getCompressor("json")(JSON.stringify(value), level).compressed;
+  return { compact, restored: JSON.parse(decompress(compact, "json")) as unknown };
+}
+
+describe("JSON: an abbreviation does not collide with a key in the data", () => {
+  for (const level of LEVELS) {
+    test(`{"name":"a","n":"b"} at ${level} keeps both values in the compact file`, () => {
+      const input = { name: "a", n: "b" };
+      const { compact, restored } = jsonRoundTrip(input, level);
+      const body = JSON.parse(compact) as Record<string, unknown>;
+      const values = Object.entries(body)
+        .filter(([k]) => k !== "_legend")
+        .map(([, v]) => String(v));
+      expect(values.sort(compareCodeUnits)).toEqual(["a", "b"]);
+      expect(restored).toEqual(input);
+    });
+
+    test(`nested short keys and a "_legend" key in the data at ${level}`, () => {
+      const input = {
+        _legend: "mine",
+        items: [{ i: 1, items: 2 }],
+        deep: { d: { dog_apple_tree_ant: 3 }, dat: 4 },
+      };
+      expect(jsonRoundTrip(input, level).restored).toEqual(input);
+    });
+  }
+});

@@ -8,6 +8,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `compress` JSON: an abbreviation does not equal a key in the data. The set of used
+  abbreviations now starts with every key in the document and with the reserved keys `_legend`
+  and `data`. Before, the input `{"name":"a","n":"b"}` at `medium` gave the compact file
+  `{"_legend":{"n":"name"},"n":"b"}`: the value `"a"` was lost in the compact file, and `-d`
+  gave `{"name":"b"}`. The compact format does not change.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the

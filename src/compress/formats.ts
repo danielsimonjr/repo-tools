@@ -103,9 +103,11 @@ function collectKeys(value: unknown, freq: Map<string, number>): void {
 const compressJson: Compressor = (content, level) => {
   const data: unknown = JSON.parse(content);
   const legend: Record<string, string> = {};
-  const existing = new Set<string>();
   const freq = new Map<string, number>();
   collectKeys(data, freq);
+  // An abbreviation must not equal a key in the data, or a key and its value are lost in the
+  // compact file. `_legend` and `data` are the reserved keys of the compact file.
+  const existing = new Set<string>([...freq.keys(), "_legend", "data"]);
 
   // Highest frequency times length first.
   const keys = [...freq.entries()]

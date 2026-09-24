@@ -41,7 +41,7 @@
 - [ ] chunk K8: split then merge is byte-identical for every supported type (property test),
   including top-level TypeScript statements and `export default`.
 - [ ] chunk: keep a `__proto__` key on JSON merge; restore CRLF line endings on merge.
-- [ ] compress: no key collision between an abbreviation and an existing short key.
+- [x] compress: no key collision between an abbreviation and an existing short key.
 - [ ] compress: keep the shape of a top-level JSON array or single value.
 - [ ] compress K9: `-d` supports JSON only; other formats exit 1 with a message.
 - [ ] compress: batch `-d` never writes to its input; `-d` changes only the file base name.
