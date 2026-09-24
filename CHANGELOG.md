@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F2: every walk lists folders in code-unit order through one module
+  (`src/depgraph/dirlist.ts`), so the reports do not depend on the order that the file system
+  returns. A reversed listing now gives the same bytes. The `mini-repo` goldens change in order
+  only. `scripts/update-depgraph-goldens.ts` rewrites the goldens in the commit of a fix.
 - `compress` (K5): `--level` and `--format` are validated. An unknown value (for example
   `--level fast`) exits 1 with a message that lists the valid values, and writes no file. The
   original tool accepted any value and used other settings without a message.

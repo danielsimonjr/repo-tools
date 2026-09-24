@@ -11,6 +11,33 @@ entryPoints:
     description: Public entry of the fixture package.
 modules:
   root:
+    src/B.ts:
+      description: 'Upper-case name: sorts before `a.ts` in code-unit order.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./a.js
+          imports:
+            - AlphaOptions
+          typeOnly: true
+        - file: ./dyn.js
+          imports: []
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - Bravo
+      classes:
+        - Bravo
+    src/_x.ts:
+      description: _x module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - helper
+      functions:
+        - helper
     src/a.ts:
       description: 'Lower-case name: sorts after `B.ts` in code-unit order.'
       externalDependencies: []
@@ -36,23 +63,6 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports: []
-    src/B.ts:
-      description: 'Upper-case name: sorts before `a.ts` in code-unit order.'
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./a.js
-          imports:
-            - AlphaOptions
-          typeOnly: true
-        - file: ./dyn.js
-          imports: []
-          typeOnly: true
-      workspaceDependencies: []
-      exports:
-        - Bravo
-      classes:
-        - Bravo
     src/cli.ts:
       description: cli module
       externalDependencies: []
@@ -121,16 +131,56 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports: []
-    src/_x.ts:
-      description: _x module
+  Z:
+    src/Z/index.ts:
+      description: Package entry point for Z (re-exports 2 symbols)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./zed.js
+          imports: []
+          reExport: true
+        - file: ./zed.js
+          imports:
+            - zed
+            - ZedShape
+          reExport: true
       workspaceDependencies: []
       exports:
-        - helper
+        - zed
+        - ZedShape
+      reExported:
+        - zed
+        - ZedShape
+    src/Z/loop.ts:
+      description: Type definitions (1 interfaces, 0 type aliases)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./zed.js
+          imports:
+            - ZedShape
+          typeOnly: true
+      workspaceDependencies: []
+      exports: []
+      interfaces:
+        - Loop
+    src/Z/zed.ts:
+      description: zed module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./loop.js
+          imports:
+            - Loop
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - zed
+      interfaces:
+        - ZedShape
       functions:
-        - helper
+        - zed
   entry:
     src/index.ts:
       description: Public entry of the fixture package.
@@ -189,56 +239,6 @@ modules:
         - clamp
       functions:
         - clamp
-  Z:
-    src/Z/index.ts:
-      description: Package entry point for Z (re-exports 2 symbols)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./zed.js
-          imports: []
-          reExport: true
-        - file: ./zed.js
-          imports:
-            - zed
-            - ZedShape
-          reExport: true
-      workspaceDependencies: []
-      exports:
-        - zed
-        - ZedShape
-      reExported:
-        - zed
-        - ZedShape
-    src/Z/loop.ts:
-      description: Type definitions (1 interfaces, 0 type aliases)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./zed.js
-          imports:
-            - ZedShape
-          typeOnly: true
-      workspaceDependencies: []
-      exports: []
-      interfaces:
-        - Loop
-    src/Z/zed.ts:
-      description: zed module
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./loop.js
-          imports:
-            - Loop
-          typeOnly: true
-      workspaceDependencies: []
-      exports:
-        - zed
-      interfaces:
-        - ZedShape
-      functions:
-        - zed
 dependencyGraph:
   circularDependencies:
     runtime:
@@ -255,27 +255,27 @@ dependencyGraph:
   layers:
     - name: Root
       files:
+        - src/B.ts
+        - src/_x.ts
         - src/a.ts
         - src/ambient.d.ts
-        - src/B.ts
         - src/cli.ts
         - src/dyn.ts
         - src/orphan.ts
         - src/ping.ts
         - src/pong.ts
         - src/register.ts
-        - src/_x.ts
+    - name: Z
+      files:
+        - src/Z/index.ts
+        - src/Z/loop.ts
+        - src/Z/zed.ts
     - name: Entry
       files:
         - src/index.ts
     - name: Util
       files:
         - src/util/index.ts
-    - name: Z
-      files:
-        - src/Z/index.ts
-        - src/Z/loop.ts
-        - src/Z/zed.ts
 statistics:
   totalTypeScriptFiles: 15
   totalModules: 4

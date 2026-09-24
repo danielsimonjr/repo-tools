@@ -1,11 +1,12 @@
 /**
  * Directory walks of the depgraph pipeline.
  *
- * Port note: every walk keeps the order that `readdirSync` returns (fix F2 sorts it). The graph
+ * Every walk lists folders through `dirlist.ts`, in code-unit order (fix F2). The graph
  * walk keeps `.d.ts` files. The census walks skip them.
  */
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { listEntries, listNames } from "./dirlist.ts";
 import { relativePosix, srcDirOf } from "./paths.ts";
 import type { WorkspacePackage } from "./types.ts";
 
@@ -36,7 +37,7 @@ const NOT_SOURCE = new Set([
  */
 export function getAllTsFiles(dir: string, files: string[] = []): string[] {
   if (!existsSync(dir)) return files;
-  for (const entry of readdirSync(dir)) {
+  for (const entry of listNames(dir)) {
     if (entry === "node_modules") continue;
     const fullPath = join(dir, entry);
     if (statSync(fullPath).isDirectory()) {
@@ -55,7 +56,7 @@ export function getAllTsFiles(dir: string, files: string[] = []): string[] {
 /** Collects the `.ts` source files under `dir`: no test file and no `.d.ts` file. */
 export function getAllSourceTsFiles(dir: string, files: string[] = []): string[] {
   if (!existsSync(dir)) return files;
-  for (const entry of readdirSync(dir)) {
+  for (const entry of listNames(dir)) {
     if (entry === "node_modules") continue;
     const fullPath = join(dir, entry);
     if (statSync(fullPath).isDirectory()) {
@@ -75,7 +76,7 @@ export function getAllSourceTsFiles(dir: string, files: string[] = []): string[]
 /** Collects the `.test.ts` and `.spec.ts` files under `dir`. Skips `node_modules`. */
 export function getAllTestFiles(dir: string, files: string[] = []): string[] {
   if (!existsSync(dir)) return files;
-  for (const entry of readdirSync(dir)) {
+  for (const entry of listNames(dir)) {
     if (entry === "node_modules") continue;
     const fullPath = join(dir, entry);
     if (statSync(fullPath).isDirectory()) {
@@ -96,7 +97,7 @@ export function resolveSourceDirs(root: string): string[] {
   const src = srcDirOf(root);
   if (existsSync(src)) return [src];
   const roots: string[] = [];
-  for (const entry of readdirSync(root, { withFileTypes: true })) {
+  for (const entry of listEntries(root)) {
     if (!entry.isDirectory()) continue;
     if (entry.name.startsWith(".") || NOT_SOURCE.has(entry.name)) continue;
     const dir = join(root, entry.name);
@@ -117,7 +118,7 @@ function censusSkips(name: string): boolean {
 export function walkRepoTsFiles(root: string): string[] {
   const out: string[] = [];
   const walk = (dir: string): void => {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
+    for (const e of listEntries(dir)) {
       if (censusSkips(e.name)) continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
@@ -144,7 +145,7 @@ export function collectCensusFiles(
   const set = new Set<string>();
   const walk = (dir: string): void => {
     if (!existsSync(dir)) return;
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
+    for (const e of listEntries(dir)) {
       if (censusSkips(e.name)) continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
@@ -153,7 +154,7 @@ export function collectCensusFiles(
   };
   for (const [, ws] of workspaces) walk(join(root, ws.directory));
   for (const d of CENSUS_DIRS) walk(join(root, d));
-  for (const e of readdirSync(root, { withFileTypes: true })) {
+  for (const e of listEntries(root)) {
     if (e.isFile() && e.name.endsWith(".ts") && !e.name.endsWith(".d.ts")) set.add(e.name);
   }
   return [...set];

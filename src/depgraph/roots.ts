@@ -6,8 +6,9 @@
  * Port note: `tsupConfigEntries` reads the first `entry: [...]` array only (fix F14), and it runs
  * only when a `build` or `dev` script calls a bare `tsup`.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { listNames } from "./dirlist.ts";
 import { relativePosix, toPosix } from "./paths.ts";
 import { getAllSourceTsFiles } from "./scanner.ts";
 import type { ParsedFile, WorkspacePackage } from "./types.ts";
@@ -142,7 +143,7 @@ export function configReferencedEntries(root: string): string[] {
   const out = new Set<string>();
   let names: string[];
   try {
-    names = readdirSync(root);
+    names = listNames(root);
   } catch {
     return [];
   }

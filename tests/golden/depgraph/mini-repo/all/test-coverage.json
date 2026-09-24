@@ -38,14 +38,22 @@
     "src/index.ts"
   ],
   "coverageMap": {
+    "src/B.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/Z/index.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/Z/loop.ts": [],
+    "src/Z/zed.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/_x.ts": [],
     "src/a.ts": [
       "tests/a.test.ts",
       "tests/barrel.test.ts"
     ],
     "src/ambient.d.ts": [],
-    "src/B.ts": [
-      "tests/barrel.test.ts"
-    ],
     "src/cli.ts": [],
     "src/dyn.ts": [],
     "src/index.ts": [
@@ -55,15 +63,7 @@
     "src/ping.ts": [],
     "src/pong.ts": [],
     "src/register.ts": [],
-    "src/util/index.ts": [],
-    "src/Z/index.ts": [
-      "tests/barrel.test.ts"
-    ],
-    "src/Z/loop.ts": [],
-    "src/Z/zed.ts": [
-      "tests/barrel.test.ts"
-    ],
-    "src/_x.ts": []
+    "src/util/index.ts": []
   },
   "testToSourceMap": {
     "tests/a.test.ts": [

@@ -2,9 +2,10 @@
  * Workspace detection: npm and Yarn `workspaces`, `pnpm-workspace.yaml`, and the structural
  * fallback for a repo that holds two or more packages without a declaration.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
+import { listEntries, listNames } from "./dirlist.ts";
 import { toPosix } from "./paths.ts";
 import { exportsSubpathEntries } from "./roots.ts";
 import type { WorkspacePackage } from "./types.ts";
@@ -39,7 +40,7 @@ export function readWorkspacePatterns(root: string): string[] {
   }
 
   const detected: string[] = [];
-  for (const entry of readdirSync(root, { withFileTypes: true })) {
+  for (const entry of listEntries(root)) {
     if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
     if (entry.name === "node_modules" || entry.name === "tools") continue;
     const dir = join(root, entry.name);
@@ -83,7 +84,7 @@ export function detectWorkspaces(root: string): Map<string, WorkspacePackage> {
       if (pattern.endsWith("/*")) {
         const parentDir = pattern.slice(0, -2);
         if (!existsSync(join(root, parentDir))) continue;
-        for (const entry of readdirSync(join(root, parentDir))) {
+        for (const entry of listNames(join(root, parentDir))) {
           addPackage(root, join(parentDir, entry), workspaces);
         }
       } else {

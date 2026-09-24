@@ -21,6 +21,10 @@
 
 The following 10 source files are not directly imported by any test file:
 
+### Z/
+
+- `src/Z/loop.ts` → Expected test: `tests/unit/Z/loop.test.ts`
+
 ### root/
 
 - `src/_x.ts` → Expected test: `tests/unit/root/_x.test.ts`
@@ -35,10 +39,6 @@ The following 10 source files are not directly imported by any test file:
 ### util/
 
 - `src/util/index.ts` → Expected test: `tests/unit/util/index.test.ts`
-
-### Z/
-
-- `src/Z/loop.ts` → Expected test: `tests/unit/Z/loop.test.ts`
 
 ---
 
