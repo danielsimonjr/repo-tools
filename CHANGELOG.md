@@ -31,6 +31,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph port, part 5 (task D6): `inventory.ts` (the census: area, disposition and counts per
+  file, the census self-check and the no-regenerate check of `--check-census`) and
+  `coverage.ts` (direct-import test coverage with barrel tracing, and the optional coverage
+  policy). The self-check returns its failure text and does not throw, so the pipeline can
+  return exit code 1.
 - depgraph port, part 4 (task D5): `analysis.ts` (modules, the dependency matrix, reachability,
   the depth-first cycle search, the public surface, unused files and exports, the statistics
   and the dormant split). The cycle search and the in-file reference count keep the pre-port
