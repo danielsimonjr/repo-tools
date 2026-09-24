@@ -46,7 +46,8 @@ Options:
 
 Batch options:
   -b, --batch          Process many files.
-  -p, --pattern <pat>  The file-name pattern, for example "*.md". Default: "*.json".
+  -p, --pattern <pat>  The file-name pattern, for example "*.md". Only * and ? are
+                       wildcards. Without --pattern, give the files as arguments.
   -r, --recursive      Also search the subdirectories.
 
 Levels:
@@ -59,7 +60,8 @@ JSON:
   (exit 1), because JSON.parse would change its value. An integer-like key ("2", "10")
   moves to the start of its object, in numeric order, as JSON.parse orders it.
 
-Exit codes: 0 when all files are done, 1 on an error.
+Exit codes: 0 when all files are done, 1 on an error. An unknown option, an option without
+a value, a missing input file and two inputs without --batch are errors. No file is written.
 `;
 
 /** The file-system access that batch mode uses. Tests replace it. */
@@ -107,14 +109,23 @@ function parseArgs(args: readonly string[]): Options {
     recursive: false,
     pattern: "",
   };
+  // Returns the value after the option at `i`. A missing value, or a value that starts with "-",
+  // is an error: the original tool used a default value without a message.
+  const optionValue = (i: number): string => {
+    const value = args[i + 1];
+    if (value === undefined || value === "" || value.startsWith("-")) {
+      throw new UsageError(`option '${args[i]}' needs a value.`);
+    }
+    return value;
+  };
   for (let i = 0; i < args.length; i++) {
     const arg = args[i] ?? "";
     if (arg === "-o" || arg === "--output") {
-      o.output = args[++i] || "";
+      o.output = optionValue(i++);
     } else if (arg === "-f" || arg === "--format") {
-      o.format = (args[++i] || "auto") as FileFormat | "auto";
+      o.format = optionValue(i++) as FileFormat;
     } else if (arg === "-l" || arg === "--level") {
-      o.level = (args[++i] || "medium") as CompressionLevel;
+      o.level = optionValue(i++) as CompressionLevel;
     } else if (arg === "--no-legend") {
       // Accepted and ignored, as in the original tool.
     } else if (arg === "--no-stats") {
@@ -128,14 +139,24 @@ function parseArgs(args: readonly string[]): Options {
     } else if (arg === "-r" || arg === "--recursive") {
       o.recursive = true;
     } else if (arg === "-p" || arg === "--pattern") {
-      o.pattern = args[++i] || "*.json";
-    } else if (!arg.startsWith("-")) {
+      o.pattern = optionValue(i++);
+    } else if (arg.startsWith("-")) {
+      throw new UsageError(`unknown option '${arg}'. See 'repo-tools compress --help'.`);
+    } else {
       if (!o.input) o.input = arg;
       o.inputs.push(arg);
     }
   }
+  if (!o.batch && o.inputs.length > 1) {
+    throw new UsageError(
+      `${o.inputs.length} inputs without --batch. Use --batch to process many files.`,
+    );
+  }
   return o;
 }
+
+/** A command-line error. `run` writes its message and exits 1. */
+class UsageError extends Error {}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -319,11 +340,13 @@ function runBatch(o: Options, io: Io, deps: CompressDeps): number {
       io.stderr(`Error: ${dir} is a directory. Use --pattern <glob> to select files in it.\n`);
       return 1;
     }
-    files = o.inputs.filter((f) => existsSync(f));
+    // The original tool warned, processed the other files and exited 0.
     const missing = o.inputs.filter((f) => !existsSync(f));
     if (missing.length > 0) {
-      io.stderr(`Warning: ${missing.length} file(s) not found: ${missing.join(", ")}\n`);
+      io.stderr(`Error: ${missing.length} file(s) not found: ${missing.join(", ")}\n`);
+      return 1;
     }
+    files = [...o.inputs];
   }
   // Compression skips the .compact files: the original tool compressed its own output again
   // (README.compact.compact.md). Decompression takes only the .compact files: the original tool
@@ -419,7 +442,14 @@ export async function run(
   io: Io,
   deps: CompressDeps = defaultDeps,
 ): Promise<number> {
-  const o = parseArgs(argv);
+  let o: Options;
+  try {
+    o = parseArgs(argv);
+  } catch (error) {
+    if (!(error instanceof UsageError)) throw error;
+    io.stderr(`Error: ${error.message}\n`);
+    return 1;
+  }
   // K5: the original tool accepted any value and fell back to other settings without a message.
   if (!(LEVELS as readonly string[]).includes(o.level)) {
     io.stderr(`Error: invalid level '${o.level}'. Use one of: ${LEVELS.join(", ")}.\n`);

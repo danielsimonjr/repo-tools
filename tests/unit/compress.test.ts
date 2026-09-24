@@ -550,3 +550,49 @@ describe("JSON: an unsafe integer is refused", () => {
     expect(Object.keys(restored)).toEqual(["2", "10", "b"]);
   });
 });
+
+describe("the command line: an error exits 1 with a message and writes no file", () => {
+  test("batch with a missing file", async () => {
+    const dir = folder("sample.md");
+    const r = await compressIn(dir, ["-b", "missing.json", "sample.md", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("not found: missing.json");
+    expect(readdirSync(dir)).toEqual(["sample.md"]);
+  });
+
+  test("two inputs without --batch", async () => {
+    const dir = folder("sample.md", "sample.txt");
+    const r = await compressIn(dir, ["sample.md", "sample.txt", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("--batch");
+    expect(readdirSync(dir).sort(compareCodeUnits)).toEqual(["sample.md", "sample.txt"]);
+  });
+
+  for (const flag of ["--level=aggressive", "--nope", "-x", "-"]) {
+    test(`an unknown option ${flag}`, async () => {
+      const dir = folder("sample.md");
+      const r = await compressIn(dir, ["sample.md", flag, "--no-stats"]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(`unknown option '${flag}'`);
+      expect(readdirSync(dir)).toEqual(["sample.md"]);
+    });
+  }
+
+  for (const flag of ["-o", "--output", "-f", "--format", "-l", "--level", "-p", "--pattern"]) {
+    test(`${flag} without a value at the end`, async () => {
+      const dir = folder("sample.md");
+      const r = await compressIn(dir, ["sample.md", "--no-stats", flag]);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain(`option '${flag}' needs a value`);
+      expect(readdirSync(dir)).toEqual(["sample.md"]);
+    });
+  }
+
+  test("-o followed by another option", async () => {
+    const dir = folder("sample.md");
+    const r = await compressIn(dir, ["sample.md", "-o", "--no-stats"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("option '-o' needs a value");
+    expect(readdirSync(dir)).toEqual(["sample.md"]);
+  });
+});

@@ -48,3 +48,4 @@
 - [x] compress: keep a `__proto__` key; escape every glob metacharacter; refuse an unsafe integer.
 - [ ] chunk and compress: exit 1 on an unknown flag, a flag without a value, a missing batch
   input, and a second input without `-b`.
+  - [x] compress part.

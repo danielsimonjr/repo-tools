@@ -51,6 +51,14 @@ All notable changes to this project are recorded in this file. The format follow
   without a message: `12345678901234567890` became `12345678901234567000`. A known limit, now
   in the help text: an integer-like object key (`"2"`, `"10"`) moves to the start of its
   object, in numeric order, because `JSON.parse` orders the keys so. The values do not change.
+- `compress` command-line errors exit 1 with a message and write no file: an unknown option
+  (for example `--nope`, or `--level=aggressive`, which is not a supported form), an option
+  without a value (a trailing `-o`, or `-o` followed by another option), a missing file in
+  `--batch` mode, and two or more inputs without `--batch`. Before, an unknown option was
+  ignored, an option without a value used a default value, `compress -b missing.json ok.md`
+  warned and exited 0, and `compress a.md b.md` processed only `a.md` and exited 0. The help
+  text lists these errors, and no longer tells a `--pattern` default that applied only to a
+  `-p` without a value.
 - Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
   `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
   the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the
