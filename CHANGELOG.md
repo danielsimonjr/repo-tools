@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph F31: the `entryPoints` list of `dependency-graph.json` matches the path segments
+  `src/index.ts`, not the text suffix. `src/mysrc/index.ts` ends with the text `src/index.ts`
+  and was listed as a main entry point. One helper (`isSrcIndex`) now makes this check for the
+  entry list, the public surface and unused detection.
 - depgraph F30: a relative specifier resolves to a `.tsx` file and to a directory index. The
   candidates are, in order: for `./x.js`, `x.ts` then `x.tsx`; for `./x.ts` or `./x.tsx`, the
   file itself; for `./x`, `x.ts`, `x.tsx`, `x/index.ts` and `x/index.tsx`. The first candidate

@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { stripComments } from "../mask.ts";
 import { filesInCycles } from "./cycles.ts";
 import { escapeRegExpLiteral } from "./duplicates.ts";
+import { isSrcIndex } from "./paths.ts";
 import { resolvePath, workspaceEntryPath } from "./resolver.ts";
 import { configReferencedEntries } from "./roots.ts";
 import type {
@@ -167,11 +168,7 @@ export function computePublicSurface(
   }
   for (const entry of configReferencedEntries(root)) extraEntryPaths.add(entry);
   for (const file of files) {
-    if (
-      file.path === "src/index.ts" ||
-      file.path.endsWith("/src/index.ts") ||
-      extraEntryPaths.has(file.path)
-    ) {
+    if (isSrcIndex(file.path) || extraEntryPaths.has(file.path)) {
       markPublic(file, new Set());
     }
   }
@@ -229,7 +226,7 @@ export function detectUnused(
   const unusedFiles: string[] = [];
   for (const file of files) {
     // Fix F17: every package `src/index.ts` is an entry root, also when it re-exports nothing.
-    if (file.path === "src/index.ts" || file.path.endsWith("/src/index.ts")) continue;
+    if (isSrcIndex(file.path)) continue;
     if (file.name === "index" && file.exports.reExported.length > 0) continue;
     if (extraEntryPaths.has(file.path)) continue;
     if (!importedFiles.has(file.path)) unusedFiles.push(file.path);

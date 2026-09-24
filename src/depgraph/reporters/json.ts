@@ -5,6 +5,7 @@
  * `c` object).
  */
 import { cleanExportName, generateFallbackDescription } from "../parser.ts";
+import { isSrcIndex } from "../paths.ts";
 import { resolvePath } from "../resolver.ts";
 import type { CyclicComponents, ModuleMap, PackageJson, ParsedFile, Statistics } from "../types.ts";
 
@@ -62,7 +63,8 @@ export function generateJSON(
       totalExports: stats.totalExports,
     },
     entryPoints: files
-      .filter((f) => f.path.endsWith("src/index.ts"))
+      // Fix F31: match the path segments, not a text suffix.
+      .filter((f) => isSrcIndex(f.path))
       .map((f) => ({ file: f.path, type: "main", description: f.description || "Entry Point" })),
     modules: modulesJson,
     dependencyGraph: {

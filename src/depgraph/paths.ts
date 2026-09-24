@@ -12,6 +12,15 @@ export function toPosix(path: string): string {
   return path.replace(/\\/g, "/");
 }
 
+/**
+ * True when the root-relative POSIX `path` is a `src/index.ts` entry: the path is
+ * `src/index.ts`, or it ends in the segments `/src/index.ts` (fix F31). `mysrc/index.ts` and
+ * `src/mysrc/index.ts` are not entries.
+ */
+export function isSrcIndex(path: string): boolean {
+  return path === "src/index.ts" || path.endsWith("/src/index.ts");
+}
+
 /** Returns `path` relative to `root`, with forward slashes. */
 export function relativePosix(root: string, path: string): string {
   return toPosix(relative(root, path));
