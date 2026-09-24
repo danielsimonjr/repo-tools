@@ -23,6 +23,7 @@ import {
   generateStatistics,
   splitDormant,
 } from "./analysis.ts";
+import { type DepgraphOptions, parseDepgraphArgs, wantsHelp } from "./args.ts";
 import { analyzeTestCoverage, type TestCoverageAnalysis } from "./coverage.ts";
 import { detectCyclicComponents } from "./cycles.ts";
 import { linkLog } from "./dirlist.ts";
@@ -58,6 +59,8 @@ import { getAllTestFiles, getAllTsFiles, resolveSourceDirs, TEST_DIR_NAMES } fro
 import type { PackageJson, ParsedFile, Statistics, UnusedExport } from "./types.ts";
 import { detectWorkspaces } from "./workspaces.ts";
 
+export { type DepgraphOptions, parseDepgraphArgs } from "./args.ts";
+
 /** The help text of `repo-tools depgraph`. */
 export const DEPGRAPH_HELP = `Usage: repo-tools depgraph [options] [project-root]
 
@@ -65,8 +68,8 @@ Write the dependency graph and the architecture reports of a TypeScript tree int
 <root>/${OUTPUT_SUBDIR}.
 
 Options:
-  --root=<path>        Project root (default: the current directory). A first
-                       argument that is an existing path also sets the root.
+  --root=<path>        Project root (default: the current directory). An
+                       argument that is not a flag also sets the root.
   --all, -a            Monorepo mode: include dormant and unreachable files.
   --reachable-only     Restrict the graph to the files reachable from a root.
                        Single-package mode analyzes all files by default.
@@ -80,54 +83,11 @@ Options:
                        walk of the root. Write nothing. Exit 1 on a difference.
   --help, -h           Show this help.
 
-Exit codes: 0 on success. 1 when no TypeScript file is found, when the census
-self-check fails with --strict-census, when an orphan exists with
---strict-orphans, or when --check-census fails.
+Exit codes: 0 on success. 1 on an unknown flag, a flag without its value or an
+invalid value (the run then writes nothing), when no TypeScript file is found,
+when the census self-check fails with --strict-census, when an orphan exists
+with --strict-orphans, or when --check-census fails.
 `;
-
-/** The parsed command line. */
-export interface DepgraphOptions {
-  root: string;
-  includeTests: boolean;
-  all: boolean;
-  /** Fix M1: restrict the graph to reachable files (single-package mode too). */
-  reachableOnly: boolean;
-  /** Fix M1: an orphan fails the census self-check. */
-  strictOrphans: boolean;
-  /** Fix F42: a census gap fails the census self-check. */
-  strictCensus: boolean;
-  checkCensus: boolean;
-  help: boolean;
-}
-
-/**
- * Parses the depgraph arguments as the pre-port generator did: unknown flags are ignored, and
- * a non-flag argument that exists on disk sets the root.
- */
-export function parseDepgraphArgs(argv: readonly string[], cwd: string): DepgraphOptions {
-  const options: DepgraphOptions = {
-    root: cwd,
-    includeTests: false,
-    all: false,
-    reachableOnly: false,
-    strictOrphans: false,
-    strictCensus: false,
-    checkCensus: false,
-    help: false,
-  };
-  for (const arg of argv) {
-    if (arg.startsWith("--root=")) options.root = arg.slice(7);
-    else if (arg === "--include-tests" || arg === "-t") options.includeTests = true;
-    else if (arg === "--all" || arg === "-a") options.all = true;
-    else if (arg === "--reachable-only") options.reachableOnly = true;
-    else if (arg === "--strict-orphans") options.strictOrphans = true;
-    else if (arg === "--strict-census") options.strictCensus = true;
-    else if (arg === "--check-census") options.checkCensus = true;
-    else if (arg === "--help" || arg === "-h") options.help = true;
-    else if (!arg.startsWith("-") && existsSync(arg)) options.root = arg;
-  }
-  return options;
-}
 
 /**
  * Reads the name and version of `<root>/package.json`, or the defaults with a warning. Fix F35:
@@ -150,13 +110,12 @@ function readPackageJson(root: string, io: Io): PackageJson {
 
 /** Runs `repo-tools depgraph` and returns the exit code. */
 export async function run(argv: string[], io: Io): Promise<number> {
-  const options = parseDepgraphArgs(argv, process.cwd());
-  if (options.help) {
+  if (wantsHelp(argv)) {
     io.stdout(DEPGRAPH_HELP);
     return 0;
   }
   try {
-    return runPipeline(options, io);
+    return runPipeline(parseDepgraphArgs(argv, process.cwd()), io);
   } catch (err) {
     io.stderr(`repo-tools depgraph: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;

@@ -20,6 +20,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- depgraph flags are strict (D10a). An unknown flag, a flag without its value (`--root`,
+  `--root=`), a value on a flag that takes none (`--all=yes`) and a second root (two positional
+  arguments, or `--root=` and a positional argument) exit 1 with a message on standard error,
+  and the run writes nothing. The parser ignored an unknown flag, so a typing error such as
+  `--strict-orphan` gave a run without the gate. The error text names the flag, never its
+  value. `--help` and `-h` win over any other argument. `-a`, `-t` (no operation) and `-h`
+  stay. No golden changes.
 - README: the status line said that the three subcommands are not built yet. It now states
   the current state: all three work, `depgraph` runs with its default settings, and `compress -d`
   restores JSON only.

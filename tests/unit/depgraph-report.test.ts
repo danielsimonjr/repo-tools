@@ -201,8 +201,8 @@ describe("unused, coverage, inventory and surface reporters", () => {
 });
 
 describe("pipeline entry", () => {
-  test("parseDepgraphArgs reads the flags and ignores unknown ones", () => {
-    expect(parseDepgraphArgs(["--root=x", "-a", "-t", "--check-census", "--zz"], "cwd")).toEqual({
+  test("parseDepgraphArgs reads the flags", () => {
+    expect(parseDepgraphArgs(["--root=x", "-a", "-t", "--check-census"], "cwd")).toEqual({
       root: "x",
       includeTests: true,
       all: true,
@@ -216,7 +216,8 @@ describe("pipeline entry", () => {
     const m1 = parseDepgraphArgs(["--reachable-only", "--strict-orphans"], "cwd");
     expect([m1.reachableOnly, m1.strictOrphans]).toEqual([true, true]);
     expect(parseDepgraphArgs([root], "cwd").root).toBe(root);
-    expect(parseDepgraphArgs(["no-such-path"], "cwd").root).toBe("cwd");
+    // A positional root is taken as given; the run checks that it is a directory.
+    expect(parseDepgraphArgs(["no-such-path"], "cwd").root).toBe("no-such-path");
   });
 
   test("--help prints the help and exits 0", async () => {
