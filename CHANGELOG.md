@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- Dependabot uses the `bun` ecosystem instead of `npm`, so an update changes `bun.lock` with
+  `package.json`; the npm ecosystem changed only `package.json`, and every CI job then failed on
+  the frozen lockfile. The `bun` ecosystem gives version updates only; advisories still reach the
+  repository as Dependabot alerts.
 - Privacy check: the address in the `Signed-off-by: dependabot[bot]` trailer is allowed, so a
   Dependabot pull request no longer fails the email rule on its own trailer.
 - depgraph F3: every Markdown report starts with the verification marker and the do-not-edit
