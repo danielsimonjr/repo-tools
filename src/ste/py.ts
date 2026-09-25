@@ -30,6 +30,34 @@ export const B = `(?:(?<=${W})(?!${W})|(?<!${W})(?=${W}))`;
 /** Python `\d`: a Unicode decimal digit. */
 export const D = "\\p{Nd}";
 
+/**
+ * The letters that Python's case-insensitive match accepts for an ASCII letter, beyond its two
+ * cases: `i` also matches U+0131 and U+0130, `s` matches U+017F, and `k` matches U+212A.
+ */
+const EXTRA_CASES: Readonly<Record<string, string>> = {
+  i: String.fromCharCode(0x131, 0x130),
+  s: String.fromCharCode(0x17f),
+  k: String.fromCharCode(0x212a),
+};
+
+/**
+ * A case-insensitive form of `pattern`, in the Python sense, as a regex source with no flag.
+ *
+ * Each ASCII letter becomes a class of its cases (`is` becomes `[iIıİ][sSſ]`); every other
+ * character stays as it is. A scoped flag group such as `(?i:is)` would do the same, but Node 20
+ * and Node 22 cannot compile one, and the npm package supports Node 20.
+ */
+export function ci(pattern: string): string {
+  let out = "";
+  for (const ch of pattern) {
+    const lower = ch.toLowerCase();
+    if (lower >= "a" && lower <= "z" && lower.length === 1) {
+      out += `[${lower}${lower.toUpperCase()}${EXTRA_CASES[lower] ?? ""}]`;
+    } else out += ch;
+  }
+  return out;
+}
+
 const SPACE_RUN = new RegExp(`${S}+`, "u");
 const LEADING_SPACE = new RegExp(`^${S}+`, "u");
 const TRAILING_SPACE = new RegExp(`${S}+$`, "u");

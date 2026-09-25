@@ -8,6 +8,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- Tests: `tests/unit/node-compat.test.ts` keeps regex modifier groups (`(?i:...)`) out of `src/`.
+  Node 20 and Node 22 cannot compile one. A rule regex compiles when its module loads, so one such
+  group stopped every subcommand of the Node bundle, although Bun and Node 24 ran it. The STE
+  rules now spell each case-insensitive word as letter classes (`ci`). The classes also match the
+  letters that Python's case-insensitive match accepts (U+0131 and U+0130 for `i`, U+017F for
+  `s`, U+212A for `k`). The STE output on Node 20 is byte-identical to the output on Bun.
 - `repo-tools ste`: checks Markdown against the mechanically decidable part of ASD-STE100
   (sentence length in two tiers, wordy forms, ambiguous references, the passive voice with an
   agent). The subcommand is a port of `ste_check.py` and `ste_rules.py` from the architecture-docs

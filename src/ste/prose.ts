@@ -7,6 +7,7 @@
  */
 import {
   B,
+  ci,
   codePointLength,
   headCodePoints,
   pySplit,
@@ -71,7 +72,7 @@ export function checkProse(text: string): ProseFinding[] {
   // Identifiers go first, so a word inside a symbol name ("utiliseCache()") is not reported.
   const prose = stripIdentifiers(text);
   for (const [phrase, better] of WORDY) {
-    if (rule(`${B}${reEscape(phrase)}${B}`, "i").test(prose)) {
+    if (rule(`${B}${ci(reEscape(phrase))}${B}`).test(prose)) {
       findings.push(["STE-WORD", `'${phrase}' -- prefer '${better}'`]);
     }
   }

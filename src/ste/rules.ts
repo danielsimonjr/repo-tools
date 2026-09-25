@@ -9,7 +9,7 @@
  * the other. A regex here is a source string, so each harness can add the flags that it needs.
  * All of them need the `u` flag, because `W`, `B` and `S` use Unicode property classes.
  */
-import { B, S, W } from "./py.ts";
+import { B, ci, S, W } from "./py.ts";
 
 /** Past participles with no -ed or -en end ("The tests are run by CI"). */
 export const IRREGULAR_PARTICIPLES =
@@ -25,13 +25,13 @@ export const DETERMINERS =
  * A form of "be", a past participle, "by" and an agent that looks like a noun phrase.
  *
  * Two guards: "by" separates the passive from a state ("the file is closed"), and the noun
- * phrase separates an agent from an adverbial ("sorted by name"). The case-insensitive parts are
- * scoped groups; a global case flag would make `[A-Z]` match lower case and defeat guard 2.
+ * phrase separates an agent from an adverbial ("sorted by name"). Only the word lists match
+ * without case (`ci`); a global case flag would make `[A-Z]` match lower case and defeat guard 2.
  */
 export const PASSIVE_SOURCE =
-  `${B}(?i:is|are|was|were|be|been|being)${S}+` +
-  `(?:(?i:${W}+(?:ed|en))|(?i:${IRREGULAR_PARTICIPLES}))${S}+` +
-  `by${S}+(?:(?i:${DETERMINERS})${B}|[A-Z\`])`;
+  `${B}(?:${ci("is|are|was|were|be|been|being")})${S}+` +
+  `(?:${W}+(?:${ci("ed|en")})|(?:${ci(IRREGULAR_PARTICIPLES)}))${S}+` +
+  `by${S}+(?:(?:${ci(DETERMINERS)})${B}|[A-Z\`])`;
 
 /** The verbs that can follow a demonstrative in an ambiguous reference. */
 const AMBIGUOUS_VERBS =
@@ -45,8 +45,8 @@ const AMBIGUOUS_VERBS =
  * Group 1 is the demonstrative.
  */
 export const AMBIGUOUS_SOURCE =
-  `(?:^|(?<=[.!?,;:])${S})${S}*(?:(?i:and|but|or|so|then|yet)${S}+)?` +
-  `((?i:it|this|that|these|those))${S}+(?:${AMBIGUOUS_VERBS})${B}`;
+  `(?:^|(?<=[.!?,;:])${S})${S}*(?:(?:${ci("and|but|or|so|then|yet")})${S}+)?` +
+  `(${ci("it|this|that|these|those")})${S}+(?:${AMBIGUOUS_VERBS})${B}`;
 
 /**
  * Wordy constructions with a shorter approved form, in the order of the source map. Each entry
