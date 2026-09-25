@@ -4,13 +4,13 @@
  * `dev` script calls `tsup`.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { makeTempDir } from "./temp.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-f14-"));
+const work = makeTempDir("f14");
 afterAll(() => {
   removeTrees();
   rmSync(work, { recursive: true, force: true });

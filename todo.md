@@ -38,6 +38,11 @@
   package, RED then GREEN; the README build step matches.
   Also: the golden sets run with `--no-extensions`, and `tests/fixtures/extension/probe.mjs` moves
   to the section 5.2 extension shape when smoke step 7 runs the product.
+- [x] D11 An interrupted test run leaves its `repo-tools-*` temp folders (a killed `bun test` never
+  runs `afterAll`). Every test temp folder carries the PID of its run, and the next run removes the
+  folders of runs that are no longer alive.
+- [ ] D11 `repo-tools query --config=<file>`, on the same path as `depgraph --config`
+  (ruling 2026-09-24).
 - [ ] D12 Public design document and the release-candidate report.
   The design document says that the extension `ctx.write` is a convenience boundary, not a
   security one: an extension is trusted repo code that can call the file system directly.

@@ -5,25 +5,17 @@
  * fixtures in tests/fixtures/compress. The port must give the same bytes and the same output.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { extname, join } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
 import { run } from "../../src/compress/index.ts";
 import { decompress } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
+import { makeTempDir } from "./temp.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
 const golden = join(import.meta.dir, "../golden/compress");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-compress-golden-"));
+const work = makeTempDir("compress-golden");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 const read = (path: string) => readFileSync(path, "utf8");

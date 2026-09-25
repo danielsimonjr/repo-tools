@@ -1,23 +1,15 @@
 /** Unit tests for the `compress` fixes and the round trip (T5 steps 2 and 3). */
 import { afterAll, describe, expect, test } from "bun:test";
-import {
-  copyFileSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { extname, join, relative } from "node:path";
 import { detectFormat, getCompressor, LEVELS } from "../../src/compress/formats.ts";
 import { type CompressDeps, findFiles, run } from "../../src/compress/index.ts";
 import { assertNumbersKept, decompress, renameKeys } from "../../src/compress/legend.ts";
 import { compareCodeUnits } from "../../src/sort.ts";
+import { makeTempDir } from "./temp.ts";
 
 const fixtures = join(import.meta.dir, "../fixtures/compress");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-compress-"));
+const work = makeTempDir("compress");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 let serial = 0;

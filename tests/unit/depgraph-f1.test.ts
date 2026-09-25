@@ -3,13 +3,13 @@
  * and no report holds an ISO date.
  */
 import { afterAll, afterEach, describe, expect, setSystemTime, test } from "bun:test";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/depgraph/index.ts";
+import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-f1-"));
+const work = makeTempDir("f1");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 afterEach(() => setSystemTime());
 

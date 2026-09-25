@@ -3,10 +3,10 @@
  * git index of a repository tracks a `.exe` file, and this repository tracks none.
  */
 import { describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { runCheck } from "../../scripts/privacy-check.ts";
+import { makeTempDir } from "./temp.ts";
 
 /** Runs git in `cwd` and throws on a non-zero exit. Returns standard output. */
 function git(cwd: string, args: string[]): string {
@@ -17,7 +17,7 @@ function git(cwd: string, args: string[]): string {
 
 describe("F20: a tracked .exe fails the privacy check", () => {
   test("a repository that tracks a compiled .exe gets a binary finding", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "repo-tools-f20-"));
+    const dir = makeTempDir("f20");
     try {
       git(dir, ["init", "-q", "-b", "main"]);
       git(dir, ["config", "core.autocrlf", "false"]);

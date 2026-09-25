@@ -1,10 +1,10 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { toJson, withOneLf, writeLf } from "../../src/io.ts";
+import { makeTempDir } from "./temp.ts";
 
-const work = mkdtempSync(join(tmpdir(), "repo-tools-io-"));
+const work = makeTempDir("io");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 describe("deterministic writes", () => {

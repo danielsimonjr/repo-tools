@@ -3,13 +3,13 @@
  * wrote JSON with no trailing newline and two Markdown reports with two.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/depgraph/index.ts";
+import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-r1-"));
+const work = makeTempDir("r1");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** Returns "LF" for one trailing LF, else a short name of the defect. */

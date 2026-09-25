@@ -3,14 +3,14 @@
  * the file system returns. A reversed reader must give the same bytes as the normal reader.
  */
 import { afterAll, afterEach, describe, expect, test } from "bun:test";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { readdirHook } from "../../src/depgraph/dirlist.ts";
 import { run } from "../../src/depgraph/index.ts";
+import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-f2-"));
+const work = makeTempDir("f2");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 const normal = { ...readdirHook };

@@ -2,20 +2,12 @@
  * Tests for the review fixes of `repo-tools chunk` (review of 486d8f3..5743c5d).
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/chunk/index.ts";
+import { makeTempDir } from "./temp.ts";
 
-const work = mkdtempSync(join(tmpdir(), "repo-tools-chunk-review-"));
+const work = makeTempDir("chunk-review");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** Runs `chunk` with captured output streams. */

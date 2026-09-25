@@ -1,12 +1,12 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import pkg from "../../package.json" with { type: "json" };
 import { scanText } from "../../scripts/privacy-check.ts";
+import { makeTempDir } from "./temp.ts";
 
 const root = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-build-"));
+const work = makeTempDir("build");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 const bundle = join(work, "cli.js");

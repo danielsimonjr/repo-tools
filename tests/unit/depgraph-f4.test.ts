@@ -4,13 +4,13 @@
  * The typecheck rejects a `quotingType` option, because the js-yaml 5 types do not declare it.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, existsSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { run } from "../../src/depgraph/index.ts";
+import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-f4-"));
+const work = makeTempDir("f4");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** The version of the js-yaml copy that the reporter loads. */

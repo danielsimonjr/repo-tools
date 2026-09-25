@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { rmSync } from "node:fs";
 import { join } from "node:path";
 import pkg from "../../package.json" with { type: "json" };
 import { main, SUBCOMMANDS } from "../../src/cli.ts";
+import { makeTempDir } from "./temp.ts";
 
 /** Runs `main` with captured output streams. */
 async function run(argv: string[]) {
@@ -60,7 +60,7 @@ describe("repo-tools CLI shell (spec 3.1)", () => {
   });
 
   test("depgraph dispatches to its pipeline: a root with no TypeScript exits 1", async () => {
-    const root = mkdtempSync(join(tmpdir(), "repo-tools-cli-"));
+    const root = makeTempDir("cli");
     try {
       const r = await run(["depgraph", `--root=${root}`]);
       expect(r.code).toBe(1);

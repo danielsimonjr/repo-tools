@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   assertDenylistFloor,
@@ -15,6 +14,7 @@ import {
   scanTrackedFile,
   selfTest,
 } from "../../scripts/privacy-check.ts";
+import { makeTempDir } from "./temp.ts";
 
 // Every plant is built from fragments, so this file never holds a literal finding and the
 // repository's own scan stays clean.
@@ -194,7 +194,7 @@ describe("self-test and the real repository", () => {
 describe("commit-msg hook mode", () => {
   const script = join(import.meta.dir, "../../scripts/privacy-check.ts");
   const runHook = async (message: string) => {
-    const dir = mkdtempSync(join(tmpdir(), "privacy-hook-"));
+    const dir = makeTempDir("privacy-hook");
     const file = join(dir, "COMMIT_EDITMSG");
     await Bun.write(file, message);
     try {
@@ -283,7 +283,7 @@ describe("review round 1: collection reads git objects (regression tests)", () =
     return r.stdout.toString().trim();
   };
   const makeRepo = () => {
-    const dir = mkdtempSync(join(tmpdir(), "privacy-repo-"));
+    const dir = makeTempDir("privacy-repo");
     git(dir, ["init", "-q", "-b", "main"]);
     git(dir, ["config", "user.name", "t"]);
     git(dir, ["config", "user.email", `t${"@"}users.noreply.github.com`]);
@@ -362,7 +362,7 @@ describe("review round 1: tools and reporting (regression tests)", () => {
     const run = (args: string[]) => Bun.spawnSync([process.execPath, tool, ...args]).exitCode;
     expect(run(["private", `jane${"."}doe`])).toBe(1);
     expect(run(["private", "good-token"])).toBe(0);
-    const dir = mkdtempSync(join(tmpdir(), "privacy-hash-"));
+    const dir = makeTempDir("privacy-hash");
     try {
       writeFileSync(join(dir, "words.txt"), "person Two Words\n");
       expect(run(["--from", join(dir, "words.txt")])).toBe(1);

@@ -3,14 +3,14 @@
  * and the banner names the configured regenerate command.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/depgraph/index.ts";
 import { bannerFor, VERIFICATION_MARKER } from "../../src/depgraph/reporters/banner.ts";
+import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-f3-"));
+const work = makeTempDir("f3");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 describe("F3: the banner", () => {

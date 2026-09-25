@@ -6,15 +6,15 @@
  * Linux, macOS and Windows is a determinism defect.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/depgraph/index.ts";
 import { sortCodeUnits } from "../../src/sort.ts";
+import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
 const golden = join(repo, "tests/golden/depgraph");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-golden-"));
+const work = makeTempDir("golden");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** The masking of the golden README: date-times, dates and the fixture root. */

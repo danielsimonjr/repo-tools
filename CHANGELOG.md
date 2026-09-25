@@ -8,6 +8,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- Tests: a killed `bun test` no longer leaves its temp folders for ever. A killed run cannot
+  run `afterAll` or `finally`, so each test temp folder now carries the PID of its run
+  (`tests/unit/temp.ts`), and the first temp folder of the next run removes the folders of dead
+  runs. A folder of a live parallel run stays. A folder from before this change (no PID) is
+  removed when it is older than one day. All 22 temp-folder sites of the tests use the helper.
 - README: the status lines say that `depgraph` and `query` read `repo-tools.config.json`. They
   said the configuration file was not built, which was false after task D10.
 - depgraph: the duplicate allowlist is read from `duplicate-allowlist.json` in the output folder

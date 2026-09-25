@@ -5,17 +5,17 @@
  * Without the flag, no other output changes.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { maskGolden } from "../../scripts/update-depgraph-goldens.ts";
 import { CONFIG_FILE } from "../../src/config.ts";
 import { parseDepgraphArgs } from "../../src/depgraph/index.ts";
 import { sortCodeUnits } from "../../src/sort.ts";
+import { makeTempDir } from "./temp.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-api-"));
+const work = makeTempDir("api");
 afterAll(() => {
   rmSync(work, { recursive: true, force: true });
   removeTrees();

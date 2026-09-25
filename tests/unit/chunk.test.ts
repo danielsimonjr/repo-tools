@@ -1,6 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { run } from "../../src/chunk/index.ts";
 import { main } from "../../src/cli.ts";
@@ -15,8 +14,9 @@ import {
   readText,
   stageFixture,
 } from "./chunk-golden.ts";
+import { makeTempDir } from "./temp.ts";
 
-const work = mkdtempSync(join(tmpdir(), "repo-tools-chunk-"));
+const work = makeTempDir("chunk");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** Runs `chunk` with captured output streams. */

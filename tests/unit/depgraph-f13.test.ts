@@ -4,15 +4,15 @@
  * Every package is found, and a workspace import resolves to the package entry.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { detectWorkspaces } from "../../src/depgraph/workspaces.ts";
+import { makeTempDir } from "./temp.ts";
 import { graphFile, runDepgraph } from "./tree.ts";
 
 const repo = join(import.meta.dir, "../..");
 const fixture = join(repo, "tests/fixtures/depgraph/pnpm-repo");
-const work = mkdtempSync(join(tmpdir(), "repo-tools-f13-"));
+const work = makeTempDir("f13");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 describe("F13: pnpm workspaces", () => {

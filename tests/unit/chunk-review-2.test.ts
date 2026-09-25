@@ -5,7 +5,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import {
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmdirSync,
   rmSync,
@@ -13,11 +12,11 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/chunk/index.ts";
+import { makeTempDir } from "./temp.ts";
 
-const work = mkdtempSync(join(tmpdir(), "repo-tools-chunk-review-2-"));
+const work = makeTempDir("chunk-review-2");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** Runs `chunk` with captured output streams. */

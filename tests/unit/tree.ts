@@ -1,15 +1,15 @@
 /** Test helper: writes a small file tree into a new temporary folder. */
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { run } from "../../src/depgraph/index.ts";
+import { makeTempDir } from "./temp.ts";
 
 /** The temporary folders that `makeTree` made in this test file. */
 const made: string[] = [];
 
 /** Writes `files` (POSIX relative path to content) under a new folder and returns the folder. */
 export function makeTree(files: Record<string, string>): string {
-  const root = mkdtempSync(join(tmpdir(), "repo-tools-dg-"));
+  const root = makeTempDir("dg");
   made.push(root);
   for (const [rel, text] of Object.entries(files)) {
     const path = join(root, rel);
