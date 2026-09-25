@@ -64,10 +64,10 @@
 
 - [x] The tool stays offline: a static test fails when `src/` imports a network module or uses a
   network global.
-- [ ] `repo-tools ste`: port `ste_check.py` and `ste_rules.py` from the architecture-docs skill, test-first.
-- [ ] `repo-tools ste --prose`: the docstring harness of the code-docs skill, over the same rule module.
-- [ ] A table of every behavioral difference between the two STE checkers, in `docs/design.md`.
-- [ ] STE parity: `repo-tools ste` and `ste_check.py` give the same output on a real document corpus.
+- [x] `repo-tools ste`: port `ste_check.py` and `ste_rules.py` from the architecture-docs skill, test-first.
+- [x] `repo-tools ste --prose`: the docstring harness of the code-docs skill, over the same rule module.
+- [x] A table of every behavioral difference between the two STE checkers, in `docs/design.md`.
+- [x] STE parity: `repo-tools ste` and `ste_check.py` give the same output on a real document corpus.
 
 ## Post-release list (filed, not worked in v1)
 

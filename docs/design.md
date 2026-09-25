@@ -10,7 +10,7 @@ Several repositories kept their own copies of the same repository tools. The cop
 in one copy did not reach the others. `repo-tools` replaces the copies with one tool, one source
 and one test suite.
 
-The tool has four subcommands:
+The tool has five subcommands:
 
 | Subcommand | Job |
 |---|---|
@@ -18,6 +18,7 @@ The tool has four subcommands:
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores a compact JSON file. |
 | `query` | Answers structural questions from the `depgraph` reports, and writes two derived reports. |
+| `ste` | Checks Markdown or docstring prose against Simplified Technical English. |
 
 ## 2. Distribution
 
@@ -125,16 +126,16 @@ relative to the root. They load in config order. The default export has this sha
   `--check-duplicates --no-regen` run no hook.
 - `report` runs after the analysis. `graph` is a frozen copy of the analysis result.
 - `mask` gives the functions of `src/mask.ts`, so an extension keeps no copy of its own.
-- `write` writes a file in the output folder. It applies rule R1. It refuses an empty path, an
-  absolute path, and a path out of the output folder.
+- `write` writes a file in the output folder, and applies rule R1. `write` refuses an empty
+  path, an absolute path, and a path out of the output folder.
 - A hook that throws, or a module that does not load, stops the run with exit 1. The message names
   the extension.
 - `--no-extensions` loads no extension.
 
 **`ctx.write` is a convenience boundary, not a security boundary.** An extension is trusted code of
-the repository. It can call the file system directly, as any repository script can. `write` makes
-the correct path easy; it does not stop an extension that wants to write somewhere else. Review an
-extension as you review any other code in the repository.
+the repository. An extension can call the file system directly, as any repository script can.
+`write` makes the correct path easy. `write` does not stop an extension that writes to another
+place. Review an extension as you review any other code in the repository.
 
 ## 7. The query subcommand
 
@@ -164,8 +165,8 @@ SHA-256 of each chunk. The merge refuses these cases, unless a flag permits them
 - a target out of the parent folder of the chunk folder (`--yes`);
 - a result smaller than the file that it replaces (`--allow-shrink`).
 
-The merge always refuses a chunk that is a symbolic link, a junction or a folder, and a chunk
-whose real path is out of the real chunk folder. No flag permits these cases.
+The merge always refuses a chunk that is a symbolic link, a junction or a folder. The merge also
+refuses a chunk whose real path is out of the real chunk folder. No flag permits these cases.
 
 A split followed by a merge gives the input bytes.
 
@@ -176,7 +177,49 @@ the restore stops with exit 1 when a number would change, and the message gives 
 `-d` on another format stops with exit 1 and writes no file. `-d` does not write over a file
 without `--yes`.
 
-## 9. Privacy check
+## 9. The ste subcommand
+
+`repo-tools ste` checks prose against the part of ASD-STE100 that a tool can decide. The rules
+cover sentence length, wordy forms, ambiguous references and the passive voice with an agent. The
+tool cannot judge the approved dictionary, because that dictionary is licensed.
+
+One rule module (`src/ste/rules.ts`) holds the rules. Two harnesses apply the rules:
+
+- the **Markdown harness** (`src/ste/markdown.ts`, the default mode) is a gate. A finding gives
+  exit 1.
+- the **docstring harness** (`src/ste/prose.ts`, `--prose <file>`) gives advice. The exit code
+  is 0.
+
+The two harnesses came from two skills, and they apply the same rules in different ways. Each row
+below comes from a run of both harnesses on the same text.
+
+| Behavior | Markdown harness | Docstring harness |
+|---|---|---|
+| Input | A Markdown file, or each `.md` file below a folder | One docstring |
+| Text removed first | Fences, tables, headings, quotes, HTML comments, frontmatter, `- Not:` lines, link targets | Tag lines (`@param`), section headers (`Args:`), doctest lines, rules, fences |
+| Code-like tokens | Removed before every rule | Removed before the wordy rule only |
+| A backticked agent (`` by `parse` ``) | Not an agent: no passive finding | An agent: a passive finding |
+| Sentence limit | 20 words for a numbered step or a check box, 25 for other text | 20 words |
+| A word | A token with a letter or a digit | Any token (a lone `-` counts) |
+| A wordy form | Lower case only; each occurrence, with its line | Any case; one finding per form |
+| Passive and ambiguous | Each match, with its line | The first match per sentence |
+| A paragraph | Wrapped lines join; each list item is its own paragraph | The whole docstring is one text |
+
+The Markdown harness is a port of `ste_check.py` from the architecture-docs skill. The docstring
+harness is a port of `code_docs/ste.py` from the code-docs skill. The two skills kept identical
+copies of the rules. On a real corpus of Markdown files, the port and `ste_check.py` give the
+same findings, byte for byte. The CHANGELOG records the measurement. The port differs from
+`ste_check.py` in these ways only:
+
+- **File order.** The port sorts the paths in code-unit order on every operating system. Python
+  sorts them without case on Windows, so its order on Windows is different.
+- **A file that is not UTF-8.** The port stops with exit 2 and names the file. Python stops with a
+  traceback.
+- **File selection.** The port reads a file whose name ends in `.md` on every operating system. A
+  folder with a `.md` name is not a file, so the port does not read it.
+- **The usage text** names `repo-tools ste`.
+
+## 10. Privacy check
 
 The repository is public, and its source came from private repositories. `scripts/privacy-check.ts`
 runs on every push and on every pull request. It scans each tracked file and each commit message.
@@ -198,25 +241,27 @@ exists.
 
 **The denylist hides names only from a reader, not from a guesser.** The list holds SHA-256
 hashes, so the repository does not publish the names that it protects. But a hash of a short word
-is an oracle: a person who guesses a name can hash the guess and find it in the list. The list
-therefore protects against a casual reader and against an accidental leak. It does not keep a name
-secret from a person who already suspects it. Do not put a secret value (a key, a token or a
+is an oracle. A person who guesses a name can hash the guess and find the hash in the list. The
+list therefore protects against a casual reader and against an accidental leak. The list does not
+keep a name secret from a person who already suspects the name. Do not put a secret value (a key, a token or a
 password) on the list. A secret must never be in the repository in any form.
 
-## 10. Build and CI
+## 11. Build and CI
 
 - Every action in a workflow is pinned to a full 40-character commit SHA. A tag can move; a SHA
   cannot.
 - The workflows have `contents: read` permission only. No workflow holds a publish token or
-  `id-token: write`. CI builds and tests; it does not publish.
-- `ci.yml` runs on each push and pull request. Its jobs run in parallel: the privacy check; type
-  check, lint and unit tests on Linux, Windows and macOS; and on each of the three operating
-  systems, the compiled executable with the smoke test on it and on `node dist/cli.js` and
-  `bun dist/cli.js`. A last job packs the npm package and records its SHA-256.
+  `id-token: write`. CI builds and tests. CI does not publish.
+- `ci.yml` runs on each push and pull request. Its jobs run in parallel:
+  - the privacy check;
+  - type check, lint and unit tests on Linux, Windows and macOS;
+  - on each of the three operating systems, the compiled executable, with the smoke test on the
+    executable, on `node dist/cli.js` and on `bun dist/cli.js`;
+  - a last job that packs the npm package and records its SHA-256.
 - `build.yml` runs on a version tag. It checks that the tag equals the `package.json` version,
   builds the three executables, and writes their SHA-256 sums.
 
-## 11. Verification
+## 12. Verification
 
 | Check | Proves |
 |---|---|
@@ -233,7 +278,7 @@ The mini-repo fixture holds names whose case order differs from code-unit order 
 A killed test run cannot remove its temporary folders. Each test folder name holds the process ID
 of its run, and the next run removes the folders of runs that are no longer alive.
 
-## 12. Limits of version 1
+## 13. Limits of version 1
 
 - `depgraph` reads TypeScript only (`.ts` and `.tsx`). Other languages are out of scope.
 - `compress -d` restores JSON only.

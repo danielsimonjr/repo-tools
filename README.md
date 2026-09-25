@@ -1,6 +1,6 @@
 # repo-tools
 
-`repo-tools` is one command-line tool with four subcommands for TypeScript repositories:
+`repo-tools` is one command-line tool with five subcommands for repositories:
 
 | Subcommand | Job |
 |---|---|
@@ -8,10 +8,11 @@
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 | `query` | Answers structural questions from the depgraph reports, and writes two derived reports. |
+| `ste` | Checks Markdown or docstring prose against Simplified Technical English. |
 
 Status: version 1.0.0.
 
-- All four subcommands work.
+- All five subcommands work.
 - `depgraph` and `query` read their settings from `repo-tools.config.json` in the root.
   `--config=<file>` makes either subcommand read another file.
 - `compress -d` restores JSON files only.

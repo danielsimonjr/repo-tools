@@ -10,6 +10,7 @@ import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
 import { DEPGRAPH_HELP, run as runDepgraph } from "./depgraph/index.ts";
 import type { Io } from "./io-types.ts";
 import { QUERY_HELP, run as runQuery } from "./query/index.ts";
+import { run as runSte, STE_HELP } from "./ste/index.ts";
 
 export type { Io } from "./io-types.ts";
 
@@ -41,6 +42,11 @@ const REGISTRY = {
     summary: "Answer structural questions from the depgraph reports, or write derived reports.",
     help: QUERY_HELP,
     run: runQuery,
+  },
+  ste: {
+    summary: "Check Markdown or docstring prose against Simplified Technical English.",
+    help: STE_HELP,
+    run: runSte,
   },
 } satisfies Record<string, Subcommand>;
 

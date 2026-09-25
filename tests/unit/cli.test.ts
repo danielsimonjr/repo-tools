@@ -21,8 +21,8 @@ async function run(argv: string[]) {
 }
 
 describe("repo-tools CLI shell (spec 3.1)", () => {
-  test("the subcommand list is exactly depgraph, chunk, compress, query", async () => {
-    expect([...SUBCOMMANDS]).toEqual(["depgraph", "chunk", "compress", "query"]);
+  test("the subcommand list is exactly depgraph, chunk, compress, query, ste", async () => {
+    expect([...SUBCOMMANDS]).toEqual(["depgraph", "chunk", "compress", "query", "ste"]);
   });
 
   for (const argv of [[], ["--help"], ["-h"]]) {

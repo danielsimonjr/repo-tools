@@ -8,6 +8,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools ste`: checks Markdown against the mechanically decidable part of ASD-STE100
+  (sentence length in two tiers, wordy forms, ambiguous references, the passive voice with an
+  agent). The subcommand is a port of `ste_check.py` and `ste_rules.py` from the architecture-docs
+  skill.
+  `repo-tools ste --prose <file>` is the docstring harness of the code-docs skill, over the same
+  one rule module. `docs/design.md` has a table of every behavioral difference between the two
+  harnesses; a run of both on the same text proves each row. The port and `ste_check.py` give the
+  same 362 findings, byte for byte, on 111 Markdown files. The corpus holds the architecture docs
+  of memoryjs, Mathts and universal-physics-tensor, the repo-tools docs, and 17 files of a
+  private repository. Only the file order differs: the port sorts in code-unit order on every
+  operating system.
+- `docs/design.md`: 8 STE findings fixed (the new checker found them); the document is STE-clean.
 - Tests: `tests/unit/offline.test.ts` keeps the tool offline. It fails when a file in `src/`
   imports a network module (`http`, `https`, `http2`, `net`, `dgram`, `tls`, `dns`, `undici`,
   `ws`, with or without `node:`) or uses a network global (`fetch`, `WebSocket`,
