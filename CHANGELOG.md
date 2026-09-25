@@ -6,6 +6,34 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- Tests: `tests/unit/node-compat.test.ts` keeps regex modifier groups (`(?i:...)`) out of `src/`.
+  Node 20 and Node 22 cannot compile one. A rule regex compiles when its module loads, so one such
+  group stopped every subcommand of the Node bundle, although Bun and Node 24 ran it. The STE
+  rules now spell each case-insensitive word as letter classes (`ci`). The classes also match the
+  letters that Python's case-insensitive match accepts (U+0131 and U+0130 for `i`, U+017F for
+  `s`, U+212A for `k`). The STE output on Node 20 is byte-identical to the output on Bun.
+- `repo-tools ste`: checks Markdown against the mechanically decidable part of ASD-STE100
+  (sentence length in two tiers, wordy forms, ambiguous references, the passive voice with an
+  agent). The subcommand is a port of `ste_check.py` and `ste_rules.py` from the architecture-docs
+  skill.
+  `repo-tools ste --prose <file>` is the docstring harness of the code-docs skill, over the same
+  one rule module. `docs/design.md` has a table of every behavioral difference between the two
+  harnesses; a run of both on the same text proves each row. The port and `ste_check.py` give the
+  same 362 findings, byte for byte, on 111 Markdown files. The corpus holds the architecture docs
+  of memoryjs, Mathts and universal-physics-tensor, the repo-tools docs, and 17 files of a
+  private repository. Only the file order differs: the port sorts in code-unit order on every
+  operating system.
+- `docs/design.md`: 8 STE findings fixed (the new checker found them); the document is STE-clean.
+- Tests: `tests/unit/offline.test.ts` keeps the tool offline. It fails when a file in `src/`
+  imports a network module (`http`, `https`, `http2`, `net`, `dgram`, `tls`, `dns`, `undici`,
+  `ws`, with or without `node:`) or uses a network global (`fetch`, `WebSocket`,
+  `XMLHttpRequest`, `EventSource`, `Bun.connect`, `Bun.listen`, `Bun.serve`, `Bun.udpSocket`,
+  `navigator.sendBeacon`). repo-tools reads private repositories, so it must never send their
+  content. 18 positive controls prove that the scan finds each form, and a planted `fetch` in
+  `src/` fails the test.
+
 ## [1.0.0] - 2026-09-24
 
 The first release. One command, `repo-tools`, replaces the copies of the repository tools that
