@@ -163,6 +163,11 @@ the config key `query.out`, else from `depgraph.out`, else from `docs/architectu
 | `bun run privacy` | Runs the privacy check on the tracked files and the commit messages. |
 | `bun run hooks` | Installs the `commit-msg` hook that runs the privacy check on each message. |
 
+## Design
+
+`docs/design.md` describes the modules, the output rules, the config, the extension contract,
+the privacy check and the verification.
+
 ## License
 
 MIT. See `LICENSE`.

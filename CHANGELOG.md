@@ -8,6 +8,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `docs/design.md` (D12): the public design document in Simplified Technical English. It
+  gives the modules, the output rules R1 to R4, the config, the extension contract, the query
+  subcommand, the privacy check and the verification. It states two limits: `ctx.write` is a
+  convenience boundary, not a security boundary, and the hashed denylist hides a name from a
+  reader but not from a person who guesses it. The README links it.
 - Build: `scripts/build.ts` compares `node_modules` with `bun.lock` before it bundles or compiles
   (`scripts/lockcheck.ts`). It stops with exit 1 and names each package that `bun.lock` does not
   name, each version that differs, and each locked package that is not installed. A missing
