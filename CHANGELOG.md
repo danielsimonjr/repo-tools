@@ -461,6 +461,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- depgraph `--help`: the `--write-duplicate-baseline` line says that the flag reads the
+  `duplicate-symbols.json` of the last depgraph run (run depgraph first). A stale report thus
+  never gives a surprise baseline.
 - depgraph extension loader and `--no-extensions` (D10b, design section 5.2). Each
   `depgraph.extensions` entry is a root-relative `.mjs` module with a default export
   `{ name, preflight?, report? }`; the modules load with `import()` in config order.

@@ -231,6 +231,17 @@ describe("pipeline entry", () => {
     expect(r.out).toBe(DEPGRAPH_HELP);
   });
 
+  test("the --write-duplicate-baseline help says it reads the last run's report", () => {
+    // The baseline copies the report of the last depgraph run. The help must say so, so a
+    // stale report never gives a surprise baseline.
+    const flat = DEPGRAPH_HELP.replace(/\s+/g, " ");
+    const line = flat.slice(flat.indexOf("--write-duplicate-baseline Write"));
+    expect(line).toStartWith(
+      "--write-duplicate-baseline Write the duplicate baseline from the duplicate-symbols.json " +
+        "of the last depgraph run (run depgraph first).",
+    );
+  });
+
   test("--check-census fails without a committed inventory", async () => {
     const r = await capture([`--root=${root}`, "--check-census"]);
     expect(r.code).toBe(1);

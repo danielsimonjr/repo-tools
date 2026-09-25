@@ -141,9 +141,9 @@ Options:
   --no-regen           With --check-duplicates: read the committed
                        duplicate-symbols.json. Write nothing.
   --write-duplicate-baseline
-                       Write the duplicate baseline from the current
-                       duplicate-symbols.json (run depgraph first). Write
-                       nothing else.
+                       Write the duplicate baseline from the
+                       duplicate-symbols.json of the last depgraph run (run
+                       depgraph first). Write nothing else.
   --help, -h           Show this help.
 
 Use one mode in a run: --check-census, --check-duplicates or
