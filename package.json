@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/repo-tools",
-  "version": "0.0.0",
-  "description": "Dependency graph, file chunking and context compression for TypeScript repositories.",
+  "version": "1.0.0",
+  "description": "One CLI for repository analysis: dependency graphs creation and query with per-export API facts, file chunking, and context compression. TypeScript on Bun, compiled to a single executable.",
   "type": "module",
   "license": "MIT",
   "author": "DANIEL SIMON JR",
@@ -20,6 +20,9 @@
   ],
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

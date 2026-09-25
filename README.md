@@ -9,14 +9,58 @@
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 | `query` | Answers structural questions from the depgraph reports, and writes two derived reports. |
 
-Status: pre-release. No version is published yet.
+Status: version 1.0.0.
 
 - All four subcommands work.
 - `depgraph` and `query` read their settings from `repo-tools.config.json` in the root.
   `--config=<file>` makes either subcommand read another file.
 - `compress -d` restores JSON files only.
 
-## Run
+## Install
+
+Install one of the two forms.
+
+### npm package
+
+The npm package needs Node 20 or later:
+
+```sh
+npm i -g @danielsimonjr/repo-tools
+repo-tools --version
+```
+
+### Compiled executable
+
+The executable holds the tool and the Bun runtime. It needs no Bun, Node or `node_modules`.
+Download the file for your platform and `SHA256SUMS` from the
+[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v1.0.0):
+
+| Platform | File |
+|---|---|
+| Windows x64 | `repo-tools-windows-x64.exe` |
+| Linux x64 | `repo-tools-linux-x64` |
+| macOS arm64 | `repo-tools-darwin-arm64` |
+
+Verify the file against `SHA256SUMS` before you run it:
+
+```sh
+# Linux
+sha256sum --ignore-missing -c SHA256SUMS
+# macOS: compare the output with the line of the file in SHA256SUMS
+shasum -a 256 repo-tools-darwin-arm64
+# Windows (PowerShell): compare the output with the line of the file in SHA256SUMS
+Get-FileHash repo-tools-windows-x64.exe -Algorithm SHA256
+```
+
+On Linux and macOS, a downloaded file has no execute bit. The executable is not signed, so macOS
+also marks a file that a browser downloads. Run these commands before the first run:
+
+```sh
+chmod +x repo-tools-linux-x64            # or repo-tools-darwin-arm64
+xattr -d com.apple.quarantine repo-tools-darwin-arm64   # macOS only
+```
+
+## Run from source
 
 Run the tool from source with Bun:
 
@@ -69,9 +113,6 @@ Prerequisites: Bun 1.4.2 or later, and a clone of this repository.
    bin/repo-tools-windows-x64.exe --version
    bin/repo-tools-windows-x64.exe depgraph --root=path/to/repo
    ```
-
-   On Linux and macOS, a downloaded executable has no execute bit. Run
-   `chmod +x repo-tools-<os>-<arch>` first.
 
 4. Test the executable, not only the source. The executable is the artifact that ships:
 

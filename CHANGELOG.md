@@ -6,6 +6,19 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-24
+
+The first release. One command, `repo-tools`, replaces the copies of the repository tools that
+several repositories kept, and ships as a compiled executable (Windows x64, Linux x64, macOS
+arm64) and as the npm package `@danielsimonjr/repo-tools` (Node 20 or later).
+
+- `depgraph` writes the dependency graph and the architecture reports of a TypeScript tree, and
+  the per-export API-surface report. Two runs give the same bytes on every operating system.
+- `query` answers structural questions from the reports, and checks browser safety.
+- `chunk` splits a large file and merges it back byte for byte.
+- `compress` writes a compact copy of a file for a model context, and restores JSON.
+- The design is in `docs/design.md`.
+
 ### Added
 
 - `docs/design.md` (D12): the public design document in Simplified Technical English. It
