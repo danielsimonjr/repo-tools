@@ -1,7 +1,7 @@
 /**
- * The Python string behaviour that the STE checker depends on.
+ * The Python string behaviour that the ported Python tools (STE, map) depend on.
  *
- * The checker is a port of a Python tool, and its findings must be the same bytes. Python and
+ * The ports must give the same bytes as the Python tools. Python and
  * JavaScript differ in these places:
  *
  * - Python's `\w` and `\b` match Unicode letters and digits. JavaScript's match ASCII only, even

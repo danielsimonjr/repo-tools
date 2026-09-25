@@ -9,7 +9,7 @@ import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "../../src/mask.ts";
-import { ci } from "../../src/ste/py.ts";
+import { ci } from "../../src/py.ts";
 
 const SRC = join(import.meta.dir, "../../src");
 
