@@ -23,6 +23,8 @@ export interface QueryOptions {
   command: QueryCommand;
   /** The project root (default: the current directory). */
   root: string;
+  /** The config file, relative to the root. Absent: `repo-tools.config.json`, when it exists. */
+  config?: string;
   /** The report folder, relative to the root. Absent: the config or the default applies. */
   out?: string;
   /** The Node runtime packages. Absent: the config or the default applies. */
@@ -36,7 +38,7 @@ const MODE_FLAGS: Readonly<Record<string, QueryCommand>> = {
 };
 
 /** The flags that take a value (`--name=<value>`). */
-const VALUE_FLAGS = new Set(["--root", "--out", "--node-runtime"]);
+const VALUE_FLAGS = new Set(["--root", "--config", "--out", "--node-runtime"]);
 
 /** The words of each command, after its name, in the usage form. */
 const COMMAND_USAGE: Readonly<Record<string, string>> = {
@@ -104,6 +106,7 @@ function list(flag: string, value: string): string[] {
  */
 export function parseQueryArgs(argv: readonly string[], cwd: string): QueryOptions {
   let root: string | undefined;
+  let config: string | undefined;
   let out: string | undefined;
   let nodeRuntimes: string[] | undefined;
   let mode: QueryCommand | undefined;
@@ -132,6 +135,9 @@ export function parseQueryArgs(argv: readonly string[], cwd: string): QueryOptio
     if (name === "--root") {
       if (root !== undefined) throw new Error("the root is set twice");
       root = value;
+    } else if (name === "--config") {
+      if (isAbsolutePath(value)) throw new Error(`flag --config ${ABSOLUTE_PATH_TEXT}`);
+      config = value;
     } else if (name === "--out") {
       if (isAbsolutePath(value)) throw new Error(`flag --out ${ABSOLUTE_PATH_TEXT}`);
       out = value;
@@ -156,6 +162,7 @@ export function parseQueryArgs(argv: readonly string[], cwd: string): QueryOptio
   return {
     command,
     root: root ?? cwd,
+    ...(config === undefined ? {} : { config }),
     ...(out === undefined ? {} : { out }),
     ...(nodeRuntimes === undefined ? {} : { nodeRuntimes }),
   };

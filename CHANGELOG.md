@@ -6,6 +6,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- `repo-tools query --config=<path>` reads the named config file instead of
+  `repo-tools.config.json`, on the same path as `depgraph --config`. A missing file, an absolute
+  path, an unknown key or invalid JSON exits 1.
+
 ### Changed
 
 - Tests: a killed `bun test` no longer leaves its temp folders for ever. A killed run cannot

@@ -48,6 +48,9 @@ Modes:
 
 Options:
   --root=<path>             Project root (default: the current directory).
+  --config=<path>           Config file, relative to the root (default:
+                            repo-tools.config.json at the root, when it exists).
+                            An unknown key, an absolute path or invalid JSON exits 1.
   --out=<dir>               Report folder, relative to the root (default: config
                             query.out, then depgraph.out, then ${OUTPUT_SUBDIR}).
   --node-runtime=<pkg,...>  Packages that run on Node only: their . entry can
@@ -77,7 +80,7 @@ export async function run(argv: string[], io: Io): Promise<number> {
     }
     const config = mergeQueryConfig(
       { out: options.out, nodeRuntimes: options.nodeRuntimes },
-      loadConfigSections(root),
+      loadConfigSections(root, options.config),
     );
     const input = loadQueryInput(root, config.out);
     const sinks: Io = { stdout: io.stdout, stderr };

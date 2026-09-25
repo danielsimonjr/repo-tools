@@ -13,7 +13,7 @@ Status: pre-release. No version is published yet.
 
 - All four subcommands work.
 - `depgraph` and `query` read their settings from `repo-tools.config.json` in the root.
-  `depgraph --config=<file>` reads another file.
+  `--config=<file>` makes either subcommand read another file.
 - `compress -d` restores JSON files only.
 
 ## Run
