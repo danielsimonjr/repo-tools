@@ -46,6 +46,12 @@ All notable changes to this project are recorded in this file. The format follow
   `pyproject.toml` is read with `smol-toml` 1.9.0, bundled and pinned.
 - 2.0.0 engine: the end-to-end graph tests of C#, Python and Rust are ported (18 tests, from
   `test_graph_csharp.py`, `test_python_repo_end_to_end.py` and `test_rust.py`).
+- 2.0.0 engine, step 7: the four core artifacts (`src/map/artifacts.ts`). They are
+  `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json` and
+  `unused-analysis.json`, with 27 ported tests. On 11 repositories, all 44 files are
+  byte-identical to the Python tool after the approved changes. These changes are LF line ends,
+  no `generated` field, schema version 2.0.0, no absolute root path in warnings, and path order
+  by code unit (the Python tool uses the Windows case-insensitive order).
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

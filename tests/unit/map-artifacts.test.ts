@@ -1,0 +1,544 @@
+/**
+ * The four artifacts of the map engine: dependency-graph.json, file-inventory.json,
+ * duplicate-symbols.json and unused-analysis.json.
+ *
+ * Ported from the architecture-docs skill (`test_artifacts.py`). Two adaptations, each deliberate:
+ * no artifact has a `generated` date (output rule R3), and the cycle cap is an option rather than a
+ * patched module constant.
+ */
+import { afterAll, describe, expect, test } from "bun:test";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import {
+  emitDependencyGraph,
+  emitDuplicateSymbols,
+  emitFileInventory,
+  emitUnusedAnalysis,
+} from "../../src/map/artifacts.ts";
+import { discover } from "../../src/map/discovery.ts";
+import { buildGraph, reachableFrom } from "../../src/map/graph.ts";
+import {
+  type Dependency,
+  type FileNode,
+  newRepoGraph,
+  type RepoGraph,
+} from "../../src/map/schema.ts";
+import { makeTempDir } from "./temp.ts";
+
+const made: string[] = [];
+afterAll(() => {
+  for (const dir of made) rmSync(dir, { recursive: true, force: true });
+});
+
+/** A new folder with the files `files`. */
+function tmp(files: Record<string, string> = {}): string {
+  const root = makeTempDir("map-art");
+  made.push(root);
+  for (const [rel, text] of Object.entries(files)) {
+    const p = join(root, rel);
+    mkdirSync(dirname(p), { recursive: true });
+    writeFileSync(p, text);
+  }
+  return root;
+}
+
+/** A file node: path, area, disposition, lines, and optional exports and edges. */
+function fnode(
+  path: string,
+  area: string,
+  disposition: string,
+  loc: number,
+  over: Partial<FileNode> = {},
+): FileNode {
+  return {
+    path,
+    area,
+    disposition,
+    loc,
+    exports: [],
+    internal: [],
+    external: [],
+    nodeBuiltins: [],
+    broken: [],
+    aliases: [],
+    ...over,
+  };
+}
+const dep = (file: string, imports: string[] = [], typeOnly = false): Dependency => ({
+  file,
+  imports,
+  typeOnly,
+});
+const graphOf = (
+  nodes: FileNode[],
+  roots: string[] = [],
+  rootPath: string | null = null,
+): RepoGraph =>
+  newRepoGraph({ name: "d", files: new Map(nodes.map((n) => [n.path, n])), roots, rootPath });
+const read = (path: string) => JSON.parse(readFileSync(path, "utf8"));
+
+const DEMO = () =>
+  graphOf(
+    [
+      fnode("src/a.ts", "src", "reachable", 12, { exports: ["a"] }),
+      fnode("tests/a.test.ts", "tests", "test", 5),
+    ],
+    ["src/a.ts"],
+  );
+
+describe("dependency-graph.json", () => {
+  test("is written with the expected keys, one trailing LF, no date", () => {
+    const out = emitDependencyGraph(DEMO(), tmp());
+    expect(out.endsWith("dependency-graph.json")).toBe(true);
+    const text = readFileSync(out, "utf8");
+    expect(text.endsWith("}\n")).toBe(true);
+    expect(text).not.toContain("\r");
+    const data = JSON.parse(text);
+    for (const key of ["metadata", "modules", "statistics", "reachability"])
+      expect(data).toHaveProperty(key);
+    expect(data.statistics.totalLinesOfCode).toBe(17);
+    expect(text).not.toContain("generated");
+  });
+
+  test("reachability is scoped by disposition, not a raw diff", () => {
+    const g = graphOf(
+      [
+        fnode("src/index.ts", "src", "build-entry", 1),
+        fnode("src/dead.ts", "src", "orphan", 1),
+        fnode("tools/gen.ts", "tools", "tool", 1),
+      ],
+      ["src/index.ts"],
+    );
+    const data = read(emitDependencyGraph(g, tmp()));
+    expect(data.reachability.orphaned).toEqual(["src/dead.ts"]);
+    expect(data.statistics.orphanedFiles).toBe(1);
+  });
+
+  test("runtime vs type-only cycles: all-runtime, and one type-only leg", () => {
+    const runtime = graphOf([
+      fnode("src/a.ts", "src", "reachable", 1, { internal: [dep("src/b.ts", ["B"])] }),
+      fnode("src/b.ts", "src", "reachable", 1, { internal: [dep("src/a.ts", ["A"])] }),
+    ]);
+    let data = read(emitDependencyGraph(runtime, tmp()));
+    expect([data.statistics.runtimeCircularDeps, data.statistics.typeOnlyCircularDeps]).toEqual([
+      1, 0,
+    ]);
+    const mixed = graphOf([
+      fnode("src/a.ts", "src", "reachable", 1, { internal: [dep("src/b.ts", ["B"], true)] }),
+      fnode("src/b.ts", "src", "reachable", 1, { internal: [dep("src/a.ts", ["A"])] }),
+    ]);
+    data = read(emitDependencyGraph(mixed, tmp()));
+    expect([data.statistics.runtimeCircularDeps, data.statistics.typeOnlyCircularDeps]).toEqual([
+      0, 1,
+    ]);
+  });
+
+  test("warnings are present and empty when clean", () => {
+    const data = read(emitDependencyGraph(DEMO(), tmp()));
+    expect(data.warnings).toEqual([]);
+    expect(data.statistics.circularDepsTruncated).toBe(false);
+  });
+
+  test("a truncated cycle count is disclosed in the written JSON", () => {
+    const edges: Record<string, string[]> = {
+      "a.ts": ["b.ts"],
+      "b.ts": ["a.ts", "c.ts"],
+      "c.ts": ["a.ts", "d.ts"],
+      "d.ts": ["a.ts"],
+    };
+    const g = graphOf(
+      Object.entries(edges).map(([p, ts]) =>
+        fnode(p, "src", "reachable", 1, { internal: ts.map((t) => dep(t)) }),
+      ),
+    );
+    const data = read(emitDependencyGraph(g, tmp(), { cycleLimits: { maxCycles: 1 } }));
+    expect(
+      data.warnings.some(
+        (w: string) => w.toLowerCase().includes("floor") || w.toLowerCase().includes("cap"),
+      ),
+    ).toBe(true);
+    expect(data.statistics.circularDepsTruncated).toBe(true);
+  });
+
+  test("the unused statistics match unused-analysis.json", () => {
+    const g = graphOf(
+      [
+        fnode("src/root.ts", "src", "build-entry", 1),
+        fnode("src/a.ts", "src", "reachable", 1, { exports: ["Used", "Unused"] }),
+        fnode("src/dead.ts", "src", "orphan", 1, { exports: ["Dead"] }),
+        fnode("src/consumer.ts", "src", "build-entry", 1, {
+          internal: [dep("src/a.ts", ["Used"])],
+        }),
+      ],
+      ["src/root.ts", "src/consumer.ts"],
+    );
+    const depData = read(emitDependencyGraph(g, tmp()));
+    const unused = read(emitUnusedAnalysis(g, tmp()));
+    expect(depData.statistics.unusedExportsCount).toBe(unused.summary.unusedExportCount);
+    expect(depData.statistics.noImporterFileCount).toBe(unused.summary.noImporterFileCount);
+    expect(depData.statistics.noImporterFileCount).toBe(1);
+    expect(depData.statistics.unusedExportsCount).toBe(2);
+    expect(unused.summary.unclassifiedExportCount).toBe(2);
+  });
+});
+
+describe("file-inventory.json", () => {
+  test("has the CDG shape, and no generated date", () => {
+    const data = read(emitFileInventory(DEMO(), tmp()));
+    for (const key of ["totalFiles", "byDisposition", "byArea", "files"])
+      expect(data).toHaveProperty(key);
+    expect(data).not.toHaveProperty("generated");
+    expect(data.totalFiles).toBe(2);
+    expect(data.byDisposition.reachable).toBe(1);
+    expect(data.byDisposition.test).toBe(1);
+    expect(new Set(Object.keys(data.files[0]))).toEqual(
+      new Set(["file", "package", "area", "disposition", "loc"]),
+    );
+  });
+
+  test("byDisposition pre-seeds all nine keys at zero", () => {
+    const data = read(emitFileInventory(DEMO(), tmp()));
+    expect(new Set(Object.keys(data.byDisposition))).toEqual(
+      new Set([
+        "reachable",
+        "build-entry",
+        "test-only",
+        "orphan",
+        "test",
+        "tool",
+        "config",
+        "bench",
+        "example",
+      ]),
+    );
+    expect(data.byDisposition.orphan).toBe(0);
+  });
+
+  test("the default path derives the package from build_graph's root", async () => {
+    const root = tmp({
+      "package.json": JSON.stringify({ name: "@scope/demo" }),
+      "src/a.ts": "export const A = 1;\n",
+    });
+    const data = read(emitFileInventory(await buildGraph(root), join(root, "out")));
+    expect(data.files.find((f: { file: string }) => f.file === "src/a.ts").package).toBe(
+      "@scope/demo",
+    );
+  });
+
+  test("no rootPath: (root) for every file, and a warning", () => {
+    const g = DEMO();
+    const data = read(emitFileInventory(g, tmp()));
+    expect(new Set(data.files.map((f: { package: string }) => f.package))).toEqual(
+      new Set(["(root)"]),
+    );
+    expect(g.warnings.some((w) => w.includes("root_path"))).toBe(true);
+  });
+
+  test("a single package.json names the src files; a test file stays (root)", () => {
+    const root = tmp({ "package.json": JSON.stringify({ name: "@scope/demo" }) });
+    const g = graphOf(
+      [
+        fnode("src/a.ts", "src", "reachable", 12, { exports: ["a"] }),
+        fnode("tests/a.test.ts", "tests", "test", 5),
+      ],
+      ["src/a.ts"],
+      root,
+    );
+    const byFile = Object.fromEntries(
+      read(emitFileInventory(g, root)).files.map((f: { file: string; package: string }) => [
+        f.file,
+        f.package,
+      ]),
+    );
+    expect(byFile).toEqual({ "src/a.ts": "@scope/demo", "tests/a.test.ts": "(root)" });
+  });
+
+  test("monorepo workspaces, array and Yarn object form", () => {
+    for (const workspaces of [
+      ["packages/*"],
+      { packages: ["packages/*"], nohoist: ["**/react-native"] },
+    ]) {
+      const root = tmp({
+        "package.json": JSON.stringify({ name: "root", workspaces }),
+        "packages/widget/package.json": JSON.stringify({ name: "@scope/widget" }),
+      });
+      const g = graphOf(
+        [
+          fnode("packages/widget/src/index.ts", "src", "reachable", 3),
+          fnode("README.md", "docs", "example", 1),
+        ],
+        [],
+        root,
+      );
+      const byFile = Object.fromEntries(
+        read(emitFileInventory(g, root)).files.map((f: { file: string; package: string }) => [
+          f.file,
+          f.package,
+        ]),
+      );
+      expect(byFile["packages/widget/src/index.ts"]).toBe("@scope/widget");
+      expect(byFile["README.md"]).toBe("(root)");
+      expect(
+        g.warnings.some((w) => w.includes("unexpected") || w.includes("without a 'packages'")),
+      ).toBe(false);
+    }
+  });
+
+  test("a missing or nameless package.json warns, in memory and in the JSON", () => {
+    const g = DEMO();
+    g.rootPath = tmp();
+    const data = read(emitFileInventory(g, g.rootPath));
+    expect(g.warnings.some((w) => w.includes("package.json"))).toBe(true);
+    expect(data.warnings.some((w: string) => w.includes("package.json"))).toBe(true);
+    const nameless = DEMO();
+    nameless.rootPath = tmp({ "package.json": JSON.stringify({ version: "1.0.0" }) });
+    const d2 = read(emitFileInventory(nameless, nameless.rootPath));
+    expect(new Set(d2.files.map((f: { package: string }) => f.package))).toEqual(
+      new Set(["(root)"]),
+    );
+    expect(nameless.warnings.some((w) => w.includes("name") && w.includes("workspaces"))).toBe(
+      true,
+    );
+  });
+
+  test("warnings are an explicit empty list when clean", () => {
+    const root = tmp({ "package.json": JSON.stringify({ name: "@scope/demo" }) });
+    const g = graphOf(
+      [fnode("src/a.ts", "src", "reachable", 12, { exports: ["a"] })],
+      ["src/a.ts"],
+      root,
+    );
+    expect(read(emitFileInventory(g, root)).warnings).toEqual([]);
+  });
+
+  test("a workspace candidate without package.json warns and falls to (root)", () => {
+    const root = tmp({
+      "package.json": JSON.stringify({ name: "root", workspaces: ["pkgs/*"] }),
+      "pkgs/good/package.json": JSON.stringify({ name: "@scope/good" }),
+    });
+    mkdirSync(join(root, "pkgs", "bad"), { recursive: true });
+    const g = graphOf(
+      [
+        fnode("pkgs/good/src/g.ts", "src", "reachable", 1),
+        fnode("pkgs/bad/src/b.ts", "src", "reachable", 1),
+      ],
+      [],
+      root,
+    );
+    const byFile = Object.fromEntries(
+      read(emitFileInventory(g, root)).files.map((f: { file: string; package: string }) => [
+        f.file,
+        f.package,
+      ]),
+    );
+    expect(byFile).toEqual({ "pkgs/bad/src/b.ts": "(root)", "pkgs/good/src/g.ts": "@scope/good" });
+    expect(g.warnings.some((w) => w.includes("pkgs/bad"))).toBe(true);
+    // Output rule R4: no warning holds the absolute root.
+    expect(g.warnings.join(" ")).not.toContain(root);
+  });
+
+  test("discovery skips the generated test-results folder", () => {
+    const root = tmp({
+      "tests/test-results/per-file-reporter.js": "module.exports = {};\n",
+      "tests/real.test.ts": "export {};\n",
+    });
+    const found = new Set(discover(root).map((f) => f.path));
+    expect(found.has("tests/test-results/per-file-reporter.js")).toBe(false);
+    expect(found.has("tests/real.test.ts")).toBe(true);
+  });
+});
+
+describe("duplicate-symbols.json", () => {
+  test("groups a name across files, and ignores non-src areas", () => {
+    let data = read(
+      emitDuplicateSymbols(
+        graphOf([
+          fnode("src/a.ts", "src", "reachable", 1, { exports: ["Dup", "OnlyA"] }),
+          fnode("src/b.ts", "src", "reachable", 1, { exports: ["Dup"] }),
+        ]),
+        tmp(),
+      ),
+    );
+    expect(data.summary.duplicateCount).toBe(1);
+    expect(data.duplicates.Dup).toEqual(["src/a.ts", "src/b.ts"]);
+    expect(data.duplicates).not.toHaveProperty("OnlyA");
+    data = read(
+      emitDuplicateSymbols(
+        graphOf([
+          fnode("tests/a.test.ts", "tests", "test", 1, { exports: ["setup"] }),
+          fnode("tests/b.test.ts", "tests", "test", 1, { exports: ["setup"] }),
+        ]),
+        tmp(),
+      ),
+    );
+    expect(data.duplicates).toEqual({});
+    expect(data.summary.totalSymbols).toBe(0);
+  });
+
+  test("a named re-export is not a second own definition", async () => {
+    const root = tmp({
+      "src/a.ts": "export const Widget = 1;\n",
+      "src/index.ts": "export { Widget } from './a';\n",
+      "src/consumer.ts": "import { Widget } from './a';\nexport const useIt = Widget;\n",
+    });
+    const g = await buildGraph(root);
+    expect(read(emitDuplicateSymbols(g, join(root, "dup"))).duplicates).not.toHaveProperty(
+      "Widget",
+    );
+    const unused = read(emitUnusedAnalysis(g, join(root, "unused")));
+    for (const bucket of ["unreferencedAnywhere", "referencedInModule", "unclassifiedExports"])
+      expect(unused[bucket]).not.toHaveProperty("src/index.ts");
+  });
+
+  test("the aliased re-export gap stays pinned, as in the source (known wrong)", async () => {
+    const root = tmp({
+      "src/a.ts": "export const X = 1;\n",
+      "src/b.ts": "export const Y = 2;\n",
+      "src/index.ts": "export { X as Y } from './a';\n",
+    });
+    expect(
+      read(emitDuplicateSymbols(await buildGraph(root), join(root, "dup"))).duplicates.Y,
+    ).toEqual(["src/b.ts", "src/index.ts"]);
+  });
+});
+
+describe("unused-analysis.json", () => {
+  const anyBucket = (data: Record<string, Record<string, unknown>>, path: string) =>
+    ["unreferencedAnywhere", "referencedInModule", "unclassifiedExports"].some(
+      (b) => path in (data[b] ?? {}),
+    );
+
+  test("an unimported export with no source to read is unclassified", () => {
+    const g = graphOf([
+      fnode("src/a.ts", "src", "reachable", 1, { exports: ["Used", "Unused"] }),
+      fnode("src/b.ts", "src", "reachable", 1, { internal: [dep("src/a.ts", ["Used"])] }),
+    ]);
+    const data = read(emitUnusedAnalysis(g, tmp()));
+    expect(data.unclassifiedExports["src/a.ts"]).toEqual(["Unused"]);
+    expect(data.unreferencedAnywhere).toEqual({});
+    expect(data.referencedInModule).toEqual({});
+    expect([
+      data.summary.unusedExportCount,
+      data.summary.unclassifiedExportCount,
+      data.summary.unreferencedAnywhereCount,
+    ]).toEqual([1, 1, 0]);
+  });
+
+  test("a same name in two files does not cross-contaminate", () => {
+    const g = graphOf([
+      fnode("src/a.ts", "src", "reachable", 1, { exports: ["Dup"] }),
+      fnode("src/b.ts", "src", "reachable", 1, { exports: ["Dup"] }),
+      fnode("src/c.ts", "src", "reachable", 1, { internal: [dep("src/a.ts", ["Dup"])] }),
+    ]);
+    const data = read(emitUnusedAnalysis(g, tmp()));
+    expect(anyBucket(data, "src/a.ts")).toBe(false);
+    expect(data.unclassifiedExports["src/b.ts"]).toEqual(["Dup"]);
+  });
+
+  test("the caveats name dynamic import and warn against deleting a no-importer file", () => {
+    const data = read(emitUnusedAnalysis(graphOf([]), tmp()));
+    expect(
+      data.caveats.some(
+        (c: string) => c.includes("import(") || c.toLowerCase().includes("dynamic"),
+      ),
+    ).toBe(true);
+    expect(
+      data.caveats.some(
+        (c: string) =>
+          c.includes("noImporterFiles") && (c.includes("smoketest") || c.includes("config")),
+      ),
+    ).toBe(true);
+  });
+
+  test("noImporterFiles is in-degree, not BFS reachability, and excludes roots", () => {
+    const g = graphOf(
+      [
+        fnode("src/root.ts", "src", "build-entry", 1),
+        fnode("src/a.ts", "src", "orphan", 1, {
+          internal: [dep("src/b.ts", ["B"])],
+          exports: ["A"],
+        }),
+        fnode("src/b.ts", "src", "orphan", 1, {
+          internal: [dep("src/a.ts", ["A"])],
+          exports: ["B"],
+        }),
+        fnode("src/dead.ts", "src", "orphan", 1, { exports: ["Dead"] }),
+      ],
+      ["src/root.ts"],
+    );
+    const bfs = reachableFrom(g, g.roots);
+    expect(new Set([...g.files.keys()].filter((p) => !bfs.has(p)))).toEqual(
+      new Set(["src/a.ts", "src/b.ts", "src/dead.ts"]),
+    );
+    const data = read(emitUnusedAnalysis(g, tmp()));
+    expect(data.noImporterFiles).toEqual(["src/dead.ts"]);
+    expect(data.summary.noImporterFileCount).toBe(1);
+    expect(
+      read(
+        emitUnusedAnalysis(
+          graphOf([fnode("src/root.ts", "src", "build-entry", 1)], ["src/root.ts"]),
+          tmp(),
+        ),
+      ).noImporterFiles,
+    ).toEqual([]);
+  });
+
+  test("a barrel-re-exported export is not unused", async () => {
+    const root = tmp({
+      "src/a.ts": "export const X = 1;\nexport const Y = 2;\n",
+      "src/index.ts": "export * from './a';\n",
+      "src/consumer.ts": "import { X } from './index';\nexport const useIt = X;\n",
+    });
+    expect(
+      anyBucket(read(emitUnusedAnalysis(await buildGraph(root), join(root, "out"))), "src/a.ts"),
+    ).toBe(false);
+  });
+
+  test("referenced in its own module vs referenced nowhere", async () => {
+    let root = tmp({
+      "src/a.ts":
+        "export interface Helper { value: number }\nexport function useHelper(h: Helper): number { return h.value; }\n",
+      "src/consumer.ts": "import { useHelper } from './a';\nexport const x = useHelper;\n",
+    });
+    let data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
+    expect(data.referencedInModule["src/a.ts"]).toEqual(["Helper"]);
+    expect(data.unreferencedAnywhere).not.toHaveProperty("src/a.ts");
+    root = tmp({
+      "src/a.ts": "export const Dead = 1;\n",
+      "src/consumer.ts": "export const x = 1;\n",
+    });
+    data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
+    expect(data.unreferencedAnywhere["src/a.ts"]).toEqual(["Dead"]);
+    const note = data.unreferencedAnywhereNotes["src/a.ts"].Dead as string;
+    expect(note).not.toContain("Verified");
+    expect(note).toContain("found none");
+    expect(note).toContain("literal string specifier");
+  });
+
+  test("a note names a verified dynamic-import referrer", async () => {
+    const root = tmp({
+      "src/a.ts": "export function helper() { return 1; }\n",
+      "src/b.ts":
+        "export async function useIt() {\n  const { helper } = await import('./a');\n  return helper();\n}\n",
+    });
+    const data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
+    expect(data.unreferencedAnywhere["src/a.ts"]).toEqual(["helper"]);
+    const note = data.unreferencedAnywhereNotes["src/a.ts"].helper as string;
+    expect(note).toContain("Verified");
+    expect(note).toContain("src/b.ts");
+  });
+
+  test("a template-literal dynamic import is out of the scan's scope, and the note says so", async () => {
+    const root = tmp({
+      "src/cmds/foo.ts": "export function runFoo() { return 1; }\n",
+      "src/dispatcher.ts":
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: the fixture is TypeScript source with a template literal.
+        "export async function dispatch(name: string) {\n  const mod = await import(`./cmds/${name}.js`);\n  return mod;\n}\n",
+    });
+    const data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
+    expect(data.unreferencedAnywhere["src/cmds/foo.ts"]).toEqual(["runFoo"]);
+    const note = data.unreferencedAnywhereNotes["src/cmds/foo.ts"].runFoo as string;
+    expect(note).not.toContain("Verified");
+    expect(note).toContain("literal string specifier");
+  });
+});
