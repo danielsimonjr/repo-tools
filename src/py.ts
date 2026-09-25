@@ -142,3 +142,39 @@ export function pyRepr(text: string): string {
 export function reEscape(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+/** Python `posixpath.dirname`. */
+export function pyDirname(path: string): string {
+  const head = path.slice(0, path.lastIndexOf("/") + 1);
+  if (head !== "" && head !== "/".repeat(head.length)) return head.replace(/\/+$/, "");
+  return head;
+}
+
+/** Python `posixpath.join`. */
+export function pyJoin(first: string, ...rest: string[]): string {
+  let path = first;
+  for (const part of rest) {
+    if (part.startsWith("/")) path = part;
+    else if (path === "" || path.endsWith("/")) path += part;
+    else path += `/${part}`;
+  }
+  return path;
+}
+
+/** Python `posixpath.normpath`: removes `.` and empty parts, and folds `..` where it can. */
+export function pyNormpath(path: string): string {
+  if (path === "") return ".";
+  let initialSlashes = path.startsWith("/") ? 1 : 0;
+  if (path.startsWith("//") && !path.startsWith("///")) initialSlashes = 2;
+  const comps: string[] = [];
+  for (const comp of path.split("/")) {
+    if (comp === "" || comp === ".") continue;
+    if (comp !== ".." || (initialSlashes === 0 && comps.length === 0) || comps.at(-1) === "..") {
+      comps.push(comp);
+    } else if (comps.length > 0) {
+      comps.pop();
+    }
+  }
+  const joined = "/".repeat(initialSlashes) + comps.join("/");
+  return joined || ".";
+}

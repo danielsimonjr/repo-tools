@@ -30,6 +30,10 @@ All notable changes to this project are recorded in this file. The format follow
   Python, C# and Rust readers match the Python tool file by file on 726 files. The files come
   from 7 public repositories: PITS-MRAS, auto-memory, fermat-mcp and memvid (Python), IronClaw
   (Rust), ui-mcp and Windows-mcp (C#).
+- 2.0.0 engine, step 5: the resolvers (`src/map/resolvers.ts`) for TypeScript, Python, C# and
+  Rust, with Python's `posixpath` rules in `src/py.ts`. The Python standard-library list is the
+  `sys.stdlib_module_names` of CPython 3.13.15, as generated data. The 35 resolver tests of four
+  test files are ported.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
