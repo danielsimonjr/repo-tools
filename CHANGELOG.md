@@ -27,9 +27,9 @@ All notable changes to this project are recorded in this file. The format follow
   CPython's `ast`. The import order is the order of `ast.walk` (ast depth, then source position).
   A module that does not parse raises `SyntaxError`. The 9 tests of `test_parsing_python.py` are
   ported; 8 new tests pin the import order and the export forms against CPython's output. The
-  Python, C# and Rust readers match the Python tool file by file on 726 files of 7 public
-  repositories: PITS-MRAS, auto-memory, fermat-mcp and memvid (Python), IronClaw (Rust), ui-mcp
-  and Windows-mcp (C#).
+  Python, C# and Rust readers match the Python tool file by file on 726 files. The files come
+  from 7 public repositories: PITS-MRAS, auto-memory, fermat-mcp and memvid (Python), IronClaw
+  (Rust), ui-mcp and Windows-mcp (C#).
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
