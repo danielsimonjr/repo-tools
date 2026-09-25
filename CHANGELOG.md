@@ -15,6 +15,11 @@ All notable changes to this project are recorded in this file. The format follow
   repositories give the same result in the port and in the Python tool: memoryjs, Mathts,
   universal-physics-tensor and repo-tools. For all 3,717 files, the language, path, area,
   disposition and line count agree. The file order is code-unit order on every operating system.
+- 2.0.0 engine, step 2: the TypeScript reader (`src/map/parsing.ts`) and the lazy grammar loader
+  (`src/map/grammars.ts`), on tree-sitter-typescript 0.23.2. The 18 tests of `test_parsing.py` are
+  ported; a synthetic barrel file replaces the source test's absolute path. On 3,719 files of four
+  repositories, the port gives the same imports, exports, kinds and default export as the Python
+  reader, file by file.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
