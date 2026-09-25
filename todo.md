@@ -43,7 +43,7 @@
   folders of runs that are no longer alive.
 - [x] D11 `repo-tools query --config=<file>`, on the same path as `depgraph --config`
   (ruling 2026-09-24).
-- [ ] D11 Criterion 5: on UPT at a commit at or after 673504a, `repo-tools depgraph
+- [x] D11 Criterion 5: on UPT at a commit at or after 673504a, `repo-tools depgraph
   --api-surface=a.json` is byte-identical to UPT's own `create-dependency-graph.ts
   --api-surface=a.json` at the same commit.
 - [ ] D12 Public design document and the release-candidate report.
