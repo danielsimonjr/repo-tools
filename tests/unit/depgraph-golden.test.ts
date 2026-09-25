@@ -6,8 +6,9 @@
  * Linux, macOS and Windows is a determinism defect.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { GOLDEN_FLAGS, GOLDEN_SETS, maskGolden } from "../../scripts/update-depgraph-goldens.ts";
 import { run } from "../../src/depgraph/index.ts";
 import { sortCodeUnits } from "../../src/sort.ts";
 import { makeTempDir } from "./temp.ts";
@@ -17,44 +18,57 @@ const golden = join(repo, "tests/golden/depgraph");
 const work = makeTempDir("golden");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
-/** The masking of the golden README: date-times, dates and the fixture root. */
-function mask(text: string, root: string): string {
-  return text
-    .split(root)
-    .join("<ROOT>")
-    .split(root.replace(/\\/g, "/"))
-    .join("<ROOT>")
-    .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z/g, "<DATETIME>")
-    .replace(/\d{4}-\d{2}-\d{2}/g, "<DATE>");
+/** One depgraph run on a fresh copy of a fixture: exit code, stdout and every report. */
+interface GoldenRun {
+  root: string;
+  code: number;
+  stdout: string;
+  reports: Map<string, Buffer>;
 }
 
-const sets = [
-  { set: "mini-repo/default", fixture: "mini-repo", flags: [] },
-  { set: "mini-repo/all", fixture: "mini-repo", flags: ["--all"] },
-  { set: "mono-repo/default", fixture: "mono-repo", flags: [] },
-  { set: "mono-repo/all", fixture: "mono-repo", flags: ["--all"] },
-];
+/**
+ * Runs the golden flags on a fresh copy of `fixture` in `root`. The copy also gets a config file
+ * with an extension that throws: the golden runs use `--no-extensions` (design 13.2), so the
+ * extension must not load.
+ */
+async function goldenRun(root: string, fixture: string, flags: string[]): Promise<GoldenRun> {
+  cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
+  mkdirSync(join(root, "ext"), { recursive: true });
+  writeFileSync(
+    join(root, "ext/throws.mjs"),
+    "export default { name: 'throws', preflight() { throw new Error('loaded'); } };\n",
+  );
+  writeFileSync(
+    join(root, "repo-tools.config.json"),
+    JSON.stringify({ depgraph: { extensions: ["ext/throws.mjs"] } }),
+  );
+  let stdout = "";
+  const code = await run([`--root=${root}`, ...GOLDEN_FLAGS, ...flags], {
+    stdout: (s) => {
+      stdout += s;
+    },
+    stderr: () => {},
+  });
+  const outDir = join(root, "docs/architecture");
+  const reports = new Map<string, Buffer>();
+  for (const name of sortCodeUnits(readdirSync(outDir))) {
+    reports.set(name, readFileSync(join(outDir, name)));
+  }
+  return { root, code, stdout, reports };
+}
 
 describe("depgraph port equals the goldens", () => {
-  for (const { set, fixture, flags } of sets) {
+  for (const { set, fixture, flags } of GOLDEN_SETS) {
     test(`${set}: every report and the exit code`, async () => {
-      const root = join(work, set.replace("/", "-"));
-      cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
-      let stdout = "";
-      const code = await run([`--root=${root}`, ...flags], {
-        stdout: (s) => {
-          stdout += s;
-        },
-        stderr: () => {},
-      });
+      const first = await goldenRun(join(work, `${set.replace("/", "-")}-1`), fixture, flags);
+      const { root, code, stdout } = first;
 
       const expectedDir = join(golden, set);
       expect(`${code}\n`).toBe(readFileSync(join(expectedDir, "_exit-code.txt"), "utf8"));
-      const outDir = join(root, "docs/architecture");
       const reports = sortCodeUnits(readdirSync(expectedDir).filter((f) => !f.startsWith("_")));
-      expect(sortCodeUnits(readdirSync(outDir))).toEqual(reports);
+      expect([...first.reports.keys()]).toEqual(reports);
       for (const name of reports) {
-        const actual = mask(readFileSync(join(outDir, name), "utf8"), root);
+        const actual = maskGolden(String(first.reports.get(name)), root);
         expect({ name, text: actual }).toEqual({
           name,
           text: readFileSync(join(expectedDir, name), "utf8"),
@@ -64,7 +78,20 @@ describe("depgraph port equals the goldens", () => {
       // own stdout golden. `_stdout.txt` is the pre-port reference, which held the root.
       expect(stdout).not.toContain(root);
       expect(stdout).not.toContain(root.replace(/\\/g, "/"));
-      expect(mask(stdout, root)).toBe(readFileSync(join(expectedDir, "_stdout.port.txt"), "utf8"));
+      expect(maskGolden(stdout, root)).toBe(
+        readFileSync(join(expectedDir, "_stdout.port.txt"), "utf8"),
+      );
+    });
+
+    test(`${set}: a second run is byte-identical to the first (design 13.4)`, async () => {
+      const a = await goldenRun(join(work, `${set.replace("/", "-")}-a`), fixture, flags);
+      const b = await goldenRun(join(work, `${set.replace("/", "-")}-b`), fixture, flags);
+      expect(b.code).toBe(a.code);
+      expect(b.stdout).toBe(a.stdout);
+      expect([...b.reports.keys()]).toEqual([...a.reports.keys()]);
+      for (const [name, bytes] of a.reports) {
+        expect({ name, same: b.reports.get(name)?.equals(bytes) }).toEqual({ name, same: true });
+      }
     });
   }
 });

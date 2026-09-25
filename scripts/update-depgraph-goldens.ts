@@ -21,6 +21,9 @@ export const GOLDEN_SETS = [
   { set: "mono-repo/all", fixture: "mono-repo", flags: ["--all"] },
 ];
 
+/** The flags of every golden run: no extension loads (design 13.2). */
+export const GOLDEN_FLAGS = ["--no-extensions"];
+
 /** The file name of the API-surface golden of the mini-repo fixture. */
 export const API_SURFACE_FILE = "api-surface.json";
 
@@ -43,7 +46,7 @@ async function main(): Promise<void> {
       const root = join(work, set.replace("/", "-"));
       cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
       let stdout = "";
-      const code = await run([`--root=${root}`, ...flags], {
+      const code = await run([`--root=${root}`, ...GOLDEN_FLAGS, ...flags], {
         stdout: (s) => {
           stdout += s;
         },
@@ -63,10 +66,13 @@ async function main(): Promise<void> {
     }
     const apiRoot = join(work, "api-surface");
     cpSync(join(repo, "tests/fixtures/depgraph/mini-repo"), apiRoot, { recursive: true });
-    const apiCode = await run([`--root=${apiRoot}`, `--api-surface=${API_SURFACE_FILE}`], {
-      stdout: () => {},
-      stderr: () => {},
-    });
+    const apiCode = await run(
+      [`--root=${apiRoot}`, ...GOLDEN_FLAGS, `--api-surface=${API_SURFACE_FILE}`],
+      {
+        stdout: () => {},
+        stderr: () => {},
+      },
+    );
     writeFileSync(
       join(repo, "tests/golden/depgraph/mini-repo", API_SURFACE_FILE),
       maskGolden(readFileSync(join(apiRoot, API_SURFACE_FILE), "utf8"), apiRoot),

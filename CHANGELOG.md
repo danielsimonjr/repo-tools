@@ -278,6 +278,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- Tests: each depgraph golden set runs twice, and the second run must be byte-identical to
+  the first (design 13.4). The golden runs use `--no-extensions` (design 13.2): the test plants a
+  config with an extension that throws, and the run must still match the goldens. The golden
+  test reads the set list and the masking from `scripts/update-depgraph-goldens.ts` and keeps no
+  copy. The goldens do not change.
 - Tests: a killed `bun test` no longer leaves its temp folders for ever. A killed run cannot
   run `afterAll` or `finally`, so each test temp folder now carries the PID of its run
   (`tests/unit/temp.ts`), and the first temp folder of the next run removes the folders of dead
