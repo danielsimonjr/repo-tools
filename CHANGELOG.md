@@ -461,6 +461,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools query` (D13): the test cases of the source query tool, ported to bun:test with
+  their meaning kept (resolve, forward and reverse edges, node taint, reach, leaks,
+  browser-safe packages, and the `--root` cases of the parser). A test shows that an unknown
+  `query.*` config key stops a query run. The README lists four subcommands, the two derived
+  reports, and a "Query the graph" section with examples from the mono-repo fixture.
 - `repo-tools query --emit` (D13) writes `dependency-reverse.json` (`dependents`: each file to
   the files that import it) and `node-safety.json` (`browserSafePackages`, `nodeTaintedFiles`:
   the files with a `node:` import, and `leaks` per browser-safe package) into the report

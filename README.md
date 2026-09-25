@@ -1,16 +1,17 @@
 # repo-tools
 
-`repo-tools` is one command-line tool with three subcommands for TypeScript repositories:
+`repo-tools` is one command-line tool with four subcommands for TypeScript repositories:
 
 | Subcommand | Job |
 |---|---|
 | `depgraph` | Writes the dependency graph and the architecture reports of a TypeScript tree. |
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
+| `query` | Answers structural questions from the depgraph reports, and writes two derived reports. |
 
 Status: pre-release. No version is published yet.
 
-- All three subcommands work.
+- All four subcommands work.
 - `depgraph` runs with its default settings. The configuration file and some flags of the design
   are not built yet.
 - `compress -d` restores JSON files only.
@@ -99,6 +100,54 @@ report starts with a "GENERATED FILE -- do not edit by hand" banner.
 | `duplicate-symbols.md` | Which names do two or more files define? Each name is classified. |
 | `duplicate-symbols.json` | The same duplicate data as data. |
 | `package-export-surfaces.json` | Which names does each package export publicly? |
+
+`repo-tools query --emit` writes two more files into the same folder. They are also generated.
+
+| File | What it answers |
+|---|---|
+| `dependency-reverse.json` | Which files import each file? The reverse edges of the graph. |
+| `node-safety.json` | Which packages are browser-safe, which files import a `node:` builtin, and which of those files does the `.` entry of each browser-safe package reach? |
+
+## Query the graph
+
+`repo-tools query` answers questions from `dependency-graph.json` and
+`package-export-surfaces.json`. It parses no source file, so run `repo-tools depgraph` first.
+The examples use a copy of `tests/fixtures/depgraph/mono-repo`:
+
+```sh
+repo-tools depgraph
+repo-tools query dependents packages/core/src/math.ts
+# packages/core/src/index.ts
+# packages/core/src/worker.ts
+repo-tools query symbol-users add
+# packages/cli/src/main.ts  [@scope/core]
+# packages/core/src/index.ts  [internal]
+repo-tools query is-public packages/core add
+# PUBLIC: add is exported from packages/core
+repo-tools query is-public packages/core double
+# INTERNAL: double is not in the public export surface of packages/core
+repo-tools query cycles
+# runtime: 0 cyclic components
+# type-only: 0 cyclic components
+```
+
+A package is the folder above a `src/index.ts` entry (`.` for the root entry). Each package is
+browser-safe, unless `--node-runtime=<pkg,...>` or the config key `query.nodeRuntimes` lists it.
+The `.` entry of a browser-safe package must not reach a file that imports a `node:` builtin:
+
+```sh
+repo-tools query node-safety
+# packages/core: clean (the . entry reaches no node: code)
+repo-tools query --check-browser-safety
+# browser-safety check passed: the . entries of 1 browser-safe package reach no node: code.
+repo-tools query --emit
+# Written: docs/architecture/dependency-reverse.json (3 files)
+# Written: docs/architecture/node-safety.json (0 node files, 0 leaks)
+```
+
+`--check-browser-safety` exits 1 on a leak. The query reads its reports from `--out`, else from
+the config key `query.out`, else from `depgraph.out`, else from `docs/architecture`. Run
+`repo-tools query --help` for every option.
 
 ## Develop
 
