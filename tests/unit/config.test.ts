@@ -11,8 +11,11 @@ import {
   CONFIG_FILE,
   type DepgraphConfig,
   loadConfigFile,
+  loadConfigSections,
   mergeDepgraphConfig,
+  mergeQueryConfig,
   parseConfig,
+  parseConfigSections,
 } from "../../src/config.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
@@ -123,6 +126,35 @@ describe("config file: keys, defaults and types", () => {
       expect(() => parseConfig({ depgraph }, "<root>/x.json")).toThrow(/absolute path/);
     });
   }
+});
+
+describe("config file: the query section (design section 3.5)", () => {
+  test("query.out loads, and the depgraph settings are unchanged", () => {
+    const root = pkg({ [CONFIG_FILE]: JSON.stringify({ query: { out: "q/out" } }) });
+    expect(loadConfigSections(root).query).toEqual({ out: "q/out" });
+    expect(loadConfigFile(root)).toEqual({});
+  });
+
+  const invalid: Array<[string, unknown, RegExp]> = [
+    ["an unknown query key", { query: { output: "x" } }, /unknown key 'query.output'/],
+    ["a query section that is not an object", { query: [] }, /'query' must be an object/],
+    ["an absolute query.out", { query: { out: "/abs" } }, /'query.out' holds an absolute path/],
+    ["an empty query.out", { query: { out: "" } }, /'query.out' must be/],
+  ];
+  for (const [label, value, message] of invalid) {
+    test(`${label} is an error, also for a depgraph run`, () => {
+      expect(() => parseConfigSections(value, "<root>/x.json")).toThrow(message);
+      expect(() => parseConfig(value, "<root>/x.json")).toThrow(message);
+    });
+  }
+
+  test("the report folder: --out, then query.out, then depgraph.out, then the default", () => {
+    const file = { depgraph: { out: "dg" }, query: { out: "q" } };
+    expect(mergeQueryConfig({ out: "cli" }, file).out).toBe("cli");
+    expect(mergeQueryConfig({}, file).out).toBe("q");
+    expect(mergeQueryConfig({}, { depgraph: { out: "dg" }, query: {} }).out).toBe("dg");
+    expect(mergeQueryConfig({}, { depgraph: {}, query: {} }).out).toBe("docs/architecture");
+  });
 });
 
 describe("config file: precedence", () => {

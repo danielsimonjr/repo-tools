@@ -1,6 +1,7 @@
 /**
  * The config file `repo-tools.config.json` (design section 5.1) and the merge of the command-line
- * flags, the config file and the defaults.
+ * flags, the config file and the defaults. The file has a `depgraph` section and a `query`
+ * section (design section 3.5).
  *
  * Precedence: a command-line flag, then the config file, then the default. Every path is POSIX or
  * native, relative to the project root; the loader rejects an absolute path, so a committed
@@ -194,47 +195,85 @@ function checkSection(
   return out;
 }
 
+/** The settings of the `query` section of the config file (design section 3.5). */
+export interface QuerySettings {
+  /** The report folder, relative to the root. */
+  out?: string;
+}
+
+/** The merged query settings of one run. */
+export interface QueryConfig {
+  /** The report folder, relative to the root. */
+  out: string;
+}
+
+/** The checked sections of one config file. An absent section is `{}`. */
+export interface ConfigSections {
+  depgraph: DepgraphSettings;
+  query: QuerySettings;
+}
+
+/** The keys of `query` in the config file, and the kind of each value. */
+const QUERY_KEYS: Readonly<Record<string, KeyKind>> = {
+  out: "path",
+};
+
 /**
- * Checks a parsed config file and returns its depgraph settings. Throws on an unknown key or an
- * invalid value. `label` names the file in the error text.
+ * Checks a parsed config file and returns the settings of each section. Throws on an unknown
+ * key or an invalid value in any section. `label` names the file in the error text.
  */
-export function parseConfig(parsed: unknown, label: string): DepgraphSettings {
+export function parseConfigSections(parsed: unknown, label: string): ConfigSections {
   const fail = (message: string): Error => new Error(`config ${label}: ${message}`);
   if (!isObject(parsed)) throw fail("the file must hold a JSON object");
   for (const key of Object.keys(parsed)) {
-    if (key !== "depgraph") throw fail(`unknown key '${key}'`);
+    if (key !== "depgraph" && key !== "query") throw fail(`unknown key '${key}'`);
   }
+  const sections: ConfigSections = { depgraph: {}, query: {} };
   const section = parsed.depgraph;
-  if (section === undefined) return {};
-  if (!isObject(section)) throw fail("'depgraph' must be an object");
-  const { apiSurface, ...rest } = section;
-  const settings = checkSection("depgraph.", rest, DEPGRAPH_KEYS, fail) as DepgraphSettings;
-  if (apiSurface !== undefined) {
-    if (!isObject(apiSurface)) throw fail("'depgraph.apiSurface' must be an object");
-    settings.apiSurface = checkSection(
-      "depgraph.apiSurface.",
-      apiSurface,
-      API_SURFACE_KEYS,
-      fail,
-    ) as Partial<ApiSurfaceConfig>;
+  if (section !== undefined) {
+    if (!isObject(section)) throw fail("'depgraph' must be an object");
+    const { apiSurface, ...rest } = section;
+    sections.depgraph = checkSection("depgraph.", rest, DEPGRAPH_KEYS, fail) as DepgraphSettings;
+    if (apiSurface !== undefined) {
+      if (!isObject(apiSurface)) throw fail("'depgraph.apiSurface' must be an object");
+      sections.depgraph.apiSurface = checkSection(
+        "depgraph.apiSurface.",
+        apiSurface,
+        API_SURFACE_KEYS,
+        fail,
+      ) as Partial<ApiSurfaceConfig>;
+    }
   }
-  return settings;
+  const query = parsed.query;
+  if (query !== undefined) {
+    if (!isObject(query)) throw fail("'query' must be an object");
+    sections.query = checkSection("query.", query, QUERY_KEYS, fail) as QuerySettings;
+  }
+  return sections;
+}
+
+/**
+ * Checks a parsed config file and returns its depgraph settings. Throws on an unknown key or an
+ * invalid value in any section. `label` names the file in the error text.
+ */
+export function parseConfig(parsed: unknown, label: string): DepgraphSettings {
+  return parseConfigSections(parsed, label).depgraph;
 }
 
 /**
  * Loads the config file of `root`: the file `configPath` (relative to the root) when it is
- * given, else `repo-tools.config.json` at the root when it exists. Returns `{}` when no file
- * applies. Throws when a named file is missing, or when the file is unreadable, not valid JSON
- * or not valid config. The error text shows the root as `<root>`.
+ * given, else `repo-tools.config.json` at the root when it exists. Returns empty sections when
+ * no file applies. Throws when a named file is missing, or when the file is unreadable, not
+ * valid JSON or not valid config. The error text shows the root as `<root>`.
  */
-export function loadConfigFile(root: string, configPath?: string): DepgraphSettings {
+export function loadConfigSections(root: string, configPath?: string): ConfigSections {
   if (configPath !== undefined && isAbsolutePath(configPath)) {
     throw new Error(`flag --config ${ABSOLUTE_PATH_TEXT}`);
   }
   const rel = configPath ?? CONFIG_FILE;
   const label = `<root>/${rel.replace(/\\/g, "/")}`;
   const path = resolveUnderRoot(root, rel);
-  if (configPath === undefined && !existsSync(path)) return {};
+  if (configPath === undefined && !existsSync(path)) return { depgraph: {}, query: {} };
   let text: string;
   try {
     text = readFileSync(path, "utf8");
@@ -247,7 +286,22 @@ export function loadConfigFile(root: string, configPath?: string): DepgraphSetti
   } catch {
     throw new Error(`config ${label}: the file is not valid JSON`);
   }
-  return parseConfig(parsed, label);
+  return parseConfigSections(parsed, label);
+}
+
+/** Loads the config file of `root` (see `loadConfigSections`) and returns its depgraph settings. */
+export function loadConfigFile(root: string, configPath?: string): DepgraphSettings {
+  return loadConfigSections(root, configPath).depgraph;
+}
+
+/**
+ * Merges the command-line query settings `cli` and the config file `file` with the defaults.
+ * The report folder is `--out`, then `query.out`, then `depgraph.out`, then the default.
+ */
+export function mergeQueryConfig(cli: QuerySettings, file: ConfigSections): QueryConfig {
+  return {
+    out: cli.out ?? file.query.out ?? file.depgraph.out ?? OUTPUT_SUBDIR,
+  };
 }
 
 /**

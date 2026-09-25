@@ -461,6 +461,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools query` (D13): the input reports. The query reads `dependency-graph.json` and
+  `package-export-surfaces.json` in the report folder: `--out`, else the config key
+  `query.out`, else `depgraph.out`, else `docs/architecture`, relative to the root. A report
+  that does not exist, cannot be read, is not valid JSON or has an unknown shape (for example a
+  graph with no `cyclicComponents`) exits 1 with a message that says to run `repo-tools
+  depgraph` first. A root that is not an existing directory exits 1. Error text shows the root
+  as `<root>`. The config file gains a `query` section; an unknown `query.*` key, an absolute
+  `query.out` and a `query` value that is not an object exit 1, for depgraph runs too.
 - `repo-tools query` (D13, design section 3.5), the fourth subcommand: its help text and its
   strict command line. The commands are `dependents <file>`, `symbol-users <symbol>`,
   `is-public <pkg> <symbol>`, `node-safety [pkg]` and `cycles`; the modes are `--emit` and

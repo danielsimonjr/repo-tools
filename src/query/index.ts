@@ -4,9 +4,13 @@
  * `package-export-surfaces.json`; it never parses source code.
  */
 
-import { OUTPUT_SUBDIR } from "../depgraph/paths.ts";
+import { existsSync, statSync } from "node:fs";
+import { resolve } from "node:path";
+import { loadConfigSections, mergeQueryConfig } from "../config.ts";
+import { maskRoot, OUTPUT_SUBDIR } from "../depgraph/paths.ts";
 import type { Io } from "../io-types.ts";
 import { parseQueryArgs } from "./args.ts";
+import { loadQueryInput } from "./load.ts";
 
 /** The help text of `repo-tools query`. */
 export const QUERY_HELP = `Usage: repo-tools query <command> [options]
@@ -52,11 +56,21 @@ or a browser-safety leak with --check-browser-safety.
 
 /** Runs `repo-tools query` and returns the exit code. */
 export async function run(argv: string[], io: Io): Promise<number> {
+  // Design criterion 4: standard error shows the root as `<root>`, never as an absolute path.
+  let root: string | undefined;
+  const stderr = (text: string): void => io.stderr(root ? maskRoot(text, root) : text);
   try {
-    parseQueryArgs(argv, process.cwd());
+    const options = parseQueryArgs(argv, process.cwd());
+    root = resolve(options.root);
+    if (!(existsSync(root) && statSync(root).isDirectory())) {
+      throw new Error("the root <root> is not an existing directory");
+    }
+    const config = mergeQueryConfig({ out: options.out }, loadConfigSections(root));
+    loadQueryInput(root, config.out);
     throw new Error("the commands are not built yet");
   } catch (err) {
-    io.stderr(`repo-tools query: ${err instanceof Error ? err.message : String(err)}\n`);
+    stderr(`repo-tools query: ${err instanceof Error ? err.message : String(err)}
+`);
     return 1;
   }
 }
