@@ -6,6 +6,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-25
+
+The STE release. `repo-tools ste` checks Markdown, and docstring prose with `--prose`, against the
+mechanically decidable part of ASD-STE100. It replaces the Python checker of the architecture-docs
+skill and the docstring harness of the code-docs skill. The port gives the same 362 findings as
+`ste_check.py` on 111 Markdown files. The npm package runs on Node 20, 22 and 24 again, and a
+static test keeps the tool offline.
+
 ### Added
 
 - Tests: `tests/unit/node-compat.test.ts` keeps regex modifier groups (`(?i:...)`) out of `src/`.

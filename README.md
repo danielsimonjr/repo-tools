@@ -10,7 +10,7 @@
 | `query` | Answers structural questions from the depgraph reports, and writes two derived reports. |
 | `ste` | Checks Markdown or docstring prose against Simplified Technical English. |
 
-Status: version 1.0.0.
+Status: version 1.1.0.
 
 - All five subcommands work.
 - `depgraph` and `query` read their settings from `repo-tools.config.json` in the root.
@@ -34,7 +34,7 @@ repo-tools --version
 
 The executable holds the tool and the Bun runtime. It needs no Bun, Node or `node_modules`.
 Download the file for your platform and `SHA256SUMS` from the
-[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v1.0.0):
+[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v1.1.0):
 
 | Platform | File |
 |---|---|
