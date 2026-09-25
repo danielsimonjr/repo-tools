@@ -60,6 +60,15 @@
   regex-aware comment stripper), F40 (`import().then<T>(...)` is a runtime edge), F43
   (self-imports in single-package mode), F44 (a `.d.ts` file never counts as an unused file).
 
+## 1.1.0: `repo-tools ste`
+
+- [x] The tool stays offline: a static test fails when `src/` imports a network module or uses a
+  network global.
+- [ ] `repo-tools ste`: port `ste_check.py` and `ste_rules.py` from the architecture-docs skill, test-first.
+- [ ] `repo-tools ste --prose`: the docstring harness of the code-docs skill, over the same rule module.
+- [ ] A table of every behavioral difference between the two STE checkers, in `docs/design.md`.
+- [ ] STE parity: `repo-tools ste` and `ste_check.py` give the same output on a real document corpus.
+
 ## Post-release list (filed, not worked in v1)
 
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose

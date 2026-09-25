@@ -6,6 +6,16 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- Tests: `tests/unit/offline.test.ts` keeps the tool offline. It fails when a file in `src/`
+  imports a network module (`http`, `https`, `http2`, `net`, `dgram`, `tls`, `dns`, `undici`,
+  `ws`, with or without `node:`) or uses a network global (`fetch`, `WebSocket`,
+  `XMLHttpRequest`, `EventSource`, `Bun.connect`, `Bun.listen`, `Bun.serve`, `Bun.udpSocket`,
+  `navigator.sendBeacon`). repo-tools reads private repositories, so it must never send their
+  content. 18 positive controls prove that the scan finds each form, and a planted `fetch` in
+  `src/` fails the test.
+
 ## [1.0.0] - 2026-09-24
 
 The first release. One command, `repo-tools`, replaces the copies of the repository tools that
