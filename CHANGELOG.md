@@ -278,6 +278,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- Smoke test (`scripts/smoke.ts`): three steps run on the product itself. Step 2 runs `depgraph`
+  on the mini-repo fixture and compares every report with its golden. Step 3 compares
+  `--api-surface=out.json` with its golden. Step 7 loads `tests/fixtures/extension/probe.mjs`
+  through `repo-tools.config.json` and checks that `preflight` and `report` ran. The steps run from
+  a temp folder, so the script makes a relative command path absolute first. The probe has the
+  section 5.2 shape (a default export with `name`). `scripts/ext-probe.ts` and its two CI steps are
+  removed: the product smoke on each OS replaces them. A test that runs the whole smoke script has
+  a 30 s budget (one run takes about 5 s).
 - Tests: each depgraph golden set runs twice, and the second run must be byte-identical to
   the first (design 13.4). The golden runs use `--no-extensions` (design 13.2): the test plants a
   config with an extension that throws, and the run must still match the goldens. The golden
