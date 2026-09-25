@@ -10,7 +10,14 @@ import { loadConfigSections, mergeQueryConfig } from "../config.ts";
 import { maskRoot, OUTPUT_SUBDIR } from "../depgraph/paths.ts";
 import type { Io } from "../io-types.ts";
 import { parseQueryArgs } from "./args.ts";
-import { cycles, dependents, isPublic, symbolUsersCommand } from "./commands.ts";
+import {
+  checkBrowserSafety,
+  cycles,
+  dependents,
+  isPublic,
+  nodeSafety,
+  symbolUsersCommand,
+} from "./commands.ts";
 import { loadQueryInput } from "./load.ts";
 
 /** The help text of `repo-tools query`. */
@@ -67,7 +74,10 @@ export async function run(argv: string[], io: Io): Promise<number> {
     if (!(existsSync(root) && statSync(root).isDirectory())) {
       throw new Error("the root <root> is not an existing directory");
     }
-    const config = mergeQueryConfig({ out: options.out }, loadConfigSections(root));
+    const config = mergeQueryConfig(
+      { out: options.out, nodeRuntimes: options.nodeRuntimes },
+      loadConfigSections(root),
+    );
     const input = loadQueryInput(root, config.out);
     const sinks: Io = { stdout: io.stdout, stderr };
     const command = options.command;
@@ -80,12 +90,15 @@ export async function run(argv: string[], io: Io): Promise<number> {
         return isPublic(input, command.pkg, command.symbol, sinks);
       case "cycles":
         return cycles(input, sinks);
+      case "node-safety":
+        return nodeSafety(input, command.pkg, config.nodeRuntimes, sinks);
+      case "check-browser-safety":
+        return checkBrowserSafety(input, config.nodeRuntimes, sinks);
       default:
         throw new Error(`${command.name} is not built yet`);
     }
   } catch (err) {
-    stderr(`repo-tools query: ${err instanceof Error ? err.message : String(err)}
-`);
+    stderr(`repo-tools query: ${err instanceof Error ? err.message : String(err)}\n`);
     return 1;
   }
 }

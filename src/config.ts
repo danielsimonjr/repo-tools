@@ -199,12 +199,16 @@ function checkSection(
 export interface QuerySettings {
   /** The report folder, relative to the root. */
   out?: string;
+  /** The packages that run on Node only: their `.` entry can use `node:` builtins. */
+  nodeRuntimes?: string[];
 }
 
 /** The merged query settings of one run. */
 export interface QueryConfig {
   /** The report folder, relative to the root. */
   out: string;
+  /** The packages that run on Node only. */
+  nodeRuntimes: string[];
 }
 
 /** The checked sections of one config file. An absent section is `{}`. */
@@ -216,6 +220,7 @@ export interface ConfigSections {
 /** The keys of `query` in the config file, and the kind of each value. */
 const QUERY_KEYS: Readonly<Record<string, KeyKind>> = {
   out: "path",
+  nodeRuntimes: "names",
 };
 
 /**
@@ -296,11 +301,13 @@ export function loadConfigFile(root: string, configPath?: string): DepgraphSetti
 
 /**
  * Merges the command-line query settings `cli` and the config file `file` with the defaults.
- * The report folder is `--out`, then `query.out`, then `depgraph.out`, then the default.
+ * The report folder is `--out`, then `query.out`, then `depgraph.out`, then the default. The
+ * Node runtimes are `--node-runtime`, then `query.nodeRuntimes`, then none.
  */
 export function mergeQueryConfig(cli: QuerySettings, file: ConfigSections): QueryConfig {
   return {
     out: cli.out ?? file.query.out ?? file.depgraph.out ?? OUTPUT_SUBDIR,
+    nodeRuntimes: cli.nodeRuntimes ?? file.query.nodeRuntimes ?? [],
   };
 }
 

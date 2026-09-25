@@ -140,6 +140,16 @@ describe("config file: the query section (design section 3.5)", () => {
     ["a query section that is not an object", { query: [] }, /'query' must be an object/],
     ["an absolute query.out", { query: { out: "/abs" } }, /'query.out' holds an absolute path/],
     ["an empty query.out", { query: { out: "" } }, /'query.out' must be/],
+    [
+      "a query.nodeRuntimes that is not a list",
+      { query: { nodeRuntimes: "core" } },
+      /'query.nodeRuntimes' must be a list of non-empty strings/,
+    ],
+    [
+      "an empty query.nodeRuntimes item",
+      { query: { nodeRuntimes: [""] } },
+      /'query.nodeRuntimes' must be/,
+    ],
   ];
   for (const [label, value, message] of invalid) {
     test(`${label} is an error, also for a depgraph run`, () => {
@@ -154,6 +164,13 @@ describe("config file: the query section (design section 3.5)", () => {
     expect(mergeQueryConfig({}, file).out).toBe("q");
     expect(mergeQueryConfig({}, { depgraph: { out: "dg" }, query: {} }).out).toBe("dg");
     expect(mergeQueryConfig({}, { depgraph: {}, query: {} }).out).toBe("docs/architecture");
+  });
+
+  test("the Node runtimes: --node-runtime, then query.nodeRuntimes, then none", () => {
+    const file = { depgraph: {}, query: { nodeRuntimes: ["a"] } };
+    expect(mergeQueryConfig({ nodeRuntimes: ["b"] }, file).nodeRuntimes).toEqual(["b"]);
+    expect(mergeQueryConfig({}, file).nodeRuntimes).toEqual(["a"]);
+    expect(mergeQueryConfig({}, { depgraph: {}, query: {} }).nodeRuntimes).toEqual([]);
   });
 });
 

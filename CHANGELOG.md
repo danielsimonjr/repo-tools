@@ -461,6 +461,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools query` (D13): `node-safety [pkg]` and `--check-browser-safety`. A package is the
+  folder above a `src/index.ts` entry of the graph (`.` for the root entry). Each package is
+  browser-safe unless `--node-runtime=<pkg,...>` or the config key `query.nodeRuntimes`
+  (default `[]`) lists it; the source tool named one fixed package. `node-safety` prints, per
+  browser-safe package (or for `[pkg]` only), the files with a `node:` import that its `.`
+  entry reaches. `--check-browser-safety` exits 1 on such a file and names each leaking
+  package on standard error. An unknown `[pkg]` and a Node runtime that is not a package exit
+  1. The node taint of a file in an import cycle is now correct: the source walk cached a
+  false value for a file on the cycle.
 - `repo-tools query` (D13): the commands `dependents <file>`, `symbol-users <symbol>`,
   `is-public <pkg> <symbol>` and `cycles`. `dependents` resolves the internal edges with the
   candidate order of depgraph (fix F30) and prints the importers sorted; a backslash path gives

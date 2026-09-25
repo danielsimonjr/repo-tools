@@ -8,6 +8,7 @@ import type { CyclicComponent } from "../depgraph/types.ts";
 import type { Io } from "../io-types.ts";
 import { buildForward, fileEntriesOf, invert, symbolUsers } from "./graph.ts";
 import type { QueryInput } from "./load.ts";
+import { browserSafePackages, computeTaint, findLeaks, packagesOf } from "./safety.ts";
 
 /** `dependents <file>`: the files that import `file`, one per line. */
 export function dependents(input: QueryInput, file: string, io: Io): number {
@@ -73,4 +74,93 @@ export function cycles(input: QueryInput, io: Io): number {
   const lines = [...componentLines("runtime", runtime), ...componentLines("type-only", typeOnly)];
   io.stdout(`${lines.join("\n")}\n`);
   return 0;
+}
+
+/**
+ * Checks that each Node runtime is a package of the graph. Throws on the first one that is not:
+ * a typing error in the list would hide a leak.
+ */
+function checkRuntimes(input: QueryInput, nodeRuntimes: readonly string[]): void {
+  const packages = packagesOf(input.graph);
+  for (const runtime of nodeRuntimes) {
+    if (!packages.includes(runtime)) {
+      throw new Error(
+        `the Node runtime '${runtime}' is not a package with a src/index.ts entry; the ` +
+          `packages are: ${packages.join(", ")}`,
+      );
+    }
+  }
+}
+
+/** The forward edges and the direct node use of each file of the graph. */
+function safetyModel(input: QueryInput) {
+  const entries = fileEntriesOf(input.graph);
+  const forward = buildForward(entries, new Set(entries.map(([f]) => f)));
+  const { direct } = computeTaint(forward, entries);
+  return { forward, direct };
+}
+
+/**
+ * `node-safety [pkg]`: for each browser-safe package (or for `pkg` only), the files with a
+ * `node:` import that its `.` entry reaches. Throws on an unknown package.
+ */
+export function nodeSafety(
+  input: QueryInput,
+  pkg: string | undefined,
+  nodeRuntimes: readonly string[],
+  io: Io,
+): number {
+  checkRuntimes(input, nodeRuntimes);
+  const packages = packagesOf(input.graph);
+  if (pkg !== undefined && !packages.includes(pkg)) {
+    throw new Error(
+      `unknown package '${pkg}'; the packages with a src/index.ts entry are: ${packages.join(", ")}`,
+    );
+  }
+  const { forward, direct } = safetyModel(input);
+  const lines: string[] = [];
+  for (const p of pkg === undefined ? browserSafePackages(input.graph, nodeRuntimes) : [pkg]) {
+    const leaks = findLeaks(p, forward, direct);
+    if (leaks.length === 0) {
+      lines.push(`${p}: clean (the . entry reaches no node: code)`);
+      continue;
+    }
+    const noun = leaks.length === 1 ? "file" : "files";
+    lines.push(`${p}: ${leaks.length} node: ${noun} reachable from the . entry:`);
+    for (const leak of leaks) lines.push(`  ${leak}`);
+  }
+  io.stdout(lines.length > 0 ? `${lines.join("\n")}\n` : "(no browser-safe package)\n");
+  return 0;
+}
+
+/**
+ * `--check-browser-safety`: exit 1 when the `.` entry of a browser-safe package reaches a file
+ * with a `node:` import. The failure lines go to standard error.
+ */
+export function checkBrowserSafety(
+  input: QueryInput,
+  nodeRuntimes: readonly string[],
+  io: Io,
+): number {
+  checkRuntimes(input, nodeRuntimes);
+  const { forward, direct } = safetyModel(input);
+  const safe = browserSafePackages(input.graph, nodeRuntimes);
+  const failed: string[] = [];
+  for (const pkg of safe) {
+    const leaks = findLeaks(pkg, forward, direct);
+    if (leaks.length > 0) failed.push(`  ${pkg}: ${leaks.join(", ")}`);
+  }
+  const noun = safe.length === 1 ? "package" : "packages";
+  if (failed.length === 0) {
+    io.stdout(
+      `browser-safety check passed: the . entries of ${safe.length} browser-safe ${noun} ` +
+        "reach no node: code.\n",
+    );
+    return 0;
+  }
+  io.stderr(
+    `browser-safety check FAILED: ${failed.length} of ${safe.length} browser-safe ${noun} ` +
+      `reach node: code from the . entry:\n${failed.join("\n")}\n`,
+  );
+  return 1;
 }
