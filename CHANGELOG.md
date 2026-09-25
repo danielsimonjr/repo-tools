@@ -44,6 +44,8 @@ All notable changes to this project are recorded in this file. The format follow
   and the Python tool give the same dispositions, ordered edges, buckets, roots and warnings.
   The empty-repo warning names the root, not its absolute path (output rule R4).
   `pyproject.toml` is read with `smol-toml` 1.9.0, bundled and pinned.
+- 2.0.0 engine: the end-to-end graph tests of C#, Python and Rust are ported (18 tests, from
+  `test_graph_csharp.py`, `test_python_repo_end_to_end.py` and `test_rust.py`).
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
