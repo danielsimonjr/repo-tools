@@ -10,6 +10,7 @@ import { loadConfigSections, mergeQueryConfig } from "../config.ts";
 import { maskRoot, OUTPUT_SUBDIR } from "../depgraph/paths.ts";
 import type { Io } from "../io-types.ts";
 import { parseQueryArgs } from "./args.ts";
+import { cycles, dependents, isPublic, symbolUsersCommand } from "./commands.ts";
 import { loadQueryInput } from "./load.ts";
 
 /** The help text of `repo-tools query`. */
@@ -24,6 +25,7 @@ Commands:
   dependents <file>         Files that import <file> (a root-relative path).
   symbol-users <symbol>     Files that import <symbol>, in any package.
   is-public <pkg> <symbol>  Is <symbol> in the public export surface of <pkg>?
+                            <pkg> is a key of package-export-surfaces.json.
   node-safety [pkg]         Files that use node: builtins and are reachable
                             from the . entry of a browser-safe package (default:
                             each browser-safe package).
@@ -66,8 +68,21 @@ export async function run(argv: string[], io: Io): Promise<number> {
       throw new Error("the root <root> is not an existing directory");
     }
     const config = mergeQueryConfig({ out: options.out }, loadConfigSections(root));
-    loadQueryInput(root, config.out);
-    throw new Error("the commands are not built yet");
+    const input = loadQueryInput(root, config.out);
+    const sinks: Io = { stdout: io.stdout, stderr };
+    const command = options.command;
+    switch (command.name) {
+      case "dependents":
+        return dependents(input, command.file, sinks);
+      case "symbol-users":
+        return symbolUsersCommand(input, command.symbol, sinks);
+      case "is-public":
+        return isPublic(input, command.pkg, command.symbol, sinks);
+      case "cycles":
+        return cycles(input, sinks);
+      default:
+        throw new Error(`${command.name} is not built yet`);
+    }
   } catch (err) {
     stderr(`repo-tools query: ${err instanceof Error ? err.message : String(err)}
 `);

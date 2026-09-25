@@ -461,6 +461,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools query` (D13): the commands `dependents <file>`, `symbol-users <symbol>`,
+  `is-public <pkg> <symbol>` and `cycles`. `dependents` resolves the internal edges with the
+  candidate order of depgraph (fix F30) and prints the importers sorted; a backslash path gives
+  the same answer, and an absolute path exits 1. `symbol-users` lists each (file, edge kind)
+  pair once, sorted; the source tool listed a file once per edge. `is-public` prints `PUBLIC`
+  or `INTERNAL`; an unknown package exits 1 and lists the keys of
+  `package-export-surfaces.json` (the source tool printed a note and exited 0). `cycles`
+  prints the runtime and the type-only cyclic components of fix F26, each with its members
+  and one cycle. The output is ASCII.
 - `repo-tools query` (D13): the input reports. The query reads `dependency-graph.json` and
   `package-export-surfaces.json` in the report folder: `--out`, else the config key
   `query.out`, else `depgraph.out`, else `docs/architecture`, relative to the root. A report
