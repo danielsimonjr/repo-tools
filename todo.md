@@ -27,9 +27,9 @@
   with a clear message, and the absolute-path error says to pass a root-relative path.
 - [x] D10 `depgraph` config, full CLI flags, the exit table (with the empty-output-folder row) and
   the extension loader.
-- [ ] The `--write-duplicate-baseline` help line says it reads the last run's
+- [x] The `--write-duplicate-baseline` help line says it reads the last run's
   `duplicate-symbols.json` (run depgraph first), so a stale baseline is no surprise.
-- [ ] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
+- [x] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
   symbol-users, is-public, node-safety, cycles, the browser-safety gate, and the derived files
   `dependency-reverse.json` and `node-safety.json`. After D10b, before D11.
 - [ ] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.

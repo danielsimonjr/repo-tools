@@ -8,6 +8,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- README: the status lines say that `depgraph` and `query` read `repo-tools.config.json`. They
+  said the configuration file was not built, which was false after task D10.
 - depgraph: the duplicate allowlist is read from `duplicate-allowlist.json` in the output folder
   by default (design section 5.1), not from `tools/create-dependency-graph/`. A repo that keeps
   the allowlist at the old path sets `depgraph.duplicateAllowlist` to that path.

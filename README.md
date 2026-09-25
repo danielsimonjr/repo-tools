@@ -12,8 +12,8 @@
 Status: pre-release. No version is published yet.
 
 - All four subcommands work.
-- `depgraph` runs with its default settings. The configuration file and some flags of the design
-  are not built yet.
+- `depgraph` and `query` read their settings from `repo-tools.config.json` in the root.
+  `depgraph --config=<file>` reads another file.
 - `compress -d` restores JSON files only.
 
 ## Run
