@@ -21,8 +21,8 @@ async function run(argv: string[]) {
 }
 
 describe("repo-tools CLI shell (spec 3.1)", () => {
-  test("the subcommand list is exactly depgraph, chunk, compress", async () => {
-    expect([...SUBCOMMANDS]).toEqual(["depgraph", "chunk", "compress"]);
+  test("the subcommand list is exactly depgraph, chunk, compress, query", async () => {
+    expect([...SUBCOMMANDS]).toEqual(["depgraph", "chunk", "compress", "query"]);
   });
 
   for (const argv of [[], ["--help"], ["-h"]]) {
@@ -40,7 +40,7 @@ describe("repo-tools CLI shell (spec 3.1)", () => {
     expect(r.out).toBe(`${pkg.version}\n`);
   });
 
-  for (const name of ["depgraph", "chunk", "compress"]) {
+  for (const name of ["depgraph", "chunk", "compress", "query"]) {
     test(`${name} --help prints that subcommand's help and exits 0`, async () => {
       const r = await run([name, "--help"]);
       expect(r.code).toBe(0);

@@ -9,6 +9,7 @@ import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
 import { DEPGRAPH_HELP, run as runDepgraph } from "./depgraph/index.ts";
 import type { Io } from "./io-types.ts";
+import { QUERY_HELP, run as runQuery } from "./query/index.ts";
 
 export type { Io } from "./io-types.ts";
 
@@ -35,6 +36,11 @@ const REGISTRY = {
     summary: "Write a compact copy of a file for a model context, or restore it.",
     help: compressHelp,
     run: compressRun,
+  },
+  query: {
+    summary: "Answer structural questions from the depgraph reports, or write derived reports.",
+    help: QUERY_HELP,
+    run: runQuery,
   },
 } satisfies Record<string, Subcommand>;
 

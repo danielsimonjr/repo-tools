@@ -43,9 +43,9 @@ const STEPS: Step[] = [
     args: ["--help"],
     exit: 0,
     check: (out) =>
-      ["depgraph", "chunk", "compress"].every((s) => out.includes(s))
+      ["depgraph", "chunk", "compress", "query"].every((s) => out.includes(s))
         ? undefined
-        : "the help does not list depgraph, chunk and compress",
+        : "the help does not list depgraph, chunk, compress and query",
   },
   { name: "unknown subcommand", args: ["frobnicate"], exit: 1 },
 ];

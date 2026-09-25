@@ -461,6 +461,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools query` (D13, design section 3.5), the fourth subcommand: its help text and its
+  strict command line. The commands are `dependents <file>`, `symbol-users <symbol>`,
+  `is-public <pkg> <symbol>`, `node-safety [pkg]` and `cycles`; the modes are `--emit` and
+  `--check-browser-safety`; the flags are `--root`, `--out` and `--node-runtime`. An unknown
+  command or flag, a missing or extra argument, a flag without its value, an absolute `--out`,
+  and two commands or modes in one run exit 1 with a message. A run with no command exits 1:
+  the source tool wrote the derived reports then, and `--emit` now does that. `repo-tools
+  --help` lists four subcommands.
 - depgraph `--help`: the `--write-duplicate-baseline` line says that the flag reads the
   `duplicate-symbols.json` of the last depgraph run (run depgraph first). A stale report thus
   never gives a surprise baseline.
