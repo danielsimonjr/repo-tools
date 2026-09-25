@@ -8,6 +8,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- Build: `scripts/build.ts` compares `node_modules` with `bun.lock` before it bundles or compiles
+  (`scripts/lockcheck.ts`). It stops with exit 1 and names each package that `bun.lock` does not
+  name, each version that differs, and each locked package that is not installed. A missing
+  platform-only package (`os` or `cpu`) is not a difference. A frozen install does not remove a
+  package that the lockfile no longer names: the first run found `@types/js-yaml` 4.0.9 left
+  from before F4 in a real checkout. The README build step says what to do.
 - `repo-tools query --config=<path>` reads the named config file instead of
   `repo-tools.config.json`, on the same path as `depgraph --config`. A missing file, an absolute
   path, an unknown key or invalid JSON exits 1.

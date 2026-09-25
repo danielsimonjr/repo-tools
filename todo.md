@@ -32,7 +32,7 @@
 - [x] D13 `repo-tools query`, the fourth subcommand (owner scope addition): dependents,
   symbol-users, is-public, node-safety, cycles, the browser-safety gate, and the derived files
   `dependency-reverse.json` and `node-safety.json`. After D10b, before D11.
-- [ ] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.
+- [x] D11 Golden and determinism CI on Linux and Windows; smoke steps 2, 3 and 7 on the product.
   Also: `bun run compile` refuses to build when `node_modules` does not match `bun.lock`
   (a frozen install does not prune a stale nested package), proven with a planted stale nested
   package, RED then GREEN; the README build step matches.
@@ -43,6 +43,9 @@
   folders of runs that are no longer alive.
 - [x] D11 `repo-tools query --config=<file>`, on the same path as `depgraph --config`
   (ruling 2026-09-24).
+- [ ] D11 Criterion 5: on UPT at a commit at or after 673504a, `repo-tools depgraph
+  --api-surface=a.json` is byte-identical to UPT's own `create-dependency-graph.ts
+  --api-surface=a.json` at the same commit.
 - [ ] D12 Public design document and the release-candidate report.
   The design document says that the extension `ctx.write` is a convenience boundary, not a
   security one: an extension is trusted repo code that can call the file system directly.

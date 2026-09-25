@@ -38,9 +38,10 @@ Prerequisites: Bun 1.4.2 or later, and a clone of this repository.
    bun install --frozen-lockfile
    ```
 
-   Do this after every pull. The executable bundles the installed dependencies. With an old
-   `node_modules`, the build can succeed and the executable then fails (for example, `depgraph`
-   stops at its js-yaml check).
+   Do this after every pull. The executable bundles the installed dependencies, so the build
+   first compares `node_modules` with `bun.lock`. On a difference, the build stops with exit 1
+   and names each package. A frozen install does not remove a package that `bun.lock` no longer
+   names. When the build names such a package, remove `node_modules` and install again.
 
 2. Compile the executable for this computer:
 

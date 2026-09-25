@@ -7,11 +7,14 @@
  *   bun scripts/build.ts --compile [--target <target>] [--outdir <dir>]
  *       Writes one compiled executable (default target: the host; default dir: `bin`).
  *
- * Flags take `--name value` or `--name=value`. An unknown flag or target exits 1. The release
+ * Both modes first check that `node_modules` matches `bun.lock` (`scripts/lockcheck.ts`) and
+ * exit 1 when it does not. Flags take `--name value` or `--name=value`. An unknown flag or target
+ * exits 1. The release
  * workflow (`build.yml`) writes and verifies `SHA256SUMS`; this script writes no checksum file.
  */
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { assertInstalledTree } from "./lockcheck.ts";
 
 export const TARGETS = ["bun-windows-x64", "bun-linux-x64", "bun-darwin-arm64"] as const;
 export type Target = (typeof TARGETS)[number];
@@ -84,6 +87,8 @@ function compile(target: Target, outdir: string): void {
 if (import.meta.main) {
   try {
     const args = parseBuildArgs(process.argv.slice(2));
+    // Both artifacts bundle node_modules, so a tree that differs from bun.lock stops the build.
+    assertInstalledTree(process.cwd());
     if (args.compile) {
       if (args.outfile) throw new Error("--outfile applies to the bundle, not to --compile");
       const name = args.target ?? hostTarget();
