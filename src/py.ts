@@ -14,8 +14,8 @@
  * - `repr()` has its own quoting and escape rules.
  */
 
-/** The Python white-space characters (`str.isspace()`), as a character-class body. */
-const SPACE_BODY =
+/** The Python white-space characters (`str.isspace()`), as a character-class body (for a negated class). */
+export const SPACE_BODY =
   "\\t\\n\\v\\f\\r\\x1c-\\x1f \\x85\\xa0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000";
 
 /** Python `\s` (a character class). Use it in a regex with the `u` flag. */

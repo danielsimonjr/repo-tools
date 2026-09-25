@@ -37,6 +37,13 @@ All notable changes to this project are recorded in this file. The format follow
 - Tests: `tests/unit/node-compat.test.ts` also fails when `src/` uses the `Bun` global or a
   `bun:` module, because `npx` runs the Node bundle. It found `Bun.spawnSync` in the map
   discovery; the git file list now comes from `node:child_process`.
+- 2.0.0 engine, step 6: the graph (`src/map/graph.ts`) and its schema (`src/map/schema.ts`).
+  It holds the classify-before-resolve buckets, barrel expansion, entry-point roots for four
+  languages, thin launchers, reachability and simple-cycle enumeration. The 29 tests of
+  `test_schema.py` and `test_graph.py` are ported. On 11 repositories and 4,456 files, the port
+  and the Python tool give the same dispositions, ordered edges, buckets, roots and warnings.
+  The empty-repo warning names the root, not its absolute path (output rule R4).
+  `pyproject.toml` is read with `smol-toml` 1.9.0, bundled and pinned.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
