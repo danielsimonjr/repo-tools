@@ -3,9 +3,11 @@
  * writes its answer to standard output and returns the exit code. A command throws on a user
  * error; the caller prints the message and exits 1.
  */
-import { isAbsolutePath } from "../config.ts";
+import { isAbsolutePath, resolveUnderRoot } from "../config.ts";
 import type { CyclicComponent } from "../depgraph/types.ts";
+import { writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
+import { sortCodeUnits } from "../sort.ts";
 import { buildForward, fileEntriesOf, invert, symbolUsers } from "./graph.ts";
 import type { QueryInput } from "./load.ts";
 import { browserSafePackages, computeTaint, findLeaks, packagesOf } from "./safety.ts";
@@ -131,6 +133,47 @@ export function nodeSafety(
   }
   io.stdout(lines.length > 0 ? `${lines.join("\n")}\n` : "(no browser-safe package)\n");
   return 0;
+}
+
+/**
+ * `--emit`: writes `dependency-reverse.json` (the reverse edges) and `node-safety.json` (the
+ * browser-safe packages, the files with a `node:` import, and the leaks of each browser-safe
+ * package) into the report folder `out` (relative to `root`). Every list and key is sorted in
+ * code-unit order. The files hold no timestamp, so two runs on one graph give the same bytes.
+ */
+export function emit(
+  input: QueryInput,
+  root: string,
+  out: string,
+  nodeRuntimes: readonly string[],
+  io: Io,
+): number {
+  checkRuntimes(input, nodeRuntimes);
+  const { forward, direct } = safetyModel(input);
+  const dependentsOf = invert(forward);
+  const nodeFiles = sortCodeUnits([...direct].filter(([, d]) => d).map(([file]) => file));
+  const safe = browserSafePackages(input.graph, nodeRuntimes);
+  const leaks: Record<string, string[]> = {};
+  for (const pkg of safe) leaks[pkg] = findLeaks(pkg, forward, direct);
+  const leakCount = Object.values(leaks).reduce((n, list) => n + list.length, 0);
+  const folder = out.replace(/\\/g, "/").replace(/\/+$/, "");
+  const write = (name: string, value: unknown, summary: string): void => {
+    writeReport(resolveUnderRoot(root, `${folder}/${name}`), JSON.stringify(value, null, 2));
+    io.stdout(`Written: ${folder}/${name} (${summary})\n`);
+  };
+  const files = Object.keys(dependentsOf).length;
+  write("dependency-reverse.json", { dependents: dependentsOf }, plural(files, "file"));
+  write(
+    "node-safety.json",
+    { browserSafePackages: safe, nodeTaintedFiles: nodeFiles, leaks },
+    `${plural(nodeFiles.length, "node file")}, ${plural(leakCount, "leak")}`,
+  );
+  return 0;
+}
+
+/** `1 <noun>` or `N <noun>s`. */
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
 /**

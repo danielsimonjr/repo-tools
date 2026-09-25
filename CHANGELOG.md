@@ -461,6 +461,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools query --emit` (D13) writes `dependency-reverse.json` (`dependents`: each file to
+  the files that import it) and `node-safety.json` (`browserSafePackages`, `nodeTaintedFiles`:
+  the files with a `node:` import, and `leaks` per browser-safe package) into the report
+  folder. Keys and lists sort in code-unit order; the files have LF line endings and one
+  trailing LF. The source `generated` timestamp field is gone, so two runs on one graph give
+  byte-identical files. Standard output names each file relative to the root.
 - `repo-tools query` (D13): `node-safety [pkg]` and `--check-browser-safety`. A package is the
   folder above a `src/index.ts` entry of the graph (`.` for the root entry). Each package is
   browser-safe unless `--node-runtime=<pkg,...>` or the config key `query.nodeRuntimes`

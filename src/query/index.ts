@@ -14,6 +14,7 @@ import {
   checkBrowserSafety,
   cycles,
   dependents,
+  emit,
   isPublic,
   nodeSafety,
   symbolUsersCommand,
@@ -94,8 +95,8 @@ export async function run(argv: string[], io: Io): Promise<number> {
         return nodeSafety(input, command.pkg, config.nodeRuntimes, sinks);
       case "check-browser-safety":
         return checkBrowserSafety(input, config.nodeRuntimes, sinks);
-      default:
-        throw new Error(`${command.name} is not built yet`);
+      case "emit":
+        return emit(input, root, config.out, config.nodeRuntimes, sinks);
     }
   } catch (err) {
     stderr(`repo-tools query: ${err instanceof Error ? err.message : String(err)}\n`);
