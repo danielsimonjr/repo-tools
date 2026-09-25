@@ -14,7 +14,7 @@
   - [x] A directory without `--batch`, and `--batch` without a directory, exit 1 with a message.
   - [x] JSON `-d` restores keys by structure (the original corrupts values).
   - [x] Round trip tests and a smoke step.
-- [ ] T6 Public design document `docs/design.md`.
+- [x] T6 Public design document `docs/design.md`.
 
 ## Part 2
 
@@ -46,7 +46,7 @@
 - [x] D11 Criterion 5: on UPT at a commit at or after 673504a, `repo-tools depgraph
   --api-surface=a.json` is byte-identical to UPT's own `create-dependency-graph.ts
   --api-surface=a.json` at the same commit.
-- [ ] D12 Public design document and the release-candidate report.
+- [x] D12 Public design document and the release-candidate report.
   The design document says that the extension `ctx.write` is a convenience boundary, not a
   security one: an extension is trusted repo code that can call the file system directly.
 - [x] depgraph fixes, one commit each: F1-F12, F13 (with a `pnpm-repo` fixture), F14 (with
