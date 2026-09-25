@@ -34,6 +34,9 @@ All notable changes to this project are recorded in this file. The format follow
   Rust, with Python's `posixpath` rules in `src/py.ts`. The Python standard-library list is the
   `sys.stdlib_module_names` of CPython 3.13.15, as generated data. The 35 resolver tests of four
   test files are ported.
+- Tests: `tests/unit/node-compat.test.ts` also fails when `src/` uses the `Bun` global or a
+  `bun:` module, because `npx` runs the Node bundle. It found `Bun.spawnSync` in the map
+  discovery; the git file list now comes from `node:child_process`.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

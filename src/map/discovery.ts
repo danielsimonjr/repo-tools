@@ -8,6 +8,8 @@
  * pruned walk otherwise. One difference from the Python tool: the file order is code-unit order
  * of the path parts on every operating system (Python sorts without case on Windows).
  */
+
+import { spawnSync } from "node:child_process";
 import { type Dirent, lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { pySplitlines } from "../py.ts";
@@ -220,17 +222,16 @@ export function gitTracked(root: string): Set<string> | null {
   const cached = trackedCache.get(root);
   if (cached !== undefined) return cached;
   let result: Set<string> | null = null;
-  try {
-    const r = Bun.spawnSync(["git", "-C", root, "ls-files", "-z", "--cached"], {
-      stdout: "pipe",
-      stderr: "ignore",
-    });
-    if (r.exitCode === 0) {
-      const out = new TextDecoder("utf-8").decode(r.stdout);
-      result = new Set(out.split("\0").filter((p) => p !== ""));
-    }
-  } catch {
-    result = null;
+  // node:child_process, not Bun.spawnSync: the Node bundle runs this code too. The Python tool
+  // used a 60-second timeout; so does this port.
+  const r = spawnSync("git", ["-C", root, "ls-files", "-z", "--cached"], {
+    stdio: ["ignore", "pipe", "ignore"],
+    timeout: 60_000,
+    maxBuffer: 1 << 30,
+  });
+  if (!r.error && r.status === 0 && r.stdout) {
+    const out = new TextDecoder("utf-8").decode(r.stdout);
+    result = new Set(out.split("\0").filter((p) => p !== ""));
   }
   trackedCache.set(root, result);
   return result;

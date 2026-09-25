@@ -51,6 +51,28 @@ describe("node-compat: no regex modifier group in src/", () => {
   });
 });
 
+/** The Bun-only uses in the code of `source`: the `Bun` global and `bun:` modules. */
+function bunOnlyUses(source: string): string[] {
+  const code = stripComments(source);
+  return [...code.matchAll(/\bBun\s*\.\s*\w+|["']bun:[\w-]+["']/g)].map((m) => m[0]);
+}
+
+describe("node-compat: no Bun-only API in src/", () => {
+  // `npx @danielsimonjr/repo-tools` runs the Node bundle, and Node has no `Bun` global.
+  test("no source file uses the Bun global or a bun: module", () => {
+    const found = tsFiles(SRC).flatMap((f) =>
+      bunOnlyUses(readFileSync(f, "utf8")).map((u) => `${f.slice(SRC.length + 1)}: ${u}`),
+    );
+    expect(found).toEqual([]);
+  });
+
+  test("the scan finds each form (positive controls)", () => {
+    expect(bunOnlyUses('const r = Bun.spawnSync(["git"]);').length).toBe(1);
+    expect(bunOnlyUses('import { Database } from "bun:sqlite";').length).toBe(1);
+    expect(bunOnlyUses("// Bun.spawnSync is Bun-only\nconst x = 1;\n")).toEqual([]);
+  });
+});
+
 describe("ci: the Python case-insensitive letters", () => {
   const dotless = String.fromCharCode(0x131);
   const dotted = String.fromCharCode(0x130);
