@@ -23,6 +23,13 @@ All notable changes to this project are recorded in this file. The format follow
 - 2.0.0 engine, step 3: the C# and Rust readers (`parseCs`, `parseRs`), regex readers ported
   with their exact behavior. Python's line-start anchor and `.` get exact translations. The 22
   reader tests of `test_parsing_csharp.py` and `test_rust.py` are ported.
+- 2.0.0 engine, step 4: the Python reader (`parsePy`) on tree-sitter-python 0.25.0, in place of
+  CPython's `ast`. The import order is the order of `ast.walk` (ast depth, then source position).
+  A module that does not parse raises `SyntaxError`. The 9 tests of `test_parsing_python.py` are
+  ported; 8 new tests pin the import order and the export forms against CPython's output. The
+  Python, C# and Rust readers match the Python tool file by file on 726 files of 7 public
+  repositories: PITS-MRAS, auto-memory, fermat-mcp and memvid (Python), IronClaw (Rust), ui-mcp
+  and Windows-mcp (C#).
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

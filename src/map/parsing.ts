@@ -395,3 +395,310 @@ export function parseRs(source: string): ParsedModule {
   for (const m of clean.matchAll(RS_PUB_ITEM)) mod.exports.push(group(m, "name"));
   return mod;
 }
+
+/*
+ * The Python reader. The Python tool reads Python with CPython's `ast`; this port reads it with
+ * tree-sitter-python and gives the same facts:
+ * - The import order is `ast.walk` order: breadth first. Among import statements, that order is
+ *   the order of (ast depth, source position), because every Python statement container lists
+ *   its child fields in source order. The depth is counted in ast levels, not tree-sitter levels:
+ *   an `elif` nests one level deeper than the one before it, an `except` body is two levels below
+ *   its `try`, and a decorator adds no level.
+ * - A module that does not parse raises `SyntaxError`, as `ast.parse` does.
+ */
+
+/** One import statement found in the tree, with its ast depth. */
+interface PyImportSite {
+  depth: number;
+  start: number;
+  node: Node;
+}
+
+/** The dotted name of a `dotted_name` node, with its identifiers joined by `.` (as `ast`). */
+function dottedName(node: Node): string {
+  return node.children
+    .filter((c) => c.type === "identifier")
+    .map((c) => c.text)
+    .join(".");
+}
+
+/** The imported name of a `dotted_name` or `aliased_import` child. */
+function importedName(node: Node): string {
+  if (node.type === "aliased_import") {
+    const name = node.childForFieldName("name");
+    return name ? dottedName(name) : "";
+  }
+  return dottedName(node);
+}
+
+/** Visits the statements of a block (or a module) at ast depth `depth`. */
+function visitPyBlock(block: Node, depth: number, sites: PyImportSite[]): void {
+  for (const stmt of block.children) visitPyStatement(stmt, depth, sites);
+}
+
+/** The first `block` child of `node`, if any. */
+const blockOf = (node: Node): Node | undefined => node.children.find((c) => c.type === "block");
+
+/** Visits one statement at ast depth `depth` and records each import statement in it. */
+function visitPyStatement(stmt: Node, depth: number, sites: PyImportSite[]): void {
+  switch (stmt.type) {
+    case "import_statement":
+    case "import_from_statement":
+    case "future_import_statement":
+      sites.push({ depth, start: stmt.startIndex, node: stmt });
+      return;
+    case "decorated_definition": {
+      const def = stmt.childForFieldName("definition");
+      if (def) visitPyStatement(def, depth, sites);
+      return;
+    }
+    case "function_definition":
+    case "class_definition":
+    case "with_statement": {
+      const body = stmt.childForFieldName("body");
+      if (body) visitPyBlock(body, depth + 1, sites);
+      return;
+    }
+    case "if_statement": {
+      const consequence = stmt.childForFieldName("consequence");
+      if (consequence) visitPyBlock(consequence, depth + 1, sites);
+      let elifs = 0;
+      for (const alt of stmt.children) {
+        if (alt.type === "elif_clause") {
+          elifs += 1;
+          const body = alt.childForFieldName("consequence");
+          if (body) visitPyBlock(body, depth + 1 + elifs, sites);
+        } else if (alt.type === "else_clause") {
+          const body = alt.childForFieldName("body");
+          if (body) visitPyBlock(body, depth + 1 + elifs, sites);
+        }
+      }
+      return;
+    }
+    case "for_statement":
+    case "while_statement": {
+      const body = stmt.childForFieldName("body");
+      if (body) visitPyBlock(body, depth + 1, sites);
+      for (const alt of stmt.children) {
+        if (alt.type !== "else_clause") continue;
+        const elseBody = alt.childForFieldName("body");
+        if (elseBody) visitPyBlock(elseBody, depth + 1, sites);
+      }
+      return;
+    }
+    case "try_statement": {
+      const body = stmt.childForFieldName("body");
+      if (body) visitPyBlock(body, depth + 1, sites);
+      for (const part of stmt.children) {
+        if (part.type === "except_clause" || part.type === "except_group_clause") {
+          const handler = blockOf(part);
+          if (handler) visitPyBlock(handler, depth + 2, sites);
+        } else if (part.type === "else_clause") {
+          const elseBody = part.childForFieldName("body");
+          if (elseBody) visitPyBlock(elseBody, depth + 1, sites);
+        } else if (part.type === "finally_clause") {
+          const fin = blockOf(part);
+          if (fin) visitPyBlock(fin, depth + 1, sites);
+        }
+      }
+      return;
+    }
+    case "match_statement": {
+      const body = stmt.childForFieldName("body");
+      for (const clause of body?.children ?? []) {
+        if (clause.type !== "case_clause") continue;
+        const consequence = clause.childForFieldName("consequence");
+        if (consequence) visitPyBlock(consequence, depth + 2, sites);
+      }
+      return;
+    }
+    default:
+      return;
+  }
+}
+
+/** The RawImports of one import statement, in the order `ast` lists its aliases. */
+function pyImportsOf(stmt: Node): RawImport[] {
+  const names = stmt.childrenForFieldName("name").map(importedName);
+  if (stmt.type === "import_statement") {
+    return names.map((specifier) => ({ specifier, names: [], typeOnly: false }));
+  }
+  if (stmt.type === "future_import_statement") {
+    return [{ specifier: "__future__", names, typeOnly: false }];
+  }
+  const module = stmt.childForFieldName("module_name");
+  let specifier = "";
+  if (module?.type === "relative_import") {
+    const prefix = module.children.find((c) => c.type === "import_prefix");
+    const dotted = module.children.find((c) => c.type === "dotted_name");
+    specifier = (prefix?.text.replace(/[^.]/g, "") ?? "") + (dotted ? dottedName(dotted) : "");
+  } else if (module) {
+    specifier = dottedName(module);
+  }
+  const wildcard = stmt.children.some((c) => c.type === "wildcard_import");
+  return [{ specifier, names: wildcard ? ["*"] : names, typeOnly: false }];
+}
+
+/** The single-character escapes of a Python str literal. */
+const PY_ESCAPES: Readonly<Record<string, string>> = {
+  "\\": "\\",
+  "'": "'",
+  '"': '"',
+  a: "\x07",
+  b: "\b",
+  f: "\f",
+  n: "\n",
+  r: "\r",
+  t: "\t",
+  v: "\v",
+};
+
+/** Decodes the body of a non-raw Python str literal as CPython does. */
+function decodePyEscapes(body: string): string {
+  let out = "";
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i] as string;
+    if (ch !== "\\" || i === body.length - 1) {
+      out += ch;
+      continue;
+    }
+    const next = body[i + 1] as string;
+    if (next === "\n") {
+      i += 1;
+      continue;
+    }
+    const simple = PY_ESCAPES[next];
+    if (simple !== undefined) {
+      out += simple;
+      i += 1;
+      continue;
+    }
+    const hexLen = next === "x" ? 2 : next === "u" ? 4 : next === "U" ? 8 : 0;
+    if (
+      hexLen > 0 &&
+      /^[0-9a-fA-F]+$/.test(body.slice(i + 2, i + 2 + hexLen)) &&
+      body.length >= i + 2 + hexLen
+    ) {
+      out += String.fromCodePoint(Number.parseInt(body.slice(i + 2, i + 2 + hexLen), 16));
+      i += 1 + hexLen;
+      continue;
+    }
+    const octal = /^[0-7]{1,3}/.exec(body.slice(i + 1));
+    if (octal) {
+      out += String.fromCodePoint(Number.parseInt(octal[0], 8));
+      i += octal[0].length;
+      continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
+/**
+ * The value of a `string` node as a Python str constant, or undefined when the literal is not a
+ * str constant (an f-string or a bytes literal).
+ */
+function pyStringValue(node: Node): string | undefined {
+  const start = node.children.find((c) => c.type === "string_start");
+  const end = node.children.find((c) => c.type === "string_end");
+  if (!start || !end) return undefined;
+  const prefix = start.text.replace(/['"]+$/, "").toLowerCase();
+  if (prefix.includes("f") || prefix.includes("b") || prefix.includes("t")) return undefined;
+  const body = node.text.slice(start.text.length, node.text.length - end.text.length);
+  return prefix.includes("r") ? body : decodePyEscapes(body);
+}
+
+/** The str value of a `string` or `concatenated_string` element, or undefined. */
+function pyConstantString(node: Node): string | undefined {
+  if (node.type === "string") return pyStringValue(node);
+  if (node.type === "concatenated_string") {
+    const parts = node.children.filter((c) => c.type === "string").map(pyStringValue);
+    return parts.every((p) => p !== undefined) ? parts.join("") : undefined;
+  }
+  return undefined;
+}
+
+/** The targets of a plain (not annotated) assignment chain and its final value. */
+function assignChain(node: Node): { targets: Node[]; value: Node | null } {
+  const targets: Node[] = [];
+  let cur: Node | null = node;
+  while (cur && cur.type === "assignment" && !cur.childForFieldName("type")) {
+    const left = cur.childForFieldName("left");
+    if (left) targets.push(left);
+    const right: Node | null = cur.childForFieldName("right");
+    if (right?.type !== "assignment") return { targets, value: right };
+    cur = right;
+  }
+  return { targets, value: null };
+}
+
+/** The assignment inside a top-level expression statement, if it has one. */
+const assignmentOf = (stmt: Node): Node | undefined =>
+  stmt.type === "expression_statement"
+    ? stmt.children.find((c) => c.type === "assignment")
+    : undefined;
+
+/** The string constants of a top-level `__all__` list or tuple, or null when there is none. */
+function dunderAll(module: Node): string[] | null {
+  for (const stmt of module.children) {
+    const assign = assignmentOf(stmt);
+    if (!assign || assign.childForFieldName("type")) continue;
+    const { targets, value } = assignChain(assign);
+    for (const target of targets) {
+      if (target.type !== "identifier" || target.text !== "__all__") continue;
+      if (value && ["list", "tuple", "expression_list"].includes(value.type)) {
+        return value.children.map(pyConstantString).filter((s): s is string => s !== undefined);
+      }
+    }
+  }
+  return null;
+}
+
+/** Reads one Python file: its imports in `ast.walk` order, and its exports. */
+export function parsePy(source: string): ParsedModule {
+  const tree = parserFor("python").parse(source);
+  if (!tree) throw new Error("tree-sitter returned no tree");
+  const root = tree.rootNode;
+  try {
+    if (root.hasError) throw new SyntaxError("the Python source does not parse");
+    const mod = emptyModule();
+    const sites: PyImportSite[] = [];
+    visitPyBlock(root, 1, sites);
+    sites.sort((a, b) => a.depth - b.depth || a.start - b.start);
+    for (const site of sites) mod.imports.push(...pyImportsOf(site.node));
+
+    const explicit = dunderAll(root);
+    if (explicit !== null) {
+      mod.exports = explicit;
+      for (const name of explicit) mod.exportKinds[name] = "unknown";
+      return mod;
+    }
+    const add = (name: string, kind: string): void => {
+      if (name.startsWith("_")) return;
+      mod.exports.push(name);
+      mod.exportKinds[name] = kind;
+    };
+    for (const stmt of root.children) {
+      const def =
+        stmt.type === "decorated_definition" ? stmt.childForFieldName("definition") : stmt;
+      if (def?.type === "function_definition" || def?.type === "class_definition") {
+        const name = def.childForFieldName("name");
+        if (name) add(name.text, def.type === "function_definition" ? "function" : "class");
+        continue;
+      }
+      const assign = assignmentOf(stmt);
+      if (!assign) continue;
+      if (assign.childForFieldName("type")) {
+        const left = assign.childForFieldName("left");
+        if (left?.type === "identifier") add(left.text, "const");
+        continue;
+      }
+      for (const target of assignChain(assign).targets) {
+        if (target.type === "identifier") add(target.text, "const");
+      }
+    }
+    return mod;
+  } finally {
+    tree.delete();
+  }
+}

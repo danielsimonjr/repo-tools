@@ -69,6 +69,12 @@
 - [x] A table of every behavioral difference between the two STE checkers, in `docs/design.md`.
 - [x] STE parity: `repo-tools ste` and `ste_check.py` give the same output on a real document corpus.
 
+## 2.0.0: the unified engine (repo_map port)
+
+- [ ] The Rust `use` reader cuts a name at the letters `as` inside a word (`HashMap` becomes `H`):
+  the Python source splits on `as` after it removes white space. Fix it as a whole-word alias,
+  with its own parity verdict (repo_map-wrong), after the side-1 parity record.
+
 ## Post-release list (filed, not worked in v1)
 
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
