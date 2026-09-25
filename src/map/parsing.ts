@@ -7,6 +7,7 @@
  * `loadGrammar` for the language before a reader runs.
  */
 import type { Node } from "web-tree-sitter";
+import { S, W } from "../py.ts";
 import { parserFor } from "./grammars.ts";
 
 /** One import of a module: its specifier, the names it binds, and whether it is type-only. */
@@ -237,5 +238,160 @@ export function parseTs(source: string): ParsedModule {
     for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i] as Node);
   }
   tree.delete();
+  return mod;
+}
+
+/*
+ * The C# and Rust readers are regex readers over source with its comments and strings blanked,
+ * as in the Python tool. Two translation rules keep them identical to it:
+ * - Python's MULTILINE `^` matches only after `\n`; `BOL` is that anchor (a JavaScript `m` flag
+ *   would also match after `\r`, U+2028 and U+2029).
+ * - Python's `.` excludes only `\n`, so it becomes `[^\n]`, and DOTALL `.` becomes `[\s\S]`.
+ */
+const BOL = "(?<=^|\\n)";
+const ID = `[A-Za-z_]${W}*`;
+
+/** Replaces each character of a match except `\n` with a space (one per code point). */
+const blank = (m: string): string => m.replace(/[^\n]/gu, " ");
+
+/** A named group of a match. Each name used here is a required group, so a match always has it. */
+const group = (m: RegExpMatchArray, name: string): string =>
+  (m.groups as Record<string, string>)[name] as string;
+
+const CS_USING = new RegExp(
+  `${BOL}[ \\t]*(?:global[ \\t]+)?using[ \\t]+(?:(?<st>static)[ \\t]+)?` +
+    `(?:(?<alias>${ID})[ \\t]*=[ \\t]*)?` +
+    `(?<ns>${ID}(?:[ \\t]*\\.[ \\t]*${ID})*)` +
+    "(?<generic>[ \\t]*<[^;\\n]*>)?[ \\t]*;",
+  "gu",
+);
+const CS_NAMESPACE = new RegExp(
+  `${BOL}[ \\t]*namespace[ \\t]+(?<ns>${ID}(?:[ \\t]*\\.[ \\t]*${ID})*)[ \\t]*[;{\\r\\n]`,
+  "gu",
+);
+const CS_PUBLIC_TYPE = new RegExp(
+  `${BOL}[ \\t]*public[ \\t]+(?:(?:static|sealed|abstract|partial|readonly|unsafe|ref)[ \\t]+)*` +
+    `(?:class|interface|record|struct|enum)[ \\t]+(?<name>${ID})`,
+  "gu",
+);
+const CS_LINE_COMMENT = /\/\/[^\n]*/gu;
+const CS_BLOCK_COMMENT = /\/\*[\s\S]*?\*\//gu;
+// As in the Python source: `\.` is a literal dot, and the class excludes `"`, `\` and `n`.
+const CS_STRING = /"(?:\.|[^"\\n])*"/gu;
+const SPACES_TABS = /[ \t]+/g;
+
+/** C# source with comments and strings blanked (block comments first). */
+function stripCsNoise(source: string): string {
+  return source
+    .replace(CS_BLOCK_COMMENT, blank)
+    .replace(CS_LINE_COMMENT, blank)
+    .replace(CS_STRING, blank);
+}
+
+/** Reads one C# file: its `using` directives, the namespaces it declares, its public types. */
+export function parseCs(source: string): ParsedModule {
+  const clean = stripCsNoise(source);
+  const mod = emptyModule();
+  for (const m of clean.matchAll(CS_USING)) {
+    const g = m.groups as Record<string, string | undefined>;
+    let ns = (g.ns as string).replace(SPACES_TABS, "");
+    // `using static X.T;` and an alias to a generic type name a TYPE: keep its namespace.
+    if (g.st !== undefined || g.generic !== undefined) {
+      const dot = ns.lastIndexOf(".");
+      ns = dot === -1 ? "" : ns.slice(0, dot);
+      if (ns === "") continue;
+    }
+    mod.imports.push({ specifier: ns, names: [], typeOnly: false });
+  }
+  for (const m of clean.matchAll(CS_NAMESPACE)) {
+    mod.provides.push(group(m, "ns").replace(SPACES_TABS, ""));
+  }
+  for (const m of clean.matchAll(CS_PUBLIC_TYPE)) mod.exports.push(group(m, "name"));
+  return mod;
+}
+
+const RS_MOD = new RegExp(
+  `${BOL}[ \\t]*(?:pub(?:\\([^)]*\\))?[ \\t]+)?mod[ \\t]+(?<name>${ID})[ \\t]*;`,
+  "gu",
+);
+const RS_USE = new RegExp(
+  `${BOL}[ \\t]*(?:pub(?:\\([^)]*\\))?[ \\t]+)?use[ \\t]+(?<path>[^;]+);`,
+  "gu",
+);
+const RS_PUB_ITEM = new RegExp(
+  `${BOL}[ \\t]*pub[ \\t]+(?:(?:async|unsafe|extern[ \\t]+"[^"]*"|const|default)[ \\t]+)*` +
+    `(?:fn|struct|enum|trait|type|union|static|const|mod)[ \\t]+(?<name>${ID})`,
+  "gu",
+);
+const RS_LINE_COMMENT = /\/\/[^\n]*/gu;
+const RS_BLOCK_COMMENT = /\/\*[\s\S]*?\*\//gu;
+const RS_RAW_STRING = /r(#*)"[\s\S]*?"\1/gu;
+const RS_STRING = /"(?:\\[^\n]|[^"\\\n])*"/gu;
+
+/** Rust source with comments and strings blanked (raw strings first: they can hold `//`). */
+function stripRsNoise(source: string): string {
+  return source
+    .replace(RS_RAW_STRING, blank)
+    .replace(RS_BLOCK_COMMENT, blank)
+    .replace(RS_LINE_COMMENT, blank)
+    .replace(RS_STRING, blank);
+}
+
+const WHITE_RUN = new RegExp(`${S}+`, "gu");
+const BRACE_REST = /\{[^\n]*/u;
+
+/** Python `str.rstrip(chars)`. */
+function rstripChars(text: string, chars: string): string {
+  let b = text.length;
+  while (b > 0 && chars.includes(text[b - 1] as string)) b--;
+  return text.slice(0, b);
+}
+
+/**
+ * The module paths of one `use` body: `a::b::{c, d as e}` gives `a::b::c` and `a::b::d`. As in
+ * the Python source, `as` splits wherever the two letters occur, and a nested brace group degrades
+ * to its prefix.
+ */
+export function expandUsePath(raw: string): string[] {
+  const path = raw.replace(WHITE_RUN, "");
+  if (!path.includes("{")) return [rstripChars(path.split("as")[0] as string, ":") || path];
+  const brace = path.indexOf("{");
+  const prefix = path.slice(0, brace);
+  const inner = rstripChars(path.slice(brace + 1), "}");
+  const items: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of inner) {
+    if (ch === "{") depth += 1;
+    else if (ch === "}") depth -= 1;
+    if (ch === "," && depth === 0) {
+      items.push(current);
+      current = "";
+    } else current += ch;
+  }
+  if (current) items.push(current);
+  const expanded: string[] = [];
+  for (const whole of items) {
+    const item = stripChars((whole.split("as")[0] as string).replace(BRACE_REST, ""), ":");
+    if (!item) continue;
+    expanded.push(item !== "self" ? `${prefix}${item}` : rstripChars(prefix, ":"));
+  }
+  return expanded.filter((e) => e !== "");
+}
+
+/**
+ * Reads one Rust file. `mod foo;` is the file edge and goes to `provides`; `use` paths are name
+ * imports and go to `imports`; public items are exports.
+ */
+export function parseRs(source: string): ParsedModule {
+  const clean = stripRsNoise(source);
+  const mod = emptyModule();
+  for (const m of clean.matchAll(RS_MOD)) mod.provides.push(group(m, "name"));
+  for (const m of clean.matchAll(RS_USE)) {
+    for (const spec of expandUsePath(group(m, "path"))) {
+      mod.imports.push({ specifier: spec, names: [], typeOnly: false });
+    }
+  }
+  for (const m of clean.matchAll(RS_PUB_ITEM)) mod.exports.push(group(m, "name"));
   return mod;
 }
