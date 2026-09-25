@@ -11,6 +11,270 @@ All notable changes to this project are recorded in this file. The format follow
 - `repo-tools query --config=<path>` reads the named config file instead of
   `repo-tools.config.json`, on the same path as `depgraph --config`. A missing file, an absolute
   path, an unknown key or invalid JSON exits 1.
+- `repo-tools query` (D13): the test cases of the source query tool, ported to bun:test with
+  their meaning kept (resolve, forward and reverse edges, node taint, reach, leaks,
+  browser-safe packages, and the `--root` cases of the parser). A test shows that an unknown
+  `query.*` config key stops a query run. The README lists four subcommands, the two derived
+  reports, and a "Query the graph" section with examples from the mono-repo fixture.
+- `repo-tools query --emit` (D13) writes `dependency-reverse.json` (`dependents`: each file to
+  the files that import it) and `node-safety.json` (`browserSafePackages`, `nodeTaintedFiles`:
+  the files with a `node:` import, and `leaks` per browser-safe package) into the report
+  folder. Keys and lists sort in code-unit order; the files have LF line endings and one
+  trailing LF. The source `generated` timestamp field is gone, so two runs on one graph give
+  byte-identical files. Standard output names each file relative to the root.
+- `repo-tools query` (D13): `node-safety [pkg]` and `--check-browser-safety`. A package is the
+  folder above a `src/index.ts` entry of the graph (`.` for the root entry). Each package is
+  browser-safe unless `--node-runtime=<pkg,...>` or the config key `query.nodeRuntimes`
+  (default `[]`) lists it; the source tool named one fixed package. `node-safety` prints, per
+  browser-safe package (or for `[pkg]` only), the files with a `node:` import that its `.`
+  entry reaches. `--check-browser-safety` exits 1 on such a file and names each leaking
+  package on standard error. An unknown `[pkg]` and a Node runtime that is not a package exit
+  1. The node taint of a file in an import cycle is now correct: the source walk cached a
+  false value for a file on the cycle.
+- `repo-tools query` (D13): the commands `dependents <file>`, `symbol-users <symbol>`,
+  `is-public <pkg> <symbol>` and `cycles`. `dependents` resolves the internal edges with the
+  candidate order of depgraph (fix F30) and prints the importers sorted; a backslash path gives
+  the same answer, and an absolute path exits 1. `symbol-users` lists each (file, edge kind)
+  pair once, sorted; the source tool listed a file once per edge. `is-public` prints `PUBLIC`
+  or `INTERNAL`; an unknown package exits 1 and lists the keys of
+  `package-export-surfaces.json` (the source tool printed a note and exited 0). `cycles`
+  prints the runtime and the type-only cyclic components of fix F26, each with its members
+  and one cycle. The output is ASCII.
+- `repo-tools query` (D13): the input reports. The query reads `dependency-graph.json` and
+  `package-export-surfaces.json` in the report folder: `--out`, else the config key
+  `query.out`, else `depgraph.out`, else `docs/architecture`, relative to the root. A report
+  that does not exist, cannot be read, is not valid JSON or has an unknown shape (for example a
+  graph with no `cyclicComponents`) exits 1 with a message that says to run `repo-tools
+  depgraph` first. A root that is not an existing directory exits 1. Error text shows the root
+  as `<root>`. The config file gains a `query` section; an unknown `query.*` key, an absolute
+  `query.out` and a `query` value that is not an object exit 1, for depgraph runs too.
+- `repo-tools query` (D13, design section 3.5), the fourth subcommand: its help text and its
+  strict command line. The commands are `dependents <file>`, `symbol-users <symbol>`,
+  `is-public <pkg> <symbol>`, `node-safety [pkg]` and `cycles`; the modes are `--emit` and
+  `--check-browser-safety`; the flags are `--root`, `--out` and `--node-runtime`. An unknown
+  command or flag, a missing or extra argument, a flag without its value, an absolute `--out`,
+  and two commands or modes in one run exit 1 with a message. A run with no command exits 1:
+  the source tool wrote the derived reports then, and `--emit` now does that. `repo-tools
+  --help` lists four subcommands.
+- depgraph `--help`: the `--write-duplicate-baseline` line says that the flag reads the
+  `duplicate-symbols.json` of the last depgraph run (run depgraph first). A stale report thus
+  never gives a surprise baseline.
+- depgraph extension loader and `--no-extensions` (D10b, design section 5.2). Each
+  `depgraph.extensions` entry is a root-relative `.mjs` module with a default export
+  `{ name, preflight?, report? }`; the modules load with `import()` in config order.
+  `preflight(ctx)` runs before the first write, with `ctx = { root, config, mask }`: the config
+  is a frozen copy, and `mask` holds `blankCommentsAndStrings` and `stripComments` of
+  `src/mask.ts`. `report(ctx)` runs after the census gate, where the pre-port pairing reports
+  ran; its context adds `graph` (a frozen copy of the dependency-graph.json content) and
+  `write(relPath, text)`, which writes with LF line endings and one trailing LF and throws on a
+  path that is empty, absolute or outside the output folder. A module that does not exist, is
+  not `.mjs`, does not load or has the wrong shape, and a hook that throws or rejects, exit 1
+  with the path or the extension name on standard error; a load or preflight failure exits
+  before any write. `--no-extensions` loads none. `--check-census`,
+  `--check-duplicates --no-regen` and `--write-duplicate-baseline` run no hook;
+  `--check-duplicates` without `--no-regen` runs both. The pipeline is async. The Node bundle
+  loads a `.mjs` extension (checked by hand with `dist/cli.js`); `scripts/ext-probe.ts` stays for
+  the compiled-executable probe until task D11. No golden changes.
+- depgraph duplicate gate (D10b, design section 3.2). `--check-duplicates` writes the reports
+  in process, then exits 1 when duplicate-symbols.json holds a TRUE_DUPLICATE name that the
+  baseline does not hold; the error lists each new name with its kind and files. The baseline
+  is `depgraph.duplicateBaseline` (default `<out>/duplicate-baseline.json`). A name counts per
+  kind (runtime, types). A missing, unreadable or invalid baseline exits 1 before the run
+  writes; the source gate also stopped when it could not read the baseline. `--no-regen` reads
+  the committed duplicate-symbols.json and writes nothing. `--write-duplicate-baseline` writes
+  the baseline from the current duplicate-symbols.json and writes nothing else; the baseline
+  has no date (the source wrote a `generated` date), and its names and files are in code-unit
+  order, so two writes of one report give the same bytes. A mode that needs a report that does
+  not exist exits 1 and says to run depgraph first. `--no-regen` without `--check-duplicates`,
+  and two of `--check-census`, `--check-duplicates` and `--write-duplicate-baseline` in one
+  run, exit 1: the run would ignore a flag. The gate reads a baseline with a `generated` key.
+  No golden changes.
+- depgraph reads `.tsx` input (D10b, design section 3.2). The graph walk, the source walk, the
+  census walks and the test walk (`.test.tsx`, `.spec.tsx`) read `.tsx` as well as `.ts`; the
+  resolver already tried `<x>.tsx` (fix F30). The `.d.ts` rules do not change. A `.test.tsx`
+  file is in the `tests` census area. The reports name a `.tsx` file without its extension, as
+  they name a `.ts` file (`view module`, `` `src/view` ``). Golden changes (mini-repo, both
+  sets, the same hunks): `src/view.tsx` joins the graph, the census (reachable), the export
+  surface of `src/index.ts` and the test coverage (through `tests/barrel.test.ts`); the file,
+  export, function and line counts go up by the new file; the Mermaid `root` group gains a
+  `...1 more` node, so the later node numbers move by one; the compact summary lists
+  `src/view.tsx` in the 15 hot spots, and `src/util/index.ts` (0 in, 0 out) leaves the list;
+  the API-surface report lists the file.
+
+- depgraph per-export facts report (D10a, design section 6.2). `--api-surface=<file>` (config
+  `depgraph.apiSurface.out`) writes the `buildApiSurfaceReport` output: `schemaVersion` 1, the
+  entry, the stability tags, the counts, each surface symbol with its signature, `async`,
+  stability tag and export path, and the exports of every file of the graph walk.
+  `--api-entry=<path>` (`depgraph.apiSurface.entry`, default `src/index.ts`) sets the entry, and
+  `--stability-tags=<a,b>` (`depgraph.apiSurface.stabilityTags`) sets the tags. The report file
+  and the entry resolve against the root. The report has no timestamp, so two runs give the same
+  bytes. When the report is on and the entry file does not exist, the run exits 1 before any
+  write. Without the flag, no other output changes. New golden:
+  `tests/golden/depgraph/mini-repo/api-surface.json`; `scripts/update-depgraph-goldens.ts`
+  writes it too.
+- depgraph config and flags in the pipeline (D10a). `--src=<a,b>` / `depgraph.src` names the
+  source folders of a single package (`auto`: `src/` if present, else each top-level folder with
+  TypeScript); the census and the test search follow them. `--tests=<a,b>` / `depgraph.tests`
+  names the test folders under the root and each package folder. `--out=<dir>` /
+  `depgraph.out` sets the output folder; standard output names it relative to the root, and
+  `--check-census` reads the inventory there. `--exclude=<a,b>` / `depgraph.exclude` replaces
+  the folder names that every walk skips, and `--also-exclude=<a,b>` / `depgraph.alsoExclude`
+  adds to them. `depgraph.strictOrphans` is the config form of `--strict-orphans`.
+  `depgraph.regenerateCommand` and `depgraph.verificationMarker` set the banner of every
+  Markdown report (`null` omits the marker line). `depgraph.duplicateAllowlist` and
+  `depgraph.coveragePolicy` name the allowlist and the coverage policy files. A list flag with an
+  empty item and a path flag with an absolute path exit 1. No golden changes.
+- depgraph config file (D10a, `src/config.ts`). `repo-tools.config.json` at the root, or the
+  file that `--config=<path>` names, holds a `depgraph` object with the keys of design section
+  5.1: `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `duplicateAllowlist`,
+  `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`,
+  `apiSurface.out`, `apiSurface.entry`, `apiSurface.stabilityTags` and `extensions`. Each key
+  has a default and a type. Precedence: a command-line flag, then the config file, then the
+  default. Every path in the config and in `--config` is relative to the root, not to the
+  current folder. An unknown key, a value of the wrong type, an absolute path, a missing
+  `--config` file, an unreadable file and invalid JSON exit 1 before any write; the error text
+  shows the root as `<root>`. The default of `tests` is `["test", "tests"]`, the two folder
+  names that the pipeline reads today. This commit loads and checks the config; the next
+  commits connect the keys to the pipeline.
+- README: a "Build an executable" section (prerequisites, the lockfile install, `bun run compile`,
+  cross-platform targets, file names and sizes, how to run and smoke-test the executable) and a
+  "Reports" section that names every file `depgraph` writes and what each answers.
+- depgraph port review: the `node dist/x.js` script-root pattern keeps the pre-port byte that
+  stops it from matching, so the port seeds no such root (the pre-port behaviour; fix F33
+  changes it later). The `--check-census` "not found" message ends with a newline. The
+  characterization test also compares the port's standard output with a golden
+  (`_stdout.port.txt`) and checks both separator forms of the root.
+- `repo-tools depgraph` (task D8, port complete). The reporters (`reporters/markdown.ts`,
+  `json.ts`, `yaml.ts`, `unused.ts`, `inventory.ts`, `coverage.ts`, `surfaces.ts`,
+  `banner.ts`), an extension stub (`extensions.ts`) and the pipeline (`index.ts`: scan, parse,
+  analyze, report, gate) are in. Flags: `--root=<dir>` or a first path argument, `--all`/`-a`,
+  `--include-tests`/`-t` (no operation), `--check-census` and `--help`. The command writes
+  the reports into `<root>/docs/architecture`, and it names paths relative to the root on
+  standard output. Exit 1: no TypeScript file, a failed census self-check (monorepo mode) or a
+  failed `--check-census`. The port reproduces the four characterization golden sets byte for
+  byte (dates and the root masked), and a Windows-only test checks each report and the exit
+  code. The WASM, WebGPU and parallel pairing reports and the WASM build gate of the pre-port
+  generator are not in the core; they come back as an extension. `Io` moves to
+  `src/io-types.ts`, and `src/cli.ts` re-exports it.
+- depgraph port, part 6 (task D7, classifier and report only): `duplicates.ts` (own
+  definitions, the allowlist, the definer and entry classes, the canonical hint and the tag
+  tally) and `reporters/duplicates.ts` (duplicate-symbols.md and duplicate-symbols.json). The
+  flags `--check-duplicates`, `--no-regen` and `--write-duplicate-baseline` come later.
+- depgraph port, part 5 (task D6): `inventory.ts` (the census: area, disposition and counts per
+  file, the census self-check and the no-regenerate check of `--check-census`) and
+  `coverage.ts` (direct-import test coverage with barrel tracing, and the optional coverage
+  policy). The self-check returns its failure text and does not throw, so the pipeline can
+  return exit code 1.
+- depgraph port, part 4 (task D5): `analysis.ts` (modules, the dependency matrix, reachability,
+  the depth-first cycle search, the public surface, unused files and exports, the statistics
+  and the dormant split). The cycle search and the in-file reference count keep the pre-port
+  behavior until fixes F26 and F24.
+- depgraph port, part 3 (tasks D3 and D4, second half): `resolver.ts` (relative specifier to a
+  `.ts` path, package specifier to a workspace package and its entry file) and `parser.ts`
+  (imports, side-effect imports, `import()` expressions, re-exports, export declarations, the
+  file description and the fallback description). The parser keeps the pre-port behavior: a
+  relative `import()` is a type-only edge (fix F25), and comments are removed with the regex
+  functions of `src/mask.ts` (fix F6).
+- depgraph port, part 2 (tasks D2 and D4, first half): `scanner.ts` (the graph walk, the test
+  walk, the source-root rule, the census walk and the maximal repo walk), `workspaces.ts` (npm,
+  Yarn and pnpm workspaces, and the structural fallback) and `roots.ts` (`exports` subpaths,
+  `bin` targets, script entries, `tsc -p` tsconfig entries, tsup config entries, root config
+  references and `new URL()` launches). `roots.ts` moves in this commit because workspace
+  detection reads the build roots of each package. The walks keep the listing order of the file
+  system until fix F2. Runtime dependency: `js-yaml` 4.3.2, pinned to the version of the
+  characterization goldens.
+- depgraph port, part 1 (task D1): `src/depgraph/types.ts` holds the shared types of the
+  pipeline. `src/depgraph/paths.ts` gives POSIX paths relative to the root. `src/mask.ts` is the
+  one comment and string masking module: `blankCommentsAndStrings` and `stripComments` read the
+  source as tokens, and the `*Regex` functions keep the comment removal of the pre-port
+  generator byte for byte until the fixes replace it.
+- `compress` round-trip tests (design 13.3 step 5): for JSON, `compress` then `compress -d`
+  gives a deep-equal value at each level. For the other 10 formats, the chain from the fixture
+  gives the golden restored file. The smoke test `scripts/smoke.ts` has a fourth step: a JSON
+  round trip through the command under test, in a temp folder.
+- Subcommand `compress` (design 3.4 and 4): a port of the CTON context compressor. It writes a
+  compact copy of a file for a model context, or restores a compact file with `-d`. Single-file
+  mode and batch mode (`-b`, `-p`, `-r`) are available. The code is in `src/compress/`:
+  `formats.ts` holds one compressor for each of the 11 formats, `legend.ts` builds and parses the
+  legends, and `index.ts` holds the arguments, the help and the batch walk. The CTON format and
+  the legend syntax do not change. Characterization goldens in `tests/golden/compress/` come from
+  the original tool, run on the fixtures in `tests/fixtures/compress/`, and the port gives the
+  same bytes and the same console output. An error now returns exit code 1 with a message; the
+  original tool stopped with a stack trace. `Io` moves to `src/io-types.ts`, so a subcommand
+  module does not import `cli.ts`; `cli.ts` exports it again.
+- Subcommand `repo-tools chunk` (design 3.3, section 4): `split <file>`, `merge <manifest.json>`
+  and `status <manifest.json>`, with `-o`, `-l`, `-m`, `-t` and `--dry-run`. The code is a port
+  of the original chunker in `src/chunk/` (`index.ts`, `splitters.ts`, `manifest.ts`). Goldens
+  in `tests/golden/chunk/` hold the output of the original tool on three fixtures, and the port
+  gives the same bytes. The TypeScript splitter keeps the lexer fixes for template literals,
+  strings in template expressions, regex literals, comments and escaped quotes (fix K4). `Io`
+  moves to `src/io-types.ts`, so a subcommand does not import `cli.ts`.
+- depgraph API-surface module (task D9): `src/depgraph/api-surface.ts`, ported from the
+  universal-physics-tensor dependency-graph tool with its behaviour unchanged. It reads source
+  text without a compiler API and exports `maskNonCode`, `extractExportDetails`,
+  `extractReExports`, `resolveSurface`, `createTsResolver`, `buildApiSurfaceReport` and
+  `DEFAULT_STABILITY_TAGS`. The only code changes are `as string` type assertions that satisfy
+  `noUncheckedIndexedAccess`; they emit no JavaScript. No CLI flag uses the module yet.
+  `tests/unit/api-surface.test.ts` holds the 20 original tests, moved to `bun:test`.
+- depgraph test base (task D0): two fixture repositories (`mini-repo`, a single package with
+  case-order names, an exports subpath, a bin, a barrel, a dynamic import, a runtime cycle, a
+  type-only cycle, an orphan, a `.d.ts` and a `.tsx` file; `mono-repo`, npm workspaces with an
+  exports subpath, a `dist/src` bin, two tsup entry arrays and a cross-package import) and the
+  characterization goldens of the pre-port generator for both, with and without `--all`.
+  `bunfig.toml` limits `bun test` to `tests/unit`, because the fixtures hold their own test
+  files as data.
+- Shared helpers: `src/sort.ts` sorts in UTF-16 code-unit order (fix F22: no `localeCompare`,
+  so the order does not depend on the ICU data of the runtime), and `src/io.ts` writes files
+  with LF line endings and formats JSON with one trailing LF.
+- CLI shell `repo-tools` with the subcommands `depgraph`, `chunk` and `compress`. `--help`, `-h`
+  and no argument print the subcommand list. `--version` prints the package version. An unknown
+  subcommand exits 1. A subcommand that is not built yet exits 1 with a message.
+- Build: `bun run build` writes the Node-compatible ESM bundle `dist/cli.js` with a node
+  shebang. `bun run compile` writes one compiled executable for the host (or `--target`) into
+  `bin/`. Targets: `bun-windows-x64`, `bun-linux-x64`, `bun-darwin-arm64`. An unknown flag or
+  target exits 1.
+- Smoke test `scripts/smoke.ts`: runs `--version`, `--help` and an unknown subcommand against one
+  way to run the tool (the executable, `node dist/cli.js` or `bun dist/cli.js`).
+- Smoke test step 4 (design 13.3): `chunk split` on a copy of a Markdown fixture in a temporary
+  folder, then the copy is deleted, then `chunk merge`. The merged file must equal the fixture
+  byte for byte.
+- Extension-load probe `scripts/ext-probe.ts`: CI compiles it with the product's flags and proves
+  that a compiled executable imports an external `.mjs` extension and runs its `preflight` and
+  `report` hooks, on all three operating systems, before any extension code exists.
+- CI job `executable` on Linux, Windows and macOS (arm64): compile, smoke the executable and the
+  bundle under Node 20 and Bun, run the extension probe, and `npm pack --dry-run`. CI job
+  `package`: uploads the npm tarball and its SHA-256 as a workflow artifact. Workflow
+  `build.yml` (tag `v*` or manual): checks that a tag equals the `package.json` version, builds
+  the three executables, uploads each one unzipped, and writes and verifies one `SHA256SUMS`.
+  A downloaded Linux or macOS executable has no execute bit; run `chmod +x` on it. No workflow
+  creates a release or holds a token.
+- Privacy check `scripts/privacy-check.ts`. It scans the content in the git index (every
+  tracked blob, symlink targets included) and every commit object reachable from HEAD, and it
+  fails when the commit count differs from `git rev-list --count`. It fails on:
+  - an absolute user path, in the Windows, drive-less, POSIX, Git Bash and WSL forms;
+  - an email address, except a whole-address `noreply` or GitHub SSH address;
+  - a session URL, in a file or in a commit message;
+  - a tracked `.exe` or a file over 5 MB;
+  - a word token whose SHA-256 is in `scripts/privacy-denylist.sha256`. The check removes
+    accents and invisible characters, and it also checks each part of a joined word (`-`, `_`
+    and camelCase), so a name joined to another word is still found.
+  UTF-16 files are decoded. Files with NUL bytes are scanned in their printable runs. A report
+  names the file, the line and the rule, never the matched value; a path that itself holds a
+  finding is named by a number and a hash. The script runs a self-test first, and it fails when
+  the denylist holds fewer than 20 hashes. Attribution exemptions apply only to `person` tokens:
+  a license file at the root, a line that starts with a copyright notice, the lines of an
+  `author`, `owner`, `authors`, `contributors` or `maintainers` JSON value, and the public org in
+  a GitHub URL or the npm scope. Commit messages get no exemption.
+- `scripts/privacy-hash.ts` writes denylist lines from a word list that stays outside the
+  repository. It rejects an entry that the checker can never match.
+- `.githooks/commit-msg` (executable) rejects a commit message that fails the privacy check. It
+  scans `#` lines too, and it stops at the scissors line of `git commit -v`. Install it with
+  `bun run hooks`.
+- CI workflow `ci.yml`: the privacy check, and typecheck, lint and tests on Linux, Windows and
+  macOS (arm64). Every action is pinned to a full commit SHA. The workflow has read-only
+  permissions and holds no token. Dependabot updates the actions and the dev dependencies.
+- Project scaffold: Bun and TypeScript (strict), `bun:test`, Biome lint and format, MIT license,
+  LF line endings through `.gitattributes`.
 
 ### Changed
 
@@ -471,270 +735,3 @@ All notable changes to this project are recorded in this file. The format follow
   and crashed on level 0. A directory given as the file or the manifest exits 1 with a message;
   the original crashed with `EISDIR`.
 - `chunk split`: the merge hint names `repo-tools chunk merge`, not the old `chunker merge`.
-
-### Added
-
-- `repo-tools query` (D13): the test cases of the source query tool, ported to bun:test with
-  their meaning kept (resolve, forward and reverse edges, node taint, reach, leaks,
-  browser-safe packages, and the `--root` cases of the parser). A test shows that an unknown
-  `query.*` config key stops a query run. The README lists four subcommands, the two derived
-  reports, and a "Query the graph" section with examples from the mono-repo fixture.
-- `repo-tools query --emit` (D13) writes `dependency-reverse.json` (`dependents`: each file to
-  the files that import it) and `node-safety.json` (`browserSafePackages`, `nodeTaintedFiles`:
-  the files with a `node:` import, and `leaks` per browser-safe package) into the report
-  folder. Keys and lists sort in code-unit order; the files have LF line endings and one
-  trailing LF. The source `generated` timestamp field is gone, so two runs on one graph give
-  byte-identical files. Standard output names each file relative to the root.
-- `repo-tools query` (D13): `node-safety [pkg]` and `--check-browser-safety`. A package is the
-  folder above a `src/index.ts` entry of the graph (`.` for the root entry). Each package is
-  browser-safe unless `--node-runtime=<pkg,...>` or the config key `query.nodeRuntimes`
-  (default `[]`) lists it; the source tool named one fixed package. `node-safety` prints, per
-  browser-safe package (or for `[pkg]` only), the files with a `node:` import that its `.`
-  entry reaches. `--check-browser-safety` exits 1 on such a file and names each leaking
-  package on standard error. An unknown `[pkg]` and a Node runtime that is not a package exit
-  1. The node taint of a file in an import cycle is now correct: the source walk cached a
-  false value for a file on the cycle.
-- `repo-tools query` (D13): the commands `dependents <file>`, `symbol-users <symbol>`,
-  `is-public <pkg> <symbol>` and `cycles`. `dependents` resolves the internal edges with the
-  candidate order of depgraph (fix F30) and prints the importers sorted; a backslash path gives
-  the same answer, and an absolute path exits 1. `symbol-users` lists each (file, edge kind)
-  pair once, sorted; the source tool listed a file once per edge. `is-public` prints `PUBLIC`
-  or `INTERNAL`; an unknown package exits 1 and lists the keys of
-  `package-export-surfaces.json` (the source tool printed a note and exited 0). `cycles`
-  prints the runtime and the type-only cyclic components of fix F26, each with its members
-  and one cycle. The output is ASCII.
-- `repo-tools query` (D13): the input reports. The query reads `dependency-graph.json` and
-  `package-export-surfaces.json` in the report folder: `--out`, else the config key
-  `query.out`, else `depgraph.out`, else `docs/architecture`, relative to the root. A report
-  that does not exist, cannot be read, is not valid JSON or has an unknown shape (for example a
-  graph with no `cyclicComponents`) exits 1 with a message that says to run `repo-tools
-  depgraph` first. A root that is not an existing directory exits 1. Error text shows the root
-  as `<root>`. The config file gains a `query` section; an unknown `query.*` key, an absolute
-  `query.out` and a `query` value that is not an object exit 1, for depgraph runs too.
-- `repo-tools query` (D13, design section 3.5), the fourth subcommand: its help text and its
-  strict command line. The commands are `dependents <file>`, `symbol-users <symbol>`,
-  `is-public <pkg> <symbol>`, `node-safety [pkg]` and `cycles`; the modes are `--emit` and
-  `--check-browser-safety`; the flags are `--root`, `--out` and `--node-runtime`. An unknown
-  command or flag, a missing or extra argument, a flag without its value, an absolute `--out`,
-  and two commands or modes in one run exit 1 with a message. A run with no command exits 1:
-  the source tool wrote the derived reports then, and `--emit` now does that. `repo-tools
-  --help` lists four subcommands.
-- depgraph `--help`: the `--write-duplicate-baseline` line says that the flag reads the
-  `duplicate-symbols.json` of the last depgraph run (run depgraph first). A stale report thus
-  never gives a surprise baseline.
-- depgraph extension loader and `--no-extensions` (D10b, design section 5.2). Each
-  `depgraph.extensions` entry is a root-relative `.mjs` module with a default export
-  `{ name, preflight?, report? }`; the modules load with `import()` in config order.
-  `preflight(ctx)` runs before the first write, with `ctx = { root, config, mask }`: the config
-  is a frozen copy, and `mask` holds `blankCommentsAndStrings` and `stripComments` of
-  `src/mask.ts`. `report(ctx)` runs after the census gate, where the pre-port pairing reports
-  ran; its context adds `graph` (a frozen copy of the dependency-graph.json content) and
-  `write(relPath, text)`, which writes with LF line endings and one trailing LF and throws on a
-  path that is empty, absolute or outside the output folder. A module that does not exist, is
-  not `.mjs`, does not load or has the wrong shape, and a hook that throws or rejects, exit 1
-  with the path or the extension name on standard error; a load or preflight failure exits
-  before any write. `--no-extensions` loads none. `--check-census`,
-  `--check-duplicates --no-regen` and `--write-duplicate-baseline` run no hook;
-  `--check-duplicates` without `--no-regen` runs both. The pipeline is async. The Node bundle
-  loads a `.mjs` extension (checked by hand with `dist/cli.js`); `scripts/ext-probe.ts` stays for
-  the compiled-executable probe until task D11. No golden changes.
-- depgraph duplicate gate (D10b, design section 3.2). `--check-duplicates` writes the reports
-  in process, then exits 1 when duplicate-symbols.json holds a TRUE_DUPLICATE name that the
-  baseline does not hold; the error lists each new name with its kind and files. The baseline
-  is `depgraph.duplicateBaseline` (default `<out>/duplicate-baseline.json`). A name counts per
-  kind (runtime, types). A missing, unreadable or invalid baseline exits 1 before the run
-  writes; the source gate also stopped when it could not read the baseline. `--no-regen` reads
-  the committed duplicate-symbols.json and writes nothing. `--write-duplicate-baseline` writes
-  the baseline from the current duplicate-symbols.json and writes nothing else; the baseline
-  has no date (the source wrote a `generated` date), and its names and files are in code-unit
-  order, so two writes of one report give the same bytes. A mode that needs a report that does
-  not exist exits 1 and says to run depgraph first. `--no-regen` without `--check-duplicates`,
-  and two of `--check-census`, `--check-duplicates` and `--write-duplicate-baseline` in one
-  run, exit 1: the run would ignore a flag. The gate reads a baseline with a `generated` key.
-  No golden changes.
-- depgraph reads `.tsx` input (D10b, design section 3.2). The graph walk, the source walk, the
-  census walks and the test walk (`.test.tsx`, `.spec.tsx`) read `.tsx` as well as `.ts`; the
-  resolver already tried `<x>.tsx` (fix F30). The `.d.ts` rules do not change. A `.test.tsx`
-  file is in the `tests` census area. The reports name a `.tsx` file without its extension, as
-  they name a `.ts` file (`view module`, `` `src/view` ``). Golden changes (mini-repo, both
-  sets, the same hunks): `src/view.tsx` joins the graph, the census (reachable), the export
-  surface of `src/index.ts` and the test coverage (through `tests/barrel.test.ts`); the file,
-  export, function and line counts go up by the new file; the Mermaid `root` group gains a
-  `...1 more` node, so the later node numbers move by one; the compact summary lists
-  `src/view.tsx` in the 15 hot spots, and `src/util/index.ts` (0 in, 0 out) leaves the list;
-  the API-surface report lists the file.
-
-- depgraph per-export facts report (D10a, design section 6.2). `--api-surface=<file>` (config
-  `depgraph.apiSurface.out`) writes the `buildApiSurfaceReport` output: `schemaVersion` 1, the
-  entry, the stability tags, the counts, each surface symbol with its signature, `async`,
-  stability tag and export path, and the exports of every file of the graph walk.
-  `--api-entry=<path>` (`depgraph.apiSurface.entry`, default `src/index.ts`) sets the entry, and
-  `--stability-tags=<a,b>` (`depgraph.apiSurface.stabilityTags`) sets the tags. The report file
-  and the entry resolve against the root. The report has no timestamp, so two runs give the same
-  bytes. When the report is on and the entry file does not exist, the run exits 1 before any
-  write. Without the flag, no other output changes. New golden:
-  `tests/golden/depgraph/mini-repo/api-surface.json`; `scripts/update-depgraph-goldens.ts`
-  writes it too.
-- depgraph config and flags in the pipeline (D10a). `--src=<a,b>` / `depgraph.src` names the
-  source folders of a single package (`auto`: `src/` if present, else each top-level folder with
-  TypeScript); the census and the test search follow them. `--tests=<a,b>` / `depgraph.tests`
-  names the test folders under the root and each package folder. `--out=<dir>` /
-  `depgraph.out` sets the output folder; standard output names it relative to the root, and
-  `--check-census` reads the inventory there. `--exclude=<a,b>` / `depgraph.exclude` replaces
-  the folder names that every walk skips, and `--also-exclude=<a,b>` / `depgraph.alsoExclude`
-  adds to them. `depgraph.strictOrphans` is the config form of `--strict-orphans`.
-  `depgraph.regenerateCommand` and `depgraph.verificationMarker` set the banner of every
-  Markdown report (`null` omits the marker line). `depgraph.duplicateAllowlist` and
-  `depgraph.coveragePolicy` name the allowlist and the coverage policy files. A list flag with an
-  empty item and a path flag with an absolute path exit 1. No golden changes.
-- depgraph config file (D10a, `src/config.ts`). `repo-tools.config.json` at the root, or the
-  file that `--config=<path>` names, holds a `depgraph` object with the keys of design section
-  5.1: `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `duplicateAllowlist`,
-  `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`,
-  `apiSurface.out`, `apiSurface.entry`, `apiSurface.stabilityTags` and `extensions`. Each key
-  has a default and a type. Precedence: a command-line flag, then the config file, then the
-  default. Every path in the config and in `--config` is relative to the root, not to the
-  current folder. An unknown key, a value of the wrong type, an absolute path, a missing
-  `--config` file, an unreadable file and invalid JSON exit 1 before any write; the error text
-  shows the root as `<root>`. The default of `tests` is `["test", "tests"]`, the two folder
-  names that the pipeline reads today. This commit loads and checks the config; the next
-  commits connect the keys to the pipeline.
-- README: a "Build an executable" section (prerequisites, the lockfile install, `bun run compile`,
-  cross-platform targets, file names and sizes, how to run and smoke-test the executable) and a
-  "Reports" section that names every file `depgraph` writes and what each answers.
-- depgraph port review: the `node dist/x.js` script-root pattern keeps the pre-port byte that
-  stops it from matching, so the port seeds no such root (the pre-port behaviour; fix F33
-  changes it later). The `--check-census` "not found" message ends with a newline. The
-  characterization test also compares the port's standard output with a golden
-  (`_stdout.port.txt`) and checks both separator forms of the root.
-- `repo-tools depgraph` (task D8, port complete). The reporters (`reporters/markdown.ts`,
-  `json.ts`, `yaml.ts`, `unused.ts`, `inventory.ts`, `coverage.ts`, `surfaces.ts`,
-  `banner.ts`), an extension stub (`extensions.ts`) and the pipeline (`index.ts`: scan, parse,
-  analyze, report, gate) are in. Flags: `--root=<dir>` or a first path argument, `--all`/`-a`,
-  `--include-tests`/`-t` (no operation), `--check-census` and `--help`. The command writes
-  the reports into `<root>/docs/architecture`, and it names paths relative to the root on
-  standard output. Exit 1: no TypeScript file, a failed census self-check (monorepo mode) or a
-  failed `--check-census`. The port reproduces the four characterization golden sets byte for
-  byte (dates and the root masked), and a Windows-only test checks each report and the exit
-  code. The WASM, WebGPU and parallel pairing reports and the WASM build gate of the pre-port
-  generator are not in the core; they come back as an extension. `Io` moves to
-  `src/io-types.ts`, and `src/cli.ts` re-exports it.
-- depgraph port, part 6 (task D7, classifier and report only): `duplicates.ts` (own
-  definitions, the allowlist, the definer and entry classes, the canonical hint and the tag
-  tally) and `reporters/duplicates.ts` (duplicate-symbols.md and duplicate-symbols.json). The
-  flags `--check-duplicates`, `--no-regen` and `--write-duplicate-baseline` come later.
-- depgraph port, part 5 (task D6): `inventory.ts` (the census: area, disposition and counts per
-  file, the census self-check and the no-regenerate check of `--check-census`) and
-  `coverage.ts` (direct-import test coverage with barrel tracing, and the optional coverage
-  policy). The self-check returns its failure text and does not throw, so the pipeline can
-  return exit code 1.
-- depgraph port, part 4 (task D5): `analysis.ts` (modules, the dependency matrix, reachability,
-  the depth-first cycle search, the public surface, unused files and exports, the statistics
-  and the dormant split). The cycle search and the in-file reference count keep the pre-port
-  behavior until fixes F26 and F24.
-- depgraph port, part 3 (tasks D3 and D4, second half): `resolver.ts` (relative specifier to a
-  `.ts` path, package specifier to a workspace package and its entry file) and `parser.ts`
-  (imports, side-effect imports, `import()` expressions, re-exports, export declarations, the
-  file description and the fallback description). The parser keeps the pre-port behavior: a
-  relative `import()` is a type-only edge (fix F25), and comments are removed with the regex
-  functions of `src/mask.ts` (fix F6).
-- depgraph port, part 2 (tasks D2 and D4, first half): `scanner.ts` (the graph walk, the test
-  walk, the source-root rule, the census walk and the maximal repo walk), `workspaces.ts` (npm,
-  Yarn and pnpm workspaces, and the structural fallback) and `roots.ts` (`exports` subpaths,
-  `bin` targets, script entries, `tsc -p` tsconfig entries, tsup config entries, root config
-  references and `new URL()` launches). `roots.ts` moves in this commit because workspace
-  detection reads the build roots of each package. The walks keep the listing order of the file
-  system until fix F2. Runtime dependency: `js-yaml` 4.3.2, pinned to the version of the
-  characterization goldens.
-- depgraph port, part 1 (task D1): `src/depgraph/types.ts` holds the shared types of the
-  pipeline. `src/depgraph/paths.ts` gives POSIX paths relative to the root. `src/mask.ts` is the
-  one comment and string masking module: `blankCommentsAndStrings` and `stripComments` read the
-  source as tokens, and the `*Regex` functions keep the comment removal of the pre-port
-  generator byte for byte until the fixes replace it.
-- `compress` round-trip tests (design 13.3 step 5): for JSON, `compress` then `compress -d`
-  gives a deep-equal value at each level. For the other 10 formats, the chain from the fixture
-  gives the golden restored file. The smoke test `scripts/smoke.ts` has a fourth step: a JSON
-  round trip through the command under test, in a temp folder.
-- Subcommand `compress` (design 3.4 and 4): a port of the CTON context compressor. It writes a
-  compact copy of a file for a model context, or restores a compact file with `-d`. Single-file
-  mode and batch mode (`-b`, `-p`, `-r`) are available. The code is in `src/compress/`:
-  `formats.ts` holds one compressor for each of the 11 formats, `legend.ts` builds and parses the
-  legends, and `index.ts` holds the arguments, the help and the batch walk. The CTON format and
-  the legend syntax do not change. Characterization goldens in `tests/golden/compress/` come from
-  the original tool, run on the fixtures in `tests/fixtures/compress/`, and the port gives the
-  same bytes and the same console output. An error now returns exit code 1 with a message; the
-  original tool stopped with a stack trace. `Io` moves to `src/io-types.ts`, so a subcommand
-  module does not import `cli.ts`; `cli.ts` exports it again.
-- Subcommand `repo-tools chunk` (design 3.3, section 4): `split <file>`, `merge <manifest.json>`
-  and `status <manifest.json>`, with `-o`, `-l`, `-m`, `-t` and `--dry-run`. The code is a port
-  of the original chunker in `src/chunk/` (`index.ts`, `splitters.ts`, `manifest.ts`). Goldens
-  in `tests/golden/chunk/` hold the output of the original tool on three fixtures, and the port
-  gives the same bytes. The TypeScript splitter keeps the lexer fixes for template literals,
-  strings in template expressions, regex literals, comments and escaped quotes (fix K4). `Io`
-  moves to `src/io-types.ts`, so a subcommand does not import `cli.ts`.
-- depgraph API-surface module (task D9): `src/depgraph/api-surface.ts`, ported from the
-  universal-physics-tensor dependency-graph tool with its behaviour unchanged. It reads source
-  text without a compiler API and exports `maskNonCode`, `extractExportDetails`,
-  `extractReExports`, `resolveSurface`, `createTsResolver`, `buildApiSurfaceReport` and
-  `DEFAULT_STABILITY_TAGS`. The only code changes are `as string` type assertions that satisfy
-  `noUncheckedIndexedAccess`; they emit no JavaScript. No CLI flag uses the module yet.
-  `tests/unit/api-surface.test.ts` holds the 20 original tests, moved to `bun:test`.
-- depgraph test base (task D0): two fixture repositories (`mini-repo`, a single package with
-  case-order names, an exports subpath, a bin, a barrel, a dynamic import, a runtime cycle, a
-  type-only cycle, an orphan, a `.d.ts` and a `.tsx` file; `mono-repo`, npm workspaces with an
-  exports subpath, a `dist/src` bin, two tsup entry arrays and a cross-package import) and the
-  characterization goldens of the pre-port generator for both, with and without `--all`.
-  `bunfig.toml` limits `bun test` to `tests/unit`, because the fixtures hold their own test
-  files as data.
-- Shared helpers: `src/sort.ts` sorts in UTF-16 code-unit order (fix F22: no `localeCompare`,
-  so the order does not depend on the ICU data of the runtime), and `src/io.ts` writes files
-  with LF line endings and formats JSON with one trailing LF.
-- CLI shell `repo-tools` with the subcommands `depgraph`, `chunk` and `compress`. `--help`, `-h`
-  and no argument print the subcommand list. `--version` prints the package version. An unknown
-  subcommand exits 1. A subcommand that is not built yet exits 1 with a message.
-- Build: `bun run build` writes the Node-compatible ESM bundle `dist/cli.js` with a node
-  shebang. `bun run compile` writes one compiled executable for the host (or `--target`) into
-  `bin/`. Targets: `bun-windows-x64`, `bun-linux-x64`, `bun-darwin-arm64`. An unknown flag or
-  target exits 1.
-- Smoke test `scripts/smoke.ts`: runs `--version`, `--help` and an unknown subcommand against one
-  way to run the tool (the executable, `node dist/cli.js` or `bun dist/cli.js`).
-- Smoke test step 4 (design 13.3): `chunk split` on a copy of a Markdown fixture in a temporary
-  folder, then the copy is deleted, then `chunk merge`. The merged file must equal the fixture
-  byte for byte.
-- Extension-load probe `scripts/ext-probe.ts`: CI compiles it with the product's flags and proves
-  that a compiled executable imports an external `.mjs` extension and runs its `preflight` and
-  `report` hooks, on all three operating systems, before any extension code exists.
-- CI job `executable` on Linux, Windows and macOS (arm64): compile, smoke the executable and the
-  bundle under Node 20 and Bun, run the extension probe, and `npm pack --dry-run`. CI job
-  `package`: uploads the npm tarball and its SHA-256 as a workflow artifact. Workflow
-  `build.yml` (tag `v*` or manual): checks that a tag equals the `package.json` version, builds
-  the three executables, uploads each one unzipped, and writes and verifies one `SHA256SUMS`.
-  A downloaded Linux or macOS executable has no execute bit; run `chmod +x` on it. No workflow
-  creates a release or holds a token.
-- Privacy check `scripts/privacy-check.ts`. It scans the content in the git index (every
-  tracked blob, symlink targets included) and every commit object reachable from HEAD, and it
-  fails when the commit count differs from `git rev-list --count`. It fails on:
-  - an absolute user path, in the Windows, drive-less, POSIX, Git Bash and WSL forms;
-  - an email address, except a whole-address `noreply` or GitHub SSH address;
-  - a session URL, in a file or in a commit message;
-  - a tracked `.exe` or a file over 5 MB;
-  - a word token whose SHA-256 is in `scripts/privacy-denylist.sha256`. The check removes
-    accents and invisible characters, and it also checks each part of a joined word (`-`, `_`
-    and camelCase), so a name joined to another word is still found.
-  UTF-16 files are decoded. Files with NUL bytes are scanned in their printable runs. A report
-  names the file, the line and the rule, never the matched value; a path that itself holds a
-  finding is named by a number and a hash. The script runs a self-test first, and it fails when
-  the denylist holds fewer than 20 hashes. Attribution exemptions apply only to `person` tokens:
-  a license file at the root, a line that starts with a copyright notice, the lines of an
-  `author`, `owner`, `authors`, `contributors` or `maintainers` JSON value, and the public org in
-  a GitHub URL or the npm scope. Commit messages get no exemption.
-- `scripts/privacy-hash.ts` writes denylist lines from a word list that stays outside the
-  repository. It rejects an entry that the checker can never match.
-- `.githooks/commit-msg` (executable) rejects a commit message that fails the privacy check. It
-  scans `#` lines too, and it stops at the scissors line of `git commit -v`. Install it with
-  `bun run hooks`.
-- CI workflow `ci.yml`: the privacy check, and typecheck, lint and tests on Linux, Windows and
-  macOS (arm64). Every action is pinned to a full commit SHA. The workflow has read-only
-  permissions and holds no token. Dependabot updates the actions and the dev dependencies.
-- Project scaffold: Bun and TypeScript (strict), `bun:test`, Biome lint and format, MIT license,
-  LF line endings through `.gitattributes`.
