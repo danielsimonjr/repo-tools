@@ -17,7 +17,7 @@ static test keeps the tool offline.
 ### Added
 
 - Tests: `tests/unit/node-compat.test.ts` keeps regex modifier groups (`(?i:...)`) out of `src/`.
-  Node 20 and Node 22 cannot compile one. A rule regex compiles when its module loads, so one such
+  Node 20 and Node 22 cannot compile one. A rule regex compiles when its module loads. Thus one such
   group stopped every subcommand of the Node bundle, although Bun and Node 24 ran it. The STE
   rules now spell each case-insensitive word as letter classes (`ci`). The classes also match the
   letters that Python's case-insensitive match accepts (U+0131 and U+0130 for `i`, U+017F for
