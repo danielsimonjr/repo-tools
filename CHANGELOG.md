@@ -137,6 +137,12 @@ All notable changes to this project are recorded in this file. The format follow
   `export *` chain was not public, which a test found. The layers module entries show star
   edges as 1.x does. On memoryjs the surfaces are identical to 1.x. On MathTS and
   universal-physics-tensor, each difference has a recorded cause.
+- 2.0.0 engine (design decision D5): `package-export-surfaces.json` for Python and Rust, with a
+  `note` that gives the rule. A Python package lists its `__all__`, else the public names that
+  its `__init__.py` defines. A Rust library crate root (`lib.rs`) lists its `pub` items and the
+  names of its plain `pub use` statements. The new `pubUseNames` reads an alias only as the
+  whole word `as`, so a name such as `HashMap` keeps its letters. For C#, no file is written,
+  because C# has no rule for a public surface of a package.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

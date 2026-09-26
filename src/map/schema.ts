@@ -53,6 +53,8 @@ export interface FileNode {
   packageImports?: { specifier: string; names: string[]; builtin: boolean }[];
   /** The relative specifiers of literal `import(...)` calls (not written to the graph JSON). */
   dynamicImports?: string[];
+  /** The names that the plain `pub use` statements make public (Rust; not in the graph JSON). */
+  publicUses?: string[];
 }
 
 /** The graph of one repository. */

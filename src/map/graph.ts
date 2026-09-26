@@ -444,6 +444,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       defaultExportLocal: mod.defaultExportLocal,
       packageImports,
       dynamicImports: [...mod.dynamicImports],
+      publicUses: [...mod.publicUses],
     });
   }
 

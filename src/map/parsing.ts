@@ -44,6 +44,8 @@ export interface ParsedModule {
    * graph has no edge for them (D1); test coverage counts them as loads.
    */
   dynamicImports: string[];
+  /** The names that the plain `pub use` statements of a Rust file make public. */
+  publicUses: string[];
 }
 
 /** An empty module. */
@@ -57,6 +59,7 @@ export function emptyModule(): ParsedModule {
     exportKinds: {},
     reExports: [],
     dynamicImports: [],
+    publicUses: [],
   };
 }
 
@@ -352,6 +355,51 @@ const RS_USE = new RegExp(
   `${BOL}[ \\t]*(?:pub(?:\\([^)]*\\))?[ \\t]+)?use[ \\t]+(?<path>[^;]+);`,
   "gu",
 );
+/** A plain `pub use` statement (not `pub(crate)` or another restricted visibility). */
+const RS_PUB_USE = new RegExp(`${BOL}[ \\t]*pub[ \\t]+use[ \\t]+(?<path>[^;]+);`, "gu");
+const RS_AS_ALIAS = /^(.*\S)\s+as\s+([A-Za-z_]\w*)$/su;
+
+/**
+ * The names that one `pub use` path makes public: the last segment, or the alias after a whole
+ * word `as`; `self` gives its parent's name; a glob gives `<path>::*`. Nested braces expand. The
+ * alias test needs the whole word, so a name such as `HashMap` keeps its letters.
+ */
+export function pubUseNames(raw: string): string[] {
+  const path = raw.replace(/\s+/gu, " ").trim();
+  const brace = path.indexOf("{");
+  if (brace === -1) {
+    const alias = RS_AS_ALIAS.exec(path);
+    if (alias) return [alias[2] as string];
+    const segs = path
+      .split("::")
+      .map((s) => s.trim())
+      .filter((s) => s !== "");
+    const last = segs.at(-1) ?? "";
+    if (last === "*") return [`${segs.slice(0, -1).join("::")}::*`];
+    if (last === "self") return segs.length > 1 ? [segs.at(-2) as string] : [];
+    return last === "" ? [] : [last];
+  }
+  const prefix = path.slice(0, brace);
+  const inner = path.slice(brace + 1, path.lastIndexOf("}"));
+  const items: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < inner.length; i++) {
+    const c = inner[i];
+    if (c === "{") depth += 1;
+    else if (c === "}") depth -= 1;
+    else if (c === "," && depth === 0) {
+      items.push(inner.slice(start, i));
+      start = i + 1;
+    }
+  }
+  items.push(inner.slice(start));
+  return items
+    .map((s) => s.trim())
+    .filter((s) => s !== "")
+    .flatMap((s) => pubUseNames(prefix + s));
+}
+
 const RS_PUB_ITEM = new RegExp(
   `${BOL}[ \\t]*pub[ \\t]+(?:(?:async|unsafe|extern[ \\t]+"[^"]*"|const|default)[ \\t]+)*` +
     `(?:fn|struct|enum|trait|type|union|static|const|mod)[ \\t]+(?<name>${ID})`,
@@ -427,6 +475,7 @@ export function parseRs(source: string): ParsedModule {
     }
   }
   for (const m of clean.matchAll(RS_PUB_ITEM)) mod.exports.push(group(m, "name"));
+  for (const m of clean.matchAll(RS_PUB_USE)) mod.publicUses.push(...pubUseNames(group(m, "path")));
   return mod;
 }
 

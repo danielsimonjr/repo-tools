@@ -33,7 +33,9 @@ type Json = any;
 async function surfaces(root: string): Promise<Json> {
   const out = join(root, "out");
   mkdirSync(out, { recursive: true });
-  return JSON.parse(readFileSync(emitExportSurfaces(await buildGraph(root), root, out), "utf8"));
+  const path = emitExportSurfaces(await buildGraph(root), root, out);
+  if (path === null) throw new Error("no surface file was written");
+  return JSON.parse(readFileSync(path, "utf8"));
 }
 
 describe("emitExportSurfaces: TypeScript", () => {
@@ -60,5 +62,54 @@ describe("emitExportSurfaces: TypeScript", () => {
       }),
     );
     expect(data.surfaces.lib).toEqual(["one"]);
+  });
+});
+
+describe("emitExportSurfaces: other languages (D5)", () => {
+  test("Python: each package lists its __all__, else the public names __init__.py defines", async () => {
+    const data = await surfaces(
+      repo({
+        "pkg/__init__.py": '__all__ = ["A", "b"]\n',
+        "pkg/sub/__init__.py": "def f():\n    pass\n\ndef _g():\n    pass\n",
+        "pkg/mod.py": "def not_a_package():\n    pass\n",
+      }),
+    );
+    expect(data.surfaces).toEqual({ pkg: ["A", "b"], "pkg/sub": ["f"] });
+    expect(data.note).toContain("__all__");
+  });
+
+  test("Rust: each library crate root lists its pub items and its pub use names", async () => {
+    const data = await surfaces(
+      repo({
+        "Cargo.toml": '[package]\nname = "demo"\n',
+        "src/lib.rs": [
+          "pub mod api;",
+          "pub use api::{Client, Config as Cfg};",
+          "pub use std::collections::HashMap;",
+          "pub use inner::*;",
+          "pub(crate) use hidden::H;",
+          "pub fn go() {}",
+          "fn private() {}",
+          "",
+        ].join("\n"),
+        "src/api.rs": "pub struct Client;\npub struct Config;\n",
+        "src/main.rs": "pub fn not_api() {}\nfn main() {}\n",
+      }),
+    );
+    expect(data.surfaces).toEqual({
+      "src/lib.rs": ["Cfg", "Client", "HashMap", "api", "go", "inner::*"],
+    });
+    expect(data.note).toContain("pub use");
+  });
+
+  test("C#: no surface file, because the language has no rule for one", async () => {
+    const root = repo({
+      "src/App/App.csproj": '<Project Sdk="Microsoft.NET.Sdk"></Project>\n',
+      "src/App/A.cs": "namespace App;\npublic class A { }\n",
+    });
+    const out = join(root, "out");
+    mkdirSync(out, { recursive: true });
+    expect(emitExportSurfaces(await buildGraph(root), root, out)).toBeNull();
+    expect(() => readFileSync(join(out, "package-export-surfaces.json"))).toThrow();
   });
 });
