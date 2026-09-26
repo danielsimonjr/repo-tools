@@ -56,6 +56,13 @@ All notable changes to this project are recorded in this file. The format follow
   `test_csharp_repo_end_to_end.py`, `test_unused_csharp.py` and `test_rust_unused_caveat.py`).
   The source tests that read a local repository are not ported. The side-1 parity run covers
   that repository.
+- 2.0.0 engine: the read-only queries (`src/map/query.ts`, from `repo_map/query.py`):
+  `loadGraph`, `dependents`, `symbolUsers` and `cycles`, with 23 ported tests. The query module
+  reads only the graph JSON. A test scans its imports and fails if a reader, resolver, grammar or
+  graph module is reachable. A 1.x graph is refused, because its major version is not 2.
+- 2.0.0 engine: the simple-cycle enumeration moves to `src/map/cycles.ts`. The graph and the
+  queries share it. The Python tool keeps two copies of this algorithm. On 10 repositories, the
+  artifacts are byte-identical before and after the move.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

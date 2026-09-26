@@ -13,6 +13,7 @@ import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
 import { B, pyRepr, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
+import { type CycleLimits, type CycleResult, simpleCycles } from "./cycles.ts";
 import {
   detectLanguage,
   discover,
@@ -516,50 +517,7 @@ export function reachableFrom(graph: RepoGraph, roots: readonly string[]): Set<s
   return seen;
 }
 
-/** The safety caps of the simple-cycle enumeration. */
-export interface CycleLimits {
-  maxCycles?: number;
-  maxSteps?: number;
-}
-
-/** The simple cycles of a graph, the backtracking steps taken, and whether a cap stopped it. */
-export interface CycleResult {
-  cycles: string[][];
-  steps: number;
-  truncated: boolean;
-}
-
-/** The strongly connected component of `start` within the nodes `eligible`. */
-export function sccContaining(
-  start: string,
-  eligible: ReadonlySet<string>,
-  edges: ReadonlyMap<string, string[]>,
-  reverseEdges: ReadonlyMap<string, string[]>,
-): Set<string> {
-  const forward = new Set([start]);
-  let stack = [start];
-  while (stack.length > 0) {
-    const node = stack.pop() as string;
-    for (const next of edges.get(node) ?? []) {
-      if (eligible.has(next) && !forward.has(next)) {
-        forward.add(next);
-        stack.push(next);
-      }
-    }
-  }
-  const scc = new Set([start]);
-  stack = [start];
-  while (stack.length > 0) {
-    const node = stack.pop() as string;
-    for (const prev of reverseEdges.get(node) ?? []) {
-      if (forward.has(prev) && !scc.has(prev)) {
-        scc.add(prev);
-        stack.push(prev);
-      }
-    }
-  }
-  return scc;
-}
+export type { CycleLimits, CycleResult } from "./cycles.ts";
 
 /**
  * Every simple cycle of the internal graph, independent of the file order: canonical-rotation
@@ -567,62 +525,11 @@ export function sccContaining(
  * order. Capped; a capped result is a floor, and a warning says so.
  */
 export function findCycles(graph: RepoGraph, limits: CycleLimits = {}): CycleResult {
-  const maxCycles = limits.maxCycles ?? 5000;
-  const maxSteps = limits.maxSteps ?? 2_000_000;
   const edges = new Map<string, string[]>();
   for (const [p, n] of graph.files) {
     edges.set(p, [...new Set(n.internal.map((d) => d.file).filter((f) => graph.files.has(f)))]);
   }
-  const reverseEdges = new Map<string, string[]>();
-  for (const [p, targets] of edges) {
-    for (const t of targets) {
-      const list = reverseEdges.get(t) ?? [];
-      list.push(p);
-      reverseEdges.set(t, list);
-    }
-  }
-  const order = pySorted(graph.files.keys());
-  const cycles: string[][] = [];
-  let steps = 0;
-  let truncated = false;
-  for (let pos = 0; pos < order.length && !truncated; pos++) {
-    const start = order[pos] as string;
-    const eligible = new Set(order.slice(pos));
-    const scc = sccContaining(start, eligible, edges, reverseEdges);
-    if (scc.size < 2 && !(edges.get(start) ?? []).includes(start)) continue;
-    const path = [start];
-    const onPath = new Set([start]);
-    const frames: [string, number][] = [[start, 0]];
-    while (frames.length > 0) {
-      const [node, idx] = frames[frames.length - 1] as [string, number];
-      const deps = edges.get(node) ?? [];
-      if (idx >= deps.length) {
-        frames.pop();
-        path.pop();
-        onPath.delete(node);
-        continue;
-      }
-      frames[frames.length - 1] = [node, idx + 1];
-      const next = deps[idx] as string;
-      if (!scc.has(next)) continue;
-      steps += 1;
-      if (steps > maxSteps) {
-        truncated = true;
-        break;
-      }
-      if (next === start) {
-        cycles.push([...path, start]);
-        if (cycles.length >= maxCycles) {
-          truncated = true;
-          break;
-        }
-      } else if (!onPath.has(next)) {
-        onPath.add(next);
-        path.push(next);
-        frames.push([next, 0]);
-      }
-    }
-  }
+  const { cycles, steps, truncated } = simpleCycles(edges, limits);
   if (truncated) {
     graph.warnings.push(
       `find_cycles: simple-cycle enumeration hit its safety cap (found ${cycles.length} cycles / ` +
