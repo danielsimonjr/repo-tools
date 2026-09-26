@@ -367,11 +367,14 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
     const nodeBuiltins: string[] = [];
     const broken: string[] = [];
     const aliases: string[] = [];
+    const packageImports: NonNullable<FileNode["packageImports"]> = [];
     for (const imp of mod.imports) {
       // Classify before resolve: a broken relative import must not look like a package.
       const kind = resolver.classifySpecifier(imp.specifier);
-      if (kind === "node" || kind === "stdlib") nodeBuiltins.push(imp.specifier);
-      else if (kind === "alias") aliases.push(imp.specifier);
+      if (kind === "node" || kind === "stdlib") {
+        nodeBuiltins.push(imp.specifier);
+        packageImports.push({ specifier: imp.specifier, names: [...imp.names], builtin: true });
+      } else if (kind === "alias") aliases.push(imp.specifier);
       else if (kind === "relative") {
         const target = resolver.resolve(imp.specifier, f.path, known);
         if (target === null) {
@@ -383,6 +386,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
           imports: [...imp.names],
           typeOnly: imp.typeOnly,
           ...(imp.reExport ? { reExport: true } : {}),
+          specifier: imp.specifier,
         });
         if (imp.names.length === 0 && starSpecs.has(imp.specifier)) {
           const list = starTargets.get(f.path) ?? [];
@@ -398,11 +402,17 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
               );
           if (targets.length > 0) {
             for (const t of targets)
-              internal.push({ file: t, imports: [...imp.names], typeOnly: imp.typeOnly });
+              internal.push({
+                file: t,
+                imports: [...imp.names],
+                typeOnly: imp.typeOnly,
+                specifier: imp.specifier,
+              });
             continue;
           }
         }
         external.push(imp.specifier);
+        packageImports.push({ specifier: imp.specifier, names: [...imp.names], builtin: false });
       }
     }
     if (resolver.resolveMod) {
@@ -429,6 +439,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       exportKinds: { ...mod.exportKinds },
       reExports: [...mod.reExports],
       defaultExportLocal: mod.defaultExportLocal,
+      packageImports,
     });
   }
 

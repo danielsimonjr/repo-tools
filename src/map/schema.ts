@@ -14,6 +14,8 @@ export interface Dependency {
   typeOnly: boolean;
   /** True for an `export ... from` edge (not written to the graph JSON). */
   reExport?: boolean;
+  /** The specifier as the source writes it (not written to the graph JSON). */
+  specifier?: string;
 }
 
 /** One source file of the graph. */
@@ -37,6 +39,11 @@ export interface FileNode {
   reExports?: string[];
   /** The local name of a named default export, from the reader (not written to the graph JSON). */
   defaultExportLocal?: string | null;
+  /**
+   * Each import of a package or a built-in, in source order, with the names it binds (not written
+   * to the graph JSON).
+   */
+  packageImports?: { specifier: string; names: string[]; builtin: boolean }[];
 }
 
 /** The graph of one repository. */

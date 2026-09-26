@@ -4,10 +4,10 @@
  * decisions D3 and D5).
  *
  * Each internal edge carries its resolved target (`resolved`), so an analyzer never resolves a
- * specifier again. The specifier (`file`) is the target relative to the importing file, for the
- * reports that show it. Three facts of a 1.x parse are not in the graph, and the records say so
- * by an empty value: the names imported from a package or a built-in, the workspace edges, and
- * a package name.
+ * specifier again. The specifier (`file`) is the one the source writes; an edge with none (a Rust
+ * `mod` declaration) gets the target relative to the importing file. Two facts of a 1.x parse
+ * are not in the graph, and the records say so by an empty value: the workspace edges and a
+ * package name. The reader names a default import `default` and a namespace import `*`.
  */
 import { readFileSync } from "node:fs";
 import { join, posix } from "node:path";
@@ -33,6 +33,33 @@ function stem(path: string): string {
   return dot > 0 ? base.slice(0, dot) : base;
 }
 
+/**
+ * The package and built-in imports of `node`, one entry for each import statement as depgraph
+ * lists them. A TypeScript built-in loses its `node:` prefix, as in depgraph. A node without its
+ * import list (a hand-built graph) gives one entry for each specifier, with no names.
+ */
+function packageLists(
+  node: FileNode,
+  language: string,
+): Pick<ParsedFile, "externalDependencies" | "nodeDependencies"> {
+  const moduleName = (spec: string): string =>
+    language === "typescript" ? spec.replace(/^node:/, "") : spec;
+  if (!node.packageImports) {
+    return {
+      externalDependencies: node.external.map((p) => ({ package: p, imports: [] })),
+      nodeDependencies: node.nodeBuiltins.map((m) => ({ module: moduleName(m), imports: [] })),
+    };
+  }
+  return {
+    externalDependencies: node.packageImports
+      .filter((i) => !i.builtin)
+      .map((i) => ({ package: i.specifier, imports: [...i.names] })),
+    nodeDependencies: node.packageImports
+      .filter((i) => i.builtin)
+      .map((i) => ({ module: moduleName(i.specifier), imports: [...i.names] })),
+  };
+}
+
 /** The export lists of `node`, in depgraph's kinds. */
 function exportsOf(node: FileNode): ParsedFile["exports"] {
   const kinds = node.exportKinds ?? {};
@@ -53,15 +80,20 @@ function exportsOf(node: FileNode): ParsedFile["exports"] {
 
 /**
  * The records of the `src` files of `graph`, in census order. `root` is the folder the graph was
- * built from; the description of a TypeScript file reads its comments from there.
+ * built from; the description of a TypeScript file reads its comments from there. With
+ * `allAreas`, the records hold the files of every area.
  */
-export function toParsedFiles(graph: RepoGraph, root: string): ParsedFile[] {
+export function toParsedFiles(
+  graph: RepoGraph,
+  root: string,
+  options: { allAreas?: boolean } = {},
+): ParsedFile[] {
   const records: ParsedFile[] = [];
   for (const node of graph.files.values()) {
-    if (node.area !== "src") continue;
+    if (node.area !== "src" && !options.allAreas) continue;
     const internalDependencies = node.internal.map(
       (d): DepgraphDependency => ({
-        file: relativeSpecifier(node.path, d.file),
+        file: d.specifier ?? relativeSpecifier(node.path, d.file),
         imports: [...d.imports],
         ...(d.reExport ? { reExport: true } : {}),
         ...(d.typeOnly ? { typeOnly: true } : {}),
@@ -71,8 +103,7 @@ export function toParsedFiles(graph: RepoGraph, root: string): ParsedFile[] {
     records.push({
       path: node.path,
       name: stem(node.path),
-      externalDependencies: node.external.map((p) => ({ package: p, imports: [] })),
-      nodeDependencies: node.nodeBuiltins.map((m) => ({ module: m, imports: [] })),
+      ...packageLists(node, graph.language),
       internalDependencies,
       workspaceDependencies: [],
       packageName: null,

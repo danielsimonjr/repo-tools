@@ -56,7 +56,7 @@ export function pyJsonDumps(data: unknown): string {
 }
 
 /** Writes `data` as JSON with one trailing LF, and returns the path. */
-function writeJson(path: string, data: unknown): string {
+export function writeJson(path: string, data: unknown): string {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${pyJsonDumps(data)}\n`);
   return path;

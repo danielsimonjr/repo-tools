@@ -75,10 +75,10 @@ describe("toParsedFiles", () => {
     expect(targetOf("src/a.ts", dep as NonNullable<typeof dep>)).toBe("src/b.ts");
   });
 
-  test("packages and built-ins are listed without their imported names", async () => {
+  test("packages and built-ins are listed with their names, as depgraph lists them", async () => {
     const a = (await tsRecords()).get("src/a.ts") as ParsedFile;
-    expect(a.externalDependencies).toEqual([{ package: "lodash", imports: [] }]);
-    expect(a.nodeDependencies).toEqual([{ module: "node:fs", imports: [] }]);
+    expect(a.externalDependencies).toEqual([{ package: "lodash", imports: ["default"] }]);
+    expect(a.nodeDependencies).toEqual([{ module: "fs", imports: ["readFileSync"] }]);
   });
 
   test("the export lists follow depgraph's kinds", async () => {

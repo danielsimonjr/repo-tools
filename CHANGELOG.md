@@ -80,8 +80,16 @@ All notable changes to this project are recorded in this file. The format follow
   each language. Each edge carries its resolved target. The new helper `targetOf` uses that
   target, and a 1.x parse still resolves the specifier. The graph now also keeps each file's
   export kinds, re-exports and re-export edges. The graph JSON does not write them. The records
-  have no names for package imports, no workspace edges and no package name. The graph does not
-  keep these facts.
+  have no workspace edges and no package name. The graph does not keep these facts.
+- 2.0.0 engine (design decision D3): `src/map/layers.ts` writes `dependency-layers.json`, which
+  is depgraph's subsystem view built on the graph. The file holds `metadata`, `entryPoints`,
+  `modules`, `cyclicComponents` and `layers`. `modules`, `entryPoints` and `layers` hold the
+  `src` files, as in depgraph 1.x. `cyclicComponents` holds every area, so its counts agree with
+  the core statistics. The adapter now also gives each edge its written specifier, and the
+  names of each package or built-in import. On memoryjs, the modules, files, entry points and
+  layers are identical to depgraph 1.x, and each field difference has a recorded cause.
+  `generateJSON` gets three helpers (`modulesJsonOf`, `layersOf`, `entryPointsOf`), and its
+  output does not change.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
