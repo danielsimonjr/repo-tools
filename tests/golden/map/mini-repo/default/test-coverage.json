@@ -1,0 +1,120 @@
+{
+  "metadata": {
+    "totalSourceFiles": 15,
+    "totalTestFiles": 2,
+    "testedCount": 6,
+    "untestedCount": 9,
+    "coveragePercent": "40.0",
+    "effectiveCoverage": {
+      "policyLoaded": false,
+      "activeFiles": 15,
+      "testedActive": 6,
+      "activeUntested": 9,
+      "excludedTotal": 0,
+      "percent": "40.0",
+      "breakdown": {
+        "active_untested": 9
+      }
+    }
+  },
+  "untestedFiles": [
+    "src/Z/loop.ts",
+    "src/_x.ts",
+    "src/cli.ts",
+    "src/dyn.ts",
+    "src/orphan.ts",
+    "src/ping.ts",
+    "src/pong.ts",
+    "src/register.ts",
+    "src/util/index.ts"
+  ],
+  "testedFiles": [
+    "src/B.ts",
+    "src/Z/index.ts",
+    "src/Z/zed.ts",
+    "src/a.ts",
+    "src/index.ts",
+    "src/view.tsx"
+  ],
+  "coverageMap": {
+    "src/B.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/Z/index.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/Z/loop.ts": [],
+    "src/Z/zed.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/_x.ts": [],
+    "src/a.ts": [
+      "tests/a.test.ts",
+      "tests/barrel.test.ts"
+    ],
+    "src/cli.ts": [],
+    "src/dyn.ts": [],
+    "src/index.ts": [
+      "tests/barrel.test.ts"
+    ],
+    "src/orphan.ts": [],
+    "src/ping.ts": [],
+    "src/pong.ts": [],
+    "src/register.ts": [],
+    "src/util/index.ts": [],
+    "src/view.tsx": [
+      "tests/barrel.test.ts"
+    ]
+  },
+  "testToSourceMap": {
+    "tests/a.test.ts": [
+      "src/a.ts"
+    ],
+    "tests/barrel.test.ts": [
+      "src/index.ts",
+      "src/a.ts",
+      "src/B.ts",
+      "src/Z/index.ts",
+      "src/view.tsx",
+      "src/Z/zed.ts"
+    ]
+  },
+  "classifiedUntested": [
+    {
+      "file": "src/Z/loop.ts",
+      "category": null
+    },
+    {
+      "file": "src/_x.ts",
+      "category": null
+    },
+    {
+      "file": "src/cli.ts",
+      "category": null
+    },
+    {
+      "file": "src/dyn.ts",
+      "category": null
+    },
+    {
+      "file": "src/orphan.ts",
+      "category": null
+    },
+    {
+      "file": "src/ping.ts",
+      "category": null
+    },
+    {
+      "file": "src/pong.ts",
+      "category": null
+    },
+    {
+      "file": "src/register.ts",
+      "category": null
+    },
+    {
+      "file": "src/util/index.ts",
+      "category": null
+    }
+  ]
+}

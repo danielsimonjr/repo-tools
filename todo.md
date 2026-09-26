@@ -74,12 +74,12 @@
 - [ ] The Rust `use` reader cuts a name at the letters `as` inside a word (`HashMap` becomes `H`):
   the Python source splits on `as` after it removes white space. Fix it as a whole-word alias,
   with its own parity verdict (repo_map-wrong), after the side-1 parity record.
-- [ ] `repo-tools map` (D8): the command that writes every 2.0.0 output. `depgraph` stays a
+- [x] `repo-tools map` (D8): the command that writes every 2.0.0 output. `depgraph` stays a
   deprecated alias through 2.x. The scan-scope flags follow the review decision (asked for on
   2026-09-26).
-- [ ] The gates of `map`: `--check-census`, `--strict-orphans`, `--strict-census`,
+- [x] The gates of `map`: `--check-census`, `--strict-orphans`, `--strict-census`,
   `--check-duplicates`, `--no-regen`, `--write-duplicate-baseline`, and the extension hooks.
-- [ ] `--api-surface` on the graph (D5): TypeScript as in 1.x, Python `__all__`, Rust `pub`. For
+- [x] `--api-surface` on the graph (D5): TypeScript as in 1.x, Python `__all__`, Rust `pub`. For
   C#, exit 1 with a message.
 - [ ] `repo-tools query` reads the core graph (D8): `dependents`, `symbol-users` and `cycles`
   get repo_map's meaning, and `cycles --components` lists the components.
@@ -88,6 +88,9 @@
 - [ ] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
   and side 2 against depgraph 1.x.
 - [ ] Decision for the PR review: dynamic `import()` edges in the core graph (D1 open point).
+- [ ] Workspace roots: in a workspace monorepo the graph has 0 roots, so each workspace source
+  file shows as an orphan (a repo_map defect that 1.x did not have). Read the entry files of
+  each workspace package, and list the change as a deliberate difference from repo_map.
 
 ## Post-release list (filed, not worked in v1)
 

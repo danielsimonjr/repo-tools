@@ -21,8 +21,8 @@ async function run(argv: string[]) {
 }
 
 describe("repo-tools CLI shell (spec 3.1)", () => {
-  test("the subcommand list is exactly depgraph, chunk, compress, query, ste", async () => {
-    expect([...SUBCOMMANDS]).toEqual(["depgraph", "chunk", "compress", "query", "ste"]);
+  test("the subcommand list is exactly map, depgraph, chunk, compress, query, ste", async () => {
+    expect([...SUBCOMMANDS]).toEqual(["map", "depgraph", "chunk", "compress", "query", "ste"]);
   });
 
   for (const argv of [[], ["--help"], ["-h"]]) {
@@ -40,7 +40,7 @@ describe("repo-tools CLI shell (spec 3.1)", () => {
     expect(r.out).toBe(`${pkg.version}\n`);
   });
 
-  for (const name of ["depgraph", "chunk", "compress", "query"]) {
+  for (const name of ["map", "depgraph", "chunk", "compress", "query"]) {
     test(`${name} --help prints that subcommand's help and exits 0`, async () => {
       const r = await run([name, "--help"]);
       expect(r.code).toBe(0);
@@ -59,12 +59,14 @@ describe("repo-tools CLI shell (spec 3.1)", () => {
     expect((await run(["--nope"])).code).toBe(1);
   });
 
-  test("depgraph dispatches to its pipeline: a root with no TypeScript exits 1", async () => {
+  test("map and its alias depgraph dispatch to the engine: a root with no source exits 1", async () => {
     const root = makeTempDir("cli");
     try {
-      const r = await run(["depgraph", `--root=${root}`]);
-      expect(r.code).toBe(1);
-      expect(r.err).toContain("No TypeScript files found");
+      for (const command of ["map", "depgraph"]) {
+        const r = await run([command, `--root=${root}`]);
+        expect(r.code).toBe(1);
+        expect(r.err).toContain("no source file found");
+      }
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

@@ -328,6 +328,20 @@ export function candidateFiles(
   return found.sort(compareParts);
 }
 
+/**
+ * The source files of `language` that a pruned walk of `root` finds, with no git filter,
+ * root-relative and in code-unit order. The census gate compares this list with the census: a
+ * file here and not in the census is on disk but untracked or ignored.
+ */
+export function walkedSourceFiles(root: string, language: Language): string[] {
+  const [suffixes, extraSkip] = LANGUAGE_SCANS[language];
+  const found: string[][] = [];
+  walk(root, new Set([...SKIP_DIRS, ...extraSkip]), (parts, name) => {
+    if (suffixes.has(suffixOf(name))) found.push([...parts, name]);
+  });
+  return found.sort(compareParts).map((parts) => parts.join("/"));
+}
+
 const DETECT_ORDER: readonly Language[] = ["typescript", "python", "csharp", "rust"];
 const SUPPORTED_NAMES = "TypeScript/JavaScript, Python, C# and Rust";
 

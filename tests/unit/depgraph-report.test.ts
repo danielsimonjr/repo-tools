@@ -216,6 +216,7 @@ describe("pipeline entry", () => {
       writeDuplicateBaseline: false,
       noExtensions: false,
       help: false,
+      ignoredFlags: [],
     });
     // Fix M1: the two single-package model flags.
     const m1 = parseDepgraphArgs(["--reachable-only", "--strict-orphans"], "cwd");

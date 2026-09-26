@@ -7,8 +7,8 @@
 import pkg from "../package.json" with { type: "json" };
 import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
-import { DEPGRAPH_HELP, run as runDepgraph } from "./depgraph/index.ts";
 import type { Io } from "./io-types.ts";
+import { DEPGRAPH_DEPRECATION, MAP_HELP, runMap } from "./map/command.ts";
 import { QUERY_HELP, run as runQuery } from "./query/index.ts";
 import { run as runSte, STE_HELP } from "./ste/index.ts";
 
@@ -23,10 +23,18 @@ interface Subcommand {
 }
 
 const REGISTRY = {
+  map: {
+    summary:
+      "Write the dependency graph and the architecture reports of a TypeScript/JavaScript, Python, C# or Rust repository.",
+    help: MAP_HELP,
+    run: (argv: string[], io: Io) => runMap(argv, io, "map"),
+  },
   depgraph: {
-    summary: "Write the dependency graph and the architecture reports of a TypeScript tree.",
-    help: DEPGRAPH_HELP,
-    run: runDepgraph,
+    summary: "Deprecated alias of map (through 2.x).",
+    help: `${DEPGRAPH_DEPRECATION}
+
+${MAP_HELP}`,
+    run: (argv: string[], io: Io) => runMap(argv, io, "depgraph"),
   },
   chunk: {
     summary: "Split a large file into chunks, merge the chunks back, or show changed chunks.",

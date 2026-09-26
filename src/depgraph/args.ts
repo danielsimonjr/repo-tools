@@ -33,6 +33,35 @@ export interface DepgraphOptions {
   /** Load no extension (design section 5.2). */
   noExtensions: boolean;
   help: boolean;
+  /**
+   * The scan-scope flags of 1.x that the 2.0.0 engine does not use (design decision D8). The
+   * `depgraph` alias accepts them and warns; `map` rejects them.
+   */
+  ignoredFlags: string[];
+}
+
+/** The command that parses: `map`, or its deprecated alias `depgraph`. */
+export type MapCommand = "map" | "depgraph";
+
+/**
+ * The 1.x scan-scope flags and why they have no effect in 2.0.0: the map census is the set of
+ * files that git tracks (or a pruned walk), and the area of each file comes from its path.
+ */
+export const SCAN_SCOPE_FLAGS: Readonly<Record<string, string>> = {
+  "--src": "the census finds the source files itself; the area of a file comes from its path",
+  "--tests": "a test file is found by its name or its tests/ folder",
+  "--exclude": "the census reads the files that git tracks; list a file in .gitignore instead",
+  "--also-exclude": "the census reads the files that git tracks; list a file in .gitignore instead",
+  "--all": "the graph always holds every file; the disposition of each file shows reachability",
+  "-a": "the graph always holds every file; the disposition of each file shows reachability",
+  "--reachable-only": "the graph always holds every file; the disposition shows reachability",
+  "--include-tests": "the test coverage reports are always written",
+  "-t": "the test coverage reports are always written",
+};
+
+/** The text for a scan-scope flag: its name and why it has no effect. */
+export function scanScopeText(flag: string): string {
+  return `flag ${flag} has no effect in 2.0.0: ${SCAN_SCOPE_FLAGS[flag]}`;
 }
 
 /** The option keys that a boolean flag sets. */
@@ -122,7 +151,11 @@ function relativePath(flag: string, value: string): string {
  * Parses the depgraph arguments. A first argument that is not a flag sets the root. Throws an
  * error on an unknown flag, a missing or unexpected value, or a second root.
  */
-export function parseDepgraphArgs(argv: readonly string[], cwd: string): DepgraphOptions {
+export function parseDepgraphArgs(
+  argv: readonly string[],
+  cwd: string,
+  command?: MapCommand,
+): DepgraphOptions {
   const options: DepgraphOptions = {
     root: cwd,
     settings: {},
@@ -137,6 +170,7 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     writeDuplicateBaseline: false,
     noExtensions: false,
     help: false,
+    ignoredFlags: [],
   };
   let rootSet = false;
   const setRoot = (value: string): void => {
@@ -153,6 +187,18 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
     const eq = arg.indexOf("=");
     const name = eq === -1 ? arg : arg.slice(0, eq);
     const value = eq === -1 ? undefined : arg.slice(eq + 1);
+    // Without a command, the 1.x pipeline parses (it keeps the scan-scope flags until it goes).
+    if (command !== undefined && name in SCAN_SCOPE_FLAGS) {
+      if (command === "map") throw new Error(scanScopeText(name));
+      // An ignored flag keeps its value rule, so a typing error still stops the run.
+      const takesValue = name in VALUE_FLAGS;
+      if (!takesValue && value !== undefined) throw new Error(`flag ${name} takes no value`);
+      if (takesValue && (value === undefined || value === "")) {
+        throw new Error(`flag ${name} needs a value: ${name}=<value>`);
+      }
+      options.ignoredFlags.push(name);
+      continue;
+    }
     const booleanKey = BOOLEAN_FLAGS[name];
     if (booleanKey !== undefined) {
       if (value !== undefined) throw new Error(`flag ${name} takes no value`);
@@ -167,7 +213,7 @@ export function parseDepgraphArgs(argv: readonly string[], cwd: string): Depgrap
       apply(options, value, setRoot);
       continue;
     }
-    throw new Error(`unknown flag '${name}' (see repo-tools depgraph --help)`);
+    throw new Error(`unknown flag '${name}' (see repo-tools ${command ?? "depgraph"} --help)`);
   }
   checkModes(options);
   return options;

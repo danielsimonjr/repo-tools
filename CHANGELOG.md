@@ -8,6 +8,27 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools map` (design decision D8): the command of the 2.0.0 engine. It writes each report
+  of the engine into the output folder, for TypeScript/JavaScript, Python, C# and Rust.
+  `repo-tools depgraph` is now its deprecated alias through 2.x, and prints one deprecation line.
+  The 1.x scan-scope flags (`--src`, `--tests`, `--exclude`, `--also-exclude`, `--all`/`-a`,
+  `--reachable-only`, `--include-tests`/`-t`) have no effect in 2.0.0. `map` exits 1 on them,
+  and the alias gives a warning and continues. The config section `map` is the new name of
+  `depgraph`, and a file with both sections exits 1.
+- `map` (design decision D9): the duplicate allowlist and baseline and the coverage policy
+  default to `docs/architecture/`, never to the output folder. A root-relative `--out=../x`
+  writes outside the root.
+- `map` gates: `--strict-orphans`, `--strict-census`, `--check-census`, `--check-duplicates`,
+  `--no-regen` and `--write-duplicate-baseline`, and the `preflight` and `report` hooks of the
+  extensions. `--strict-census` compares the census with a walk of the root. It finds a source
+  file on disk that git does not track. The duplicate gate works for TypeScript only, and says
+  so for another language. The `report` hook receives the core `dependency-graph.json`.
+- `map --api-surface` (design decision D5): TypeScript keeps the 1.x report, and the
+  mini-repo report is byte-identical to the 1.x golden. Python and Rust list the surface names
+  of the entry file. C# exits 1 with the reason.
+- Goldens for `map` (`tests/golden/map`, written by `scripts/update-map-goldens.ts`). The smoke
+  test (design 13.3) runs `map`.
+
 - 2.0.0 engine, step 1: `src/map/discovery.ts` ports `repo_map/discovery.py` from the
   architecture-docs skill. It holds the language detection, the file census and the area and
   disposition rules. It refuses a repository in an unsupported language. The census comes from

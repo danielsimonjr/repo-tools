@@ -1,0 +1,135 @@
+metadata:
+  name: mono-repo
+  schemaVersion: 2.0.0
+  language: typescript
+  totalFiles: 9
+  totalModules: 3
+  totalExports: 8
+modules:
+  src:
+    packages/cli/src/format.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - format
+    packages/cli/src/main.ts:
+      externalDependencies:
+        - '@scope/core'
+      nodeDependencies: []
+      internalDependencies:
+        - file: packages/cli/src/format.ts
+          imports:
+            - format
+          typeOnly: false
+      exports: []
+    packages/core/src/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: packages/core/src/math.ts
+          imports:
+            - add
+          typeOnly: false
+        - file: packages/core/src/types.ts
+          imports:
+            - Pair
+          typeOnly: true
+      exports:
+        - add
+        - Pair
+    packages/core/src/internal.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - INTERNAL_FLAG
+    packages/core/src/math.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: packages/core/src/types.ts
+          imports:
+            - Pair
+          typeOnly: true
+      exports:
+        - add
+        - double
+    packages/core/src/types.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Pair
+    packages/core/src/worker.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: packages/core/src/math.ts
+          imports:
+            - double
+          typeOnly: false
+      exports:
+        - workerResult
+  tests:
+    packages/core/tests/math.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: packages/core/src/math.ts
+          imports:
+            - add
+          typeOnly: false
+      exports: []
+  config:
+    packages/core/tsup.config.ts:
+      externalDependencies:
+        - tsup
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+statistics:
+  totalTypeScriptFiles: 9
+  totalSourceFiles: 9
+  totalModules: 3
+  totalLinesOfCode: 40
+  totalExports: 8
+  entryRoots: 0
+  reachableFiles: 0
+  dormantFiles: 7
+  orphanedFiles: 5
+  testOnlyFiles: 2
+  runtimeCircularDeps: 0
+  typeOnlyCircularDeps: 0
+  totalTypeOnlyImports: 2
+  noImporterFileCount: 4
+  unusedExportsCount: 2
+  circularDepsTruncated: false
+  runtimeCyclicComponents: 0
+  typeOnlyCyclicComponents: 0
+  runtimeFilesInCycles: 0
+  typeOnlyFilesInCycles: 0
+  totalClasses: 0
+  totalInterfaces: 0
+  totalFunctions: 3
+  totalTypeGuards: 0
+  totalEnums: 0
+  totalConstants: 2
+  totalReExports: 2
+reachability:
+  roots: []
+  reachableCount: 0
+  dormantCount: 7
+  orphaned:
+    - packages/cli/src/format.ts
+    - packages/cli/src/main.ts
+    - packages/core/src/index.ts
+    - packages/core/src/internal.ts
+    - packages/core/src/worker.ts
+  testOnly:
+    - packages/core/src/math.ts
+    - packages/core/src/types.ts
+warnings:
+  - >-
+    could not determine any entry-point roots: no package.json main/module/bin/exports resolved to a known source file,
+    and no src/index.* fallback was found -- every 'src' file will show as orphan or test-only rather than build-entry

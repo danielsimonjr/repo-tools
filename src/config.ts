@@ -231,18 +231,31 @@ export function parseConfigSections(parsed: unknown, label: string): ConfigSecti
   const fail = (message: string): Error => new Error(`config ${label}: ${message}`);
   if (!isObject(parsed)) throw fail("the file must hold a JSON object");
   for (const key of Object.keys(parsed)) {
-    if (key !== "depgraph" && key !== "query") throw fail(`unknown key '${key}'`);
+    if (key !== "depgraph" && key !== "map" && key !== "query") {
+      throw fail(`unknown key '${key}'`);
+    }
   }
+  // Design decision D8: `map` is the new name of the `depgraph` section. Both at once is
+  // ambiguous, so the file is refused.
+  if (parsed.map !== undefined && parsed.depgraph !== undefined) {
+    throw fail("use the section 'map' or its old name 'depgraph', not both");
+  }
+  const sectionName = parsed.map !== undefined ? "map" : "depgraph";
   const sections: ConfigSections = { depgraph: {}, query: {} };
-  const section = parsed.depgraph;
+  const section = parsed[sectionName];
   if (section !== undefined) {
-    if (!isObject(section)) throw fail("'depgraph' must be an object");
+    if (!isObject(section)) throw fail(`'${sectionName}' must be an object`);
     const { apiSurface, ...rest } = section;
-    sections.depgraph = checkSection("depgraph.", rest, DEPGRAPH_KEYS, fail) as DepgraphSettings;
+    sections.depgraph = checkSection(
+      `${sectionName}.`,
+      rest,
+      DEPGRAPH_KEYS,
+      fail,
+    ) as DepgraphSettings;
     if (apiSurface !== undefined) {
-      if (!isObject(apiSurface)) throw fail("'depgraph.apiSurface' must be an object");
+      if (!isObject(apiSurface)) throw fail(`'${sectionName}.apiSurface' must be an object`);
       sections.depgraph.apiSurface = checkSection(
-        "depgraph.apiSurface.",
+        `${sectionName}.apiSurface.`,
         apiSurface,
         API_SURFACE_KEYS,
         fail,
@@ -308,6 +321,29 @@ export function mergeQueryConfig(cli: QuerySettings, file: ConfigSections): Quer
   return {
     out: cli.out ?? file.query.out ?? file.depgraph.out ?? OUTPUT_SUBDIR,
     nodeRuntimes: cli.nodeRuntimes ?? file.query.nodeRuntimes ?? [],
+  };
+}
+
+/** The regenerate command that the `map` reports name by default (design decision D8). */
+export const MAP_REGENERATE_COMMAND = "repo-tools map";
+
+/**
+ * The merged settings of `repo-tools map`: those of `mergeDepgraphConfig`, with two 2.0.0
+ * defaults. The input files (the duplicate allowlist and baseline, the coverage policy) default
+ * to `docs/architecture/`, never to the output folder (design decision D9). The banner names
+ * `repo-tools map`.
+ */
+export function mergeMapConfig(cli: DepgraphSettings, file: DepgraphSettings): DepgraphConfig {
+  const merged = mergeDepgraphConfig(cli, file);
+  const inDocs = (name: string): string => `${OUTPUT_SUBDIR}/${name}`;
+  return {
+    ...merged,
+    duplicateAllowlist:
+      cli.duplicateAllowlist ?? file.duplicateAllowlist ?? inDocs("duplicate-allowlist.json"),
+    duplicateBaseline:
+      cli.duplicateBaseline ?? file.duplicateBaseline ?? inDocs("duplicate-baseline.json"),
+    coveragePolicy: cli.coveragePolicy ?? file.coveragePolicy ?? inDocs("coverage-policy.json"),
+    regenerateCommand: cli.regenerateCommand ?? file.regenerateCommand ?? MAP_REGENERATE_COMMAND,
   };
 }
 

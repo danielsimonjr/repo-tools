@@ -1,0 +1,22 @@
+{
+  "surfaces": {
+    "Z": [
+      "ZedShape",
+      "zed"
+    ],
+    "entry": [
+      "AlphaOptions",
+      "Bravo",
+      "alpha",
+      "render"
+    ],
+    "root": [
+      "Bravo",
+      "alpha",
+      "render"
+    ],
+    "util": [
+      "clamp"
+    ]
+  }
+}

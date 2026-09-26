@@ -5,10 +5,10 @@
  *
  * Examples: `-- bin/repo-tools-linux-x64`, `-- node dist/cli.js`, `-- bun dist/cli.js`.
  * The script runs every step and exits 1 when a step fails. The steps: `--version`, `--help`,
- * an unknown subcommand, `depgraph` on the mini-repo fixture against its goldens (13.3 step 2),
+ * an unknown subcommand, `map` on the mini-repo fixture against its goldens (13.3 step 2),
  * the API-surface report against its golden (13.3 step 3), the `chunk split` and `chunk merge`
  * round trip (13.3 step 4), a JSON round trip through `compress` and `compress -d` (13.3 step 5),
- * and a `depgraph` run that loads the fixture extension (13.3 step 7), each in a temp folder.
+ * and a `map` run that loads the fixture extension (13.3 step 7), each in a temp folder.
  */
 import {
   copyFileSync,
@@ -50,9 +50,9 @@ const STEPS: Step[] = [
     args: ["--help"],
     exit: 0,
     check: (out) =>
-      ["depgraph", "chunk", "compress", "query"].every((s) => out.includes(s))
+      ["map", "depgraph", "chunk", "compress", "query"].every((s) => out.includes(s))
         ? undefined
-        : "the help does not list depgraph, chunk, compress and query",
+        : "the help does not list map, depgraph, chunk, compress and query",
   },
   { name: "unknown subcommand", args: ["frobnicate"], exit: 1 },
 ];
@@ -125,7 +125,7 @@ function jsonRoundTrip(command: string[]): string | undefined {
 }
 
 const MINI_REPO = join(import.meta.dir, "../tests/fixtures/depgraph/mini-repo");
-const MINI_GOLDEN = join(import.meta.dir, "../tests/golden/depgraph/mini-repo");
+const MINI_GOLDEN = join(import.meta.dir, "../tests/golden/map/mini-repo");
 const PROBE_EXTENSION = join(import.meta.dir, "../tests/fixtures/extension/probe.mjs");
 
 /**
@@ -146,17 +146,17 @@ function inMiniRepo(check: (root: string) => string | undefined): string | undef
   }
 }
 
-/** Runs `depgraph` on `root` from the parent folder of `root`. */
-function depgraph(command: string[], root: string, flags: string[]) {
-  return Bun.spawnSync([...command, "depgraph", `--root=${root}`, ...flags], {
+/** Runs `map` on `root` from the parent folder of `root`. */
+function map(command: string[], root: string, flags: string[]) {
+  return Bun.spawnSync([...command, "map", `--root=${root}`, ...flags], {
     cwd: join(root, ".."),
   });
 }
 
-/** Design 13.3 step 2: `depgraph` on the mini-repo fixture equals its goldens, file by file. */
-function depgraphGolden(command: string[]): string | undefined {
+/** Design 13.3 step 2: `map` on the mini-repo fixture equals its goldens, file by file. */
+function mapGolden(command: string[]): string | undefined {
   return inMiniRepo((root) => {
-    const r = depgraph(command, root, GOLDEN_FLAGS);
+    const r = map(command, root, GOLDEN_FLAGS);
     if (r.exitCode !== 0) return `exit ${r.exitCode}`;
     const golden = join(MINI_GOLDEN, "default");
     const want = sortCodeUnits(readdirSync(golden).filter((f) => !f.startsWith("_")));
@@ -174,10 +174,10 @@ function depgraphGolden(command: string[]): string | undefined {
   });
 }
 
-/** Design 13.3 step 3: `depgraph --api-surface=out.json` equals the API-surface golden. */
+/** Design 13.3 step 3: `map --api-surface=out.json` equals the API-surface golden. */
 function apiSurfaceGolden(command: string[]): string | undefined {
   return inMiniRepo((root) => {
-    const r = depgraph(command, root, [...GOLDEN_FLAGS, "--api-surface=out.json"]);
+    const r = map(command, root, [...GOLDEN_FLAGS, "--api-surface=out.json"]);
     if (r.exitCode !== 0) return `exit ${r.exitCode}`;
     const file = join(root, "out.json");
     if (!existsSync(file)) return "no out.json";
@@ -199,9 +199,9 @@ function extensionHooks(command: string[]): string | undefined {
     copyFileSync(PROBE_EXTENSION, join(root, "ext/probe.mjs"));
     writeFileSync(
       join(root, "repo-tools.config.json"),
-      JSON.stringify({ depgraph: { extensions: ["ext/probe.mjs"] } }),
+      JSON.stringify({ map: { extensions: ["ext/probe.mjs"] } }),
     );
-    const r = depgraph(command, root, []);
+    const r = map(command, root, []);
     if (r.exitCode !== 0) return `exit ${r.exitCode}`;
     const problems: string[] = [];
     if (!existsSync(join(root, "preflight-ran.txt"))) problems.push("preflight did not run");
@@ -216,7 +216,7 @@ function extensionHooks(command: string[]): string | undefined {
 
 /** Checks that run a command more than once and check files. */
 const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined }[] = [
-  { name: "depgraph golden (13.3 step 2)", run: depgraphGolden },
+  { name: "map golden (13.3 step 2)", run: mapGolden },
   { name: "api surface golden (13.3 step 3)", run: apiSurfaceGolden },
   { name: "chunk round trip", run: chunkRoundTrip },
   { name: "compress JSON round trip", run: jsonRoundTrip },

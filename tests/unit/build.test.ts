@@ -124,12 +124,12 @@ describe("smoke test script (design 13.3)", () => {
   );
 });
 
-describe("smoke test: depgraph on the product (design 13.3 steps 2, 3 and 7)", () => {
+describe("smoke test: map on the product (design 13.3 steps 2, 3 and 7)", () => {
   const smoke = (command: string[]) =>
     Bun.spawnSync([process.execPath, "scripts/smoke.ts", "--", ...command], { cwd: root });
 
   test(
-    "the source entry passes every step, the depgraph steps included",
+    "the source entry passes every step, the map steps included",
     () => {
       const r = smoke([process.execPath, "src/bin.ts"]);
       expect(r.stderr.toString()).toBe("");
@@ -139,22 +139,22 @@ describe("smoke test: depgraph on the product (design 13.3 steps 2, 3 and 7)", (
   );
 
   test(
-    "a CLI whose depgraph writes nothing fails steps 2, 3 and 7 by name",
+    "a CLI whose map writes nothing fails steps 2, 3 and 7 by name",
     () => {
-      // A fake CLI that passes the first three steps; its depgraph exits 0 and writes nothing.
-      const fake = join(work, "fake-depgraph.js");
+      // A fake CLI that passes the first three steps; its map exits 0 and writes nothing.
+      const fake = join(work, "fake-map.js");
       writeFileSync(
         fake,
         [
           "const a = process.argv[2];",
           `if (a === "--version") console.log(${JSON.stringify(pkg.version)});`,
-          'else if (a === "--help") console.log("depgraph chunk compress query");',
-          'else if (a !== "depgraph") process.exitCode = 1;',
+          'else if (a === "--help") console.log("map depgraph chunk compress query");',
+          'else if (a !== "map") process.exitCode = 1;',
           "",
         ].join("\n"),
       );
       const err = smoke(["node", fake]).stderr.toString();
-      expect(err).toContain("depgraph golden (13.3 step 2)");
+      expect(err).toContain("map golden (13.3 step 2)");
       expect(err).toContain("api surface golden (13.3 step 3)");
       expect(err).toContain("extension hooks (13.3 step 7)");
     },

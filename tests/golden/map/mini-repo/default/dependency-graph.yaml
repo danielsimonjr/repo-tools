@@ -1,0 +1,227 @@
+metadata:
+  name: mini-repo
+  schemaVersion: 2.0.0
+  language: typescript
+  totalFiles: 18
+  totalModules: 2
+  totalExports: 20
+modules:
+  src:
+    src/B.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/a.ts
+          imports:
+            - AlphaOptions
+          typeOnly: true
+      exports:
+        - Bravo
+    src/Z/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/Z/zed.ts
+          imports:
+            - zed
+            - ZedShape
+          typeOnly: false
+      exports:
+        - zed
+        - ZedShape
+    src/Z/loop.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/Z/zed.ts
+          imports:
+            - ZedShape
+          typeOnly: true
+      exports:
+        - Loop
+    src/Z/zed.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/Z/loop.ts
+          imports:
+            - Loop
+          typeOnly: true
+      exports:
+        - ZedShape
+        - zed
+    src/_x.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - helper
+    src/a.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/_x.ts
+          imports:
+            - helper
+          typeOnly: false
+      exports:
+        - AlphaOptions
+        - alpha
+        - unusedConstant
+    src/ambient.d.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    src/cli.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/a.ts
+          imports:
+            - alpha
+          typeOnly: false
+        - file: src/ping.ts
+          imports:
+            - ping
+          typeOnly: false
+        - file: src/register.ts
+          imports: []
+          typeOnly: false
+      exports: []
+    src/dyn.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - dynamicValue
+    src/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/a.ts
+          imports:
+            - alpha
+            - AlphaOptions
+          typeOnly: false
+        - file: src/B.ts
+          imports:
+            - Bravo
+          typeOnly: false
+        - file: src/Z/index.ts
+          imports:
+            - ZedShape
+            - zed
+          typeOnly: false
+        - file: src/view.tsx
+          imports:
+            - render
+          typeOnly: false
+      exports:
+        - alpha
+        - AlphaOptions
+        - Bravo
+        - render
+    src/orphan.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - forgotten
+    src/ping.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/pong.ts
+          imports:
+            - pong
+          typeOnly: false
+      exports:
+        - ping
+    src/pong.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/ping.ts
+          imports:
+            - ping
+          typeOnly: false
+      exports:
+        - pong
+    src/register.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    src/util/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - clamp
+    src/view.tsx:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - render
+  tests:
+    tests/a.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/a.ts
+          imports:
+            - alpha
+          typeOnly: false
+      exports: []
+    tests/barrel.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/index.ts
+          imports:
+            - zed
+          typeOnly: false
+      exports: []
+statistics:
+  totalTypeScriptFiles: 18
+  totalSourceFiles: 18
+  totalModules: 2
+  totalLinesOfCode: 96
+  totalExports: 20
+  entryRoots: 3
+  reachableFiles: 13
+  dormantFiles: 3
+  orphanedFiles: 3
+  testOnlyFiles: 0
+  runtimeCircularDeps: 1
+  typeOnlyCircularDeps: 1
+  totalTypeOnlyImports: 3
+  noImporterFileCount: 3
+  unusedExportsCount: 4
+  circularDepsTruncated: false
+  runtimeCyclicComponents: 1
+  typeOnlyCyclicComponents: 1
+  runtimeFilesInCycles: 2
+  typeOnlyFilesInCycles: 2
+  totalClasses: 1
+  totalInterfaces: 3
+  totalFunctions: 8
+  totalTypeGuards: 0
+  totalEnums: 0
+  totalConstants: 2
+  totalReExports: 7
+reachability:
+  roots:
+    - src/cli.ts
+    - src/index.ts
+    - src/util/index.ts
+  reachableCount: 13
+  dormantCount: 3
+  orphaned:
+    - src/ambient.d.ts
+    - src/dyn.ts
+    - src/orphan.ts
+  testOnly: []
+warnings: []
