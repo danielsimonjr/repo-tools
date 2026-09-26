@@ -28,6 +28,11 @@ All notable changes to this project are recorded in this file. The format follow
   of the entry file. C# exits 1 with the reason.
 - Goldens for `map` (`tests/golden/map`, written by `scripts/update-map-goldens.ts`). The smoke
   test (design 13.3) runs `map`.
+- `docs/parity-2.0.0.md`: the parity record of the 2.0.0 engine on public repositories. On side
+  1, the four core files are identical to the Python tool on 11 repositories, apart from the
+  two deliberate workspace differences on Mathts. A control shows that these two differences
+  cause all of the Mathts differences. Side 2 compares each extra with depgraph 1.x on
+  memoryjs, Mathts and universal-physics-tensor, and gives a verdict for each difference.
 - `repo-tools query` reads the core graph of `map` (design decision D8), and refuses a 1.x graph.
   `dependents`, `symbol-users` and `cycles` have the meaning of the Python tool. They read each
   area of the graph, and a path that is not a file of the graph exits 1. `symbol-users` lists

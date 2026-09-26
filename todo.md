@@ -85,9 +85,12 @@
   get repo_map's meaning, and `cycles --components` lists the components.
 - [x] Build (D7): the four `.wasm` files go into `dist/` and into the package `files`. Smoke
   test the exe and the Node bundle on Node 20 and 22.
-- [ ] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
+- [x] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
   and side 2 against depgraph 1.x.
 - [ ] Decision for the PR review: dynamic `import()` edges in the core graph (D1 open point).
+- [ ] A bodiless `export function f(): T;` (an overload signature or an ambient declaration in a
+  `.d.ts` file) is not an export of the reader, as in the Python tool. Decide with a parity
+  verdict if the reader records it.
 - [ ] Remove the 1.x depgraph pipeline, which the product no longer calls (`depgraph` is an
   alias of `map`). Port each 1.x fix test (F1 to F44, M1, R1) to `map` first, or record why
   the fix has no 2.0.0 meaning. Then delete the 1.x runner, parser, scanner and goldens.
