@@ -6,6 +6,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-09-26
+
+The unified engine. `repo-tools map` replaces the Python `repo_map.py` and depgraph 1.x with one
+engine for TypeScript/JavaScript, Python, C# and Rust. On 11 public repositories, its four core
+files are identical to the Python tool, apart from the deliberate differences that the parity
+record lists. `repo-tools depgraph` stays as a deprecated alias through 2.x. The 1.x scan-scope
+flags have no effect: `map` exits 1 on them, and the alias gives a warning.
+
 ### Known differences
 
 - `map` makes no graph edge for a dynamic `import()`, as the Python tool does. depgraph 1.x

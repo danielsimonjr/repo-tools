@@ -11,7 +11,7 @@
 | `query` | Answers structural questions from the graph of `map`, and writes two derived reports. |
 | `ste` | Checks Markdown or docstring prose against Simplified Technical English. |
 
-Status: 2.0.0 is in development and is not released. The latest release is 1.1.0.
+Status: version 2.0.0.
 
 - `map` and `query` read their settings from `repo-tools.config.json` in the root. The section
   of `map` is `map` (its old name, `depgraph`, is also read). `--config=<file>` makes either
@@ -39,7 +39,7 @@ repo-tools --version
 
 The executable holds the tool and the Bun runtime. It needs no Bun, Node or `node_modules`.
 Download the file for your platform and `SHA256SUMS` from the
-[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v1.1.0):
+[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v2.0.0):
 
 | Platform | File |
 |---|---|
