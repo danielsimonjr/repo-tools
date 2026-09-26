@@ -114,6 +114,12 @@ All notable changes to this project are recorded in this file. The format follow
   package, as depgraph 1.x does. On memoryjs, MathTS and universal-physics-tensor, each
   classified entry is identical to depgraph 1.x. The one exception is a 1.x definer that is a
   declaration file.
+- 2.0.0 engine (design decisions D4 and D5): `src/map/markdown.ts` writes `FILE_INVENTORY.md`,
+  `duplicate-symbols.md` and `unused-analysis.md` for each language. Each report reads the
+  JSON files in the output folder. A TypeScript duplicate report keeps the depgraph renderer.
+  Another language gets the name-only list and the explicit note. The inventory and unused
+  reports have new text, because the 1.x text described a census of TypeScript files only. The
+  unused report also lists the dormant files of the core reachability.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
