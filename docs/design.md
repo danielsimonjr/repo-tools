@@ -1,8 +1,14 @@
+<!-- repo-map:no-verification -->
+<!-- This document is the design; it makes no claim about the graph of this repository. -->
+
 # repo-tools design
 
 This document describes the design of `repo-tools` version 1. It tells a maintainer what the tool
 does, how the code is divided, which rules keep the output stable, and which checks prove the
 product. The text follows ASD-STE100 Simplified Technical English.
+
+Sections 1 to 13 describe version 1. Section 14 describes the 2.0.0 engine (`repo-tools map`),
+which replaces the `depgraph` pipeline. Where the two differ, section 14 applies to 2.0.0.
 
 ## 1. Purpose
 
@@ -285,3 +291,66 @@ of its run, and the next run removes the folders of runs that are no longer aliv
 - The API-surface report takes one entry file (`--api-entry`).
 - `dependency-graph.json` has no `schemaVersion` key. A new key changes the output of every
   consumer.
+
+## 14. The 2.0.0 engine
+
+`repo-tools map` is the command of the 2.0.0 engine. The engine is a port of the Python tool
+`repo_map` of the architecture-docs skill. It reads TypeScript and JavaScript, Python, C# and Rust. The
+extras of depgraph 1.x run on its graph. `repo-tools depgraph` is a deprecated alias of `map`
+through 2.x.
+
+### 14.1 Modules
+
+| Module | Job |
+|---|---|
+| `src/map/discovery.ts` | The census: the files that git tracks (else a pruned walk), the language of the repository, and the area and disposition of each file. |
+| `src/map/grammars.ts` | Loads the tree-sitter grammars (TypeScript, Python) once each, when a run needs them. |
+| `src/map/parsing.ts` | One reader per language: tree-sitter for TypeScript/JavaScript and Python, regular expressions for C# and Rust. |
+| `src/map/resolvers.ts` | One resolver per language: an import to a file of the census, a built-in, or an external package. |
+| `src/map/graph.ts` | Builds the graph: edges, entry roots, barrel expansion, reachability and cycles. |
+| `src/map/schema.ts` | The graph types and the core JSON shape (schema version 2.0.0). |
+| `src/map/cycles.ts` | The simple cycles and the strongly connected components, for the graph and the query. |
+| `src/map/artifacts.ts` | The four core files: `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json` and `unused-analysis.json`. |
+| `src/map/adapter.ts` | Changes the graph into the parsed-file records of depgraph, so that the depgraph analyzers run on the graph. |
+| `src/map/layers.ts`, `reports.ts`, `markdown.ts`, `coverage.ts`, `surfaces.ts` | The extras: the subsystem view, the Markdown reports, test coverage and the export surfaces. |
+| `src/map/query.ts` | The read-only queries of the Python tool: `dependents`, `symbolUsers` and `cycles`. |
+| `src/map/command.ts` | The command: flags, config, the order of the reports, the gates and the extension hooks. |
+
+### 14.2 The command
+
+- The flags of depgraph stay. The 1.x scan-scope flags (`--src`, `--tests`, `--exclude`,
+  `--also-exclude`, `--all`, `--reachable-only`, `--include-tests`) have no effect, because the
+  census is the set of files that git tracks. `map` exits 1 on them, and the alias warns.
+- The config section is `map`. Its old name, `depgraph`, is also read. A file with both sections
+  exits 1.
+- Input files never come from the output folder. The duplicate allowlist, the duplicate baseline
+  and the coverage policy default to `docs/architecture/`.
+- A repository with no source file, or with a language that the engine cannot read, exits 1
+  and gets no output folder.
+
+### 14.3 Output rules
+
+The output rules R1 to R4 (section 4) apply. The core graph has the shape of the Python tool,
+with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are listed in
+`docs/parity-2.0.0.md`: the component and export-kind statistics, the subsystem view in
+`dependency-layers.json`, and the superset keys of `file-inventory.json` and
+`duplicate-symbols.json`.
+
+### 14.4 Deliberate differences from the Python tool
+
+- A workspace monorepo gets the entry roots of each workspace package.
+- An import of a workspace package by name is an edge to its entry file.
+
+### 14.5 The query
+
+`repo-tools query` reads the core graph and refuses a 1.x graph. `dependents`, `symbol-users` and
+`cycles` read each area of the graph. A path that is not a file of the graph exits 1. `cycles`
+lists the simple cycles, and `cycles --components` lists the strongly connected components. The
+browser-safety commands serve TypeScript/JavaScript only.
+
+### 14.6 Assets
+
+The Node bundle needs the three tree-sitter `.wasm` files. The build writes them next to
+`dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
+system. A relative asset path resolves against the URL of its module, never against the working
+folder.

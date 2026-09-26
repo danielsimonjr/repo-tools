@@ -1,3 +1,6 @@
+<!-- repo-map:no-verification -->
+<!-- This record measures other repositories; it makes no claim about the graph of this repository. -->
+
 # Parity record of the 2.0.0 engine
 
 This record gives the parity checks of the 2.0.0 engine (`repo-tools map`). Each named

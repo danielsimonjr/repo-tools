@@ -32,7 +32,9 @@ export const FORMATS = [
 /** The compression levels that `--level` accepts, in help order. */
 export const LEVELS = ["light", "medium", "aggressive"] as const;
 
+/** A file format that `compress` accepts (one item of `FORMATS`). */
 export type FileFormat = (typeof FORMATS)[number];
+/** A compression level that `--level` accepts (one item of `LEVELS`). */
 export type CompressionLevel = (typeof LEVELS)[number];
 
 /** Sizes in bytes and estimated token counts before and after compression. */
@@ -46,12 +48,14 @@ export interface CompressionStats {
   tokenSavingsPercent: number;
 }
 
+/** The output of a compressor: the compact text, its legend of abbreviations, and the sizes. */
 export interface CompressionResult {
   compressed: string;
   legend: Record<string, string>;
   stats: CompressionStats;
 }
 
+/** A compressor of one file format: it compresses `content` at `level`. */
 export type Compressor = (content: string, level: CompressionLevel) => CompressionResult;
 
 /** Estimates tokens: one per word, plus a half for each punctuation mark and each number. */

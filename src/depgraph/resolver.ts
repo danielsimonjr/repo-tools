@@ -53,6 +53,13 @@ export function resolveCandidates(fromPath: string, spec: string): string[] {
  * root-relative POSIX path: the first candidate of `resolveCandidates` that `known` holds.
  * Without a match (or without `known`) the result is the first candidate.
  */
+export function resolvePath(fromPath: string, spec: string, known?: KnownFiles): string {
+  const candidates = resolveCandidates(fromPath, spec);
+  const first = candidates[0] as string;
+  if (!known) return first;
+  return candidates.find((c) => known.has(c)) ?? first;
+}
+
 /**
  * The root-relative target of the edge `dep` of the file `fromPath`: the target that the map
  * engine resolved, else `resolvePath` of the specifier.
@@ -63,13 +70,6 @@ export function targetOf(
   known?: KnownFiles,
 ): string {
   return dep.resolved ?? resolvePath(fromPath, dep.file, known);
-}
-
-export function resolvePath(fromPath: string, spec: string, known?: KnownFiles): string {
-  const candidates = resolveCandidates(fromPath, spec);
-  const first = candidates[0] as string;
-  if (!known) return first;
-  return candidates.find((c) => known.has(c)) ?? first;
 }
 
 /**

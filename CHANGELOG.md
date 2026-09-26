@@ -28,6 +28,11 @@ All notable changes to this project are recorded in this file. The format follow
   of the entry file. C# exits 1 with the reason.
 - Goldens for `map` (`tests/golden/map`, written by `scripts/update-map-goldens.ts`). The smoke
   test (design 13.3) runs `map`.
+- README and `docs/design.md` describe the 2.0.0 engine. The README gives `map`, the
+  `depgraph` alias, the report list of `map` and new query examples from the mono-repo fixture.
+  `docs/design.md` has a new section 14, "The 2.0.0 engine". Both documents in `docs/` start
+  with the `repo-map:no-verification` marker and give the reason: neither one makes a claim
+  about the graph of this repository.
 - `docs/parity-2.0.0.md`: the parity record of the 2.0.0 engine on public repositories. On side
   1, the four core files are identical to the Python tool on 11 repositories, apart from the
   two deliberate workspace differences on Mathts. A control shows that these two differences
@@ -183,6 +188,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- The code-docs gate passes (399 of 399 exported symbols have a doc comment). Seven exported
+  types had no doc comment. The doc comment of `resolvePath` was apart from its function,
+  because `targetOf` was in the space between them. `src/map/graph.ts` and `src/ste/index.ts`
+  wrote the type `import("node:fs").Dirent` in the code, which the tree-sitter TypeScript
+  grammar cannot parse. They now import the type `Dirent`.
 - `map`: a workspace monorepo now has entry roots. The Python tool reads the root `package.json`
   only, so each workspace source file showed as an orphan. The engine now also reads the
   `package.json` of each workspace package, then the extra entries of depgraph, then a

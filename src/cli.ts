@@ -58,6 +58,7 @@ ${MAP_HELP}`,
   },
 } satisfies Record<string, Subcommand>;
 
+/** The name of a subcommand of the registry, for example `map` or `chunk`. */
 export type SubcommandName = keyof typeof REGISTRY;
 
 /** The subcommand names, in help order. */
