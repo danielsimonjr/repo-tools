@@ -6,6 +6,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Known differences
+
+- `map` makes no graph edge for a dynamic `import()`, as the Python tool does. depgraph 1.x
+  made one. So a cycle that closes only through `import()` is not a cycle in 2.0.0. On
+  memoryjs, one type-only cyclic component has 3 files, not 7. Test coverage still counts a
+  literal `import()` in a test file as a load.
+
 ### Added
 
 - `repo-tools map` (design decision D8): the command of the 2.0.0 engine. It writes each report
@@ -188,6 +195,17 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `map`: the Rust `use` reader kept the error of the Python tool. The Python tool removes the white
+  space of a `use` path, then cuts the path at the letters `as`. So `HashMap` gave `H`, `wasm`
+  gave `w` and `task` gave `t`, and a cut path could resolve to the wrong module. The reader now
+  removes only an alias that is the whole word `as` and a name. On IronClaw, 139 names are
+  complete again. The internal edges of 14 files go to the correct modules, and the simple
+  runtime cycle count goes from 1667 to 1009. The fix is a deliberate difference from the
+  Python tool.
+- Tests: the build test that runs `map` from the Node bundle writes `{"type": "module"}` next to
+  the bundle, as in the installed package. Without it, Node reads the nearest `package.json`
+  above the temporary folder. A stray one with no `type` makes Node write a warning to standard
+  error, and the test failed on such a machine.
 - The code-docs gate passes (399 of 399 exported symbols have a doc comment). Seven exported
   types had no doc comment. The doc comment of `resolvePath` was apart from its function,
   because `targetOf` was in the space between them. `src/map/graph.ts` and `src/ste/index.ts`

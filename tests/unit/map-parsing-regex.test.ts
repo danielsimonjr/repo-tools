@@ -136,6 +136,22 @@ describe("parseRs", () => {
     ).toEqual(["crate::a::b", "crate::a::c"]);
   });
 
+  test("a name that holds the letters `as` keeps them (a whole-word alias only)", () => {
+    // The Python tool split on the letters `as` after it removed the white space, so
+    // `HashMap` became `H`, `hash_map` became `h` and `class` became `cl`.
+    const src =
+      "use std::collections::HashMap;\nuse std::collections::hash_map::Entry;\n" +
+      "use crate::class::Base as B;\nuse crate::a::{HashSet, Alias as Al, basic};\n";
+    expect(parseRs(src).imports.map((i) => i.specifier)).toEqual([
+      "std::collections::HashMap",
+      "std::collections::hash_map::Entry",
+      "crate::class::Base",
+      "crate::a::HashSet",
+      "crate::a::Alias",
+      "crate::a::basic",
+    ]);
+  });
+
   test("pub items are exports and private ones are not", () => {
     const src =
       "pub fn run() {}\npub struct Config;\npub async fn go() {}\nfn helper() {}\n" +

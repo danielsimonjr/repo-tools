@@ -340,6 +340,11 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
 
 - A workspace monorepo gets the entry roots of each workspace package.
 - An import of a workspace package by name is an edge to its entry file.
+- A Rust `use` alias is the whole word `as` and a name. A path keeps the letters `as` inside a
+  name (`HashMap`, `wasm`).
+
+The core graph has no edge for a dynamic `import()`, as in the Python tool. depgraph 1.x had
+one. Test coverage counts a literal `import()` in a test file as a load.
 
 ### 14.5 The query
 

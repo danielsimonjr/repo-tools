@@ -71,7 +71,7 @@
 
 ## 2.0.0: the unified engine (repo_map port)
 
-- [ ] The Rust `use` reader cuts a name at the letters `as` inside a word (`HashMap` becomes `H`):
+- [x] The Rust `use` reader cuts a name at the letters `as` inside a word (`HashMap` becomes `H`):
   the Python source splits on `as` after it removes white space. Fix it as a whole-word alias,
   with its own parity verdict (repo_map-wrong), after the side-1 parity record.
 - [x] `repo-tools map` (D8): the command that writes every 2.0.0 output. `depgraph` stays a
