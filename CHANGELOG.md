@@ -49,9 +49,9 @@ All notable changes to this project are recorded in this file. The format follow
 - 2.0.0 engine, step 7: the four core artifacts (`src/map/artifacts.ts`). They are
   `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json` and
   `unused-analysis.json`, with 27 ported tests. On 11 repositories, all 44 files are
-  byte-identical to the Python tool after the approved changes. These changes are LF line ends,
-  no `generated` field, schema version 2.0.0, no absolute root path in warnings, and path order
-  by code unit (the Python tool uses the Windows case-insensitive order).
+  byte-identical to the Python tool after the approved changes. The port writes LF line ends and
+  schema version 2.0.0, with no `generated` field. Warnings name no absolute root path. Paths
+  sort by code unit, and the Python tool sorts them in the Windows case-insensitive order.
 - 2.0.0 engine: the artifact tests of C# and Rust are ported (16 tests, from
   `test_csharp_repo_end_to_end.py`, `test_unused_csharp.py` and `test_rust_unused_caveat.py`).
   The source tests that read a local repository are not ported. The side-1 parity run covers
@@ -63,6 +63,11 @@ All notable changes to this project are recorded in this file. The format follow
 - 2.0.0 engine: the simple-cycle enumeration moves to `src/map/cycles.ts`. The graph and the
   queries share it. The Python tool keeps two copies of this algorithm. On 10 repositories, the
   artifacts are byte-identical before and after the move.
+- 2.0.0 engine (design decision D2): `dependency-graph.json` statistics also count the cyclic
+  components. The new keys are `runtimeCyclicComponents`, `typeOnlyCyclicComponents`,
+  `runtimeFilesInCycles` and `typeOnlyFilesInCycles`, after `circularDepsTruncated`. A cap never
+  truncates these counts. The Tarjan search moves from `src/depgraph/cycles.ts` to
+  `src/map/cycles.ts`, so depgraph and the core graph count components in the same way.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

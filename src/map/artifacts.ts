@@ -20,6 +20,7 @@ import {
 import { basename, dirname, join } from "node:path";
 import { B, reEscape, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
+import { stronglyConnectedComponents } from "./cycles.ts";
 import { isReparsePoint, readSource } from "./discovery.ts";
 import { type CycleLimits, findCycles } from "./graph.ts";
 import { getResolver } from "./resolvers.ts";
@@ -63,6 +64,34 @@ function writeJson(path: string, data: unknown): string {
 
 /** The identity of a cycle for the runtime vs type-only comparison. */
 const cycleSignature = (cycle: string[]): string => pySorted(new Set(cycle)).join("->");
+
+/**
+ * The cyclic components (design decision D2, depgraph's fix F26): the strongly connected
+ * components of the runtime edges, and the components of all edges that are not identical to a
+ * runtime one, each with its number of distinct files. Never truncated.
+ */
+function cyclicComponentStats(graph: RepoGraph): Record<string, number> {
+  const runtime = new Map<string, string[]>();
+  const all = new Map<string, string[]>();
+  for (const path of pySorted(graph.files.keys())) {
+    const internal = (graph.files.get(path) as FileNode).internal.filter((d) =>
+      graph.files.has(d.file),
+    );
+    all.set(path, pySorted(new Set(internal.map((d) => d.file))));
+    runtime.set(path, pySorted(new Set(internal.filter((d) => !d.typeOnly).map((d) => d.file))));
+  }
+  const runtimeSccs = stronglyConnectedComponents(runtime);
+  const key = (c: string[]): string => c.join("\n");
+  const runtimeKeys = new Set(runtimeSccs.map(key));
+  const typeOnlySccs = stronglyConnectedComponents(all).filter((c) => !runtimeKeys.has(key(c)));
+  const files = (sccs: string[][]): number => new Set(sccs.flat()).size;
+  return {
+    runtimeCyclicComponents: runtimeSccs.length,
+    typeOnlyCyclicComponents: typeOnlySccs.length,
+    runtimeFilesInCycles: files(runtimeSccs),
+    typeOnlyFilesInCycles: files(typeOnlySccs),
+  };
+}
 
 /** The options of `emitDependencyGraph`. */
 export interface DependencyGraphOptions {
@@ -108,6 +137,7 @@ export function emitDependencyGraph(
     noImporterFileCount: noImporterFiles(graph).length,
     unusedExportsCount: unusedExportTotal(graph),
     circularDepsTruncated: all.truncated || runtime.truncated,
+    ...cyclicComponentStats(graph),
   });
   data.warnings = [...graph.warnings];
   return writeJson(join(outDir, "dependency-graph.json"), data);

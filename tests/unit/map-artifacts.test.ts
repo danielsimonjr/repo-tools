@@ -133,6 +133,42 @@ describe("dependency-graph.json", () => {
     ]);
   });
 
+  test("D2: the cyclic components (SCCs) are counted beside the simple cycles", () => {
+    const g = graphOf([
+      fnode("src/a.ts", "src", "reachable", 1, { internal: [dep("src/b.ts")] }),
+      fnode("src/b.ts", "src", "reachable", 1, { internal: [dep("src/a.ts")] }),
+      fnode("src/c.ts", "src", "reachable", 1, { internal: [dep("src/d.ts")] }),
+      fnode("src/d.ts", "src", "reachable", 1, { internal: [dep("src/c.ts", [], true)] }),
+      fnode("src/e.ts", "src", "reachable", 1, { internal: [dep("src/e.ts")] }),
+    ]);
+    const s = read(emitDependencyGraph(g, tmp())).statistics;
+    expect([s.runtimeCyclicComponents, s.runtimeFilesInCycles]).toEqual([2, 3]);
+    expect([s.typeOnlyCyclicComponents, s.typeOnlyFilesInCycles]).toEqual([1, 2]);
+  });
+
+  test("D2: the component keys follow the repo_map keys, in a fixed order", () => {
+    const keys = Object.keys(read(emitDependencyGraph(DEMO(), tmp())).statistics);
+    expect(keys.slice(keys.indexOf("circularDepsTruncated"))).toEqual([
+      "circularDepsTruncated",
+      "runtimeCyclicComponents",
+      "typeOnlyCyclicComponents",
+      "runtimeFilesInCycles",
+      "typeOnlyFilesInCycles",
+    ]);
+  });
+
+  test("D2: a capped simple-cycle count leaves the component counts exact", () => {
+    const g = graphOf([
+      fnode("src/a.ts", "src", "reachable", 1, { internal: [dep("src/b.ts")] }),
+      fnode("src/b.ts", "src", "reachable", 1, { internal: [dep("src/a.ts"), dep("src/c.ts")] }),
+      fnode("src/c.ts", "src", "reachable", 1, { internal: [dep("src/a.ts"), dep("src/d.ts")] }),
+      fnode("src/d.ts", "src", "reachable", 1, { internal: [dep("src/a.ts")] }),
+    ]);
+    const s = read(emitDependencyGraph(g, tmp(), { cycleLimits: { maxCycles: 1 } })).statistics;
+    expect(s.circularDepsTruncated).toBe(true);
+    expect([s.runtimeCyclicComponents, s.runtimeFilesInCycles]).toEqual([1, 4]);
+  });
+
   test("warnings are present and empty when clean", () => {
     const data = read(emitDependencyGraph(DEMO(), tmp()));
     expect(data.warnings).toEqual([]);
