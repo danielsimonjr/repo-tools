@@ -11,6 +11,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
+import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { B, pyRepr, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
 import { type CycleLimits, type CycleResult, simpleCycles } from "./cycles.ts";
@@ -318,10 +319,41 @@ function findRoots(
   if (language === "python") return pythonRoots(root, known);
   if (language === "csharp") return csharpRoots(root, known);
   if (language === "rust") return rustRoots(known);
-  const [roots, warnings] = packageJsonRoots(root, known);
+  const [rootRoots, rootWarnings] = packageJsonRoots(root, known);
+  const [wsRoots, wsWarnings] = workspaceRoots(root, known);
+  const roots = [...new Set([...rootRoots, ...wsRoots])];
+  const warnings = [...rootWarnings, ...wsWarnings];
   if (roots.length > 0) return [roots, warnings];
   for (const cand of FALLBACK_ROOTS) if (known.has(cand)) return [[cand], warnings];
   return [[], warnings];
+}
+
+/**
+ * The entry roots of each workspace package (a deliberate difference from repo_map, which reads
+ * the root package.json only, so each file of a workspace monorepo showed as an orphan). Per
+ * package: its package.json entries (as for the root package), then depgraph's extra entries
+ * (`exports` subpaths, `bin`, scripts, tsup config), else a conventional `src/index.*` file.
+ */
+function workspaceRoots(root: string, known: ReadonlySet<string>): [string[], string[]] {
+  const roots: string[] = [];
+  const warnings: string[] = [];
+  for (const ws of detectWorkspaces(root).values()) {
+    if (ws.directory === "") continue;
+    const prefix = `${ws.directory}/`;
+    const local = new Set(
+      [...known].filter((p) => p.startsWith(prefix)).map((p) => p.slice(prefix.length)),
+    );
+    const [found, pkgWarnings] = packageJsonRoots(join(root, ws.directory), local);
+    const pkgRoots = found.map((p) => prefix + p);
+    for (const entry of ws.extraEntries) if (known.has(entry)) pkgRoots.push(entry);
+    if (pkgRoots.length === 0) {
+      const fallback = FALLBACK_ROOTS.map((c) => prefix + c).find((c) => known.has(c));
+      if (fallback) pkgRoots.push(fallback);
+    }
+    roots.push(...pkgRoots);
+    for (const w of pkgWarnings) warnings.push(`${prefix}${w}`);
+  }
+  return [roots, warnings];
 }
 
 const READERS: Readonly<Record<Language, (source: string) => ParsedModule>> = {

@@ -11,7 +11,7 @@
     "unreferencedAnywhereCount": 2,
     "referencedInModuleCount": 0,
     "unclassifiedExportCount": 0,
-    "noImporterFileCount": 4
+    "noImporterFileCount": 0
   },
   "unreferencedAnywhere": {
     "packages/core/src/internal.ts": [
@@ -31,10 +31,5 @@
   },
   "referencedInModule": {},
   "unclassifiedExports": {},
-  "noImporterFiles": [
-    "packages/cli/src/main.ts",
-    "packages/core/src/index.ts",
-    "packages/core/src/internal.ts",
-    "packages/core/src/worker.ts"
-  ]
+  "noImporterFiles": []
 }

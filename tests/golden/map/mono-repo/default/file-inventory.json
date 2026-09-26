@@ -1,10 +1,10 @@
 {
   "totalFiles": 9,
   "byDisposition": {
-    "reachable": 0,
-    "build-entry": 0,
-    "test-only": 2,
-    "orphan": 5,
+    "reachable": 3,
+    "build-entry": 4,
+    "test-only": 0,
+    "orphan": 0,
     "test": 1,
     "tool": 0,
     "config": 1,
@@ -25,49 +25,49 @@
       "file": "packages/cli/src/format.ts",
       "package": "@scope/cli",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "reachable",
       "loc": 4
     },
     {
       "file": "packages/cli/src/main.ts",
       "package": "@scope/cli",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "build-entry",
       "loc": 5
     },
     {
       "file": "packages/core/src/index.ts",
       "package": "@scope/core",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "build-entry",
       "loc": 3
     },
     {
       "file": "packages/core/src/internal.ts",
       "package": "@scope/core",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "build-entry",
       "loc": 2
     },
     {
       "file": "packages/core/src/math.ts",
       "package": "@scope/core",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 11
     },
     {
       "file": "packages/core/src/types.ts",
       "package": "@scope/core",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 2
     },
     {
       "file": "packages/core/src/worker.ts",
       "package": "@scope/core",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "build-entry",
       "loc": 4
     },
     {
@@ -86,7 +86,5 @@
     }
   ],
   "skippedLinks": [],
-  "warnings": [
-    "could not determine any entry-point roots: no package.json main/module/bin/exports resolved to a known source file, and no src/index.* fallback was found -- every 'src' file will show as orphan or test-only rather than build-entry"
-  ]
+  "warnings": []
 }

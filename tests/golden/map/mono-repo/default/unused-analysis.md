@@ -6,10 +6,10 @@
 
 ## Summary
 
-- **Files with no in-repo importer**: 4
-- **Dormant files**: 7
-  - **Orphaned (reachable from nothing)**: 5
-  - **Test-only (only a test reaches them)**: 2
+- **Files with no in-repo importer**: 0
+- **Dormant files**: 0
+  - **Orphaned (reachable from nothing)**: 0
+  - **Test-only (only a test reaches them)**: 0
 - **Potentially unused exports**: 2
   - **Unreferenced anywhere**: 2
   - **Referenced in their own module**: 0
@@ -27,27 +27,19 @@
 
 Source files that no root and no test reaches. Verify each one before you delete it.
 
-- `packages/cli/src/format.ts`
-- `packages/cli/src/main.ts`
-- `packages/core/src/index.ts`
-- `packages/core/src/internal.ts`
-- `packages/core/src/worker.ts`
+_None._
 
 ## Dormant files: test-only
 
 Source files that only a test reaches. They ship nothing, but a test uses them.
 
-- `packages/core/src/math.ts`
-- `packages/core/src/types.ts`
+_None._
 
 ## Files with no in-repo importer
 
 No file of this repository imports these files. This is not a deletion list.
 
-- `packages/cli/src/main.ts`
-- `packages/core/src/index.ts`
-- `packages/core/src/internal.ts`
-- `packages/core/src/worker.ts`
+_None._
 
 ## Exports unreferenced anywhere
 

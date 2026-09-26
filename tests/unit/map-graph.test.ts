@@ -399,6 +399,36 @@ describe("buildGraph: dispositions and roots", () => {
   });
 });
 
+describe("buildGraph: workspace roots (a deliberate difference from repo_map)", () => {
+  const MONO = {
+    "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',
+    "packages/core/package.json": '{"name": "@s/core", "main": "dist/index.js"}\n',
+    "packages/core/src/index.ts": 'export { u } from "./util.js";\n',
+    "packages/core/src/util.ts": "export const u = 1;\n",
+    "packages/core/src/dead.ts": "export const dead = 1;\n",
+    "packages/cli/package.json": '{"name": "@s/cli", "bin": {"x": "dist/cli.js"}}\n',
+    "packages/cli/src/cli.ts": "export const run = 1;\n",
+    "packages/plain/package.json": '{"name": "@s/plain"}\n',
+    "packages/plain/src/index.ts": "export const p = 1;\n",
+  };
+
+  test("each workspace package gives its entry files as roots", async () => {
+    const g = await buildGraph(repo(MONO));
+    expect(new Set(g.roots)).toEqual(
+      new Set([
+        "packages/core/src/index.ts",
+        "packages/cli/src/cli.ts",
+        "packages/plain/src/index.ts",
+      ]),
+    );
+    expect(g.files.get("packages/core/src/util.ts")?.disposition).toBe("reachable");
+    expect(g.files.get("packages/core/src/dead.ts")?.disposition).toBe("orphan");
+    expect(g.warnings.some((w) => w.includes("could not determine any entry-point roots"))).toBe(
+      false,
+    );
+  });
+});
+
 describe("buildGraph: thin launchers", () => {
   /** A repo whose bin is a launcher with the body `body`. */
   const launcherRepo = (body: string): string =>

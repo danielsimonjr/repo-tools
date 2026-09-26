@@ -14,10 +14,10 @@ This report lists each source file that the map census finds, with a disposition
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 0 | A `src`-area file that an entry root reaches. |
-| `build-entry` | 0 | A `src`-area file that is an entry root. |
-| `test-only` | 2 | A `src`-area file that only a test reaches. |
-| `orphan` | 5 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
+| `reachable` | 3 | A `src`-area file that an entry root reaches. |
+| `build-entry` | 4 | A `src`-area file that is an entry root. |
+| `test-only` | 0 | A `src`-area file that only a test reaches. |
+| `orphan` | 0 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
 | `test` | 1 | A file in a `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
 | `tool` | 0 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 1 | A `*.config.*` file of TypeScript or JavaScript. |
@@ -44,13 +44,13 @@ This report lists each source file that the map census finds, with a disposition
 
 | File | Package | Area | Disposition | Lines |
 | --- | --- | --- | --- | --: |
-| `packages/cli/src/format.ts` | @scope/cli | src | orphan | 4 |
-| `packages/cli/src/main.ts` | @scope/cli | src | orphan | 5 |
-| `packages/core/src/index.ts` | @scope/core | src | orphan | 3 |
-| `packages/core/src/internal.ts` | @scope/core | src | orphan | 2 |
-| `packages/core/src/math.ts` | @scope/core | src | test-only | 11 |
-| `packages/core/src/types.ts` | @scope/core | src | test-only | 2 |
-| `packages/core/src/worker.ts` | @scope/core | src | orphan | 4 |
+| `packages/cli/src/format.ts` | @scope/cli | src | reachable | 4 |
+| `packages/cli/src/main.ts` | @scope/cli | src | build-entry | 5 |
+| `packages/core/src/index.ts` | @scope/core | src | build-entry | 3 |
+| `packages/core/src/internal.ts` | @scope/core | src | build-entry | 2 |
+| `packages/core/src/math.ts` | @scope/core | src | reachable | 11 |
+| `packages/core/src/types.ts` | @scope/core | src | reachable | 2 |
+| `packages/core/src/worker.ts` | @scope/core | src | build-entry | 4 |
 | `packages/core/tests/math.test.ts` | @scope/core | tests | test | 3 |
 | `packages/core/tsup.config.ts` | @scope/core | config | config | 6 |
 
@@ -62,4 +62,4 @@ _None._
 
 ## Warnings
 
-- could not determine any entry-point roots: no package.json main/module/bin/exports resolved to a known source file, and no src/index.* fallback was found -- every 'src' file will show as orphan or test-only rather than build-entry
+_None._

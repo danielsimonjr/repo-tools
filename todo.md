@@ -88,7 +88,7 @@
 - [ ] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
   and side 2 against depgraph 1.x.
 - [ ] Decision for the PR review: dynamic `import()` edges in the core graph (D1 open point).
-- [ ] Workspace roots: in a workspace monorepo the graph has 0 roots, so each workspace source
+- [x] Workspace roots: in a workspace monorepo the graph has 0 roots, so each workspace source
   file shows as an orphan (a repo_map defect that 1.x did not have). Read the entry files of
   each workspace package, and list the change as a deliberate difference from repo_map.
 
