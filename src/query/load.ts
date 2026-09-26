@@ -1,121 +1,120 @@
 /**
- * The input of `repo-tools query`: `dependency-graph.json` and `package-export-surfaces.json` in
- * the report folder (design section 3.5). A report that is missing, cannot be read, is not valid
- * JSON or has an unknown shape throws an error that says to run depgraph first. An error text
- * shows the root as `<root>`.
+ * The input of `repo-tools query` (design decision D8): the core `dependency-graph.json` of
+ * `repo-tools map` and, for `is-public`, `package-export-surfaces.json`, both in the report
+ * folder. A report that is missing, cannot be read, is not valid JSON or has an unknown shape
+ * throws an error that says to run map first. A graph of another major schema version (a 1.x
+ * graph) is refused. An error text shows the root as `<root>`.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolveUnderRoot } from "../config.ts";
-import type { CyclicComponents } from "../depgraph/types.ts";
+import { type GraphDocument, loadGraph } from "../map/query.ts";
 
-/** One dependency edge of a file. The target field depends on the kind of the edge. */
+/** One internal edge of the core graph: its resolved target and the names it imports. */
 export interface GraphEdge {
-  /** An internal edge: the specifier as written in the source (not resolved). */
   file?: string;
-  /** A Node built-in edge: the module name. */
-  module?: string;
-  /** An external or workspace edge: the package name. */
-  package?: string;
   imports?: string[];
-  reExport?: boolean;
   typeOnly?: boolean;
 }
 
-/** The fields of one file entry of the graph that the query reads. */
+/** The fields of one file entry of the core graph that the query reads. */
 export interface GraphFileEntry {
   internalDependencies?: GraphEdge[];
-  nodeDependencies?: GraphEdge[];
-  workspaceDependencies?: GraphEdge[];
+  /** The Node built-ins (or the Python standard library modules) that the file imports. */
+  nodeDependencies?: string[];
 }
 
-/** One entry point of the graph (`src/index.ts` and each `<package>/src/index.ts`). */
-export interface GraphEntryPoint {
-  file: string;
-  type: string;
-}
-
-/** The fields of `dependency-graph.json` that the query reads. */
+/** The core graph: `modules` maps each area to its files. */
 export interface QueryGraph {
-  entryPoints: GraphEntryPoint[];
-  /** Module name to (root-relative file path to its entry). */
+  metadata?: { language?: unknown; schemaVersion?: unknown };
   modules: Record<string, Record<string, GraphFileEntry>>;
-  dependencyGraph: { cyclicComponents: CyclicComponents };
 }
 
-/** The two input reports of one query run. */
+/** The input of one query run. */
 export interface QueryInput {
   graph: QueryGraph;
-  /** Package key to its public export names (`package-export-surfaces.json`). */
-  surfaces: Record<string, string[]>;
+  /** The language of the graph (`typescript`, `python`, `csharp` or `rust`). */
+  language: string;
+  /** The report folder, relative to the root, for the reports that load on demand. */
+  root: string;
+  out: string;
+  /** Warnings of the load (for example a missing schema version). */
+  warnings: string[];
 }
 
 /** The text that ends each report error. */
-const RUN_DEPGRAPH = "run repo-tools depgraph first";
+const RUN_MAP = "run repo-tools map first";
 
-/** True for a plain JSON object (not `null`, not an array). */
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+/** The root-relative path of the report `name` in the folder `out`. */
+function reportRel(out: string, name: string): string {
+  return `${out.replace(/\\/g, "/").replace(/\/+$/, "")}/${name}`;
 }
 
-/** True when `value` has the fields of `dependency-graph.json` that the query reads. */
-function isQueryGraph(value: unknown): value is QueryGraph {
-  if (!isObject(value) || !Array.isArray(value.entryPoints) || !isObject(value.modules)) {
-    return false;
+/**
+ * Loads the core graph from the report folder `out` (relative to `root`). Throws when it is
+ * missing, cannot be read, is not valid JSON, has no `modules`, or has another major schema
+ * version.
+ */
+export function loadQueryInput(root: string, out: string): QueryInput {
+  const rel = reportRel(out, "dependency-graph.json");
+  const shown = `the dependency graph <root>/${rel}`;
+  const path = resolveUnderRoot(root, rel);
+  if (!existsSync(path)) throw new Error(`${shown} does not exist; ${RUN_MAP}`);
+  let loaded: { data: GraphDocument; warnings: string[] };
+  try {
+    loaded = loadGraph(path);
+  } catch (err) {
+    // A read error (a folder in place of the file, no permission) carries an errno code.
+    if (typeof (err as { code?: unknown }).code === "string") {
+      throw new Error(`${shown} cannot be read; ${RUN_MAP}`);
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes("not compatible")) {
+      throw new Error(`${shown} is not a 2.x graph (a 1.x report?); ${RUN_MAP}`);
+    }
+    if (message.includes("'modules'")) throw new Error(`${shown} has an unknown shape; ${RUN_MAP}`);
+    throw new Error(`${shown} is not valid JSON; ${RUN_MAP}`);
   }
-  if (!Object.values(value.modules).every(isObject)) return false;
-  const graph = value.dependencyGraph;
-  if (!isObject(graph) || !isObject(graph.cyclicComponents)) return false;
-  const { runtime, typeOnly } = graph.cyclicComponents;
-  return Array.isArray(runtime) && Array.isArray(typeOnly);
+  const graph = loaded.data as QueryGraph;
+  const language = typeof graph.metadata?.language === "string" ? graph.metadata.language : "";
+  return {
+    graph,
+    language,
+    root,
+    out,
+    warnings: loaded.warnings.map((w) => w.replace(path, `<root>/${rel}`)),
+  };
 }
 
 /** True when `value` is a `package-export-surfaces.json` object. */
 function isSurfaces(value: unknown): value is { surfaces: Record<string, string[]> } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const surfaces = (value as { surfaces?: unknown }).surfaces;
   return (
-    isObject(value) &&
-    isObject(value.surfaces) &&
-    Object.values(value.surfaces).every((names) => Array.isArray(names))
+    typeof surfaces === "object" &&
+    surfaces !== null &&
+    !Array.isArray(surfaces) &&
+    Object.values(surfaces).every((names) => Array.isArray(names))
   );
 }
 
 /**
- * Reads and parses the report `name` of the report folder `out` (relative to the root). Throws
- * when the report does not exist, cannot be read or is not valid JSON.
+ * Loads `package-export-surfaces.json` of the report folder. Throws when it is missing (a C#
+ * repository has none), cannot be read, is not valid JSON or has an unknown shape.
  */
-function readReport(root: string, out: string, name: string, what: string): unknown {
-  const rel = `${out.replace(/\\/g, "/").replace(/\/+$/, "")}/${name}`;
-  const shown = `the ${what} <root>/${rel}`;
-  const path = resolveUnderRoot(root, rel);
-  if (!existsSync(path)) throw new Error(`${shown} does not exist; ${RUN_DEPGRAPH}`);
-  let text: string;
+export function loadSurfaces(input: QueryInput): Record<string, string[]> {
+  const rel = reportRel(input.out, "package-export-surfaces.json");
+  const shown = `the export-surfaces report <root>/${rel}`;
+  const path = resolveUnderRoot(input.root, rel);
+  if (!existsSync(path)) {
+    const why = input.language === "csharp" ? " (map writes none for C#)" : `; ${RUN_MAP}`;
+    throw new Error(`${shown} does not exist${why}`);
+  }
+  let parsed: unknown;
   try {
-    text = readFileSync(path, "utf8");
+    parsed = JSON.parse(readFileSync(path, "utf8"));
   } catch {
-    throw new Error(`${shown} cannot be read; ${RUN_DEPGRAPH}`);
+    throw new Error(`${shown} is not valid JSON; ${RUN_MAP}`);
   }
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(`${shown} is not valid JSON; ${RUN_DEPGRAPH}`);
-  }
-}
-
-/**
- * Loads the two input reports from the report folder `out` (relative to `root`). Throws when a
- * report is missing, cannot be read, is not valid JSON or has an unknown shape.
- */
-export function loadQueryInput(root: string, out: string): QueryInput {
-  const graphName = "dependency-graph.json";
-  const graph = readReport(root, out, graphName, "dependency graph");
-  if (!isQueryGraph(graph)) {
-    throw new Error(`the dependency graph ${graphName} has an unknown shape; ${RUN_DEPGRAPH}`);
-  }
-  const surfacesName = "package-export-surfaces.json";
-  const surfaces = readReport(root, out, surfacesName, "export-surfaces report");
-  if (!isSurfaces(surfaces)) {
-    throw new Error(
-      `the export-surfaces report ${surfacesName} has an unknown shape; ${RUN_DEPGRAPH}`,
-    );
-  }
-  return { graph, surfaces: surfaces.surfaces };
+  if (!isSurfaces(parsed)) throw new Error(`${shown} has an unknown shape; ${RUN_MAP}`);
+  return parsed.surfaces;
 }

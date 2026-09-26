@@ -29,7 +29,7 @@ describe("query --config", () => {
   test("without --config, the run reads repo-tools.config.json (control)", async () => {
     const r = await runQuery([`--root=${root}`, "cycles"]);
     expect(r.code).toBe(1);
-    expect(r.err).toContain("repo-tools depgraph");
+    expect(r.err).toContain("run repo-tools map first");
   });
 
   test("--config reads the named file instead", async () => {

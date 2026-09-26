@@ -1,15 +1,27 @@
 /**
- * The commands of `repo-tools query` that print an answer (design section 3.5). Each command
- * writes its answer to standard output and returns the exit code. A command throws on a user
- * error; the caller prints the message and exits 1.
+ * The commands of `repo-tools query` on the core graph (design decision D8). Each command writes
+ * its answer to standard output and returns the exit code. A command throws on a user error; the
+ * caller prints the message and exits 1.
+ *
+ * `dependents`, `symbol-users` and `cycles` have repo_map's meaning: they read every area of the
+ * graph, a path that is not a file of the graph is an error (not an empty answer), and `cycles`
+ * lists the simple cycles (`--components` lists the strongly connected components). The
+ * browser-safety commands serve TypeScript/JavaScript only (design decision D5).
  */
 import { isAbsolutePath, resolveUnderRoot } from "../config.ts";
-import type { CyclicComponent } from "../depgraph/types.ts";
+import { detectCyclicComponents } from "../depgraph/cycles.ts";
+import type { CyclicComponent, ParsedFile } from "../depgraph/types.ts";
 import { writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
+import {
+  dependents as dependentsOf,
+  type GraphDocument,
+  cycles as simpleCycles,
+  symbolUsers,
+} from "../map/query.ts";
 import { sortCodeUnits } from "../sort.ts";
-import { buildForward, fileEntriesOf, invert, symbolUsers } from "./graph.ts";
-import type { QueryInput } from "./load.ts";
+import { buildForward, fileEntriesOf, invert } from "./graph.ts";
+import { loadSurfaces, type QueryInput } from "./load.ts";
 import { browserSafePackages, computeTaint, findLeaks, packagesOf } from "./safety.ts";
 
 /** `dependents <file>`: the files that import `file`, one per line. */
@@ -18,25 +30,15 @@ export function dependents(input: QueryInput, file: string, io: Io): number {
     throw new Error("dependents <file> holds an absolute path; pass a path relative to the root");
   }
   const target = file.replace(/\\/g, "/");
-  const entries = fileEntriesOf(input.graph);
-  const allFiles = new Set(entries.map(([f]) => f));
-  const importers = invert(buildForward(entries, allFiles))[target] ?? [];
-  io.stdout(
-    importers.length > 0
-      ? `${importers.join("\n")}\n`
-      : `(no intra-package importers of ${target})\n`,
-  );
+  const importers = dependentsOf(input.graph as GraphDocument, target);
+  io.stdout(importers.length > 0 ? `${importers.join("\n")}\n` : `(no importers of ${target})\n`);
   return 0;
 }
 
-/** `symbol-users <symbol>`: each file that imports `symbol`, with the kind of the edge. */
+/** `symbol-users <symbol>`: each file whose internal imports name `symbol`, one per line. */
 export function symbolUsersCommand(input: QueryInput, symbol: string, io: Io): number {
-  const users = symbolUsers(symbol, fileEntriesOf(input.graph));
-  io.stdout(
-    users.length > 0
-      ? `${users.map((u) => `${u.file}  [${u.from}]`).join("\n")}\n`
-      : `(no importers of symbol ${symbol})\n`,
-  );
+  const users = symbolUsers(input.graph as GraphDocument, symbol);
+  io.stdout(users.length > 0 ? `${users.join("\n")}\n` : `(no importers of symbol ${symbol})\n`);
   return 0;
 }
 
@@ -45,9 +47,10 @@ export function symbolUsersCommand(input: QueryInput, symbol: string, io: Io): n
  * package-export-surfaces.json; the message lists the keys.
  */
 export function isPublic(input: QueryInput, pkg: string, symbol: string, io: Io): number {
-  const names = Object.hasOwn(input.surfaces, pkg) ? input.surfaces[pkg] : undefined;
+  const surfaces = loadSurfaces(input);
+  const names = Object.hasOwn(surfaces, pkg) ? surfaces[pkg] : undefined;
   if (names === undefined) {
-    const known = Object.keys(input.surfaces).join(", ");
+    const known = Object.keys(surfaces).join(", ");
     throw new Error(
       `unknown package '${pkg}'; the packages of package-export-surfaces.json are: ${known}`,
     );
@@ -70,12 +73,58 @@ function componentLines(kind: string, components: readonly CyclicComponent[]): s
   return lines;
 }
 
-/** `cycles`: the runtime and the type-only cyclic components of the graph (fix F26). */
-export function cycles(input: QueryInput, io: Io): number {
-  const { runtime, typeOnly } = input.graph.dependencyGraph.cyclicComponents;
-  const lines = [...componentLines("runtime", runtime), ...componentLines("type-only", typeOnly)];
+/**
+ * `cycles`: every simple cycle of the internal edges (repo_map's meaning), capped; a capped list
+ * is a floor and a warning says so. `cycles --components`: the runtime and the type-only
+ * strongly connected components (depgraph's fix F26), never capped.
+ */
+export function cycles(input: QueryInput, components: boolean, io: Io): number {
+  if (components) {
+    // depgraph's component detector reads parsed-file records; the core edges carry their
+    // resolved target, so each record names it directly.
+    const records = fileEntriesOf(input.graph).map(
+      ([path, entry]) =>
+        ({
+          path,
+          internalDependencies: (entry.internalDependencies ?? [])
+            .filter((d) => d.file !== undefined)
+            .map((d) => ({
+              file: d.file as string,
+              imports: d.imports ?? [],
+              ...(d.typeOnly ? { typeOnly: true } : {}),
+              resolved: d.file as string,
+            })),
+        }) as unknown as ParsedFile,
+    );
+    const found = detectCyclicComponents(records);
+    const lines = [
+      ...componentLines("runtime", found.runtime),
+      ...componentLines("type-only", found.typeOnly),
+    ];
+    io.stdout(`${lines.join("\n")}\n`);
+    return 0;
+  }
+  const result = simpleCycles(input.graph as GraphDocument);
+  const noun = result.cycles.length === 1 ? "cycle" : "cycles";
+  const lines = [`${result.cycles.length} simple ${noun}`];
+  for (const c of result.cycles) lines.push(`  ${c.join(" -> ")}`);
   io.stdout(`${lines.join("\n")}\n`);
+  if (result.warning) io.stderr(`Warning: ${result.warning}\n`);
   return 0;
+}
+
+/** Throws unless the graph is TypeScript/JavaScript: the browser-safety model reads `node:` use. */
+function requireTypeScript(input: QueryInput, what: string): void {
+  if (input.language !== "typescript") {
+    throw new Error(
+      `${what} serves TypeScript/JavaScript only; this graph is ${input.language || "unknown"}`,
+    );
+  }
+}
+
+/** The files of the graph. */
+function filesOf(input: QueryInput): string[] {
+  return fileEntriesOf(input.graph).map(([f]) => f);
 }
 
 /**
@@ -83,7 +132,7 @@ export function cycles(input: QueryInput, io: Io): number {
  * a typing error in the list would hide a leak.
  */
 function checkRuntimes(input: QueryInput, nodeRuntimes: readonly string[]): void {
-  const packages = packagesOf(input.graph);
+  const packages = packagesOf(filesOf(input));
   for (const runtime of nodeRuntimes) {
     if (!packages.includes(runtime)) {
       throw new Error(
@@ -112,8 +161,9 @@ export function nodeSafety(
   nodeRuntimes: readonly string[],
   io: Io,
 ): number {
+  requireTypeScript(input, "node-safety");
   checkRuntimes(input, nodeRuntimes);
-  const packages = packagesOf(input.graph);
+  const packages = packagesOf(filesOf(input));
   if (pkg !== undefined && !packages.includes(pkg)) {
     throw new Error(
       `unknown package '${pkg}'; the packages with a src/index.ts entry are: ${packages.join(", ")}`,
@@ -121,7 +171,7 @@ export function nodeSafety(
   }
   const { forward, direct } = safetyModel(input);
   const lines: string[] = [];
-  for (const p of pkg === undefined ? browserSafePackages(input.graph, nodeRuntimes) : [pkg]) {
+  for (const p of pkg === undefined ? browserSafePackages(filesOf(input), nodeRuntimes) : [pkg]) {
     const leaks = findLeaks(p, forward, direct);
     if (leaks.length === 0) {
       lines.push(`${p}: clean (the . entry reaches no node: code)`);
@@ -138,31 +188,26 @@ export function nodeSafety(
 /**
  * `--emit`: writes `dependency-reverse.json` (the reverse edges) and `node-safety.json` (the
  * browser-safe packages, the files with a `node:` import, and the leaks of each browser-safe
- * package) into the report folder `out` (relative to `root`). Every list and key is sorted in
- * code-unit order. The files hold no timestamp, so two runs on one graph give the same bytes.
+ * package) into the report folder. Every list and key is sorted in code-unit order. The files
+ * hold no timestamp, so two runs on one graph give the same bytes.
  */
-export function emit(
-  input: QueryInput,
-  root: string,
-  out: string,
-  nodeRuntimes: readonly string[],
-  io: Io,
-): number {
+export function emit(input: QueryInput, nodeRuntimes: readonly string[], io: Io): number {
+  requireTypeScript(input, "--emit");
   checkRuntimes(input, nodeRuntimes);
   const { forward, direct } = safetyModel(input);
-  const dependentsOf = invert(forward);
+  const dependentsMap = invert(forward);
   const nodeFiles = sortCodeUnits([...direct].filter(([, d]) => d).map(([file]) => file));
-  const safe = browserSafePackages(input.graph, nodeRuntimes);
+  const safe = browserSafePackages(filesOf(input), nodeRuntimes);
   const leaks: Record<string, string[]> = {};
   for (const pkg of safe) leaks[pkg] = findLeaks(pkg, forward, direct);
   const leakCount = Object.values(leaks).reduce((n, list) => n + list.length, 0);
-  const folder = out.replace(/\\/g, "/").replace(/\/+$/, "");
+  const folder = input.out.replace(/\\/g, "/").replace(/\/+$/, "");
   const write = (name: string, value: unknown, summary: string): void => {
-    writeReport(resolveUnderRoot(root, `${folder}/${name}`), JSON.stringify(value, null, 2));
+    writeReport(resolveUnderRoot(input.root, `${folder}/${name}`), JSON.stringify(value, null, 2));
     io.stdout(`Written: ${folder}/${name} (${summary})\n`);
   };
-  const files = Object.keys(dependentsOf).length;
-  write("dependency-reverse.json", { dependents: dependentsOf }, plural(files, "file"));
+  const files = Object.keys(dependentsMap).length;
+  write("dependency-reverse.json", { dependents: dependentsMap }, plural(files, "file"));
   write(
     "node-safety.json",
     { browserSafePackages: safe, nodeTaintedFiles: nodeFiles, leaks },
@@ -185,9 +230,10 @@ export function checkBrowserSafety(
   nodeRuntimes: readonly string[],
   io: Io,
 ): number {
+  requireTypeScript(input, "--check-browser-safety");
   checkRuntimes(input, nodeRuntimes);
   const { forward, direct } = safetyModel(input);
-  const safe = browserSafePackages(input.graph, nodeRuntimes);
+  const safe = browserSafePackages(filesOf(input), nodeRuntimes);
   const failed: string[] = [];
   for (const pkg of safe) {
     const leaks = findLeaks(pkg, forward, direct);

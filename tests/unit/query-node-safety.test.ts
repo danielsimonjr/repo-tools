@@ -1,13 +1,15 @@
 /**
  * `repo-tools query node-safety` and `--check-browser-safety` (design section 3.5): the Node
  * runtimes come from `--node-runtime` or `query.nodeRuntimes`, not from a fixed package name.
+ * The core graph (design decision D8) holds the edges of workspace imports, so a leak through an
+ * import of another package by name is found; depgraph 1.x followed relative imports only.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG_FILE } from "../../src/config.ts";
-import { QUERY_TREE, queryTree, runQuery } from "./query-fixture.ts";
-import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
+import { QUERY_TREE, queryTree, runMapOn, runQuery } from "./query-fixture.ts";
+import { makeTree, removeTrees } from "./tree.ts";
 
 afterAll(removeTrees);
 
@@ -23,8 +25,11 @@ function q(...argv: string[]) {
 
 const WEB_LEAK =
   "packages/web: 1 node: file reachable from the . entry:\n  packages/web/src/io.ts\n";
+// The server entry imports node:http itself, and it reaches packages/web/src/io.ts through its
+// import of `@fx/web` (main.ts -> the web entry -> view.ts -> io.ts).
 const SERVER_LEAK =
-  "packages/server: 1 node: file reachable from the . entry:\n  packages/server/src/index.ts\n";
+  "packages/server: 2 node: files reachable from the . entry:\n" +
+  "  packages/server/src/index.ts\n  packages/web/src/io.ts\n";
 const CLEAN = "packages/clean: clean (the . entry reaches no node: code)\n";
 
 describe("query node-safety", () => {
@@ -76,7 +81,9 @@ describe("query --check-browser-safety", () => {
     const r = await q("--check-browser-safety");
     expect(r.code).toBe(1);
     expect(r.err).toContain("2 of 3 browser-safe packages");
-    expect(r.err).toContain("  packages/server: packages/server/src/index.ts\n");
+    expect(r.err).toContain(
+      "  packages/server: packages/server/src/index.ts, packages/web/src/io.ts\n",
+    );
   });
 
   test("a clean graph exits 0", async () => {
@@ -86,7 +93,7 @@ describe("query --check-browser-safety", () => {
       "packages/clean/src/index.ts": QUERY_TREE["packages/clean/src/index.ts"] as string,
       "packages/clean/src/math.ts": QUERY_TREE["packages/clean/src/math.ts"] as string,
     });
-    expect((await runDepgraph(clean)).code).toBe(0);
+    expect((await runMapOn(clean)).code).toBe(0);
     const r = await runQuery([`--root=${clean}`, "--check-browser-safety"]);
     expect(r).toEqual({
       code: 0,
@@ -123,7 +130,7 @@ describe("query --check-browser-safety", () => {
       "src/io.ts":
         "/** IO. */\nimport { readFileSync } from 'node:fs';\nexport const load = readFileSync;\n",
     });
-    expect((await runDepgraph(single)).code).toBe(0);
+    expect((await runMapOn(single)).code).toBe(0);
     const leak = await runQuery([`--root=${single}`, "node-safety"]);
     expect(leak.out).toBe(".: 1 node: file reachable from the . entry:\n  src/io.ts\n");
     const allowed = await runQuery([

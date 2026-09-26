@@ -28,6 +28,14 @@ All notable changes to this project are recorded in this file. The format follow
   of the entry file. C# exits 1 with the reason.
 - Goldens for `map` (`tests/golden/map`, written by `scripts/update-map-goldens.ts`). The smoke
   test (design 13.3) runs `map`.
+- `repo-tools query` reads the core graph of `map` (design decision D8), and refuses a 1.x graph.
+  `dependents`, `symbol-users` and `cycles` have the meaning of the Python tool. They read each
+  area of the graph, and a path that is not a file of the graph exits 1. `symbol-users` lists
+  files. `cycles` lists the simple cycles, and `cycles --components` lists the runtime and
+  type-only components. `is-public` reads `package-export-surfaces.json` only when it runs. The
+  browser-safety commands serve TypeScript/JavaScript only, and exit 1 with the reason for
+  another language. They now follow the workspace imports too, so they find a `node:` file
+  that another package reaches through an import of its package name.
 
 - 2.0.0 engine, step 1: `src/map/discovery.ts` ports `repo_map/discovery.py` from the
   architecture-docs skill. It holds the language detection, the file census and the area and

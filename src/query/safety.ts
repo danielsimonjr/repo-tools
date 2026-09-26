@@ -1,14 +1,13 @@
 /**
  * The browser-safety model of `repo-tools query` (design section 3.5).
  *
- * A package is the folder above a `src/index.ts` entry of the graph; the package of the root
+ * A package is the folder above a `src/index.ts` file of the graph; the package of the root
  * `src/index.ts` is ".". Each package is browser-safe unless it is a Node runtime. The `.` entry
  * of a browser-safe package must reach no file that imports a `node:` builtin. The Node runtimes
  * come from the command line or the config file; the source tool named one fixed package.
  */
 import { sortCodeUnits } from "../sort.ts";
 import type { FilePair } from "./graph.ts";
-import type { QueryGraph } from "./load.ts";
 
 /** The package of the root entry. */
 export const ROOT_PACKAGE = ".";
@@ -18,23 +17,23 @@ export function entryOf(pkg: string): string {
   return pkg === ROOT_PACKAGE ? "src/index.ts" : `${pkg}/src/index.ts`;
 }
 
-/** The packages of the graph: one per `main` entry point, in code-unit order. */
-export function packagesOf(graph: Pick<QueryGraph, "entryPoints">): string[] {
-  const packages = graph.entryPoints
-    .filter((e) => e.type === "main")
-    .map((e) =>
-      e.file === "src/index.ts" ? ROOT_PACKAGE : e.file.replace(/\/src\/index\.ts$/, ""),
-    );
+/** The packages of the graph: one per `src/index.ts` file, in code-unit order. */
+export function packagesOf(files: Iterable<string>): string[] {
+  const packages: string[] = [];
+  for (const file of files) {
+    if (file === "src/index.ts") packages.push(ROOT_PACKAGE);
+    else if (file.endsWith("/src/index.ts")) packages.push(file.slice(0, -"/src/index.ts".length));
+  }
   return sortCodeUnits([...new Set(packages)]);
 }
 
 /** The browser-safe packages: every package of the graph less the Node runtimes. */
 export function browserSafePackages(
-  graph: Pick<QueryGraph, "entryPoints">,
+  files: Iterable<string>,
   nodeRuntimes: readonly string[],
 ): string[] {
   const runtimes = new Set(nodeRuntimes);
-  return packagesOf(graph).filter((pkg) => !runtimes.has(pkg));
+  return packagesOf(files).filter((pkg) => !runtimes.has(pkg));
 }
 
 /**

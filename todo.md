@@ -81,7 +81,7 @@
   `--check-duplicates`, `--no-regen`, `--write-duplicate-baseline`, and the extension hooks.
 - [x] `--api-surface` on the graph (D5): TypeScript as in 1.x, Python `__all__`, Rust `pub`. For
   C#, exit 1 with a message.
-- [ ] `repo-tools query` reads the core graph (D8): `dependents`, `symbol-users` and `cycles`
+- [x] `repo-tools query` reads the core graph (D8): `dependents`, `symbol-users` and `cycles`
   get repo_map's meaning, and `cycles --components` lists the components.
 - [ ] Build (D7): the four `.wasm` files go into `dist/` and into the package `files`. Smoke
   test the exe and the Node bundle on Node 20 and 22.

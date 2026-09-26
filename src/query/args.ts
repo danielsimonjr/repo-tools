@@ -14,7 +14,7 @@ export type QueryCommand =
   | { name: "symbol-users"; symbol: string }
   | { name: "is-public"; pkg: string; symbol: string }
   | { name: "node-safety"; pkg?: string }
-  | { name: "cycles" }
+  | { name: "cycles"; components?: boolean }
   | { name: "emit" }
   | { name: "check-browser-safety" };
 
@@ -110,6 +110,7 @@ export function parseQueryArgs(argv: readonly string[], cwd: string): QueryOptio
   let out: string | undefined;
   let nodeRuntimes: string[] | undefined;
   let mode: QueryCommand | undefined;
+  let components = false;
   const words: string[] = [];
   for (const arg of argv) {
     if (!arg.startsWith("-")) {
@@ -119,6 +120,11 @@ export function parseQueryArgs(argv: readonly string[], cwd: string): QueryOptio
     const eq = arg.indexOf("=");
     const name = eq === -1 ? arg : arg.slice(0, eq);
     const value = eq === -1 ? undefined : arg.slice(eq + 1);
+    if (name === "--components") {
+      if (value !== undefined) throw new Error("flag --components takes no value");
+      components = true;
+      continue;
+    }
     const modeCommand = MODE_FLAGS[name];
     if (modeCommand !== undefined) {
       if (value !== undefined) throw new Error(`flag ${name} takes no value`);
@@ -158,6 +164,10 @@ export function parseQueryArgs(argv: readonly string[], cwd: string): QueryOptio
       throw new Error("a command is missing (see repo-tools query --help)");
     }
     command = makeCommand(first, rest);
+  }
+  if (components) {
+    if (command.name !== "cycles") throw new Error("flag --components applies to cycles only");
+    command = { name: "cycles", components: true };
   }
   return {
     command,

@@ -9,9 +9,9 @@ describe("computeTaint", () => {
     // a -> b -> a, and a -> n (node:fs). The source walk marked b clean: it met a on the
     // visiting stack, took that as clean, and cached the value.
     const entries: FilePair[] = [
-      ["src/a.ts", { internalDependencies: [{ file: "./b.js" }, { file: "./n.js" }] }],
-      ["src/b.ts", { internalDependencies: [{ file: "./a.js" }] }],
-      ["src/n.ts", { nodeDependencies: [{ module: "fs" }] }],
+      ["src/a.ts", { internalDependencies: [{ file: "src/b.ts" }, { file: "src/n.ts" }] }],
+      ["src/b.ts", { internalDependencies: [{ file: "src/a.ts" }] }],
+      ["src/n.ts", { nodeDependencies: ["fs"] }],
       ["src/c.ts", {}],
     ];
     const forward = buildForward(entries, new Set(entries.map(([f]) => f)));

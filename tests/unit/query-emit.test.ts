@@ -26,7 +26,7 @@ describe("query --emit", () => {
     expect(r).toEqual({
       code: 0,
       out:
-        "Written: docs/architecture/dependency-reverse.json (7 files)\n" +
+        "Written: docs/architecture/dependency-reverse.json (8 files)\n" +
         "Written: docs/architecture/node-safety.json (3 node files, 1 leak)\n",
       err: "",
     });
@@ -37,6 +37,8 @@ describe("query --emit", () => {
       dependents: {
         "packages/clean/src/math.ts": ["packages/clean/src/index.ts"],
         "packages/server/src/main.ts": ["packages/server/src/index.ts"],
+        // A workspace import of `@fx/web` is an edge of the core graph (design decision D8).
+        "packages/web/src/index.ts": ["packages/server/src/main.ts"],
         "packages/web/src/io.ts": ["packages/web/src/view.ts"],
         "packages/web/src/ping.ts": ["packages/web/src/pong.ts", "packages/web/src/view.ts"],
         "packages/web/src/pong.ts": ["packages/web/src/ping.ts"],
