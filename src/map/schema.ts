@@ -16,6 +16,8 @@ export interface Dependency {
   reExport?: boolean;
   /** The specifier as the source writes it (not written to the graph JSON). */
   specifier?: string;
+  /** True for a bare side-effect import (not written to the graph JSON). */
+  sideEffect?: boolean;
 }
 
 /** One source file of the graph. */
@@ -44,6 +46,8 @@ export interface FileNode {
    * to the graph JSON).
    */
   packageImports?: { specifier: string; names: string[]; builtin: boolean }[];
+  /** The relative specifiers of literal `import(...)` calls (not written to the graph JSON). */
+  dynamicImports?: string[];
 }
 
 /** The graph of one repository. */

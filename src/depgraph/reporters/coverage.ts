@@ -16,7 +16,11 @@ function percent(tested: number, total: number): string {
 }
 
 /** The TEST_COVERAGE.md body (without the banner). */
-export function generateTestCoverageMarkdown(coverage: TestCoverageAnalysis): string {
+export function generateTestCoverageMarkdown(
+  coverage: TestCoverageAnalysis,
+  options: { expectedTestHint?: boolean } = {},
+): string {
+  const hint = options.expectedTestHint ?? true;
   const lines: string[] = [];
   lines.push("# Test Coverage Analysis");
   lines.push("");
@@ -82,7 +86,11 @@ export function generateTestCoverageMarkdown(coverage: TestCoverageAnalysis): st
       lines.push("");
       for (const file of files.sort()) {
         const fileName = basename(file, ".ts");
-        lines.push(`- \`${file}\` → Expected test: \`tests/unit/${module}/${fileName}.test.ts\``);
+        lines.push(
+          hint
+            ? `- \`${file}\` → Expected test: \`tests/unit/${module}/${fileName}.test.ts\``
+            : `- \`${file}\``,
+        );
       }
       lines.push("");
     }

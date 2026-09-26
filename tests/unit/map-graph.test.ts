@@ -266,11 +266,13 @@ describe("buildGraph: barrel export * expansion", () => {
     const graph = await buildGraph(
       repo({ "src/a.ts": "export const A = 1;\n", "src/b.ts": 'import "./a.js";\n' }),
     );
-    // D3: the edge also keeps its written specifier for the layers view; it is no re-export.
+    // D3 and D5: the edge also keeps its written specifier and its side-effect flag for the
+    // extras; it is no re-export.
     expect(graph.files.get("src/b.ts")?.internal[0]).toEqual({
       file: "src/a.ts",
       imports: [],
       typeOnly: false,
+      sideEffect: true,
       specifier: "./a.js",
     });
   });

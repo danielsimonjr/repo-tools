@@ -98,12 +98,13 @@ function exportsOf(node: FileNode): ParsedFile["exports"] {
 /**
  * The records of the `src` files of `graph`, in census order. `root` is the folder the graph was
  * built from; the description of a TypeScript file reads its comments from there. With
- * `allAreas`, the records hold the files of every area.
+ * `allAreas`, the records hold the files of every area. With `loadEdges`, each record also gets
+ * its dynamic and unresolved relative loads, for test coverage only.
  */
 export function toParsedFiles(
   graph: RepoGraph,
   root: string,
-  options: { allAreas?: boolean } = {},
+  options: { allAreas?: boolean; loadEdges?: boolean } = {},
 ): ParsedFile[] {
   const records: ParsedFile[] = [];
   const workspaces = detectWorkspaces(root);
@@ -115,9 +116,20 @@ export function toParsedFiles(
         imports: [...d.imports],
         ...(d.reExport ? { reExport: true } : {}),
         ...(d.typeOnly ? { typeOnly: true } : {}),
+        ...(d.sideEffect ? { sideEffect: true } : {}),
         resolved: d.file,
       }),
     );
+    if (options.loadEdges) {
+      // Loads that the graph has no edge for: a literal `import(...)`, and a relative specifier
+      // that resolves to no source file (for example `../dist/x.js`). They carry no resolved
+      // target, so depgraph resolves them as 1.x does, with its `dist/` to `src/` mapping.
+      const loads = [
+        ...(node.dynamicImports ?? []),
+        ...node.broken.filter((s) => s.startsWith(".")),
+      ];
+      for (const spec of loads) internalDependencies.push({ file: spec, imports: [] });
+    }
     records.push({
       path: node.path,
       name: stem(node.path),

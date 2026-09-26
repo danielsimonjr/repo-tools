@@ -120,6 +120,16 @@ All notable changes to this project are recorded in this file. The format follow
   Another language gets the name-only list and the explicit note. The inventory and unused
   reports have new text, because the 1.x text described a census of TypeScript files only. The
   unused report also lists the dormant files of the core reachability.
+- 2.0.0 engine (design decision D5): `src/map/coverage.ts` writes `TEST_COVERAGE.md` and
+  `test-coverage.json` for each language, with depgraph's analyzer. The name of a file decides
+  if it is a test. For TypeScript and JavaScript, the name is `*.test.*` or `*.spec.*`, as in
+  1.x. For Python, the name is `test_*.py` or `*_test.py`. For C# and Rust, each file in the
+  tests area is a test. A test also covers a file that it loads with a literal `import()`, or
+  through a relative `dist/` path. The core graph has no edge for these loads. The coverage
+  policy is `<root>/docs/architecture/coverage-policy.json` (D9). The reader records the bare
+  side-effect imports and the literal `import()` specifiers of TypeScript. The graph JSON does
+  not write them. On memoryjs, MathTS and universal-physics-tensor, the tested files are the
+  same as in depgraph 1.x.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

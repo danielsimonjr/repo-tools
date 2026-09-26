@@ -387,6 +387,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
           imports: [...imp.names],
           typeOnly: imp.typeOnly,
           ...(imp.reExport ? { reExport: true } : {}),
+          ...(imp.sideEffect ? { sideEffect: true } : {}),
           specifier: imp.specifier,
         });
         if (imp.names.length === 0 && starSpecs.has(imp.specifier)) {
@@ -441,6 +442,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       reExports: [...mod.reExports],
       defaultExportLocal: mod.defaultExportLocal,
       packageImports,
+      dynamicImports: [...mod.dynamicImports],
     });
   }
 

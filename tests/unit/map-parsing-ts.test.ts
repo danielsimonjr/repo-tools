@@ -109,6 +109,24 @@ describe("parseTs: re-exports are both an export and an import", () => {
   });
 });
 
+describe("parseTs: dynamic imports (for test coverage, not graph edges)", () => {
+  test("a literal relative import() is recorded; a substitution or a package is not", () => {
+    const mod = parseTs(
+      [
+        "const x = 'y';",
+        "await import('./a.js');",
+        "await import(`./b.js`);",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: the fixture is TypeScript source with a template literal.
+        "await import(`./${x}.js`);",
+        "await import('pkg');",
+        "",
+      ].join("\n"),
+    );
+    expect(mod.dynamicImports).toEqual(["./a.js", "./b.js"]);
+    expect(mod.imports).toEqual([]);
+  });
+});
+
 describe("parseTs: export default", () => {
   const cases: [string, string, string | null][] = [
     ["export default class Foo {}\n", "class", "Foo"],

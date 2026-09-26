@@ -17,6 +17,8 @@ export interface RawImport {
   typeOnly: boolean;
   /** True for an `export ... from` statement. */
   reExport?: boolean;
+  /** True for a bare side-effect import (`import './x.js';`), which binds no name. */
+  sideEffect?: boolean;
 }
 
 /** The facts of one parsed source file. */
@@ -37,6 +39,11 @@ export interface ParsedModule {
    * clause, the name of `* as ns`, or `* from <spec>` and `type * from <spec>`.
    */
   reExports: string[];
+  /**
+   * The relative specifiers of the `import(...)` calls with a literal argument (TypeScript). The
+   * graph has no edge for them (D1); test coverage counts them as loads.
+   */
+  dynamicImports: string[];
 }
 
 /** An empty module. */
@@ -49,6 +56,7 @@ export function emptyModule(): ParsedModule {
     defaultExportLocal: null,
     exportKinds: {},
     reExports: [],
+    dynamicImports: [],
   };
 }
 
@@ -214,7 +222,20 @@ export function parseTs(source: string): ParsedModule {
           specifier: specifierOf(spec),
           names: clause ? importClauseNames(clause) : [],
           typeOnly: isTypeOnlyImport(node, clause),
+          ...(clause ? {} : { sideEffect: true }),
         });
+      }
+    } else if (
+      node.type === "call_expression" &&
+      node.childForFieldName("function")?.type === "import"
+    ) {
+      const arg = node.childForFieldName("arguments")?.namedChildren[0];
+      const literal =
+        arg?.type === "string" ||
+        (arg?.type === "template_string" && !hasChild(arg, "template_substitution"));
+      if (arg && literal) {
+        const spec = specifierOf(arg);
+        if (spec.startsWith(".")) mod.dynamicImports.push(spec);
       }
     } else if (node.type === "export_statement") {
       if (hasChild(node, "default")) {
