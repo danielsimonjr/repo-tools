@@ -420,6 +420,8 @@ function stripRsNoise(source: string): string {
 }
 
 const WHITE_RUN = new RegExp(`${S}+`, "gu");
+/** A `use` alias: white space, the whole word `as`, white space and a name (`_` included). */
+const RS_USE_ALIAS = new RegExp(`${S}+as${S}+${ID}`, "gu");
 const BRACE_REST = /\{[^\n]*/u;
 
 /** Python `str.rstrip(chars)`. */
@@ -435,8 +437,11 @@ function rstripChars(text: string, chars: string): string {
  * to its prefix.
  */
 export function expandUsePath(raw: string): string[] {
-  const path = raw.replace(WHITE_RUN, "");
-  if (!path.includes("{")) return [rstripChars(path.split("as")[0] as string, ":") || path];
+  // An alias is the whole word `as` and a name (`Config as Cfg`); it goes before the white
+  // space does. The Python tool split on the letters `as` after it removed the white space, so
+  // a name such as `HashMap` lost its tail (a deliberate difference: that output was wrong).
+  const path = raw.replace(RS_USE_ALIAS, "").replace(WHITE_RUN, "");
+  if (!path.includes("{")) return [rstripChars(path, ":") || path];
   const brace = path.indexOf("{");
   const prefix = path.slice(0, brace);
   const inner = rstripChars(path.slice(brace + 1), "}");
@@ -454,7 +459,7 @@ export function expandUsePath(raw: string): string[] {
   if (current) items.push(current);
   const expanded: string[] = [];
   for (const whole of items) {
-    const item = stripChars((whole.split("as")[0] as string).replace(BRACE_REST, ""), ":");
+    const item = stripChars(whole.replace(BRACE_REST, ""), ":");
     if (!item) continue;
     expanded.push(item !== "self" ? `${prefix}${item}` : rstripChars(prefix, ":"));
   }

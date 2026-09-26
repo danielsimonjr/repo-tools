@@ -10,7 +10,7 @@ repository is public on GitHub. The checks ran on 2026-09-25 and 2026-09-26.
 - **Side 2:** the extras of `map` against `repo-tools depgraph` 1.x.
 
 Each difference has a measured cause. A difference is one of these verdicts: an approved change,
-a deliberate difference, an expected improvement, a 1.x defect, or an open point for review.
+a deliberate difference, an expected improvement, a 1.x defect, or a known difference.
 
 ## Side 1: the core files against `repo_map.py`
 
@@ -40,15 +40,16 @@ compared `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json
 | auto-memory | 79 | identical |
 | fermat-mcp | 42 | identical |
 | memvid | 29 | identical |
-| IronClaw | 288 | identical |
+| IronClaw | 288 | the deliberate Rust `use` difference only (see below) |
 | ui-mcp | 25 | identical |
 | Windows-mcp | 168 | identical |
 
 The languages are TypeScript, Python (PITS-MRAS, auto-memory, fermat-mcp, memvid), Rust
 (IronClaw) and C# (ui-mcp, Windows-mcp).
 
-**Control for Mathts.** With the two workspace changes switched off, the four files of Mathts
-are identical to the Python tool.
+**Controls.** With the two workspace changes switched off, the four files of Mathts are identical
+to the Python tool. Before the Rust `use` fix, the four files of IronClaw were identical to the
+Python tool.
 
 ### Deliberate differences from the Python tool
 
@@ -62,14 +63,18 @@ are identical to the Python tool.
    edges are internal. 485 exports that other packages use are no longer counted as unused.
    Also, a name that a file re-exports from another package is no longer a second definition
    of that name.
+3. **Rust `use` aliases.** The Python tool removes the white space of a `use` path, then cuts
+   the path at the letters `as`. So `HashMap` gives `H`, `wasm` gives `w` and `task` gives `t`.
+   A cut path can resolve to the wrong module. The engine removes only an alias that is the
+   whole word `as` and a name. On IronClaw, 139 package and standard-library names are
+   complete again. The internal edges of 14 files go to the correct modules. The simple
+   runtime cycle count goes from 1667 to 1009, because the wrong edges made cycles.
 
-### Defects of the Python tool that the engine keeps
+### Behavior of the Python tool that the engine keeps
 
-The engine keeps these behaviors of the Python tool, so that side 1 stays exact. Each one has an
-open item in `todo.md`:
+The engine keeps this behavior of the Python tool, so that side 1 stays exact. The behavior has
+an open item in `todo.md`:
 
-- The Rust `use` reader cuts a name at the letters `as` inside a word (`HashMap` gives `H`).
-  The new `pub use` reader of the export surface does not have this defect.
 - A bodiless `export function f(): T;` in a declaration file is not an export.
 
 ## Side 2: the extras against depgraph 1.x
@@ -101,8 +106,8 @@ depgraph code that both engines share, depgraph 1.x wrote its 12 reports on memo
   `DEPENDENCY_GRAPH.md` and the compact summary follow the core statistics.
 - **JavaScript files (approved, D1).** The census reads JavaScript files. depgraph 1.x read
   `.ts` and `.tsx` only.
-- **`import()` (open point for review).** depgraph 1.x records a dynamic `import()` as a graph
-  edge, and the core graph (D1) does not. On memoryjs, one type-only cyclic component has 3
+- **`import()` (known difference, D1).** depgraph 1.x records a dynamic `import()` as a graph
+  edge. The core graph of 2.0.0 does not, as in the Python tool. On memoryjs, one type-only cyclic component has 3
   files, not 7. Test coverage counts a literal `import()` in a test file as a load, so the tested
   files do not change.
 - **Local `export type { X }` (expected improvement).** The 1.x reader does not find this form.

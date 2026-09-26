@@ -10,6 +10,11 @@ const work = makeTempDir("build");
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 const bundle = join(work, "cli.js");
+// The installed package has its own `"type": "module"` package.json next to `dist/`. Without one,
+// Node walks up from the temp folder to the nearest package.json. A stray one with no "type"
+// makes Node print MODULE_TYPELESS_PACKAGE_JSON to standard error, and a test that expects an
+// empty standard error then fails for a reason that is not the product's.
+writeFileSync(join(work, "package.json"), '{"type": "module"}\n');
 
 /**
  * The time budget of a test that runs the whole smoke script. The script spawns the tool about
