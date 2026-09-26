@@ -183,6 +183,13 @@ All notable changes to this project are recorded in this file. The format follow
   `package.json` of each workspace package, then the extra entries of depgraph, then a
   `src/index.*` file. The workspace roots are a deliberate difference from the Python tool. On
   MathTS, the roots go from 0 to 1167, and each disposition equals depgraph 1.x.
+- Build (design decision D7): `scripts/build.ts` now writes the three tree-sitter `.wasm` assets
+  next to `dist/cli.js`, under the names that the bundle refers to. Before this fix, the build
+  kept the JavaScript output only, so the Node bundle had no grammar files. `package.json`
+  `files` adds `dist/*.wasm`, and `npm pack --dry-run` lists the three files. The smoke test
+  passes 8 of 8 steps on the Windows executable, and on `dist/cli.js` with Bun, Node 20, Node
+  22 and Node 24. A bundle with no `.wasm` file fails the smoke test. The engine has three
+  `.wasm` files, not four, because it reads `.tsx` with the TypeScript grammar.
 - `map`: an import of a workspace package by name is now an edge to its entry file. In a single
   package, an import of its own name is an edge too (1.x fix F43). The Python tool keeps each
   such import as an external package, so a monorepo had no edges between its packages. The

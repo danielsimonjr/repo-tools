@@ -13,7 +13,7 @@
  * workflow (`build.yml`) writes and verifies `SHA256SUMS`; this script writes no checksum file.
  */
 import { mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { assertInstalledTree } from "./lockcheck.ts";
 
 export const TARGETS = ["bun-windows-x64", "bun-linux-x64", "bun-darwin-arm64"] as const;
@@ -67,11 +67,16 @@ async function bundle(outfile: string): Promise<void> {
     minify: false,
   });
   if (!result.success) throw new AggregateError(result.logs, "bundle failed");
-  const [output] = result.outputs;
-  if (!output) throw new Error("bundle produced no output");
-  const code = (await output.text()).replace(/^#!.*\n/, "");
+  const entry = result.outputs.find((o) => o.kind === "entry-point");
+  if (!entry) throw new Error("bundle produced no entry point");
+  const code = (await entry.text()).replace(/^#!.*\n/, "");
   mkdirSync(dirname(outfile), { recursive: true });
   await Bun.write(outfile, `#!/usr/bin/env node\n${code}`);
+  // Design decision D7: the tree-sitter `.wasm` assets go next to the bundle, under the names
+  // that the bundle references (`./<name>-<hash>.wasm`, resolved against the bundle's URL).
+  for (const asset of result.outputs.filter((o) => o.kind === "asset")) {
+    await Bun.write(join(dirname(outfile), basename(asset.path)), asset);
+  }
 }
 
 function compile(target: Target, outdir: string): void {

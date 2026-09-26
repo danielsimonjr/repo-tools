@@ -14,6 +14,7 @@
   },
   "files": [
     "dist/cli.js",
+    "dist/*.wasm",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"

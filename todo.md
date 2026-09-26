@@ -83,11 +83,14 @@
   C#, exit 1 with a message.
 - [x] `repo-tools query` reads the core graph (D8): `dependents`, `symbol-users` and `cycles`
   get repo_map's meaning, and `cycles --components` lists the components.
-- [ ] Build (D7): the four `.wasm` files go into `dist/` and into the package `files`. Smoke
+- [x] Build (D7): the four `.wasm` files go into `dist/` and into the package `files`. Smoke
   test the exe and the Node bundle on Node 20 and 22.
 - [ ] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
   and side 2 against depgraph 1.x.
 - [ ] Decision for the PR review: dynamic `import()` edges in the core graph (D1 open point).
+- [ ] Remove the 1.x depgraph pipeline, which the product no longer calls (`depgraph` is an
+  alias of `map`). Port each 1.x fix test (F1 to F44, M1, R1) to `map` first, or record why
+  the fix has no 2.0.0 meaning. Then delete the 1.x runner, parser, scanner and goldens.
 - [x] Workspace roots: in a workspace monorepo the graph has 0 roots, so each workspace source
   file shows as an orphan (a repo_map defect that 1.x did not have). Read the entry files of
   each workspace package, and list the change as a deliberate difference from repo_map.
