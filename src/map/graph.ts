@@ -388,6 +388,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
           typeOnly: imp.typeOnly,
           ...(imp.reExport ? { reExport: true } : {}),
           ...(imp.sideEffect ? { sideEffect: true } : {}),
+          ...(imp.reExport && imp.names.length === 0 ? { star: true } : {}),
           specifier: imp.specifier,
         });
         if (imp.names.length === 0 && starSpecs.has(imp.specifier)) {

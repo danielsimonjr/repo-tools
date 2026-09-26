@@ -18,6 +18,11 @@ export interface Dependency {
   specifier?: string;
   /** True for a bare side-effect import (not written to the graph JSON). */
   sideEffect?: boolean;
+  /**
+   * True for a bare `export * from` or `export type * from` edge (not written to the graph JSON).
+   * Barrel expansion lists the names such an edge carries; the extras need the star itself.
+   */
+  star?: boolean;
 }
 
 /** One source file of the graph. */

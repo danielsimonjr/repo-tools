@@ -113,7 +113,8 @@ export function toParsedFiles(
     const internalDependencies = node.internal.map(
       (d): DepgraphDependency => ({
         file: d.specifier ?? relativeSpecifier(node.path, d.file),
-        imports: [...d.imports],
+        // depgraph marks a bare star re-export with `*`; barrel expansion replaced it with names.
+        imports: d.star ? ["*"] : [...d.imports],
         ...(d.reExport ? { reExport: true } : {}),
         ...(d.typeOnly ? { typeOnly: true } : {}),
         ...(d.sideEffect ? { sideEffect: true } : {}),

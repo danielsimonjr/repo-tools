@@ -130,6 +130,13 @@ All notable changes to this project are recorded in this file. The format follow
   side-effect imports and the literal `import()` specifiers of TypeScript. The graph JSON does
   not write them. On memoryjs, MathTS and universal-physics-tensor, the tested files are the
   same as in depgraph 1.x.
+- 2.0.0 engine (design decision D5): `src/map/surfaces.ts` writes
+  `package-export-surfaces.json` for TypeScript with depgraph's public-surface rules. Fix: a
+  bare `export *` edge now keeps a `star` flag, and the adapter shows it as `*`, as 1.x does.
+  Before the fix, barrel expansion replaced the `*` with names. Then a name deep in an
+  `export *` chain was not public, which a test found. The layers module entries show star
+  edges as 1.x does. On memoryjs the surfaces are identical to 1.x. On MathTS and
+  universal-physics-tensor, each difference has a recorded cause.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
