@@ -11,7 +11,7 @@ import { stripComments } from "../mask.ts";
 import { filesInCycles } from "./cycles.ts";
 import { escapeRegExpLiteral } from "./duplicates.ts";
 import { isSrcIndex } from "./paths.ts";
-import { resolvePath, workspaceTarget } from "./resolver.ts";
+import { targetOf, workspaceTarget } from "./resolver.ts";
 import { configReferencedEntries } from "./roots.ts";
 import type {
   CyclicComponents,
@@ -95,7 +95,7 @@ export function buildDependencyMatrix(files: ParsedFile[]): DependencyMatrix {
     for (const other of files) {
       if (other.path === file.path) continue;
       for (const dep of other.internalDependencies) {
-        const resolved = resolvePath(other.path, dep.file, known);
+        const resolved = targetOf(other.path, dep, known);
         if (resolved === file.path || resolved === file.path.replace(/\.ts$/, "")) {
           exportsTo.add(other.path);
         }
@@ -127,7 +127,7 @@ export function findReachableFiles(
     const file = fileMap.get(current);
     if (!file) continue;
     for (const dep of file.internalDependencies) {
-      const resolved = resolvePath(current, dep.file, fileMap);
+      const resolved = targetOf(current, dep, fileMap);
       if (fileMap.has(resolved) && !reachable.has(resolved)) queue.push(resolved);
     }
     for (const ws of file.workspaceDependencies) {
@@ -159,7 +159,7 @@ export function computePublicSurface(
     publicWildcardFiles.add(file.path);
     for (const dep of file.internalDependencies) {
       if (!dep.reExport) continue;
-      const target = byPath.get(resolvePath(file.path, dep.file, byPath));
+      const target = byPath.get(targetOf(file.path, dep, byPath));
       if (!target) continue;
       if (dep.imports.includes("*")) markPublic(target, seen);
       else for (const name of dep.imports) publicNamed.add(`${target.path}::${name}`);
@@ -209,7 +209,7 @@ export function detectUnused(
   };
   for (const file of [...files, ...testFiles]) {
     for (const dep of file.internalDependencies) {
-      const resolved = resolvePath(file.path, dep.file, filePaths);
+      const resolved = targetOf(file.path, dep, filePaths);
       if (!filePaths.has(resolved)) continue;
       importedFiles.add(resolved);
       addImported(symbolsOf(resolved), dep.imports);

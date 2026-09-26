@@ -13,6 +13,11 @@ export interface Dependency {
   typeOnly?: boolean;
   /** True for a bare side-effect import (`import './x.js';`): it binds no name (fix F10). */
   sideEffect?: boolean;
+  /**
+   * The root-relative target, when the map engine resolved it already (2.0.0). The analyzers use
+   * it in place of resolving `file` again. A 1.x parse never sets it.
+   */
+  resolved?: string;
 }
 
 /** An import from a package that is not a workspace member and not a Node built-in. */

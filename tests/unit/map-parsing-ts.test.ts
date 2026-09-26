@@ -3,7 +3,8 @@
  *
  * Ported from the architecture-docs skill (`test_parsing.py`). The source test of a real barrel
  * file read a local repository through an absolute path; this port uses a synthetic barrel of the
- * same shape instead.
+ * same shape instead. Decisions D3 and D5: an `export ... from` import also carries
+ * `reExport: true`, which depgraph's analyzers read. The graph JSON does not write it.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
 import { loadGrammar } from "../../src/map/grammars.ts";
@@ -62,37 +63,49 @@ describe("parseTs: re-exports are both an export and an import", () => {
   test("a named re-export gives an import edge", () => {
     const mod = parseTs('export { A, B } from "./m.js";\n');
     expect([...mod.exports].sort()).toEqual(["A", "B"]);
-    expect(mod.imports).toEqual([{ specifier: "./m.js", names: ["A", "B"], typeOnly: false }]);
+    expect(mod.imports).toEqual([
+      { specifier: "./m.js", names: ["A", "B"], typeOnly: false, reExport: true },
+    ]);
   });
 
   test("a bare star re-export gives an edge with no names and no export", () => {
     const mod = parseTs('export * from "./m.js";\n');
     expect(mod.exports).toEqual([]);
-    expect(mod.imports).toEqual([{ specifier: "./m.js", names: [], typeOnly: false }]);
+    expect(mod.imports).toEqual([
+      { specifier: "./m.js", names: [], typeOnly: false, reExport: true },
+    ]);
   });
 
   test("a namespace star re-export gives the export and an edge", () => {
     const mod = parseTs('export * as ns from "./x.js";\n');
     expect(mod.exports).toEqual(["ns"]);
-    expect(mod.imports).toEqual([{ specifier: "./x.js", names: ["*"], typeOnly: false }]);
+    expect(mod.imports).toEqual([
+      { specifier: "./x.js", names: ["*"], typeOnly: false, reExport: true },
+    ]);
   });
 
   test("a type-only named re-export sets typeOnly", () => {
     const mod = parseTs('export type { T } from "./t.js";\n');
     expect(mod.exports).toEqual(["T"]);
-    expect(mod.imports).toEqual([{ specifier: "./t.js", names: ["T"], typeOnly: true }]);
+    expect(mod.imports).toEqual([
+      { specifier: "./t.js", names: ["T"], typeOnly: true, reExport: true },
+    ]);
   });
 
   test("a default-alias re-export records the source name", () => {
     const mod = parseTs('export { default as D } from "./d";\n');
     expect(mod.exports).toEqual(["D"]);
-    expect(mod.imports).toEqual([{ specifier: "./d", names: ["default"], typeOnly: false }]);
+    expect(mod.imports).toEqual([
+      { specifier: "./d", names: ["default"], typeOnly: false, reExport: true },
+    ]);
   });
 
   test("export { foo as default } from is a named clause", () => {
     const mod = parseTs('export { foo as default } from "./m.js";\n');
     expect(mod.exports).toEqual(["default"]);
-    expect(mod.imports).toEqual([{ specifier: "./m.js", names: ["foo"], typeOnly: false }]);
+    expect(mod.imports).toEqual([
+      { specifier: "./m.js", names: ["foo"], typeOnly: false, reExport: true },
+    ]);
   });
 });
 

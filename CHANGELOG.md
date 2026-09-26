@@ -75,6 +75,13 @@ All notable changes to this project are recorded in this file. The format follow
   the same names of each kind as in depgraph 1.x. The totals differ for two reasons. The core
   counts every area, and depgraph counts the `src` files only. Also, depgraph counts an
   overloaded or merged name one time for each declaration.
+- 2.0.0 engine (design decisions D3 and D5): `src/map/adapter.ts` changes the `src` files of the
+  graph into depgraph's parsed-file records. Then depgraph's analyzers run on the one graph for
+  each language. Each edge carries its resolved target. The new helper `targetOf` uses that
+  target, and a 1.x parse still resolves the specifier. The graph now also keeps each file's
+  export kinds, re-exports and re-export edges. The graph JSON does not write them. The records
+  have no names for package imports, no workspace edges and no package name. The graph does not
+  keep these facts.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

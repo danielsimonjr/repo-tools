@@ -18,7 +18,7 @@
  */
 import { stronglyConnectedComponents } from "../map/cycles.ts";
 import { compareCodeUnits } from "../sort.ts";
-import { resolvePath } from "./resolver.ts";
+import { targetOf } from "./resolver.ts";
 import type { CyclicComponent, CyclicComponents, ParsedFile } from "./types.ts";
 
 /** Node to its neighbours: no duplicates, in code-unit order. */
@@ -32,7 +32,7 @@ function buildGraphs(files: readonly ParsedFile[]): { runtime: Graph; all: Graph
   const allSets = new Map<string, Set<string>>(nodes.map((n) => [n, new Set<string>()]));
   for (const file of files) {
     for (const dep of file.internalDependencies) {
-      const target = resolvePath(file.path, dep.file, known);
+      const target = targetOf(file.path, dep, known);
       if (!known.has(target)) continue;
       allSets.get(file.path)?.add(target);
       if (!dep.typeOnly) runtimeSets.get(file.path)?.add(target);

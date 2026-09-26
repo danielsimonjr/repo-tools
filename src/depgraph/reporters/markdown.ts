@@ -8,7 +8,7 @@
 import { basename } from "node:path";
 import { generateFallbackDescription } from "../parser.ts";
 import { withoutTsExtension } from "../paths.ts";
-import { resolvePath } from "../resolver.ts";
+import { targetOf } from "../resolver.ts";
 import type {
   CyclicComponent,
   CyclicComponents,
@@ -68,7 +68,7 @@ export function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]):
     if (!sourceId) continue;
     for (const dep of file.internalDependencies) {
       if (edgeCount >= maxEdges) break;
-      const targetId = nodeIds.get(resolvePath(file.path, dep.file, nodeIds));
+      const targetId = nodeIds.get(targetOf(file.path, dep, nodeIds));
       if (targetId && sourceId !== targetId) {
         const edgeKey = `${sourceId}-${targetId}`;
         if (!addedEdges.has(edgeKey)) {

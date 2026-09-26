@@ -378,7 +378,12 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
           broken.push(imp.specifier);
           continue;
         }
-        internal.push({ file: target, imports: [...imp.names], typeOnly: imp.typeOnly });
+        internal.push({
+          file: target,
+          imports: [...imp.names],
+          typeOnly: imp.typeOnly,
+          ...(imp.reExport ? { reExport: true } : {}),
+        });
         if (imp.names.length === 0 && starSpecs.has(imp.specifier)) {
           const list = starTargets.get(f.path) ?? [];
           list.push(target);
@@ -423,6 +428,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       aliases,
       exportKinds: { ...mod.exportKinds },
       reExports: [...mod.reExports],
+      defaultExportLocal: mod.defaultExportLocal,
     });
   }
 

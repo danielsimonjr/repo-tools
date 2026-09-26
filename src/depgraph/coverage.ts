@@ -8,7 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { outputDirOf } from "./paths.ts";
-import { resolvePath } from "./resolver.ts";
+import { targetOf } from "./resolver.ts";
 import type { ParsedFile } from "./types.ts";
 
 /** One category of the coverage policy. */
@@ -145,7 +145,7 @@ export function buildReExportMap(sourceFiles: ParsedFile[]): ReExportMap {
     const reExportedSources = new Set<string>();
     for (const dep of file.internalDependencies) {
       if (!dep.reExport) continue;
-      const resolved = resolvePath(file.path, dep.file, sourceFilePaths);
+      const resolved = targetOf(file.path, dep, sourceFilePaths);
       if (sourceFilePaths.has(resolved)) reExportedSources.add(resolved);
     }
     if (reExportedSources.size > 0) reExportMap.set(file.path, reExportedSources);
@@ -215,7 +215,7 @@ export function analyzeTestCoverage(
   ): void => {
     for (const dep of sourceByPath.get(fromPath)?.internalDependencies ?? []) {
       if (!dep.sideEffect) continue;
-      const target = resolvePath(fromPath, dep.file, sourceFilePaths);
+      const target = targetOf(fromPath, dep, sourceFilePaths);
       if (!sourceFilePaths.has(target) || visited.has(target)) continue;
       visited.add(target);
       addCoverage(target, testPath, importedSources);
@@ -237,7 +237,7 @@ export function analyzeTestCoverage(
   for (const testFile of testFiles) {
     const importedSources: string[] = [];
     for (const dep of testFile.internalDependencies) {
-      const resolvedPath = resolvePath(testFile.path, dep.file, sourceFilePaths);
+      const resolvedPath = targetOf(testFile.path, dep, sourceFilePaths);
       if (sourceFilePaths.has(resolvedPath))
         addTraced(resolvedPath, testFile.path, importedSources);
       const withTs = `${resolvedPath.replace(/\.ts$/, "")}.ts`;

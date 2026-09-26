@@ -12,6 +12,8 @@ export interface Dependency {
   file: string;
   imports: string[];
   typeOnly: boolean;
+  /** True for an `export ... from` edge (not written to the graph JSON). */
+  reExport?: boolean;
 }
 
 /** One source file of the graph. */
@@ -33,6 +35,8 @@ export interface FileNode {
   exportKinds?: Record<string, string>;
   /** What the file re-exports, from the reader (not written to the graph JSON). */
   reExports?: string[];
+  /** The local name of a named default export, from the reader (not written to the graph JSON). */
+  defaultExportLocal?: string | null;
 }
 
 /** The graph of one repository. */

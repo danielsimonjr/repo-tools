@@ -6,7 +6,7 @@
  */
 import { cleanExportName, generateFallbackDescription } from "../parser.ts";
 import { isSrcIndex } from "../paths.ts";
-import { resolvePath } from "../resolver.ts";
+import { targetOf } from "../resolver.ts";
 import type { CyclicComponents, ModuleMap, PackageJson, ParsedFile, Statistics } from "../types.ts";
 
 /** The dependency-graph.json object. The key order is the report order. */
@@ -147,7 +147,7 @@ export function generateCompactSummary(
       p: f.path.split("/").slice(-2).join("/"),
       i: f.internalDependencies.length,
       o: files.filter((other) =>
-        other.internalDependencies.some((d) => resolvePath(other.path, d.file, known) === f.path),
+        other.internalDependencies.some((d) => targetOf(other.path, d, known) === f.path),
       ).length,
     }))
     .sort((a, b) => b.i + b.o - (a.i + a.o))

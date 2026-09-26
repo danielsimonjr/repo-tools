@@ -15,6 +15,8 @@ export interface RawImport {
   specifier: string;
   names: string[];
   typeOnly: boolean;
+  /** True for an `export ... from` statement. */
+  reExport?: boolean;
 }
 
 /** The facts of one parsed source file. */
@@ -243,7 +245,7 @@ export function parseTs(source: string): ParsedModule {
           const typeStar = hasChild(node, "type") ? "type " : "";
           mod.reExports.push(`${typeStar}* from ${specifierOf(spec)}`);
         }
-        mod.imports.push({ specifier: specifierOf(spec), names, typeOnly });
+        mod.imports.push({ specifier: specifierOf(spec), names, typeOnly, reExport: true });
       }
     }
     for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i] as Node);
