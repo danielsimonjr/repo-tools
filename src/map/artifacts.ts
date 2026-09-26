@@ -18,8 +18,13 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { computePublicSurface } from "../depgraph/analysis.ts";
+import { buildDuplicateReport, detectDuplicateSymbols } from "../depgraph/duplicates.ts";
+import { rootPackageEntries } from "../depgraph/roots.ts";
+import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { B, reEscape, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
+import { toParsedFiles } from "./adapter.ts";
 import { stronglyConnectedComponents } from "./cycles.ts";
 import { isReparsePoint, readSource } from "./discovery.ts";
 import { type CycleLimits, findCycles } from "./graph.ts";
@@ -594,7 +599,11 @@ function unreferencedAnywhereNotes(
 }
 
 /** Writes duplicate-symbols.json: names that two or more `src` files declare themselves. */
-export function emitDuplicateSymbols(graph: RepoGraph, outDir: string): string {
+export function emitDuplicateSymbols(
+  graph: RepoGraph,
+  outDir: string,
+  options: DuplicateSymbolsOptions = {},
+): string {
   const owners = new Map<string, string[]>();
   for (const node of [...graph.files.values()].sort((a, b) => compareCodeUnits(a.path, b.path))) {
     if (node.area !== "src") continue;
@@ -609,11 +618,60 @@ export function emitDuplicateSymbols(graph: RepoGraph, outDir: string): string {
     const paths = owners.get(sym) as string[];
     if (paths.length > 1) duplicates[sym] = paths;
   }
-  return writeJson(join(outDir, "duplicate-symbols.json"), {
-    note: "Groups names OWN-exported by >=2 'src' files, by name only. Unlike CDG's create-dependency-graph.ts, this does NOT classify entries (TRUE_DUPLICATE / ALIAS_DELEGATION / ALLOWLISTED) or attach a category/public flag -- that needs AST body comparison this stage's flat export-name list does not carry. Every name below is a candidate for human triage, not a pre-sorted verdict.",
-    summary: { duplicateCount: Object.keys(duplicates).length, totalSymbols: owners.size },
+  const summary = { duplicateCount: Object.keys(duplicates).length, totalSymbols: owners.size };
+  const path = join(outDir, "duplicate-symbols.json");
+  const root = graph.rootPath;
+  if (graph.language !== "typescript" || root === null) {
+    const reason =
+      root === null
+        ? "This graph has no root folder to read the definitions from."
+        : `This repository reads as ${graph.language}.`;
+    return writeJson(path, {
+      note: DUPLICATES_NAME_ONLY_NOTE,
+      classificationNote: `The classified lists (runtime, types) cover TypeScript only. ${reason} The duplicates list above is the name-only grouping.`,
+      summary,
+      duplicates,
+    });
+  }
+  // Design decision D4: depgraph's classified lists join the name-only grouping. The allowlist
+  // is an input, so it never comes from the output folder (D9).
+  const records = toParsedFiles(graph, root);
+  const workspaces = detectWorkspaces(root);
+  const rootEntries = workspaces.size > 0 ? [] : rootPackageEntries(root);
+  const surface = computePublicSurface(records, root, workspaces, rootEntries);
+  // A declaration file declares a name and holds no body, so it is no definer of a duplicate
+  // (depgraph 1.x left `.d.ts` files out of its census for the same reason).
+  const definers = records.filter((r) => !/\.d\.[cm]?ts$/.test(r.path));
+  const report = buildDuplicateReport(
+    detectDuplicateSymbols(
+      definers,
+      surface,
+      root,
+      options.allowlistPath ?? join(root, "docs", "architecture", "duplicate-allowlist.json"),
+    ),
+  );
+  return writeJson(path, {
+    note: DUPLICATES_CLASSIFIED_NOTE,
+    classificationNote: report.note,
+    summary: { ...summary, ...report.summary },
     duplicates,
+    runtime: report.runtime,
+    types: report.types,
   });
+}
+
+/** repo_map's note: the file groups names only (every language except TypeScript). */
+const DUPLICATES_NAME_ONLY_NOTE =
+  "Groups names OWN-exported by >=2 'src' files, by name only. Unlike CDG's create-dependency-graph.ts, this does NOT classify entries (TRUE_DUPLICATE / ALIAS_DELEGATION / ALLOWLISTED) or attach a category/public flag -- that needs AST body comparison this stage's flat export-name list does not carry. Every name below is a candidate for human triage, not a pre-sorted verdict.";
+
+/** The note of a TypeScript file, which also holds depgraph's classified lists (D4). */
+const DUPLICATES_CLASSIFIED_NOTE =
+  "`duplicates` groups the names OWN-exported by >=2 'src' files, by name only, with no classification. `runtime` and `types` hold depgraph's classified lists of the same kind of names (see classificationNote); only TRUE_DUPLICATE entries there are merge targets.";
+
+/** The options of `emitDuplicateSymbols`. */
+export interface DuplicateSymbolsOptions {
+  /** The allowlist file. Default: `<root>/docs/architecture/duplicate-allowlist.json` (D9). */
+  allowlistPath?: string;
 }
 
 /** Writes unused-analysis.json: the three export buckets, the notes, and the no-importer files. */

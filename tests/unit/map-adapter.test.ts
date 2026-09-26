@@ -111,6 +111,22 @@ describe("toParsedFiles", () => {
   });
 });
 
+describe("toParsedFiles: workspace packages", () => {
+  test("a file in a workspace folder gets its package name, as in depgraph 1.x", async () => {
+    const root = repo({
+      "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',
+      "packages/a/package.json": '{"name": "@s/a", "main": "src/index.ts"}\n',
+      "packages/a/src/index.ts": "export const a = 1;\n",
+      "src/root.ts": "export const r = 1;\n",
+    });
+    const byPath = new Map(
+      toParsedFiles(await buildGraph(root), root).map((r) => [r.path, r.packageName]),
+    );
+    expect(byPath.get("packages/a/src/index.ts")).toBe("@s/a");
+    expect(byPath.get("src/root.ts")).toBeNull();
+  });
+});
+
 describe("depgraph's analyzers on adapted records", () => {
   test("a Python import cycle is a cyclic component (the resolved .py targets are used)", async () => {
     const root = repo({

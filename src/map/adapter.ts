@@ -5,14 +5,20 @@
  *
  * Each internal edge carries its resolved target (`resolved`), so an analyzer never resolves a
  * specifier again. The specifier (`file`) is the one the source writes; an edge with none (a Rust
- * `mod` declaration) gets the target relative to the importing file. Two facts of a 1.x parse
- * are not in the graph, and the records say so by an empty value: the workspace edges and a
- * package name. The reader names a default import `default` and a namespace import `*`.
+ * `mod` declaration) gets the target relative to the importing file. The package name comes from
+ * the workspace folders, as in 1.x. One fact of a 1.x parse is not in the graph, and the records
+ * say so by an empty list: the workspace edges. The reader names a default import `default` and
+ * a namespace import `*`.
  */
 import { readFileSync } from "node:fs";
 import { join, posix } from "node:path";
 import { extractDescription } from "../depgraph/parser.ts";
-import type { Dependency as DepgraphDependency, ParsedFile } from "../depgraph/types.ts";
+import type {
+  Dependency as DepgraphDependency,
+  ParsedFile,
+  WorkspacePackage,
+} from "../depgraph/types.ts";
+import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import type { FileNode, RepoGraph } from "./schema.ts";
 
 /** The export kinds that are types, not values: depgraph lists them apart from `named`. */
@@ -60,6 +66,17 @@ function packageLists(
   };
 }
 
+/**
+ * The workspace package of `path`, as depgraph 1.x names it: the first workspace, other than the
+ * root package, whose folder holds the file. Null outside every workspace.
+ */
+function packageNameOf(path: string, workspaces: Map<string, WorkspacePackage>): string | null {
+  for (const [name, ws] of workspaces) {
+    if (ws.directory !== "" && path.startsWith(`${ws.directory}/`)) return name;
+  }
+  return null;
+}
+
 /** The export lists of `node`, in depgraph's kinds. */
 function exportsOf(node: FileNode): ParsedFile["exports"] {
   const kinds = node.exportKinds ?? {};
@@ -89,6 +106,7 @@ export function toParsedFiles(
   options: { allAreas?: boolean } = {},
 ): ParsedFile[] {
   const records: ParsedFile[] = [];
+  const workspaces = detectWorkspaces(root);
   for (const node of graph.files.values()) {
     if (node.area !== "src" && !options.allAreas) continue;
     const internalDependencies = node.internal.map(
@@ -106,7 +124,7 @@ export function toParsedFiles(
       ...packageLists(node, graph.language),
       internalDependencies,
       workspaceDependencies: [],
-      packageName: null,
+      packageName: packageNameOf(node.path, workspaces),
       exports: exportsOf(node),
       description: DESCRIBED_LANGUAGES.has(graph.language)
         ? extractDescription(readFileSync(join(root, node.path), "utf8"))

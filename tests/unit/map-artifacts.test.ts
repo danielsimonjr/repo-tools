@@ -526,6 +526,77 @@ describe("file-inventory.json", () => {
 });
 
 describe("duplicate-symbols.json", () => {
+  const DUP_TS = {
+    "package.json": '{"name": "demo", "main": "src/index.ts"}\n',
+    "src/index.ts": 'export { foo } from "./a.js";\n',
+    "src/a.ts": "export function foo() { return 1; }\n",
+    "src/b.ts": "export function foo() { return 2; }\n",
+  };
+
+  test("D4: a TypeScript repo gets repo_map's keys and depgraph's classified lists", async () => {
+    const root = tmp(DUP_TS);
+    const data = read(emitDuplicateSymbols(await buildGraph(root), join(root, "out")));
+    expect(Object.keys(data)).toEqual([
+      "note",
+      "classificationNote",
+      "summary",
+      "duplicates",
+      "runtime",
+      "types",
+    ]);
+    expect(Object.keys(data.summary)).toEqual([
+      "duplicateCount",
+      "totalSymbols",
+      "runtimeDuplicates",
+      "typeDuplicates",
+      "runtimeByTag",
+      "typeByTag",
+    ]);
+    expect(data.duplicates.foo).toEqual(["src/a.ts", "src/b.ts"]);
+    expect(data.summary.runtimeDuplicates).toBe(1);
+    expect(data.runtime.map((e: { name: string; tag: string }) => [e.name, e.tag])).toEqual([
+      ["foo", "TRUE_DUPLICATE"],
+    ]);
+    expect(data.note).toContain("`runtime` and `types`");
+  });
+
+  test("D4: a declaration file is no definer in the classified lists", async () => {
+    const root = tmp({
+      "package.json": '{"name": "demo", "main": "src/a.ts"}\n',
+      "src/a.ts": "export class Foo {\n  x = 1;\n}\n",
+      "src/types/a.d.ts": "export class Foo {\n  x: number;\n}\n",
+    });
+    const data = read(emitDuplicateSymbols(await buildGraph(root), join(root, "out")));
+    expect(data.duplicates.Foo).toEqual(["src/a.ts", "src/types/a.d.ts"]);
+    expect(data.runtime).toEqual([]);
+  });
+
+  test("D4, D9: the allowlist is read from docs/architecture, never from the output folder", async () => {
+    const allow = JSON.stringify({
+      entries: [{ names: ["foo"], filesGlob: ["src/**"], reason: "accepted" }],
+    });
+    const inDocs = tmp({ ...DUP_TS, "docs/architecture/duplicate-allowlist.json": allow });
+    let data = read(emitDuplicateSymbols(await buildGraph(inDocs), join(inDocs, "out")));
+    expect(data.runtime[0].tag).toBe("ALLOWLISTED");
+
+    const inOut = tmp({ ...DUP_TS, "out/duplicate-allowlist.json": allow });
+    data = read(emitDuplicateSymbols(await buildGraph(inOut), join(inOut, "out")));
+    expect(data.runtime[0].tag).toBe("TRUE_DUPLICATE");
+  });
+
+  test("D5: a Python repo says the classification covers TypeScript only", async () => {
+    const root = tmp({
+      "pkg/__init__.py": "",
+      "pkg/a.py": "def foo():\n    return 1\n",
+      "pkg/b.py": "def foo():\n    return 2\n",
+    });
+    const data = read(emitDuplicateSymbols(await buildGraph(root), join(root, "out")));
+    expect(Object.keys(data)).toEqual(["note", "classificationNote", "summary", "duplicates"]);
+    expect(data.classificationNote).toContain("TypeScript only");
+    expect(Object.keys(data.summary)).toEqual(["duplicateCount", "totalSymbols"]);
+    expect(data.duplicates.foo).toEqual(["pkg/a.py", "pkg/b.py"]);
+  });
+
   test("groups a name across files, and ignores non-src areas", () => {
     let data = read(
       emitDuplicateSymbols(

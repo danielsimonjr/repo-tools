@@ -101,9 +101,19 @@ All notable changes to this project are recorded in this file. The format follow
   memoryjs byte-identical to a run before them.
 - 2.0.0 engine (design decision D4): `file-inventory.json` also gives depgraph's `byPackage`
   and `skippedLinks`, the links that discovery does not follow. A walk does not follow a folder
-  link. In a git work tree, discovery does not follow a tracked link (mode 120000) to a folder. The new `gitTrackedLinks` reads the modes with `git ls-files --stage`. The
+  link. In a git work tree, discovery does not follow a tracked link (mode 120000) to a folder
+  or to a missing file. The new `gitTrackedLinks` reads the modes with `git ls-files --stage`. The
   git branch has a test that makes a folder link when the host permits it. The other core
   files of 10 repositories stay byte-identical.
+- 2.0.0 engine (design decision D4): for a TypeScript repo, `duplicate-symbols.json` also
+  holds depgraph's classified lists: `runtime`, `types`, `classificationNote` and the four
+  summary counts. The allowlist is `<root>/docs/architecture/duplicate-allowlist.json`,
+  never a file in the output folder (D9). A declaration file (`.d.ts`) is no definer in the
+  classified lists, because it has no body. Another language gets an explicit
+  `classificationNote` and no classified lists. The adapter now gives each file its workspace
+  package, as depgraph 1.x does. On memoryjs, MathTS and universal-physics-tensor, each
+  classified entry is identical to depgraph 1.x. The one exception is a 1.x definer that is a
+  declaration file.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
