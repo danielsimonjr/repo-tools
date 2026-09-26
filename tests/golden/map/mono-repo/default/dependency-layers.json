@@ -29,14 +29,7 @@
       },
       "packages/cli/src/main.ts": {
         "description": "main module",
-        "externalDependencies": [
-          {
-            "package": "@scope/core",
-            "imports": [
-              "add"
-            ]
-          }
-        ],
+        "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -46,7 +39,15 @@
             ]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@scope/core",
+            "directory": "packages/core",
+            "imports": [
+              "add"
+            ]
+          }
+        ],
         "exports": []
       }
     },

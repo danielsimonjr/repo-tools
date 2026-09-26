@@ -125,6 +125,29 @@ describe("toParsedFiles: workspace packages", () => {
     expect(byPath.get("packages/a/src/index.ts")).toBe("@s/a");
     expect(byPath.get("src/root.ts")).toBeNull();
   });
+
+  test("an import of a workspace package is a workspace edge, as in 1.x", async () => {
+    const root = repo({
+      "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',
+      "packages/core/package.json": '{"name": "@s/core"}\n',
+      "packages/core/src/index.ts": "export const u = 1;\n",
+      "packages/cli/package.json": '{"name": "@s/cli"}\n',
+      "packages/cli/src/index.ts": 'import { u } from "@s/core";\nexport const v = u;\n',
+      "packages/cli/src/all.ts": 'export * from "@s/core";\n',
+    });
+    const records = toParsedFiles(await buildGraph(root), root);
+    const all = records.find((r) => r.path === "packages/cli/src/all.ts") as ParsedFile;
+    expect(all.workspaceDependencies).toEqual([
+      { package: "@s/core", directory: "packages/core", imports: ["*"] },
+    ]);
+    const cli = toParsedFiles(await buildGraph(root), root).find(
+      (r) => r.path === "packages/cli/src/index.ts",
+    ) as ParsedFile;
+    expect(cli.internalDependencies).toEqual([]);
+    expect(cli.workspaceDependencies).toEqual([
+      { package: "@s/core", directory: "packages/core", imports: ["u"] },
+    ]);
+  });
 });
 
 describe("depgraph's analyzers on adapted records", () => {

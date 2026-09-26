@@ -110,17 +110,19 @@ export function toParsedFiles(
   const workspaces = detectWorkspaces(root);
   for (const node of graph.files.values()) {
     if (node.area !== "src" && !options.allAreas) continue;
-    const internalDependencies = node.internal.map(
-      (d): DepgraphDependency => ({
-        file: d.specifier ?? relativeSpecifier(node.path, d.file),
-        // depgraph marks a bare star re-export with `*`; barrel expansion replaced it with names.
-        imports: d.star ? ["*"] : [...d.imports],
-        ...(d.reExport ? { reExport: true } : {}),
-        ...(d.typeOnly ? { typeOnly: true } : {}),
-        ...(d.sideEffect ? { sideEffect: true } : {}),
-        resolved: d.file,
-      }),
-    );
+    const internalDependencies = node.internal
+      .filter((d) => d.workspace === undefined)
+      .map(
+        (d): DepgraphDependency => ({
+          file: d.specifier ?? relativeSpecifier(node.path, d.file),
+          // depgraph marks a bare star re-export with `*`; barrel expansion replaced it with names.
+          imports: d.star ? ["*"] : [...d.imports],
+          ...(d.reExport ? { reExport: true } : {}),
+          ...(d.typeOnly ? { typeOnly: true } : {}),
+          ...(d.sideEffect ? { sideEffect: true } : {}),
+          resolved: d.file,
+        }),
+      );
     if (options.loadEdges) {
       // Loads that the graph has no edge for: a literal `import(...)`, and a relative specifier
       // that resolves to no source file (for example `../dist/x.js`). They carry no resolved
@@ -136,7 +138,20 @@ export function toParsedFiles(
       name: stem(node.path),
       ...packageLists(node, graph.language),
       internalDependencies,
-      workspaceDependencies: [],
+      // An import of a workspace package by name is a workspace edge in depgraph's records.
+      workspaceDependencies: node.internal
+        .filter((d) => d.workspace !== undefined)
+        .map((d) => {
+          const name = d.workspace as string;
+          const spec = d.specifier ?? name;
+          const subpath = spec.startsWith(`${name}/`) ? spec.slice(name.length + 1) : undefined;
+          return {
+            package: name,
+            directory: workspaces.get(name)?.directory ?? "",
+            imports: d.star ? ["*"] : [...d.imports],
+            ...(subpath ? { subpath } : {}),
+          };
+        }),
       packageName: packageNameOf(node.path, workspaces),
       exports: exportsOf(node),
       description: DESCRIBED_LANGUAGES.has(graph.language)

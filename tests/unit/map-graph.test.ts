@@ -429,6 +429,46 @@ describe("buildGraph: workspace roots (a deliberate difference from repo_map)", 
   });
 });
 
+describe("buildGraph: workspace imports (a deliberate difference from repo_map)", () => {
+  test("an import of a workspace package by name is an edge to its entry file", async () => {
+    const g = await buildGraph(
+      repo({
+        "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',
+        "packages/core/package.json": '{"name": "@s/core"}\n',
+        "packages/core/src/index.ts": "export const u = 1;\n",
+        "packages/cli/package.json": '{"name": "@s/cli"}\n',
+        "packages/cli/src/index.ts": 'import { u } from "@s/core";\nexport const v = u;\n',
+      }),
+    );
+    const cli = g.files.get("packages/cli/src/index.ts");
+    expect(cli?.internal.map((d) => [d.file, d.imports, d.workspace])).toEqual([
+      ["packages/core/src/index.ts", ["u"], "@s/core"],
+    ]);
+    expect(cli?.external).toEqual([]);
+  });
+
+  test("a single package's import of its own name is an edge to its entry (1.x F43)", async () => {
+    const g = await buildGraph(
+      repo({
+        "package.json": '{"name": "demo", "main": "src/index.ts"}\n',
+        "src/index.ts": "export const a = 1;\n",
+        "tests/a.test.ts": 'import { a } from "demo";\nexport const t = a;\n',
+      }),
+    );
+    expect(g.files.get("tests/a.test.ts")?.internal.map((d) => d.file)).toEqual(["src/index.ts"]);
+  });
+
+  test("an unknown package stays external", async () => {
+    const g = await buildGraph(
+      repo({
+        "package.json": '{"name": "demo", "main": "src/index.ts"}\n',
+        "src/index.ts": 'import x from "lodash";\nexport const a = x;\n',
+      }),
+    );
+    expect(g.files.get("src/index.ts")?.external).toEqual(["lodash"]);
+  });
+});
+
 describe("buildGraph: thin launchers", () => {
   /** A repo whose bin is a launcher with the body `body`. */
   const launcherRepo = (body: string): string =>

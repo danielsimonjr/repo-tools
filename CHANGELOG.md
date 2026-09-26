@@ -175,6 +175,12 @@ All notable changes to this project are recorded in this file. The format follow
   `package.json` of each workspace package, then the extra entries of depgraph, then a
   `src/index.*` file. The workspace roots are a deliberate difference from the Python tool. On
   MathTS, the roots go from 0 to 1167, and each disposition equals depgraph 1.x.
+- `map`: an import of a workspace package by name is now an edge to its entry file. In a single
+  package, an import of its own name is an edge too (1.x fix F43). The Python tool keeps each
+  such import as an external package, so a monorepo had no edges between its packages. The
+  import stays external when the census does not hold the entry file. The adapter lists these
+  edges as workspace edges, as depgraph 1.x does. On MathTS, 485 exports that other packages
+  use are no longer counted as unused.
 
 ## [1.1.0] - 2026-09-25
 

@@ -23,6 +23,8 @@ export interface Dependency {
    * Barrel expansion lists the names such an edge carries; the extras need the star itself.
    */
   star?: boolean;
+  /** The workspace package that a package-name import names (not written to the graph JSON). */
+  workspace?: string;
 }
 
 /** One source file of the graph. */

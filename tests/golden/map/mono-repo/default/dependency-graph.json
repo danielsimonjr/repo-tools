@@ -18,11 +18,16 @@
         ]
       },
       "packages/cli/src/main.ts": {
-        "externalDependencies": [
-          "@scope/core"
-        ],
+        "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "packages/core/src/index.ts",
+            "imports": [
+              "add"
+            ],
+            "typeOnly": false
+          },
           {
             "file": "packages/cli/src/format.ts",
             "imports": [

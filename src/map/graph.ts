@@ -11,6 +11,9 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
+import { resolveWorkspaceSource, workspaceTarget } from "../depgraph/resolver.ts";
+import { selfPackage } from "../depgraph/roots.ts";
+import type { WorkspacePackage } from "../depgraph/types.ts";
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { B, pyRepr, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
@@ -376,6 +379,14 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
   const skippedLinks = new Set<string>();
   const found = discover(root, language, skippedLinks);
   const known = new Set(found.map((f) => f.path));
+  // The workspace packages that a package-name import can reach (TypeScript only).
+  const workspaces: Map<string, WorkspacePackage> = new Map();
+  if (language === "typescript") {
+    const members = detectWorkspaces(root);
+    const self = members.size === 0 ? selfPackage(root) : undefined;
+    for (const [name, ws] of self ? [[self.name, self] as const] : members)
+      workspaces.set(name, ws);
+  }
   if (language === "typescript" || language === "python") await loadGrammar(language);
   const resolver = getResolver(language);
   const read = READERS[language];
@@ -445,6 +456,25 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
               });
             continue;
           }
+        }
+        // A deliberate difference from repo_map: an import of a workspace package by name (or of
+        // a single package's own name, 1.x fix F43) is an edge to its entry file, when the
+        // census holds that file. Otherwise the import stays external.
+        const hit =
+          workspaces.size > 0 ? resolveWorkspaceSource(workspaces, imp.specifier) : undefined;
+        const wsFile = hit && workspaceTarget(workspaces, hit.ws.name, hit.subpath, known);
+        if (hit && wsFile && known.has(wsFile)) {
+          internal.push({
+            file: wsFile,
+            imports: [...imp.names],
+            typeOnly: imp.typeOnly,
+            ...(imp.reExport ? { reExport: true } : {}),
+            ...(imp.sideEffect ? { sideEffect: true } : {}),
+            ...(imp.reExport && imp.names.length === 0 ? { star: true } : {}),
+            specifier: imp.specifier,
+            workspace: hit.ws.name,
+          });
+          continue;
         }
         external.push(imp.specifier);
         packageImports.push({ specifier: imp.specifier, names: [...imp.names], builtin: false });

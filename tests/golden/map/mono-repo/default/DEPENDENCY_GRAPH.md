@@ -46,7 +46,7 @@ The codebase is organized into the following modules:
 
 ### `packages/cli/src/main.ts` - main module
 
-**External Dependencies:**
+**Workspace Dependencies:**
 | Package | Import |
 |---------|--------|
 | `@scope/core` | `add` |
