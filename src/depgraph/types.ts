@@ -13,6 +13,11 @@ export interface Dependency {
   typeOnly?: boolean;
   /** True for a bare side-effect import (`import './x.js';`): it binds no name (fix F10). */
   sideEffect?: boolean;
+  /**
+   * The root-relative target, when the map engine resolved it already (2.0.0). The analyzers use
+   * it in place of resolving `file` again. A 1.x parse never sets it.
+   */
+  resolved?: string;
 }
 
 /** An import from a package that is not a workspace member and not a Node built-in. */
@@ -74,19 +79,22 @@ export interface DependencyMatrix {
   };
 }
 
-/** The totals of one run. */
+/**
+ * The totals of one run. The per-kind export counts are optional: depgraph 1.x always sets them,
+ * and the map engine sets them for TypeScript only (design decision D2).
+ */
 export interface Statistics {
   totalTypeScriptFiles: number;
   totalModules: number;
   totalLinesOfCode: number;
   totalExports: number;
-  totalClasses: number;
-  totalInterfaces: number;
-  totalFunctions: number;
-  totalTypeGuards: number;
-  totalEnums: number;
-  totalConstants: number;
-  totalReExports: number;
+  totalClasses?: number;
+  totalInterfaces?: number;
+  totalFunctions?: number;
+  totalTypeGuards?: number;
+  totalEnums?: number;
+  totalConstants?: number;
+  totalReExports?: number;
   totalTypeOnlyImports: number;
   /** The number of runtime cyclic components (fix F26). */
   runtimeCyclicComponents: number;

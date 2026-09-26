@@ -4,7 +4,7 @@
  * test source holds no raw control or separator character.
  */
 import { describe, expect, test } from "bun:test";
-import { pyRepr, pySplit, pySplitlines, pyStrip } from "../../src/ste/py.ts";
+import { pyRepr, pySplit, pySplitlines, pyStrip } from "../../src/py.ts";
 
 const ch = (...codes: number[]): string => String.fromCharCode(...codes);
 const [LF, CR, VT, FS, NEL, LS] = [ch(10), ch(13), ch(11), ch(0x1c), ch(0x85), ch(0x2028)];

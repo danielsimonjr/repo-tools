@@ -9,7 +9,7 @@
  * the other. A regex here is a source string, so each harness can add the flags that it needs.
  * All of them need the `u` flag, because `W`, `B` and `S` use Unicode property classes.
  */
-import { B, ci, S, W } from "./py.ts";
+import { B, ci, S, W } from "../py.ts";
 
 /** Past participles with no -ed or -en end ("The tests are run by CI"). */
 export const IRREGULAR_PARTICIPLES =

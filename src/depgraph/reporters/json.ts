@@ -6,17 +6,11 @@
  */
 import { cleanExportName, generateFallbackDescription } from "../parser.ts";
 import { isSrcIndex } from "../paths.ts";
-import { resolvePath } from "../resolver.ts";
+import { targetOf } from "../resolver.ts";
 import type { CyclicComponents, ModuleMap, PackageJson, ParsedFile, Statistics } from "../types.ts";
 
-/** The dependency-graph.json object. The key order is the report order. */
-export function generateJSON(
-  files: ParsedFile[],
-  modules: ModuleMap,
-  stats: Statistics,
-  cycles: CyclicComponents,
-  packageJson: PackageJson,
-): object {
+/** The `modules` object of the report: each module's files with depgraph's per-file fields. */
+export function modulesJsonOf(modules: ModuleMap): Record<string, Record<string, object>> {
   const modulesJson: Record<string, Record<string, object>> = {};
   for (const [category, categoryFiles] of Object.entries(modules)) {
     const out: Record<string, object> = {};
@@ -48,12 +42,38 @@ export function generateJSON(
       out[path] = fileData;
     }
   }
-  const layers = Object.keys(modules)
+  return modulesJson;
+}
+
+/** The layers of the report: one per module that holds a file, with a capitalized name. */
+export function layersOf(modules: ModuleMap): { name: string; files: string[] }[] {
+  return Object.keys(modules)
     .map((name) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
       files: Object.keys(modules[name] ?? {}),
     }))
     .filter((l) => l.files.length > 0);
+}
+
+/** The entry points of the report: each `src/index.ts` (fix F31: by path segments). */
+export function entryPointsOf(
+  files: ParsedFile[],
+): { file: string; type: string; description: string }[] {
+  return files
+    .filter((f) => isSrcIndex(f.path))
+    .map((f) => ({ file: f.path, type: "main", description: f.description || "Entry Point" }));
+}
+
+/** The dependency-graph.json object. The key order is the report order. */
+export function generateJSON(
+  files: ParsedFile[],
+  modules: ModuleMap,
+  stats: Statistics,
+  cycles: CyclicComponents,
+  packageJson: PackageJson,
+): object {
+  const modulesJson = modulesJsonOf(modules);
+  const layers = layersOf(modules);
   return {
     metadata: {
       name: packageJson.name,
@@ -62,10 +82,7 @@ export function generateJSON(
       totalModules: stats.totalModules,
       totalExports: stats.totalExports,
     },
-    entryPoints: files
-      // Fix F31: match the path segments, not a text suffix.
-      .filter((f) => isSrcIndex(f.path))
-      .map((f) => ({ file: f.path, type: "main", description: f.description || "Entry Point" })),
+    entryPoints: entryPointsOf(files),
     modules: modulesJson,
     dependencyGraph: {
       // Fix F26: strongly connected components, each with its members and one cycle.
@@ -147,7 +164,7 @@ export function generateCompactSummary(
       p: f.path.split("/").slice(-2).join("/"),
       i: f.internalDependencies.length,
       o: files.filter((other) =>
-        other.internalDependencies.some((d) => resolvePath(other.path, d.file, known) === f.path),
+        other.internalDependencies.some((d) => targetOf(other.path, d, known) === f.path),
       ).length,
     }))
     .sort((a, b) => b.i + b.o - (a.i + a.o))

@@ -1,7 +1,7 @@
 /**
- * The Python string behaviour that the STE checker depends on.
+ * The Python string behaviour that the ported Python tools (STE, map) depend on.
  *
- * The checker is a port of a Python tool, and its findings must be the same bytes. Python and
+ * The ports must give the same bytes as the Python tools. Python and
  * JavaScript differ in these places:
  *
  * - Python's `\w` and `\b` match Unicode letters and digits. JavaScript's match ASCII only, even
@@ -14,8 +14,8 @@
  * - `repr()` has its own quoting and escape rules.
  */
 
-/** The Python white-space characters (`str.isspace()`), as a character-class body. */
-const SPACE_BODY =
+/** The Python white-space characters (`str.isspace()`), as a character-class body (for a negated class). */
+export const SPACE_BODY =
   "\\t\\n\\v\\f\\r\\x1c-\\x1f \\x85\\xa0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000";
 
 /** Python `\s` (a character class). Use it in a regex with the `u` flag. */
@@ -141,4 +141,40 @@ export function pyRepr(text: string): string {
  */
 export function reEscape(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Python `posixpath.dirname`. */
+export function pyDirname(path: string): string {
+  const head = path.slice(0, path.lastIndexOf("/") + 1);
+  if (head !== "" && head !== "/".repeat(head.length)) return head.replace(/\/+$/, "");
+  return head;
+}
+
+/** Python `posixpath.join`. */
+export function pyJoin(first: string, ...rest: string[]): string {
+  let path = first;
+  for (const part of rest) {
+    if (part.startsWith("/")) path = part;
+    else if (path === "" || path.endsWith("/")) path += part;
+    else path += `/${part}`;
+  }
+  return path;
+}
+
+/** Python `posixpath.normpath`: removes `.` and empty parts, and folds `..` where it can. */
+export function pyNormpath(path: string): string {
+  if (path === "") return ".";
+  let initialSlashes = path.startsWith("/") ? 1 : 0;
+  if (path.startsWith("//") && !path.startsWith("///")) initialSlashes = 2;
+  const comps: string[] = [];
+  for (const comp of path.split("/")) {
+    if (comp === "" || comp === ".") continue;
+    if (comp !== ".." || (initialSlashes === 0 && comps.length === 0) || comps.at(-1) === "..") {
+      comps.push(comp);
+    } else if (comps.length > 0) {
+      comps.pop();
+    }
+  }
+  const joined = "/".repeat(initialSlashes) + comps.join("/");
+  return joined || ".";
 }

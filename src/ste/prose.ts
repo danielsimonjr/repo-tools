@@ -15,7 +15,7 @@ import {
   pyStrip,
   reEscape,
   S,
-} from "./py.ts";
+} from "../py.ts";
 import {
   AMBIGUOUS_SOURCE,
   MAX_WORDS_PROCEDURAL as MAX_WORDS,

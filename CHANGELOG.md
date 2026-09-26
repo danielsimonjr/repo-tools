@@ -6,6 +6,147 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- 2.0.0 engine, step 1: `src/map/discovery.ts` ports `repo_map/discovery.py` from the
+  architecture-docs skill. It holds the language detection, the file census and the area and
+  disposition rules. It refuses a repository in an unsupported language. The census comes from
+  `git ls-files`, or from a pruned walk. The 30 tests of its four test files are ported. Four
+  repositories give the same result in the port and in the Python tool: memoryjs, Mathts,
+  universal-physics-tensor and repo-tools. For all 3,717 files, the language, path, area,
+  disposition and line count agree. The file order is code-unit order on every operating system.
+- 2.0.0 engine, step 2: the TypeScript reader (`src/map/parsing.ts`) and the lazy grammar loader
+  (`src/map/grammars.ts`), on tree-sitter-typescript 0.23.2. The 18 tests of `test_parsing.py` are
+  ported; a synthetic barrel file replaces the source test's absolute path. On 3,719 files of four
+  repositories, the port gives the same imports, exports, kinds and default export as the Python
+  reader, file by file.
+- 2.0.0 engine, step 3: the C# and Rust readers (`parseCs`, `parseRs`), regex readers ported
+  with their exact behavior. Python's line-start anchor and `.` get exact translations. The 22
+  reader tests of `test_parsing_csharp.py` and `test_rust.py` are ported.
+- 2.0.0 engine, step 4: the Python reader (`parsePy`) on tree-sitter-python 0.25.0, in place of
+  CPython's `ast`. The import order is the order of `ast.walk` (ast depth, then source position).
+  A module that does not parse raises `SyntaxError`. The 9 tests of `test_parsing_python.py` are
+  ported; 8 new tests pin the import order and the export forms against CPython's output. The
+  Python, C# and Rust readers match the Python tool file by file on 726 files. The files come
+  from 7 public repositories: PITS-MRAS, auto-memory, fermat-mcp and memvid (Python), IronClaw
+  (Rust), ui-mcp and Windows-mcp (C#).
+- 2.0.0 engine, step 5: the resolvers (`src/map/resolvers.ts`) for TypeScript, Python, C# and
+  Rust, with Python's `posixpath` rules in `src/py.ts`. The Python standard-library list is the
+  `sys.stdlib_module_names` of CPython 3.13.15, as generated data. The 35 resolver tests of four
+  test files are ported.
+- Tests: `tests/unit/node-compat.test.ts` also fails when `src/` uses the `Bun` global or a
+  `bun:` module, because `npx` runs the Node bundle. It found `Bun.spawnSync` in the map
+  discovery; the git file list now comes from `node:child_process`.
+- 2.0.0 engine, step 6: the graph (`src/map/graph.ts`) and its schema (`src/map/schema.ts`).
+  It holds the classify-before-resolve buckets, barrel expansion, entry-point roots for four
+  languages, thin launchers, reachability and simple-cycle enumeration. The 29 tests of
+  `test_schema.py` and `test_graph.py` are ported. On 11 repositories and 4,456 files, the port
+  and the Python tool give the same dispositions, ordered edges, buckets, roots and warnings.
+  The empty-repo warning names the root, not its absolute path (output rule R4).
+  `pyproject.toml` is read with `smol-toml` 1.9.0, bundled and pinned.
+- 2.0.0 engine: the end-to-end graph tests of C#, Python and Rust are ported (18 tests, from
+  `test_graph_csharp.py`, `test_python_repo_end_to_end.py` and `test_rust.py`).
+- 2.0.0 engine, step 7: the four core artifacts (`src/map/artifacts.ts`). They are
+  `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json` and
+  `unused-analysis.json`, with 27 ported tests. On 11 repositories, all 44 files are
+  byte-identical to the Python tool after the approved changes. The port writes LF line ends and
+  schema version 2.0.0, with no `generated` field. Warnings name no absolute root path. Paths
+  sort by code unit, and the Python tool sorts them in the Windows case-insensitive order.
+- 2.0.0 engine: the artifact tests of C# and Rust are ported (16 tests, from
+  `test_csharp_repo_end_to_end.py`, `test_unused_csharp.py` and `test_rust_unused_caveat.py`).
+  The source tests that read a local repository are not ported. The side-1 parity run covers
+  that repository.
+- 2.0.0 engine: the read-only queries (`src/map/query.ts`, from `repo_map/query.py`):
+  `loadGraph`, `dependents`, `symbolUsers` and `cycles`, with 23 ported tests. The query module
+  reads only the graph JSON. A test scans its imports and fails if a reader, resolver, grammar or
+  graph module is reachable. A 1.x graph is refused, because its major version is not 2.
+- 2.0.0 engine: the simple-cycle enumeration moves to `src/map/cycles.ts`. The graph and the
+  queries share it. The Python tool keeps two copies of this algorithm. On 10 repositories, the
+  artifacts are byte-identical before and after the move.
+- 2.0.0 engine (design decision D2): `dependency-graph.json` statistics also count the cyclic
+  components. The new keys are `runtimeCyclicComponents`, `typeOnlyCyclicComponents`,
+  `runtimeFilesInCycles` and `typeOnlyFilesInCycles`, after `circularDepsTruncated`. A cap never
+  truncates these counts. The Tarjan search moves from `src/depgraph/cycles.ts` to
+  `src/map/cycles.ts`, so depgraph and the core graph count components in the same way.
+- 2.0.0 engine (design decision D2): for a TypeScript repo, the statistics also give the
+  per-kind export counts of depgraph. The keys are `totalClasses`, `totalInterfaces`,
+  `totalFunctions`, `totalTypeGuards`, `totalEnums`, `totalConstants` and `totalReExports`. The
+  core reader gives the kinds, so the counts come from one parser. On memoryjs, each file has
+  the same names of each kind as in depgraph 1.x. The totals differ for two reasons. The core
+  counts every area, and depgraph counts the `src` files only. Also, depgraph counts an
+  overloaded or merged name one time for each declaration.
+- 2.0.0 engine (design decisions D3 and D5): `src/map/adapter.ts` changes the `src` files of the
+  graph into depgraph's parsed-file records. Then depgraph's analyzers run on the one graph for
+  each language. Each edge carries its resolved target. The new helper `targetOf` uses that
+  target, and a 1.x parse still resolves the specifier. The graph now also keeps each file's
+  export kinds, re-exports and re-export edges. The graph JSON does not write them. The records
+  have no workspace edges and no package name. The graph does not keep these facts.
+- 2.0.0 engine (design decision D3): `src/map/layers.ts` writes `dependency-layers.json`, which
+  is depgraph's subsystem view built on the graph. The file holds `metadata`, `entryPoints`,
+  `modules`, `cyclicComponents` and `layers`. `modules`, `entryPoints` and `layers` hold the
+  `src` files, as in depgraph 1.x. `cyclicComponents` holds every area, so its counts agree with
+  the core statistics. The adapter now also gives each edge its written specifier, and the
+  names of each package or built-in import. On memoryjs, the modules, files, entry points and
+  layers are identical to depgraph 1.x, and each field difference has a recorded cause.
+  `generateJSON` gets three helpers (`modulesJsonOf`, `layersOf`, `entryPointsOf`), and its
+  output does not change.
+- 2.0.0 engine (design decisions D3 and D5): `src/map/reports.ts` writes `DEPENDENCY_GRAPH.md`,
+  `dependency-graph.yaml` and `dependency-summary.compact.json` for each language. The
+  Markdown and the compact summary show the subsystem view with the core statistics. The YAML
+  is a copy of the core `dependency-graph.json` in YAML. The Markdown banner names
+  `repo-tools map`, and its table uses language-neutral labels. A language with no kind counts
+  gets no kind rows. In depgraph, `generateMarkdown` gets an optional `summaryRows` parameter.
+  Its cycle section counts the files of the listed components. The per-kind export counts of
+  `Statistics` are optional. After these changes, depgraph 1.x writes all 12 reports on
+  memoryjs byte-identical to a run before them.
+- 2.0.0 engine (design decision D4): `file-inventory.json` also gives depgraph's `byPackage`
+  and `skippedLinks`, the links that discovery does not follow. A walk does not follow a folder
+  link. In a git work tree, discovery does not follow a tracked link (mode 120000) to a folder
+  or to a missing file. The new `gitTrackedLinks` reads the modes with `git ls-files --stage`. The
+  git branch has a test that makes a folder link when the host permits it. The other core
+  files of 10 repositories stay byte-identical.
+- 2.0.0 engine (design decision D4): for a TypeScript repo, `duplicate-symbols.json` also
+  holds depgraph's classified lists: `runtime`, `types`, `classificationNote` and the four
+  summary counts. The allowlist is `<root>/docs/architecture/duplicate-allowlist.json`,
+  never a file in the output folder (D9). A declaration file (`.d.ts`) is no definer in the
+  classified lists, because it has no body. Another language gets an explicit
+  `classificationNote` and no classified lists. The adapter now gives each file its workspace
+  package, as depgraph 1.x does. On memoryjs, MathTS and universal-physics-tensor, each
+  classified entry is identical to depgraph 1.x. The one exception is a 1.x definer that is a
+  declaration file.
+- 2.0.0 engine (design decisions D4 and D5): `src/map/markdown.ts` writes `FILE_INVENTORY.md`,
+  `duplicate-symbols.md` and `unused-analysis.md` for each language. Each report reads the
+  JSON files in the output folder. A TypeScript duplicate report keeps the depgraph renderer.
+  Another language gets the name-only list and the explicit note. The inventory and unused
+  reports have new text, because the 1.x text described a census of TypeScript files only. The
+  unused report also lists the dormant files of the core reachability.
+- 2.0.0 engine (design decision D5): `src/map/coverage.ts` writes `TEST_COVERAGE.md` and
+  `test-coverage.json` for each language, with depgraph's analyzer. The name of a file decides
+  if it is a test. For TypeScript and JavaScript, the name is `*.test.*` or `*.spec.*`, as in
+  1.x. For Python, the name is `test_*.py` or `*_test.py`. For C# and Rust, each file in the
+  tests area is a test. A test also covers a file that it loads with a literal `import()`, or
+  through a relative `dist/` path. The core graph has no edge for these loads. The coverage
+  policy is `<root>/docs/architecture/coverage-policy.json` (D9). The reader records the bare
+  side-effect imports and the literal `import()` specifiers of TypeScript. The graph JSON does
+  not write them. On memoryjs, MathTS and universal-physics-tensor, the tested files are the
+  same as in depgraph 1.x.
+- 2.0.0 engine (design decision D5): `src/map/surfaces.ts` writes
+  `package-export-surfaces.json` for TypeScript with depgraph's public-surface rules. Fix: a
+  bare `export *` edge now keeps a `star` flag, and the adapter shows it as `*`, as 1.x does.
+  Before the fix, barrel expansion replaced the `*` with names. Then a name deep in an
+  `export *` chain was not public, which a test found. The layers module entries show star
+  edges as 1.x does. On memoryjs the surfaces are identical to 1.x. On MathTS and
+  universal-physics-tensor, each difference has a recorded cause.
+- 2.0.0 engine (design decision D5): `package-export-surfaces.json` for Python and Rust, with a
+  `note` that gives the rule. A Python package lists its `__all__`, else the public names that
+  its `__init__.py` defines. A Rust library crate root (`lib.rs`) lists its `pub` items and the
+  names of its plain `pub use` statements. The new `pubUseNames` reads an alias only as the
+  whole word `as`, so a name such as `HashMap` keeps its letters. For C#, no file is written,
+  because C# has no rule for a public surface of a package.
+- Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
+  `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
+  them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
+
 ## [1.1.0] - 2026-09-25
 
 The STE release. `repo-tools ste` checks Markdown, and docstring prose with `--prose`, against the

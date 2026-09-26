@@ -22,7 +22,7 @@ import {
   pyStrip,
   reEscape,
   S,
-} from "./py.ts";
+} from "../py.ts";
 import {
   AMBIGUOUS_SOURCE,
   IDENTIFIER_SOURCE,

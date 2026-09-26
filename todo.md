@@ -69,6 +69,26 @@
 - [x] A table of every behavioral difference between the two STE checkers, in `docs/design.md`.
 - [x] STE parity: `repo-tools ste` and `ste_check.py` give the same output on a real document corpus.
 
+## 2.0.0: the unified engine (repo_map port)
+
+- [ ] The Rust `use` reader cuts a name at the letters `as` inside a word (`HashMap` becomes `H`):
+  the Python source splits on `as` after it removes white space. Fix it as a whole-word alias,
+  with its own parity verdict (repo_map-wrong), after the side-1 parity record.
+- [ ] `repo-tools map` (D8): the command that writes every 2.0.0 output. `depgraph` stays a
+  deprecated alias through 2.x. The scan-scope flags follow the review decision (asked for on
+  2026-09-26).
+- [ ] The gates of `map`: `--check-census`, `--strict-orphans`, `--strict-census`,
+  `--check-duplicates`, `--no-regen`, `--write-duplicate-baseline`, and the extension hooks.
+- [ ] `--api-surface` on the graph (D5): TypeScript as in 1.x, Python `__all__`, Rust `pub`. For
+  C#, exit 1 with a message.
+- [ ] `repo-tools query` reads the core graph (D8): `dependents`, `symbol-users` and `cycles`
+  get repo_map's meaning, and `cycles --components` lists the components.
+- [ ] Build (D7): the four `.wasm` files go into `dist/` and into the package `files`. Smoke
+  test the exe and the Node bundle on Node 20 and 22.
+- [ ] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
+  and side 2 against depgraph 1.x.
+- [ ] Decision for the PR review: dynamic `import()` edges in the core graph (D1 open point).
+
 ## Post-release list (filed, not worked in v1)
 
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
