@@ -399,6 +399,76 @@ describe("buildGraph: dispositions and roots", () => {
   });
 });
 
+describe("buildGraph: workspace roots (a deliberate difference from repo_map)", () => {
+  const MONO = {
+    "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',
+    "packages/core/package.json": '{"name": "@s/core", "main": "dist/index.js"}\n',
+    "packages/core/src/index.ts": 'export { u } from "./util.js";\n',
+    "packages/core/src/util.ts": "export const u = 1;\n",
+    "packages/core/src/dead.ts": "export const dead = 1;\n",
+    "packages/cli/package.json": '{"name": "@s/cli", "bin": {"x": "dist/cli.js"}}\n',
+    "packages/cli/src/cli.ts": "export const run = 1;\n",
+    "packages/plain/package.json": '{"name": "@s/plain"}\n',
+    "packages/plain/src/index.ts": "export const p = 1;\n",
+  };
+
+  test("each workspace package gives its entry files as roots", async () => {
+    const g = await buildGraph(repo(MONO));
+    expect(new Set(g.roots)).toEqual(
+      new Set([
+        "packages/core/src/index.ts",
+        "packages/cli/src/cli.ts",
+        "packages/plain/src/index.ts",
+      ]),
+    );
+    expect(g.files.get("packages/core/src/util.ts")?.disposition).toBe("reachable");
+    expect(g.files.get("packages/core/src/dead.ts")?.disposition).toBe("orphan");
+    expect(g.warnings.some((w) => w.includes("could not determine any entry-point roots"))).toBe(
+      false,
+    );
+  });
+});
+
+describe("buildGraph: workspace imports (a deliberate difference from repo_map)", () => {
+  test("an import of a workspace package by name is an edge to its entry file", async () => {
+    const g = await buildGraph(
+      repo({
+        "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',
+        "packages/core/package.json": '{"name": "@s/core"}\n',
+        "packages/core/src/index.ts": "export const u = 1;\n",
+        "packages/cli/package.json": '{"name": "@s/cli"}\n',
+        "packages/cli/src/index.ts": 'import { u } from "@s/core";\nexport const v = u;\n',
+      }),
+    );
+    const cli = g.files.get("packages/cli/src/index.ts");
+    expect(cli?.internal.map((d) => [d.file, d.imports, d.workspace])).toEqual([
+      ["packages/core/src/index.ts", ["u"], "@s/core"],
+    ]);
+    expect(cli?.external).toEqual([]);
+  });
+
+  test("a single package's import of its own name is an edge to its entry (1.x F43)", async () => {
+    const g = await buildGraph(
+      repo({
+        "package.json": '{"name": "demo", "main": "src/index.ts"}\n',
+        "src/index.ts": "export const a = 1;\n",
+        "tests/a.test.ts": 'import { a } from "demo";\nexport const t = a;\n',
+      }),
+    );
+    expect(g.files.get("tests/a.test.ts")?.internal.map((d) => d.file)).toEqual(["src/index.ts"]);
+  });
+
+  test("an unknown package stays external", async () => {
+    const g = await buildGraph(
+      repo({
+        "package.json": '{"name": "demo", "main": "src/index.ts"}\n',
+        "src/index.ts": 'import x from "lodash";\nexport const a = x;\n',
+      }),
+    );
+    expect(g.files.get("src/index.ts")?.external).toEqual(["lodash"]);
+  });
+});
+
 describe("buildGraph: thin launchers", () => {
   /** A repo whose bin is a launcher with the body `body`. */
   const launcherRepo = (body: string): string =>

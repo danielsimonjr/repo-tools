@@ -8,9 +8,13 @@
  * rule R4); `.csproj` files are found in code-unit order; a TOML parse-error message has the words
  * of the TOML parser in use.
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { type Dirent, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
+import { resolveWorkspaceSource, workspaceTarget } from "../depgraph/resolver.ts";
+import { selfPackage } from "../depgraph/roots.ts";
+import type { WorkspacePackage } from "../depgraph/types.ts";
+import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { B, pyRepr, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
 import { type CycleLimits, type CycleResult, simpleCycles } from "./cycles.ts";
@@ -244,7 +248,7 @@ const CSPROJ_EXE = new RegExp(`<OutputType>${S}*(Exe|WinExe)${S}*</OutputType>`,
 function rglobParts(root: string, suffix: string): string[][] {
   const found: string[][] = [];
   const go = (dir: string, parts: string[]): void => {
-    let entries: import("node:fs").Dirent[];
+    let entries: Dirent[];
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
@@ -318,10 +322,41 @@ function findRoots(
   if (language === "python") return pythonRoots(root, known);
   if (language === "csharp") return csharpRoots(root, known);
   if (language === "rust") return rustRoots(known);
-  const [roots, warnings] = packageJsonRoots(root, known);
+  const [rootRoots, rootWarnings] = packageJsonRoots(root, known);
+  const [wsRoots, wsWarnings] = workspaceRoots(root, known);
+  const roots = [...new Set([...rootRoots, ...wsRoots])];
+  const warnings = [...rootWarnings, ...wsWarnings];
   if (roots.length > 0) return [roots, warnings];
   for (const cand of FALLBACK_ROOTS) if (known.has(cand)) return [[cand], warnings];
   return [[], warnings];
+}
+
+/**
+ * The entry roots of each workspace package (a deliberate difference from repo_map, which reads
+ * the root package.json only, so each file of a workspace monorepo showed as an orphan). Per
+ * package: its package.json entries (as for the root package), then depgraph's extra entries
+ * (`exports` subpaths, `bin`, scripts, tsup config), else a conventional `src/index.*` file.
+ */
+function workspaceRoots(root: string, known: ReadonlySet<string>): [string[], string[]] {
+  const roots: string[] = [];
+  const warnings: string[] = [];
+  for (const ws of detectWorkspaces(root).values()) {
+    if (ws.directory === "") continue;
+    const prefix = `${ws.directory}/`;
+    const local = new Set(
+      [...known].filter((p) => p.startsWith(prefix)).map((p) => p.slice(prefix.length)),
+    );
+    const [found, pkgWarnings] = packageJsonRoots(join(root, ws.directory), local);
+    const pkgRoots = found.map((p) => prefix + p);
+    for (const entry of ws.extraEntries) if (known.has(entry)) pkgRoots.push(entry);
+    if (pkgRoots.length === 0) {
+      const fallback = FALLBACK_ROOTS.map((c) => prefix + c).find((c) => known.has(c));
+      if (fallback) pkgRoots.push(fallback);
+    }
+    roots.push(...pkgRoots);
+    for (const w of pkgWarnings) warnings.push(`${prefix}${w}`);
+  }
+  return [roots, warnings];
 }
 
 const READERS: Readonly<Record<Language, (source: string) => ParsedModule>> = {
@@ -344,6 +379,14 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
   const skippedLinks = new Set<string>();
   const found = discover(root, language, skippedLinks);
   const known = new Set(found.map((f) => f.path));
+  // The workspace packages that a package-name import can reach (TypeScript only).
+  const workspaces: Map<string, WorkspacePackage> = new Map();
+  if (language === "typescript") {
+    const members = detectWorkspaces(root);
+    const self = members.size === 0 ? selfPackage(root) : undefined;
+    for (const [name, ws] of self ? [[self.name, self] as const] : members)
+      workspaces.set(name, ws);
+  }
   if (language === "typescript" || language === "python") await loadGrammar(language);
   const resolver = getResolver(language);
   const read = READERS[language];
@@ -413,6 +456,25 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
               });
             continue;
           }
+        }
+        // A deliberate difference from repo_map: an import of a workspace package by name (or of
+        // a single package's own name, 1.x fix F43) is an edge to its entry file, when the
+        // census holds that file. Otherwise the import stays external.
+        const hit =
+          workspaces.size > 0 ? resolveWorkspaceSource(workspaces, imp.specifier) : undefined;
+        const wsFile = hit && workspaceTarget(workspaces, hit.ws.name, hit.subpath, known);
+        if (hit && wsFile && known.has(wsFile)) {
+          internal.push({
+            file: wsFile,
+            imports: [...imp.names],
+            typeOnly: imp.typeOnly,
+            ...(imp.reExport ? { reExport: true } : {}),
+            ...(imp.sideEffect ? { sideEffect: true } : {}),
+            ...(imp.reExport && imp.names.length === 0 ? { star: true } : {}),
+            specifier: imp.specifier,
+            workspace: hit.ws.name,
+          });
+          continue;
         }
         external.push(imp.specifier);
         packageImports.push({ specifier: imp.specifier, names: [...imp.names], builtin: false });

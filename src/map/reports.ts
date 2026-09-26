@@ -8,6 +8,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { MAP_REGENERATE_COMMAND } from "../config.ts";
 import { buildDependencyMatrix } from "../depgraph/analysis.ts";
 import { type BannerOptions, withBanner } from "../depgraph/reporters/banner.ts";
 import { generateCompactSummary } from "../depgraph/reporters/json.ts";
@@ -18,8 +19,7 @@ import { writeReport } from "../io.ts";
 import { projectIdentity, type SubsystemView, subsystemView } from "./layers.ts";
 import type { RepoGraph } from "./schema.ts";
 
-/** The regenerate command that the 2.0.0 reports name (design decision D8). */
-export const MAP_REGENERATE_COMMAND = "repo-tools map";
+export { MAP_REGENERATE_COMMAND };
 
 type CoreStatistics = Record<string, number | boolean | undefined>;
 

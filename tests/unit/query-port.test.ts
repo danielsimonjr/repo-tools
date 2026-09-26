@@ -5,11 +5,14 @@
  *   runtime package. The case lists a runtime to keep the "runtime excluded" assertion.
  * - The source `resolveRoot` (default: two folders above the script) became the `--root` flag
  *   of the strict parser; the default root is the current directory.
+ * - Design decision D8: the query reads the core graph, whose edges hold resolved targets and
+ *   whose built-ins are plain names. The source `resolveSpec` case became "an edge whose target
+ *   is not a file of the graph is dropped". A package comes from a `src/index.ts` file.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { CONFIG_FILE } from "../../src/config.ts";
 import { parseQueryArgs } from "../../src/query/args.ts";
-import { buildForward, type FilePair, invert, resolveSpec } from "../../src/query/graph.ts";
+import { buildForward, type FilePair, invert } from "../../src/query/graph.ts";
 import {
   browserSafePackages,
   computeTaint,
@@ -29,24 +32,25 @@ afterAll(removeTrees);
 const entries: FilePair[] = [
   [
     "plot/src/index.ts",
-    { internalDependencies: [{ file: "./a.js" }, { file: "./b.js" }], nodeDependencies: [] },
+    {
+      internalDependencies: [{ file: "plot/src/a.ts" }, { file: "plot/src/b.ts" }],
+      nodeDependencies: [],
+    },
   ],
-  ["plot/src/a.ts", { internalDependencies: [{ file: "./c.js" }], nodeDependencies: [] }],
-  ["plot/src/b.ts", { internalDependencies: [], nodeDependencies: [{ module: "fs" }] }],
+  ["plot/src/a.ts", { internalDependencies: [{ file: "plot/src/c.ts" }], nodeDependencies: [] }],
+  ["plot/src/b.ts", { internalDependencies: [], nodeDependencies: ["fs"] }],
   ["plot/src/c.ts", { internalDependencies: [], nodeDependencies: [] }],
-  [
-    "plot/src/node-only.ts",
-    { internalDependencies: [], nodeDependencies: [{ module: "child_process" }] },
-  ],
+  ["plot/src/node-only.ts", { internalDependencies: [], nodeDependencies: ["child_process"] }],
 ];
 const allFiles = new Set(entries.map(([f]) => f));
 
 describe("query: the source test cases", () => {
-  test("resolveSpec maps a ./x.js relative import to the sibling .ts file", () => {
-    expect(resolveSpec("plot/src/index.ts", "./a.js", allFiles)).toBe("plot/src/a.ts");
-    expect(resolveSpec("plot/src/a.ts", "./c.js", allFiles)).toBe("plot/src/c.ts");
-    expect(resolveSpec("plot/src/index.ts", "node:fs", allFiles)).toBeNull(); // bare specifier
-    expect(resolveSpec("plot/src/index.ts", "./missing.js", allFiles)).toBeNull(); // no file
+  test("an edge whose target is not a file of the graph is dropped", () => {
+    const withMissing: FilePair[] = [
+      ["plot/src/x.ts", { internalDependencies: [{ file: "plot/src/missing.ts" }] }],
+    ];
+    const forward = buildForward(withMissing, new Set(["plot/src/x.ts"]));
+    expect([...(forward.get("plot/src/x.ts") ?? [])]).toEqual([]);
   });
 
   test("buildForward and invert give the correct reverse edges", () => {
@@ -85,17 +89,15 @@ describe("query: the source test cases", () => {
     expect(findLeaks("plot", forward, direct)).toEqual(["plot/src/b.ts"]);
   });
 
-  test("browserSafePackages = the main entries less the Node runtimes", () => {
-    const graph = {
-      entryPoints: [
-        { file: "plot/src/index.ts", type: "main" },
-        { file: "core/src/index.ts", type: "main" },
-        { file: "server/src/index.ts", type: "main" },
-        { file: "packages/typed-function/src/index.ts", type: "main" },
-        { file: "plot/src/render-file.ts", type: "subpath" }, // not main: ignored
-      ],
-    };
-    const bsp = browserSafePackages(graph, ["server"]);
+  test("browserSafePackages = the src/index.ts packages less the Node runtimes", () => {
+    const files = [
+      "plot/src/index.ts",
+      "core/src/index.ts",
+      "server/src/index.ts",
+      "packages/typed-function/src/index.ts",
+      "plot/src/render-file.ts", // not a src/index.ts file: no package
+    ];
+    const bsp = browserSafePackages(files, ["server"]);
     expect(bsp).toContain("plot");
     expect(bsp).toContain("core");
     expect(bsp).toContain("packages/typed-function");

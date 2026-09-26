@@ -1,0 +1,184 @@
+{
+  "metadata": {
+    "name": "mono-repo",
+    "schemaVersion": "2.0.0",
+    "language": "typescript",
+    "totalFiles": 9,
+    "totalModules": 3,
+    "totalExports": 8
+  },
+  "modules": {
+    "src": {
+      "packages/cli/src/format.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "format"
+        ]
+      },
+      "packages/cli/src/main.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "packages/core/src/index.ts",
+            "imports": [
+              "add"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "packages/cli/src/format.ts",
+            "imports": [
+              "format"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": []
+      },
+      "packages/core/src/index.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "packages/core/src/math.ts",
+            "imports": [
+              "add"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "packages/core/src/types.ts",
+            "imports": [
+              "Pair"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "add",
+          "Pair"
+        ]
+      },
+      "packages/core/src/internal.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "INTERNAL_FLAG"
+        ]
+      },
+      "packages/core/src/math.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "packages/core/src/types.ts",
+            "imports": [
+              "Pair"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "add",
+          "double"
+        ]
+      },
+      "packages/core/src/types.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "Pair"
+        ]
+      },
+      "packages/core/src/worker.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "packages/core/src/math.ts",
+            "imports": [
+              "double"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "workerResult"
+        ]
+      }
+    },
+    "tests": {
+      "packages/core/tests/math.test.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "packages/core/src/math.ts",
+            "imports": [
+              "add"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": []
+      }
+    },
+    "config": {
+      "packages/core/tsup.config.ts": {
+        "externalDependencies": [
+          "tsup"
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": []
+      }
+    }
+  },
+  "statistics": {
+    "totalTypeScriptFiles": 9,
+    "totalSourceFiles": 9,
+    "totalModules": 3,
+    "totalLinesOfCode": 40,
+    "totalExports": 8,
+    "entryRoots": 4,
+    "reachableFiles": 7,
+    "dormantFiles": 0,
+    "orphanedFiles": 0,
+    "testOnlyFiles": 0,
+    "runtimeCircularDeps": 0,
+    "typeOnlyCircularDeps": 0,
+    "totalTypeOnlyImports": 2,
+    "noImporterFileCount": 0,
+    "unusedExportsCount": 2,
+    "circularDepsTruncated": false,
+    "runtimeCyclicComponents": 0,
+    "typeOnlyCyclicComponents": 0,
+    "runtimeFilesInCycles": 0,
+    "typeOnlyFilesInCycles": 0,
+    "totalClasses": 0,
+    "totalInterfaces": 0,
+    "totalFunctions": 3,
+    "totalTypeGuards": 0,
+    "totalEnums": 0,
+    "totalConstants": 2,
+    "totalReExports": 2
+  },
+  "reachability": {
+    "roots": [
+      "packages/cli/src/main.ts",
+      "packages/core/src/index.ts",
+      "packages/core/src/internal.ts",
+      "packages/core/src/worker.ts"
+    ],
+    "reachableCount": 7,
+    "dormantCount": 0,
+    "orphaned": [],
+    "testOnly": []
+  },
+  "warnings": []
+}

@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 1,
+  "entry": "src/index.ts",
+  "stabilityTags": [
+    "public",
+    "internal",
+    "experimental",
+    "beta",
+    "alpha"
+  ],
+  "summary": {
+    "symbols": 6,
+    "runtime": 4,
+    "typeOnly": 2,
+    "byKind": {
+      "class": 1,
+      "function": 3,
+      "interface": 2
+    },
+    "byStability": {
+      "untagged": 6
+    },
+    "undocumented": 2
+  },
+  "symbols": [
+    {
+      "name": "AlphaOptions",
+      "kind": "interface",
+      "line": 7,
+      "async": false,
+      "typeParams": null,
+      "params": null,
+      "returnType": null,
+      "stability": null,
+      "documented": true,
+      "summary": "Options for alpha.",
+      "declaredName": "AlphaOptions",
+      "declaredIn": "src/a.ts",
+      "via": [
+        "src/index.ts"
+      ],
+      "typeOnly": true
+    },
+    {
+      "name": "Bravo",
+      "kind": "class",
+      "line": 6,
+      "async": false,
+      "typeParams": null,
+      "params": null,
+      "returnType": null,
+      "stability": null,
+      "documented": false,
+      "summary": null,
+      "declaredName": "Bravo",
+      "declaredIn": "src/B.ts",
+      "via": [
+        "src/index.ts"
+      ],
+      "typeOnly": false
+    },
+    {
+      "name": "ZedShape",
+      "kind": "interface",
+      "line": 4,
+      "async": false,
+      "typeParams": null,
+      "params": null,
+      "returnType": null,
+      "stability": null,
+      "documented": true,
+      "summary": "A shape.",
+      "declaredName": "ZedShape",
+      "declaredIn": "src/Z/zed.ts",
+      "via": [
+        "src/index.ts",
+        "src/Z/index.ts"
+      ],
+      "typeOnly": true
+    },
+    {
+      "name": "alpha",
+      "kind": "function",
+      "line": 12,
+      "async": false,
+      "typeParams": null,
+      "params": "name: string, options?: AlphaOptions",
+      "returnType": "string",
+      "stability": null,
+      "documented": true,
+      "summary": "Returns a greeting.",
+      "declaredName": "alpha",
+      "declaredIn": "src/a.ts",
+      "via": [
+        "src/index.ts"
+      ],
+      "typeOnly": false
+    },
+    {
+      "name": "render",
+      "kind": "function",
+      "line": 2,
+      "async": false,
+      "typeParams": null,
+      "params": "label: string",
+      "returnType": "string",
+      "stability": null,
+      "documented": true,
+      "summary": "A TSX file.",
+      "declaredName": "render",
+      "declaredIn": "src/view.tsx",
+      "via": [
+        "src/index.ts"
+      ],
+      "typeOnly": false
+    },
+    {
+      "name": "zed",
+      "kind": "function",
+      "line": 8,
+      "async": false,
+      "typeParams": null,
+      "params": "",
+      "returnType": "ZedShape",
+      "stability": null,
+      "documented": false,
+      "summary": null,
+      "declaredName": "zed",
+      "declaredIn": "src/Z/zed.ts",
+      "via": [
+        "src/index.ts",
+        "src/Z/index.ts"
+      ],
+      "typeOnly": false
+    }
+  ],
+  "unresolved": [],
+  "external": [],
+  "files": [
+    {
+      "path": "src/B.ts",
+      "exports": [
+        {
+          "name": "Bravo",
+          "localName": "Bravo",
+          "kind": "class",
+          "line": 6,
+          "async": false,
+          "typeParams": null,
+          "params": null,
+          "returnType": null,
+          "stability": null,
+          "documented": false,
+          "summary": null
+        }
+      ]
+    },
+    {
+      "path": "src/Z/index.ts",
+      "exports": []
+    },
+    {
+      "path": "src/Z/loop.ts",
+      "exports": [
+        {
+          "name": "Loop",
+          "localName": "Loop",
+          "kind": "interface",
+          "line": 4,
+          "async": false,
+          "typeParams": null,
+          "params": null,
+          "returnType": null,
+          "stability": null,
+          "documented": true,
+          "summary": "Type-only cycle with zed.ts."
+        }
+      ]
+    },
+    {
+      "path": "src/Z/zed.ts",
+      "exports": [
+        {
+          "name": "ZedShape",
+          "localName": "ZedShape",
+          "kind": "interface",
+          "line": 4,
+          "async": false,
+          "typeParams": null,
+          "params": null,
+          "returnType": null,
+          "stability": null,
+          "documented": true,
+          "summary": "A shape."
+        },
+        {
+          "name": "zed",
+          "localName": "zed",
+          "kind": "function",
+          "line": 8,
+          "async": false,
+          "typeParams": null,
+          "params": "",
+          "returnType": "ZedShape",
+          "stability": null,
+          "documented": false,
+          "summary": null
+        }
+      ]
+    },
+    {
+      "path": "src/_x.ts",
+      "exports": [
+        {
+          "name": "helper",
+          "localName": "helper",
+          "kind": "function",
+          "line": 2,
+          "async": false,
+          "typeParams": null,
+          "params": "name: string",
+          "returnType": "string",
+          "stability": null,
+          "documented": true,
+          "summary": "Underscore name: sorts between upper and lower case."
+        }
+      ]
+    },
+    {
+      "path": "src/a.ts",
+      "exports": [
+        {
+          "name": "AlphaOptions",
+          "localName": "AlphaOptions",
+          "kind": "interface",
+          "line": 7,
+          "async": false,
+          "typeParams": null,
+          "params": null,
+          "returnType": null,
+          "stability": null,
+          "documented": true,
+          "summary": "Options for alpha."
+        },
+        {
+          "name": "alpha",
+          "localName": "alpha",
+          "kind": "function",
+          "line": 12,
+          "async": false,
+          "typeParams": null,
+          "params": "name: string, options?: AlphaOptions",
+          "returnType": "string",
+          "stability": null,
+          "documented": true,
+          "summary": "Returns a greeting."
+        },
+        {
+          "name": "unusedConstant",
+          "localName": "unusedConstant",
+          "kind": "const",
+          "line": 17,
+          "async": false,
+          "typeParams": null,
+          "params": null,
+          "returnType": null,
+          "stability": null,
+          "documented": false,
+          "summary": null
+        }
+      ]
+    },
+    {
+      "path": "src/ambient.d.ts",
+      "exports": []
+    },
+    {
+      "path": "src/cli.ts",
+      "exports": []
+    },
+    {
+      "path": "src/dyn.ts",
+      "exports": [
+        {
+          "name": "dynamicValue",
+          "localName": "dynamicValue",
+          "kind": "const",
+          "line": 2,
+          "async": false,
+          "typeParams": null,
+          "params": null,
+          "returnType": null,
+          "stability": null,
+          "documented": true,
+          "summary": "Loaded only through a dynamic import."
+        }
+      ]
+    },
+    {
+      "path": "src/index.ts",
+      "exports": []
+    },
+    {
+      "path": "src/orphan.ts",
+      "exports": [
+        {
+          "name": "forgotten",
+          "localName": "forgotten",
+          "kind": "function",
+          "line": 2,
+          "async": false,
+          "typeParams": null,
+          "params": "",
+          "returnType": "void",
+          "stability": null,
+          "documented": true,
+          "summary": "Imported by nothing: an orphan."
+        }
+      ]
+    },
+    {
+      "path": "src/ping.ts",
+      "exports": [
+        {
+          "name": "ping",
+          "localName": "ping",
+          "kind": "function",
+          "line": 4,
+          "async": false,
+          "typeParams": null,
+          "params": "n: number",
+          "returnType": "number",
+          "stability": null,
+          "documented": true,
+          "summary": "Runtime cycle with pong.ts."
+        }
+      ]
+    },
+    {
+      "path": "src/pong.ts",
+      "exports": [
+        {
+          "name": "pong",
+          "localName": "pong",
+          "kind": "function",
+          "line": 3,
+          "async": false,
+          "typeParams": null,
+          "params": "n: number",
+          "returnType": "number",
+          "stability": null,
+          "documented": false,
+          "summary": null
+        }
+      ]
+    },
+    {
+      "path": "src/register.ts",
+      "exports": []
+    },
+    {
+      "path": "src/util/index.ts",
+      "exports": [
+        {
+          "name": "clamp",
+          "localName": "clamp",
+          "kind": "function",
+          "line": 2,
+          "async": false,
+          "typeParams": null,
+          "params": "value: number, low: number, high: number",
+          "returnType": "number",
+          "stability": null,
+          "documented": true,
+          "summary": "Reachable only through the `./util` exports subpath."
+        }
+      ]
+    },
+    {
+      "path": "src/view.tsx",
+      "exports": [
+        {
+          "name": "render",
+          "localName": "render",
+          "kind": "function",
+          "line": 2,
+          "async": false,
+          "typeParams": null,
+          "params": "label: string",
+          "returnType": "string",
+          "stability": null,
+          "documented": true,
+          "summary": "A TSX file."
+        }
+      ]
+    }
+  ]
+}

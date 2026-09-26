@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "name": "mono-repo",
+    "version": "unknown",
+    "schemaVersion": "2.0.0",
+    "language": "typescript"
+  },
+  "entryPoints": [
+    {
+      "file": "packages/core/src/index.ts",
+      "type": "main",
+      "description": "Entry Point"
+    }
+  ],
+  "modules": {
+    "packages/cli": {
+      "packages/cli/src/format.ts": {
+        "description": "format module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "format"
+        ],
+        "functions": [
+          "format"
+        ]
+      },
+      "packages/cli/src/main.ts": {
+        "description": "main module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./format.js",
+            "imports": [
+              "format"
+            ]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@scope/core",
+            "directory": "packages/core",
+            "imports": [
+              "add"
+            ]
+          }
+        ],
+        "exports": []
+      }
+    },
+    "packages/core": {
+      "packages/core/src/index.ts": {
+        "description": "Package entry point for @scope/core (re-exports 2 symbols)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./math.js",
+            "imports": [
+              "add"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./types.js",
+            "imports": [
+              "Pair"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "add",
+          "Pair"
+        ],
+        "reExported": [
+          "add",
+          "Pair"
+        ]
+      },
+      "packages/core/src/internal.ts": {
+        "description": "internal module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "INTERNAL_FLAG"
+        ],
+        "constants": [
+          "INTERNAL_FLAG"
+        ]
+      },
+      "packages/core/src/math.ts": {
+        "description": "math module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types.js",
+            "imports": [
+              "Pair"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "add",
+          "double"
+        ],
+        "functions": [
+          "add",
+          "double"
+        ]
+      },
+      "packages/core/src/types.ts": {
+        "description": "Type definitions (0 interfaces, 1 type aliases)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "packages/core/src/worker.ts": {
+        "description": "worker module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./math.js",
+            "imports": [
+              "double"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "workerResult"
+        ],
+        "constants": [
+          "workerResult"
+        ]
+      }
+    }
+  },
+  "cyclicComponents": {
+    "runtime": [],
+    "typeOnly": []
+  },
+  "layers": [
+    {
+      "name": "Packages/cli",
+      "files": [
+        "packages/cli/src/format.ts",
+        "packages/cli/src/main.ts"
+      ]
+    },
+    {
+      "name": "Packages/core",
+      "files": [
+        "packages/core/src/index.ts",
+        "packages/core/src/internal.ts",
+        "packages/core/src/math.ts",
+        "packages/core/src/types.ts",
+        "packages/core/src/worker.ts"
+      ]
+    }
+  ]
+}

@@ -8,6 +8,45 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools map` (design decision D8): the command of the 2.0.0 engine. It writes each report
+  of the engine into the output folder, for TypeScript/JavaScript, Python, C# and Rust.
+  `repo-tools depgraph` is now its deprecated alias through 2.x, and prints one deprecation line.
+  The 1.x scan-scope flags (`--src`, `--tests`, `--exclude`, `--also-exclude`, `--all`/`-a`,
+  `--reachable-only`, `--include-tests`/`-t`) have no effect in 2.0.0. `map` exits 1 on them,
+  and the alias gives a warning and continues. The config section `map` is the new name of
+  `depgraph`, and a file with both sections exits 1.
+- `map` (design decision D9): the duplicate allowlist and baseline and the coverage policy
+  default to `docs/architecture/`, never to the output folder. A root-relative `--out=../x`
+  writes outside the root.
+- `map` gates: `--strict-orphans`, `--strict-census`, `--check-census`, `--check-duplicates`,
+  `--no-regen` and `--write-duplicate-baseline`, and the `preflight` and `report` hooks of the
+  extensions. `--strict-census` compares the census with a walk of the root. It finds a source
+  file on disk that git does not track. The duplicate gate works for TypeScript only, and says
+  so for another language. The `report` hook receives the core `dependency-graph.json`.
+- `map --api-surface` (design decision D5): TypeScript keeps the 1.x report, and the
+  mini-repo report is byte-identical to the 1.x golden. Python and Rust list the surface names
+  of the entry file. C# exits 1 with the reason.
+- Goldens for `map` (`tests/golden/map`, written by `scripts/update-map-goldens.ts`). The smoke
+  test (design 13.3) runs `map`.
+- README and `docs/design.md` describe the 2.0.0 engine. The README gives `map`, the
+  `depgraph` alias, the report list of `map` and new query examples from the mono-repo fixture.
+  `docs/design.md` has a new section 14, "The 2.0.0 engine". Both documents in `docs/` start
+  with the `repo-map:no-verification` marker and give the reason: neither one makes a claim
+  about the graph of this repository.
+- `docs/parity-2.0.0.md`: the parity record of the 2.0.0 engine on public repositories. On side
+  1, the four core files are identical to the Python tool on 11 repositories, apart from the
+  two deliberate workspace differences on Mathts. A control shows that these two differences
+  cause all of the Mathts differences. Side 2 compares each extra with depgraph 1.x on
+  memoryjs, Mathts and universal-physics-tensor, and gives a verdict for each difference.
+- `repo-tools query` reads the core graph of `map` (design decision D8), and refuses a 1.x graph.
+  `dependents`, `symbol-users` and `cycles` have the meaning of the Python tool. They read each
+  area of the graph, and a path that is not a file of the graph exits 1. `symbol-users` lists
+  files. `cycles` lists the simple cycles, and `cycles --components` lists the runtime and
+  type-only components. `is-public` reads `package-export-surfaces.json` only when it runs. The
+  browser-safety commands serve TypeScript/JavaScript only, and exit 1 with the reason for
+  another language. They now follow the workspace imports too, so they find a `node:` file
+  that another package reaches through an import of its package name.
+
 - 2.0.0 engine, step 1: `src/map/discovery.ts` ports `repo_map/discovery.py` from the
   architecture-docs skill. It holds the language detection, the file census and the area and
   disposition rules. It refuses a repository in an unsupported language. The census comes from
@@ -146,6 +185,32 @@ All notable changes to this project are recorded in this file. The format follow
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
+
+### Fixed
+
+- The code-docs gate passes (399 of 399 exported symbols have a doc comment). Seven exported
+  types had no doc comment. The doc comment of `resolvePath` was apart from its function,
+  because `targetOf` was in the space between them. `src/map/graph.ts` and `src/ste/index.ts`
+  wrote the type `import("node:fs").Dirent` in the code, which the tree-sitter TypeScript
+  grammar cannot parse. They now import the type `Dirent`.
+- `map`: a workspace monorepo now has entry roots. The Python tool reads the root `package.json`
+  only, so each workspace source file showed as an orphan. The engine now also reads the
+  `package.json` of each workspace package, then the extra entries of depgraph, then a
+  `src/index.*` file. The workspace roots are a deliberate difference from the Python tool. On
+  MathTS, the roots go from 0 to 1167, and each disposition equals depgraph 1.x.
+- Build (design decision D7): `scripts/build.ts` now writes the three tree-sitter `.wasm` assets
+  next to `dist/cli.js`, under the names that the bundle refers to. Before this fix, the build
+  kept the JavaScript output only, so the Node bundle had no grammar files. `package.json`
+  `files` adds `dist/*.wasm`, and `npm pack --dry-run` lists the three files. The smoke test
+  passes 8 of 8 steps on the Windows executable, and on `dist/cli.js` with Bun, Node 20, Node
+  22 and Node 24. A bundle with no `.wasm` file fails the smoke test. The engine has three
+  `.wasm` files, not four, because it reads `.tsx` with the TypeScript grammar.
+- `map`: an import of a workspace package by name is now an edge to its entry file. In a single
+  package, an import of its own name is an edge too (1.x fix F43). The Python tool keeps each
+  such import as an external package, so a monorepo had no edges between its packages. The
+  import stays external when the census does not hold the entry file. The adapter lists these
+  edges as workspace edges, as depgraph 1.x does. On MathTS, 485 exports that other packages
+  use are no longer counted as unused.
 
 ## [1.1.0] - 2026-09-25
 

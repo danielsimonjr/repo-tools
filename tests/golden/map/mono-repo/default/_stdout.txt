@@ -1,0 +1,17 @@
+Language: typescript; 9 source files; 4 roots
+Created output directory: docs/architecture
+Written: docs/architecture/dependency-graph.json
+Written: docs/architecture/file-inventory.json
+Written: docs/architecture/duplicate-symbols.json
+Written: docs/architecture/unused-analysis.json
+Written: docs/architecture/dependency-layers.json
+Written: docs/architecture/DEPENDENCY_GRAPH.md
+Written: docs/architecture/dependency-graph.yaml
+Written: docs/architecture/dependency-summary.compact.json
+Written: docs/architecture/FILE_INVENTORY.md
+Written: docs/architecture/duplicate-symbols.md
+Written: docs/architecture/unused-analysis.md
+Written: docs/architecture/TEST_COVERAGE.md
+Written: docs/architecture/test-coverage.json
+Written: docs/architecture/package-export-surfaces.json
+census passed: 9 files

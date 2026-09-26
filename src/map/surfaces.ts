@@ -11,8 +11,15 @@
  *   `pub use` statements.
  * - C#: no rule gives a public surface, so the run writes no file (a "no" is explicit, D5).
  */
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { categorizeFiles, computePublicSurface } from "../depgraph/analysis.ts";
+import {
+  buildApiSurfaceReport,
+  createTsResolver,
+  extractExportDetails,
+  resolveSurface,
+} from "../depgraph/api-surface.ts";
 import { generateSurfacesJson } from "../depgraph/reporters/surfaces.ts";
 import { rootPackageEntries } from "../depgraph/roots.ts";
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
@@ -20,6 +27,76 @@ import { writeReport } from "../io.ts";
 import { sortCodeUnits } from "../sort.ts";
 import { toParsedFiles } from "./adapter.ts";
 import type { RepoGraph } from "./schema.ts";
+
+/**
+ * Writes the `--api-surface` report to `outPath` (design decision D5). TypeScript uses depgraph's
+ * per-export facts engine (it reads the source text from the entry file on, and lists every
+ * `.ts`/`.tsx` source file of the graph). Python and Rust list the surface names of the entry
+ * file, with a note: the facts of the TypeScript report (signatures, JSDoc tags) are not read for
+ * them. C# throws with `NO_SURFACE_REASON`. Returns the number of surface symbols.
+ */
+export function emitApiSurface(
+  graph: RepoGraph,
+  root: string,
+  outPath: string,
+  entry: string,
+  stabilityTags: readonly string[],
+): number {
+  if (graph.language === "typescript") {
+    const load = (p: string): string | null => {
+      try {
+        return readFileSync(join(root, p), "utf8");
+      } catch {
+        return null;
+      }
+    };
+    const opts = { stabilityTags };
+    const surface = resolveSurface(
+      entry,
+      load,
+      createTsResolver((p) => load(p) !== null),
+      opts,
+    );
+    const files = [...graph.files.values()]
+      .filter((n) => n.area === "src" && /\.tsx?$/.test(n.path))
+      .map((n) => ({ path: n.path, exports: extractExportDetails(load(n.path) ?? "", opts) }));
+    writeReport(
+      outPath,
+      JSON.stringify(buildApiSurfaceReport(surface, files, stabilityTags), null, 2),
+    );
+    return surface.symbols.length;
+  }
+  if (graph.language !== "python" && graph.language !== "rust") {
+    throw new Error(
+      NO_SURFACE_REASON[graph.language]?.replace("package-export-surfaces.json", "--api-surface") ??
+        `--api-surface has no rule for ${graph.language}`,
+    );
+  }
+  const node = graph.files.get(entry);
+  if (!node)
+    throw new Error(`the --api-entry file <root>/${entry} is not a source file of the census`);
+  const kinds = node.exportKinds ?? {};
+  const names = sortCodeUnits([
+    ...new Set([...node.exports, ...(graph.language === "rust" ? (node.publicUses ?? []) : [])]),
+  ]);
+  const symbols = names.map((name) => ({ name, kind: kinds[name] ?? null, declaredIn: entry }));
+  writeReport(
+    outPath,
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        language: graph.language,
+        entry,
+        summary: { symbols: symbols.length },
+        symbols,
+        note: graph.language === "python" ? PYTHON_NOTE : RUST_NOTE,
+      },
+      null,
+      2,
+    ),
+  );
+  return symbols.length;
+}
 
 /** Why a language gets no surface file: the text the run reports. */
 export const NO_SURFACE_REASON: Readonly<Record<string, string>> = {

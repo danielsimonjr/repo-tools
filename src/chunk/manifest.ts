@@ -10,6 +10,7 @@ import { posix, relative, resolve, sep, win32 } from "node:path";
 import { toJson, writeLf } from "../io.ts";
 import { type JsonLayout, LINE_BREAK_RUNS } from "./splitters.ts";
 
+/** The kinds of file that `chunk` splits: each kind has its own splitter. */
 export type FileType = "markdown" | "json" | "typescript";
 
 /** One chunk file in a manifest. */

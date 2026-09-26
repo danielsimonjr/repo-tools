@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import pkg from "../../package.json" with { type: "json" };
 import { scanText } from "../../scripts/privacy-check.ts";
 import { makeTempDir } from "./temp.ts";
@@ -35,6 +35,30 @@ describe("node bundle (design 11.1)", () => {
       (f) => f.rule,
     );
     expect(rules.filter((r) => r.endsWith("-path"))).toEqual([]);
+  });
+
+  test("each .wasm asset that the bundle references is written next to it (D7)", () => {
+    const refs = [...readFileSync(bundle, "utf8").matchAll(/["']\.\/([\w.-]+\.wasm)["']/g)].map(
+      (m) => m[1] as string,
+    );
+    expect(refs.length).toBe(3);
+    for (const name of refs) expect(existsSync(join(dirname(bundle), name))).toBe(true);
+  });
+
+  test("node runs map from the bundle, from another working folder (D7)", () => {
+    const mapWork = makeTempDir("bundle-map");
+    try {
+      const repo = join(mapWork, "r");
+      mkdirSync(join(repo, "src"), { recursive: true });
+      writeFileSync(join(repo, "src", "index.ts"), "export const a = 1;\n");
+      writeFileSync(join(repo, "package.json"), '{"name": "r", "main": "src/index.ts"}\n');
+      const r = Bun.spawnSync(["node", bundle, "map", `--root=${repo}`], { cwd: mapWork });
+      expect(r.stderr.toString()).toBe("");
+      expect(r.exitCode).toBe(0);
+      expect(existsSync(join(repo, "docs/architecture/dependency-graph.json"))).toBe(true);
+    } finally {
+      rmSync(mapWork, { recursive: true, force: true });
+    }
   });
 
   test("node runs the bundle: version, help and an unknown subcommand", () => {
@@ -124,12 +148,12 @@ describe("smoke test script (design 13.3)", () => {
   );
 });
 
-describe("smoke test: depgraph on the product (design 13.3 steps 2, 3 and 7)", () => {
+describe("smoke test: map on the product (design 13.3 steps 2, 3 and 7)", () => {
   const smoke = (command: string[]) =>
     Bun.spawnSync([process.execPath, "scripts/smoke.ts", "--", ...command], { cwd: root });
 
   test(
-    "the source entry passes every step, the depgraph steps included",
+    "the source entry passes every step, the map steps included",
     () => {
       const r = smoke([process.execPath, "src/bin.ts"]);
       expect(r.stderr.toString()).toBe("");
@@ -139,22 +163,22 @@ describe("smoke test: depgraph on the product (design 13.3 steps 2, 3 and 7)", (
   );
 
   test(
-    "a CLI whose depgraph writes nothing fails steps 2, 3 and 7 by name",
+    "a CLI whose map writes nothing fails steps 2, 3 and 7 by name",
     () => {
-      // A fake CLI that passes the first three steps; its depgraph exits 0 and writes nothing.
-      const fake = join(work, "fake-depgraph.js");
+      // A fake CLI that passes the first three steps; its map exits 0 and writes nothing.
+      const fake = join(work, "fake-map.js");
       writeFileSync(
         fake,
         [
           "const a = process.argv[2];",
           `if (a === "--version") console.log(${JSON.stringify(pkg.version)});`,
-          'else if (a === "--help") console.log("depgraph chunk compress query");',
-          'else if (a !== "depgraph") process.exitCode = 1;',
+          'else if (a === "--help") console.log("map depgraph chunk compress query");',
+          'else if (a !== "map") process.exitCode = 1;',
           "",
         ].join("\n"),
       );
       const err = smoke(["node", fake]).stderr.toString();
-      expect(err).toContain("depgraph golden (13.3 step 2)");
+      expect(err).toContain("map golden (13.3 step 2)");
       expect(err).toContain("api surface golden (13.3 step 3)");
       expect(err).toContain("extension hooks (13.3 step 7)");
     },

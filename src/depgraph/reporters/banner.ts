@@ -9,6 +9,7 @@ export const VERIFICATION_MARKER = "<!-- repo-map:no-verification -->";
 /** The default regenerate command that the banner names. */
 export const DEFAULT_REGENERATE_COMMAND = "repo-tools depgraph";
 
+/** The options of the banner of a Markdown report: the regenerate command and the marker line. */
 export interface BannerOptions {
   /** The command that regenerates the reports. Default: `repo-tools depgraph`. */
   command?: string;

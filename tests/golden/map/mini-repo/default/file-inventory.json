@@ -1,0 +1,152 @@
+{
+  "totalFiles": 18,
+  "byDisposition": {
+    "reachable": 10,
+    "build-entry": 3,
+    "test-only": 0,
+    "orphan": 3,
+    "test": 2,
+    "tool": 0,
+    "config": 0,
+    "bench": 0,
+    "example": 0
+  },
+  "byArea": {
+    "src": 16,
+    "tests": 2
+  },
+  "byPackage": {
+    "mini-repo": 16,
+    "(root)": 2
+  },
+  "files": [
+    {
+      "file": "src/B.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 13
+    },
+    {
+      "file": "src/Z/index.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 1
+    },
+    {
+      "file": "src/Z/loop.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 6
+    },
+    {
+      "file": "src/Z/zed.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 10
+    },
+    {
+      "file": "src/_x.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 4
+    },
+    {
+      "file": "src/a.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 17
+    },
+    {
+      "file": "src/ambient.d.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 1
+    },
+    {
+      "file": "src/cli.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 6
+    },
+    {
+      "file": "src/dyn.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 2
+    },
+    {
+      "file": "src/index.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 7
+    },
+    {
+      "file": "src/orphan.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 2
+    },
+    {
+      "file": "src/ping.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 6
+    },
+    {
+      "file": "src/pong.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 5
+    },
+    {
+      "file": "src/register.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 2
+    },
+    {
+      "file": "src/util/index.ts",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 4
+    },
+    {
+      "file": "src/view.tsx",
+      "package": "mini-repo",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 4
+    },
+    {
+      "file": "tests/a.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/barrel.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    }
+  ],
+  "skippedLinks": [],
+  "warnings": []
+}

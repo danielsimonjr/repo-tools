@@ -1,0 +1,402 @@
+{
+  "metadata": {
+    "name": "mini-repo",
+    "version": "1.0.0",
+    "schemaVersion": "2.0.0",
+    "language": "typescript"
+  },
+  "entryPoints": [
+    {
+      "file": "src/index.ts",
+      "type": "main",
+      "description": "Public entry of the fixture package."
+    }
+  ],
+  "modules": {
+    "root": {
+      "src/B.ts": {
+        "description": "Upper-case name: sorts before `a.ts` in code-unit order.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./a.js",
+            "imports": [
+              "AlphaOptions"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "Bravo"
+        ],
+        "classes": [
+          "Bravo"
+        ]
+      },
+      "src/_x.ts": {
+        "description": "_x module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "helper"
+        ],
+        "functions": [
+          "helper"
+        ]
+      },
+      "src/a.ts": {
+        "description": "Lower-case name: sorts after `B.ts` in code-unit order.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./_x.js",
+            "imports": [
+              "helper"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "alpha",
+          "unusedConstant"
+        ],
+        "interfaces": [
+          "AlphaOptions"
+        ],
+        "functions": [
+          "alpha"
+        ],
+        "constants": [
+          "unusedConstant"
+        ]
+      },
+      "src/ambient.d.ts": {
+        "description": "ambient.d module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/cli.ts": {
+        "description": "cli module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./a.js",
+            "imports": [
+              "alpha"
+            ]
+          },
+          {
+            "file": "./ping.js",
+            "imports": [
+              "ping"
+            ]
+          },
+          {
+            "file": "./register.js",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/dyn.ts": {
+        "description": "dyn module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "dynamicValue"
+        ],
+        "constants": [
+          "dynamicValue"
+        ]
+      },
+      "src/orphan.ts": {
+        "description": "orphan module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "forgotten"
+        ],
+        "functions": [
+          "forgotten"
+        ]
+      },
+      "src/ping.ts": {
+        "description": "ping module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./pong.js",
+            "imports": [
+              "pong"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "ping"
+        ],
+        "functions": [
+          "ping"
+        ]
+      },
+      "src/pong.ts": {
+        "description": "pong module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ping.js",
+            "imports": [
+              "ping"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "pong"
+        ],
+        "functions": [
+          "pong"
+        ]
+      },
+      "src/register.ts": {
+        "description": "register module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/view.tsx": {
+        "description": "view module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "render"
+        ],
+        "functions": [
+          "render"
+        ]
+      }
+    },
+    "Z": {
+      "src/Z/index.ts": {
+        "description": "Package entry point for Z (re-exports 2 symbols)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./zed.js",
+            "imports": [
+              "zed",
+              "ZedShape"
+            ],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "zed",
+          "ZedShape"
+        ],
+        "reExported": [
+          "zed",
+          "ZedShape"
+        ]
+      },
+      "src/Z/loop.ts": {
+        "description": "Type definitions (1 interfaces, 0 type aliases)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./zed.js",
+            "imports": [
+              "ZedShape"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "Loop"
+        ]
+      },
+      "src/Z/zed.ts": {
+        "description": "zed module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./loop.js",
+            "imports": [
+              "Loop"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "zed"
+        ],
+        "interfaces": [
+          "ZedShape"
+        ],
+        "functions": [
+          "zed"
+        ]
+      }
+    },
+    "entry": {
+      "src/index.ts": {
+        "description": "Public entry of the fixture package.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./a.js",
+            "imports": [
+              "alpha",
+              "AlphaOptions"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./B.js",
+            "imports": [
+              "Bravo"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./Z/index.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./view.js",
+            "imports": [
+              "render"
+            ],
+            "reExport": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "alpha",
+          "AlphaOptions",
+          "Bravo",
+          "render"
+        ],
+        "reExported": [
+          "alpha",
+          "AlphaOptions",
+          "Bravo",
+          "* from ./Z/index.js",
+          "render"
+        ]
+      }
+    },
+    "util": {
+      "src/util/index.ts": {
+        "description": "Entry point exporting 1 symbols",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "clamp"
+        ],
+        "functions": [
+          "clamp"
+        ]
+      }
+    }
+  },
+  "cyclicComponents": {
+    "runtime": [
+      {
+        "members": [
+          "src/ping.ts",
+          "src/pong.ts"
+        ],
+        "cycle": [
+          "src/ping.ts",
+          "src/pong.ts",
+          "src/ping.ts"
+        ]
+      }
+    ],
+    "typeOnly": [
+      {
+        "members": [
+          "src/Z/loop.ts",
+          "src/Z/zed.ts"
+        ],
+        "cycle": [
+          "src/Z/loop.ts",
+          "src/Z/zed.ts",
+          "src/Z/loop.ts"
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "name": "Root",
+      "files": [
+        "src/B.ts",
+        "src/_x.ts",
+        "src/a.ts",
+        "src/ambient.d.ts",
+        "src/cli.ts",
+        "src/dyn.ts",
+        "src/orphan.ts",
+        "src/ping.ts",
+        "src/pong.ts",
+        "src/register.ts",
+        "src/view.tsx"
+      ]
+    },
+    {
+      "name": "Z",
+      "files": [
+        "src/Z/index.ts",
+        "src/Z/loop.ts",
+        "src/Z/zed.ts"
+      ]
+    },
+    {
+      "name": "Entry",
+      "files": [
+        "src/index.ts"
+      ]
+    },
+    {
+      "name": "Util",
+      "files": [
+        "src/util/index.ts"
+      ]
+    }
+  ]
+}

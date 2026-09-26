@@ -1,5 +1,5 @@
 /**
- * Test helper for `repo-tools query`: a small monorepo, its depgraph reports, and a runner.
+ * Test helper for `repo-tools query`: a small monorepo, its `map` reports, and a runner.
  *
  * The packages:
  * - `packages/web`: its `.` entry reaches `io.ts`, which imports `node:fs` (a browser-safety
@@ -10,7 +10,7 @@
  * - `packages/clean`: no file imports a Node built-in.
  */
 import { main } from "../../src/cli.ts";
-import { makeTree, runDepgraph } from "./tree.ts";
+import { makeTree } from "./tree.ts";
 
 /** The files of the fixture monorepo. */
 export const QUERY_TREE: Record<string, string> = {
@@ -45,14 +45,35 @@ export const QUERY_TREE: Record<string, string> = {
 };
 
 /**
- * Makes a copy of the fixture tree (with `extra` files) and runs depgraph on it with `--all`, so
- * the graph also holds the files that no entry reaches (`cli.ts`).
+ * Makes a copy of the fixture tree (with `extra` files) and runs `repo-tools map` on it. The
+ * core graph holds every file, the ones that no entry reaches (`cli.ts`) included.
  */
 export async function queryTree(extra: Record<string, string> = {}): Promise<string> {
   const root = makeTree({ ...QUERY_TREE, ...extra });
-  const r = await runDepgraph(root, ["--all"]);
-  if (r.code !== 0) throw new Error(`depgraph failed on the fixture: ${r.stderr}`);
+  let err = "";
+  const code = await main(["map", `--root=${root}`, "--no-extensions"], {
+    stdout: () => {},
+    stderr: (s) => {
+      err += s;
+    },
+  });
+  if (code !== 0) throw new Error(`map failed on the fixture: ${err}`);
   return root;
+}
+
+/** Runs `repo-tools map` on `root` with `flags`; returns the exit code and standard error. */
+export async function runMapOn(
+  root: string,
+  flags: string[] = [],
+): Promise<{ code: number; err: string }> {
+  let err = "";
+  const code = await main(["map", `--root=${root}`, "--no-extensions", ...flags], {
+    stdout: () => {},
+    stderr: (s) => {
+      err += s;
+    },
+  });
+  return { code, err };
 }
 
 /** The result of one query run. */

@@ -5,7 +5,7 @@
  * The Markdown mode is a gate (exit 1 on a finding). The `--prose` mode is advice (exit 0 with
  * findings). Both modes use one rule module (`rules.ts`).
  */
-import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { type Dirent, existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import type { Io } from "../io-types.ts";
 import { compareCodeUnits } from "../sort.ts";
@@ -66,7 +66,7 @@ function targetsFor(path: string): string[] {
   if (existsSync(path) && statSync(path).isFile()) return [path];
   const found: string[][] = [];
   const walk = (dir: string, parts: string[]): void => {
-    let entries: import("node:fs").Dirent[];
+    let entries: Dirent[];
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
