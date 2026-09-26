@@ -99,6 +99,12 @@ All notable changes to this project are recorded in this file. The format follow
   Its cycle section counts the files of the listed components. The per-kind export counts of
   `Statistics` are optional. After these changes, depgraph 1.x writes all 12 reports on
   memoryjs byte-identical to a run before them.
+- 2.0.0 engine (design decision D4): `file-inventory.json` also gives depgraph's `byPackage`
+  and `skippedLinks`. `skippedLinks` lists the links that discovery does not follow. In a walk,
+  that is a folder link. In a git work tree, that is a tracked link (mode 120000) that does not
+  resolve to a file. The new `gitTrackedLinks` reads the modes with `git ls-files --stage`. The
+  git branch has a test that makes a folder link when the host permits it. The other core
+  files of 10 repositories stay byte-identical.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

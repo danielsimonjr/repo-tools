@@ -57,6 +57,8 @@ export interface RepoGraph {
   /** The root folder of the build; null for a graph built by hand. */
   rootPath: string | null;
   language: string;
+  /** The links that discovery did not follow, root-relative and sorted (design decision D4). */
+  skippedLinks?: string[];
 }
 
 /** A new graph with the defaults of the Python dataclass. */

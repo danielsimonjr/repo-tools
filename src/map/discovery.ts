@@ -175,12 +175,17 @@ function walk(
   root: string,
   skip: Set<string>,
   visit: (parts: string[], name: string) => void,
+  onLink: (parts: string[]) => void = () => {},
 ): void {
   const go = (dir: string, parts: string[]): void => {
     for (const e of entries(dir)) {
       const full = join(dir, e.name);
       if (e.isDirectory() || (e.isSymbolicLink() && isDirectoryTarget(full))) {
-        if (skip.has(e.name) || isReparsePoint(full)) continue;
+        if (skip.has(e.name)) continue;
+        if (isReparsePoint(full)) {
+          onLink([...parts, e.name]);
+          continue;
+        }
         go(full, [...parts, e.name]);
       } else if (e.isFile() || e.isSymbolicLink()) {
         visit(parts, e.name);
@@ -237,6 +242,31 @@ export function gitTracked(root: string): Set<string> | null {
   return result;
 }
 
+const linksCache = new Map<string, Set<string>>();
+
+/**
+ * The paths that git tracks as symbolic links (mode 120000) under `root`, relative to `root`.
+ * Empty when git cannot run. Cached per root for the life of the process.
+ */
+export function gitTrackedLinks(root: string): Set<string> {
+  const cached = linksCache.get(root);
+  if (cached !== undefined) return cached;
+  const links = new Set<string>();
+  const r = spawnSync("git", ["-C", root, "ls-files", "-z", "--stage"], {
+    stdio: ["ignore", "pipe", "ignore"],
+    timeout: 60_000,
+    maxBuffer: 1 << 30,
+  });
+  if (!r.error && r.status === 0 && r.stdout) {
+    for (const entry of new TextDecoder("utf-8").decode(r.stdout).split("\0")) {
+      const tab = entry.indexOf("\t");
+      if (tab > 0 && entry.startsWith("120000 ")) links.add(entry.slice(tab + 1));
+    }
+  }
+  linksCache.set(root, links);
+  return links;
+}
+
 /** Compares two path-part lists in code-unit order. */
 function compareParts(a: string[], b: string[]): number {
   for (let i = 0; i < Math.min(a.length, b.length); i++) {
@@ -255,16 +285,28 @@ function isFile(path: string): boolean {
   }
 }
 
-/** The path parts of each source file of `suffixes`, in code-unit order. */
+/**
+ * The path parts of each source file of `suffixes`, in code-unit order. `skippedLinks`, when
+ * given, receives the root-relative path of each link that the discovery does not follow: a
+ * folder link that the walk prunes, or a tracked link that does not resolve to a file.
+ */
 export function candidateFiles(
   root: string,
   suffixes: Set<string>,
   extraSkip: Set<string> = new Set(),
+  skippedLinks?: Set<string>,
 ): string[][] {
   const skip = new Set([...SKIP_DIRS, ...extraSkip]);
   const found: string[][] = [];
   const tracked = gitTracked(root);
   if (tracked !== null) {
+    if (skippedLinks) {
+      for (const rel of gitTrackedLinks(root)) {
+        const parts = rel.split("/");
+        if (parts.slice(0, -1).some((p) => skip.has(p))) continue;
+        if (!isFile(join(root, ...parts))) skippedLinks.add(rel);
+      }
+    }
     for (const rel of tracked) {
       const parts = rel.split("/");
       if (parts.slice(0, -1).some((p) => skip.has(p))) continue;
@@ -274,9 +316,14 @@ export function candidateFiles(
       found.push(parts);
     }
   } else {
-    walk(root, skip, (parts, name) => {
-      if (suffixes.has(suffixOf(name))) found.push([...parts, name]);
-    });
+    walk(
+      root,
+      skip,
+      (parts, name) => {
+        if (suffixes.has(suffixOf(name))) found.push([...parts, name]);
+      },
+      (parts) => skippedLinks?.add(parts.join("/")),
+    );
   }
   return found.sort(compareParts);
 }
@@ -322,9 +369,10 @@ export function readSource(path: string): string {
 export function discover(
   root: string,
   language: Language = detectLanguage(root),
+  skippedLinks?: Set<string>,
 ): DiscoveredFile[] {
   const [suffixes, extraSkip] = LANGUAGE_SCANS[language];
-  return candidateFiles(root, suffixes, extraSkip).map((parts) => {
+  return candidateFiles(root, suffixes, extraSkip, skippedLinks).map((parts) => {
     const rel = parts.join("/");
     const area = classifyArea(rel);
     return {

@@ -402,7 +402,9 @@ export function emitFileInventory(graph: RepoGraph, outDir: string): string {
     totalFiles: files.length,
     byDisposition,
     byArea: counter(files.map((f) => f.area)),
+    byPackage: counter(files.map((f) => f.package)),
     files,
+    skippedLinks: [...(graph.skippedLinks ?? [])],
     warnings: [...graph.warnings],
   });
 }

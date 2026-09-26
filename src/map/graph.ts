@@ -341,7 +341,8 @@ const SCANNED: Readonly<Record<Language, string>> = {
 /** Builds the graph of the repository at `root`. */
 export async function buildGraph(root: string): Promise<RepoGraph> {
   const language = detectLanguage(root);
-  const found = discover(root, language);
+  const skippedLinks = new Set<string>();
+  const found = discover(root, language, skippedLinks);
   const known = new Set(found.map((f) => f.path));
   if (language === "typescript" || language === "python") await loadGrammar(language);
   const resolver = getResolver(language);
@@ -467,6 +468,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
     rootPath: root,
     language,
   });
+  graph.skippedLinks = [...skippedLinks].sort(compareCodeUnits);
   refineSrcDispositions(graph);
   return graph;
 }

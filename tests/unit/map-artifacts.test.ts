@@ -7,7 +7,7 @@
  * patched module constant.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
   emitDependencyGraph,
@@ -282,6 +282,84 @@ describe("dependency-graph.json", () => {
 });
 
 describe("file-inventory.json", () => {
+  const WINDOWS = process.platform === "win32";
+  /** A link at `link` to the folder `target`: a junction on Windows, else a symbolic link. */
+  const folderLink = (link: string, target: string): void => {
+    if (WINDOWS) {
+      const made = Bun.spawnSync(["cmd", "/c", "mklink", "/J", link, target]).exitCode === 0;
+      if (!made) throw new Error(`mklink /J failed for ${link}`);
+    } else {
+      symlinkSync(target, link, "dir");
+    }
+  };
+
+  test("D4: byPackage and skippedLinks join repo_map's keys, in order", async () => {
+    const root = tmp({
+      "package.json": '{"name": "demo", "main": "src/a.ts"}\n',
+      "src/a.ts": "export const a = 1;\n",
+      "tests/a.test.ts": 'import { a } from "../src/a.js";\n',
+    });
+    const data = read(emitFileInventory(await buildGraph(root), join(root, "out")));
+    expect(Object.keys(data)).toEqual([
+      "totalFiles",
+      "byDisposition",
+      "byArea",
+      "byPackage",
+      "files",
+      "skippedLinks",
+      "warnings",
+    ]);
+    const counted: Record<string, number> = {};
+    for (const f of data.files) counted[f.package] = (counted[f.package] ?? 0) + 1;
+    expect(data.byPackage).toEqual(counted);
+    expect(data.byPackage).toEqual({ "(root)": 1, demo: 1 });
+    expect(data.skippedLinks).toEqual([]);
+  });
+
+  test("D4: a folder link that discovery does not follow is listed in skippedLinks", async () => {
+    const base = tmp();
+    const root = join(base, "repo");
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(join(root, "src", "a.ts"), "export const a = 1;\n");
+    mkdirSync(join(base, "other"), { recursive: true });
+    writeFileSync(join(base, "other", "x.ts"), "export const x = 1;\n");
+    folderLink(join(root, "src", "vendor"), join(base, "other"));
+    const data = read(emitFileInventory(await buildGraph(root), join(base, "out")));
+    expect(data.skippedLinks).toEqual(["src/vendor"]);
+    expect(data.files.map((f: { file: string }) => f.file)).toEqual(["src/a.ts"]);
+  });
+
+  /** True when this host can make a folder symbolic link (Windows needs a privilege for it). */
+  const CAN_SYMLINK = (() => {
+    const dir = tmp();
+    try {
+      mkdirSync(join(dir, "t"));
+      symlinkSync(join(dir, "t"), join(dir, "l"), "dir");
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+
+  test.skipIf(!CAN_SYMLINK)("D4: a tracked folder link in a git repo is listed", async () => {
+    const base = tmp();
+    const root = join(base, "repo");
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(join(root, "src", "a.ts"), "export const a = 1;\n");
+    mkdirSync(join(base, "other"), { recursive: true });
+    writeFileSync(join(base, "other", "x.ts"), "export const x = 1;\n");
+    symlinkSync(join(base, "other"), join(root, "src", "vendor"), "dir");
+    const git = (...args: string[]): void => {
+      const r = Bun.spawnSync(["git", "-C", root, "-c", "core.symlinks=true", ...args]);
+      if (r.exitCode !== 0) throw new Error(`git ${args.join(" ")} failed`);
+    };
+    git("init", "-q");
+    git("add", "-A");
+    const data = read(emitFileInventory(await buildGraph(root), join(base, "out")));
+    expect(data.skippedLinks).toEqual(["src/vendor"]);
+    expect(data.files.map((f: { file: string }) => f.file)).toEqual(["src/a.ts"]);
+  });
+
   test("has the CDG shape, and no generated date", () => {
     const data = read(emitFileInventory(DEMO(), tmp()));
     for (const key of ["totalFiles", "byDisposition", "byArea", "files"])
