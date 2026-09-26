@@ -421,6 +421,8 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       nodeBuiltins: pySorted(new Set(nodeBuiltins)),
       broken,
       aliases,
+      exportKinds: { ...mod.exportKinds },
+      reExports: [...mod.reExports],
     });
   }
 

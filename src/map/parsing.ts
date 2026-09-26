@@ -30,6 +30,11 @@ export interface ParsedModule {
   defaultExportLocal: string | null;
   /** The kind of each export: class, interface, type, function, const, enum or unknown. */
   exportKinds: Record<string, string>;
+  /**
+   * What each `export ... from` statement re-exports (depgraph's meaning): the exported names of a
+   * clause, the name of `* as ns`, or `* from <spec>` and `type * from <spec>`.
+   */
+  reExports: string[];
 }
 
 /** An empty module. */
@@ -41,6 +46,7 @@ export function emptyModule(): ParsedModule {
     defaultExport: null,
     defaultExportLocal: null,
     exportKinds: {},
+    reExports: [],
   };
 }
 
@@ -229,8 +235,13 @@ export function parseTs(source: string): ParsedModule {
         if (clause) {
           names = exportClauseSourceNames(clause);
           typeOnly = isTypeOnlyExport(node, clause);
+          for (const [name] of exportEntries(node)) mod.reExports.push(name);
         } else if (nsExport) {
           names = ["*"];
+          for (const [name] of exportEntries(node)) mod.reExports.push(name);
+        } else {
+          const typeStar = hasChild(node, "type") ? "type " : "";
+          mod.reExports.push(`${typeStar}* from ${specifierOf(spec)}`);
         }
         mod.imports.push({ specifier: specifierOf(spec), names, typeOnly });
       }

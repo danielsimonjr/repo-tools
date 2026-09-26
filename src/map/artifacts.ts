@@ -93,6 +93,33 @@ function cyclicComponentStats(graph: RepoGraph): Record<string, number> {
   };
 }
 
+/**
+ * depgraph's per-kind export counts (design decision D2), for a TypeScript repo only. The kinds
+ * come from the core reader. A type guard is an exported function whose name starts with `is`,
+ * as depgraph counts it. A default export is in no kind, as in depgraph.
+ */
+function exportKindStats(graph: RepoGraph): Record<string, number> {
+  const count = { class: 0, interface: 0, function: 0, typeGuard: 0, enum: 0, const: 0 };
+  let reExports = 0;
+  for (const node of graph.files.values()) {
+    for (const [name, kind] of Object.entries(node.exportKinds ?? {})) {
+      if (name === "default") continue;
+      if (kind === "function" && name.startsWith("is")) count.typeGuard += 1;
+      if (kind in count) count[kind as keyof typeof count] += 1;
+    }
+    reExports += new Set(node.reExports ?? []).size;
+  }
+  return {
+    totalClasses: count.class,
+    totalInterfaces: count.interface,
+    totalFunctions: count.function,
+    totalTypeGuards: count.typeGuard,
+    totalEnums: count.enum,
+    totalConstants: count.const,
+    totalReExports: reExports,
+  };
+}
+
 /** The options of `emitDependencyGraph`. */
 export interface DependencyGraphOptions {
   cycleLimits?: CycleLimits;
@@ -138,6 +165,7 @@ export function emitDependencyGraph(
     unusedExportsCount: unusedExportTotal(graph),
     circularDepsTruncated: all.truncated || runtime.truncated,
     ...cyclicComponentStats(graph),
+    ...(graph.language === "typescript" ? exportKindStats(graph) : {}),
   });
   data.warnings = [...graph.warnings];
   return writeJson(join(outDir, "dependency-graph.json"), data);

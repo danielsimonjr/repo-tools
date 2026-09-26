@@ -148,7 +148,9 @@ describe("dependency-graph.json", () => {
 
   test("D2: the component keys follow the repo_map keys, in a fixed order", () => {
     const keys = Object.keys(read(emitDependencyGraph(DEMO(), tmp())).statistics);
-    expect(keys.slice(keys.indexOf("circularDepsTruncated"))).toEqual([
+    expect(
+      keys.slice(keys.indexOf("circularDepsTruncated"), keys.indexOf("circularDepsTruncated") + 5),
+    ).toEqual([
       "circularDepsTruncated",
       "runtimeCyclicComponents",
       "typeOnlyCyclicComponents",
@@ -167,6 +169,67 @@ describe("dependency-graph.json", () => {
     const s = read(emitDependencyGraph(g, tmp(), { cycleLimits: { maxCycles: 1 } })).statistics;
     expect(s.circularDepsTruncated).toBe(true);
     expect([s.runtimeCyclicComponents, s.runtimeFilesInCycles]).toEqual([1, 4]);
+  });
+
+  test("D2: a TypeScript repo gets depgraph's per-kind export counts", async () => {
+    const root = tmp({
+      "src/k.ts": [
+        "export class C {}",
+        "export interface I {}",
+        "export type T = number;",
+        "export function isThing() { return true; }",
+        "export async function go() {}",
+        "export const A = 1, B = 2;",
+        "export let L = 3;",
+        "export enum E { X }",
+        "export default class D {}",
+        "const local = 1;",
+        "export { local as renamed };",
+        'export * from "./m.js";',
+        'export type * from "./t.js";',
+        'export { x as y } from "./m.js";',
+        'export * as ns from "./m.js";',
+        "",
+      ].join("\n"),
+      "src/m.ts": "export const x = 1;\n",
+      "src/t.ts": "export type Z = 1;\n",
+    });
+    const s = read(emitDependencyGraph(await buildGraph(root), join(root, "out"))).statistics;
+    expect({
+      totalClasses: s.totalClasses,
+      totalInterfaces: s.totalInterfaces,
+      totalFunctions: s.totalFunctions,
+      totalTypeGuards: s.totalTypeGuards,
+      totalEnums: s.totalEnums,
+      totalConstants: s.totalConstants,
+      totalReExports: s.totalReExports,
+    }).toEqual({
+      totalClasses: 1,
+      totalInterfaces: 1,
+      totalFunctions: 2,
+      totalTypeGuards: 1,
+      totalEnums: 1,
+      totalConstants: 4,
+      totalReExports: 4,
+    });
+    const keys = Object.keys(s);
+    expect(keys.slice(keys.indexOf("typeOnlyFilesInCycles") + 1)).toEqual([
+      "totalClasses",
+      "totalInterfaces",
+      "totalFunctions",
+      "totalTypeGuards",
+      "totalEnums",
+      "totalConstants",
+      "totalReExports",
+    ]);
+  });
+
+  test("D2: a Python repo does not get the TypeScript export counts", async () => {
+    const root = tmp({ "server.py": "class S:\n    pass\n" });
+    const s = read(emitDependencyGraph(await buildGraph(root), join(root, "out"))).statistics;
+    expect(s).not.toHaveProperty("totalClasses");
+    expect(s).not.toHaveProperty("totalReExports");
+    expect(s).toHaveProperty("runtimeCyclicComponents");
   });
 
   test("warnings are present and empty when clean", () => {

@@ -29,6 +29,10 @@ export interface FileNode {
   broken: string[];
   /** Alias specifiers (`@/x`, `~/x`) that the engine cannot expand yet. */
   aliases: string[];
+  /** The kind of each export, from the reader (not written to the graph JSON). */
+  exportKinds?: Record<string, string>;
+  /** What the file re-exports, from the reader (not written to the graph JSON). */
+  reExports?: string[];
 }
 
 /** The graph of one repository. */

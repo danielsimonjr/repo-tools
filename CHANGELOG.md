@@ -68,6 +68,13 @@ All notable changes to this project are recorded in this file. The format follow
   `runtimeFilesInCycles` and `typeOnlyFilesInCycles`, after `circularDepsTruncated`. A cap never
   truncates these counts. The Tarjan search moves from `src/depgraph/cycles.ts` to
   `src/map/cycles.ts`, so depgraph and the core graph count components in the same way.
+- 2.0.0 engine (design decision D2): for a TypeScript repo, the statistics also give the
+  per-kind export counts of depgraph. The keys are `totalClasses`, `totalInterfaces`,
+  `totalFunctions`, `totalTypeGuards`, `totalEnums`, `totalConstants` and `totalReExports`. The
+  core reader gives the kinds, so the counts come from one parser. On memoryjs, each file has
+  the same names of each kind as in depgraph 1.x. The totals differ for two reasons. The core
+  counts every area, and depgraph counts the `src` files only. Also, depgraph counts an
+  overloaded or merged name one time for each declaration.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
