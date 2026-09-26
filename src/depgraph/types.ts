@@ -79,19 +79,22 @@ export interface DependencyMatrix {
   };
 }
 
-/** The totals of one run. */
+/**
+ * The totals of one run. The per-kind export counts are optional: depgraph 1.x always sets them,
+ * and the map engine sets them for TypeScript only (design decision D2).
+ */
 export interface Statistics {
   totalTypeScriptFiles: number;
   totalModules: number;
   totalLinesOfCode: number;
   totalExports: number;
-  totalClasses: number;
-  totalInterfaces: number;
-  totalFunctions: number;
-  totalTypeGuards: number;
-  totalEnums: number;
-  totalConstants: number;
-  totalReExports: number;
+  totalClasses?: number;
+  totalInterfaces?: number;
+  totalFunctions?: number;
+  totalTypeGuards?: number;
+  totalEnums?: number;
+  totalConstants?: number;
+  totalReExports?: number;
   totalTypeOnlyImports: number;
   /** The number of runtime cyclic components (fix F26). */
   runtimeCyclicComponents: number;

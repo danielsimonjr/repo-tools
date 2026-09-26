@@ -90,6 +90,15 @@ All notable changes to this project are recorded in this file. The format follow
   layers are identical to depgraph 1.x, and each field difference has a recorded cause.
   `generateJSON` gets three helpers (`modulesJsonOf`, `layersOf`, `entryPointsOf`), and its
   output does not change.
+- 2.0.0 engine (design decisions D3 and D5): `src/map/reports.ts` writes `DEPENDENCY_GRAPH.md`,
+  `dependency-graph.yaml` and `dependency-summary.compact.json` for each language. The
+  Markdown and the compact summary show the subsystem view with the core statistics. The YAML
+  is a copy of the core `dependency-graph.json` in YAML. The Markdown banner names
+  `repo-tools map`, and its table uses language-neutral labels. A language with no kind counts
+  gets no kind rows. In depgraph, `generateMarkdown` gets an optional `summaryRows` parameter.
+  Its cycle section counts the files of the listed components. The per-kind export counts of
+  `Statistics` are optional. After these changes, depgraph 1.x writes all 12 reports on
+  memoryjs byte-identical to a run before them.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.

@@ -6,6 +6,7 @@
  * Fix F26: the cycle section lists cyclic components, each with its members and one cycle.
  */
 import { basename } from "node:path";
+import { filesInCycles } from "../cycles.ts";
 import { generateFallbackDescription } from "../parser.ts";
 import { withoutTsExtension } from "../paths.ts";
 import { targetOf } from "../resolver.ts";
@@ -183,6 +184,34 @@ function fileSection(lines: string[], path: string, file: ParsedFile): void {
   lines.push("");
 }
 
+/** One row of the Summary Statistics table: a label and a count. */
+export type SummaryRow = readonly [string, number];
+
+/**
+ * The Summary Statistics rows of depgraph 1.x. A per-kind count that `stats` does not hold gives
+ * no row.
+ */
+export function summaryRowsOf(stats: Statistics): SummaryRow[] {
+  const rows: [string, number | undefined][] = [
+    ["Total TypeScript Files", stats.totalTypeScriptFiles],
+    ["Total Modules", stats.totalModules],
+    ["Total Lines of Code", stats.totalLinesOfCode],
+    ["Total Exports", stats.totalExports],
+    ["Total Re-exports", stats.totalReExports],
+    ["Total Classes", stats.totalClasses],
+    ["Total Interfaces", stats.totalInterfaces],
+    ["Total Functions", stats.totalFunctions],
+    ["Total Type Guards", stats.totalTypeGuards],
+    ["Total Enums", stats.totalEnums],
+    ["Type-only Imports", stats.totalTypeOnlyImports],
+    ["Runtime Cyclic Components", stats.runtimeCyclicComponents],
+    ["Type-only Cyclic Components", stats.typeOnlyCyclicComponents],
+    ["Files in Runtime Cycles", stats.runtimeFilesInCycles],
+    ["Files in Type-only Cycles", stats.typeOnlyFilesInCycles],
+  ];
+  return rows.filter((r): r is [string, number] => r[1] !== undefined);
+}
+
 /** The DEPENDENCY_GRAPH.md body (without the banner and the package section). */
 export function generateMarkdown(
   files: ParsedFile[],
@@ -191,6 +220,7 @@ export function generateMarkdown(
   cycles: CyclicComponents,
   matrix: DependencyMatrix,
   packageJson: PackageJson,
+  summaryRows: readonly SummaryRow[] = summaryRowsOf(stats),
 ): string {
   const lines: string[] = [];
   lines.push(`# ${packageJson.name || "Project"} - Dependency Graph`);
@@ -274,11 +304,11 @@ export function generateMarkdown(
     lines.push("");
     lines.push(
       `- **Runtime components**: ${cycles.runtime.length} ` +
-        `(${filesLabel(stats.runtimeFilesInCycles)}; require attention)`,
+        `(${filesLabel(filesInCycles(cycles.runtime))}; require attention)`,
     );
     lines.push(
       `- **Type-only components**: ${cycles.typeOnly.length} ` +
-        `(${filesLabel(stats.typeOnlyFilesInCycles)}; a type-only import closes each cycle)`,
+        `(${filesLabel(filesInCycles(cycles.typeOnly))}; a type-only import closes each cycle)`,
     );
     lines.push("");
     const componentList = (title: string, intro: string, list: CyclicComponent[]): void => {
@@ -317,21 +347,7 @@ export function generateMarkdown(
   lines.push("");
   lines.push("| Category | Count |");
   lines.push("|----------|-------|");
-  lines.push(`| Total TypeScript Files | ${stats.totalTypeScriptFiles} |`);
-  lines.push(`| Total Modules | ${stats.totalModules} |`);
-  lines.push(`| Total Lines of Code | ${stats.totalLinesOfCode} |`);
-  lines.push(`| Total Exports | ${stats.totalExports} |`);
-  lines.push(`| Total Re-exports | ${stats.totalReExports} |`);
-  lines.push(`| Total Classes | ${stats.totalClasses} |`);
-  lines.push(`| Total Interfaces | ${stats.totalInterfaces} |`);
-  lines.push(`| Total Functions | ${stats.totalFunctions} |`);
-  lines.push(`| Total Type Guards | ${stats.totalTypeGuards} |`);
-  lines.push(`| Total Enums | ${stats.totalEnums} |`);
-  lines.push(`| Type-only Imports | ${stats.totalTypeOnlyImports} |`);
-  lines.push(`| Runtime Cyclic Components | ${stats.runtimeCyclicComponents} |`);
-  lines.push(`| Type-only Cyclic Components | ${stats.typeOnlyCyclicComponents} |`);
-  lines.push(`| Files in Runtime Cycles | ${stats.runtimeFilesInCycles} |`);
-  lines.push(`| Files in Type-only Cycles | ${stats.typeOnlyFilesInCycles} |`);
+  for (const [label, value] of summaryRows) lines.push(`| ${label} | ${value} |`);
   lines.push("", "---", "");
   lines.push(`*Version*: ${packageJson.version}`);
   lines.push("");
