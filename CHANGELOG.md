@@ -100,9 +100,8 @@ All notable changes to this project are recorded in this file. The format follow
   `Statistics` are optional. After these changes, depgraph 1.x writes all 12 reports on
   memoryjs byte-identical to a run before them.
 - 2.0.0 engine (design decision D4): `file-inventory.json` also gives depgraph's `byPackage`
-  and `skippedLinks`. `skippedLinks` lists the links that discovery does not follow. In a walk,
-  that is a folder link. In a git work tree, that is a tracked link (mode 120000) that does not
-  resolve to a file. The new `gitTrackedLinks` reads the modes with `git ls-files --stage`. The
+  and `skippedLinks`, the links that discovery does not follow. A walk does not follow a folder
+  link. In a git work tree, discovery does not follow a tracked link (mode 120000) to a folder. The new `gitTrackedLinks` reads the modes with `git ls-files --stage`. The
   git branch has a test that makes a folder link when the host permits it. The other core
   files of 10 repositories stay byte-identical.
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
