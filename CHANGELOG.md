@@ -29,14 +29,6 @@ All notable changes to this project are recorded in this file. The format follow
 - Goldens for `map` (`tests/golden/map`, written by `scripts/update-map-goldens.ts`). The smoke
   test (design 13.3) runs `map`.
 
-### Fixed
-
-- `map`: a workspace monorepo now has entry roots. The Python tool reads the root `package.json`
-  only, so each workspace source file showed as an orphan. The engine now also reads the
-  `package.json` of each workspace package, then the extra entries of depgraph, then a
-  `src/index.*` file. This is a deliberate difference from the Python tool. On MathTS, the roots
-  go from 0 to 1167, and each disposition equals depgraph 1.x.
-
 - 2.0.0 engine, step 1: `src/map/discovery.ts` ports `repo_map/discovery.py` from the
   architecture-docs skill. It holds the language detection, the file census and the area and
   disposition rules. It refuses a repository in an unsupported language. The census comes from
@@ -175,6 +167,14 @@ All notable changes to this project are recorded in this file. The format follow
 - Dependencies (bundled, not installed by users): `web-tree-sitter` 0.27.0,
   `tree-sitter-typescript` 0.23.2 and `tree-sitter-python` 0.25.0, pinned. The engine parses with
   them in a later step. `src/ste/py.ts` moves to `src/py.ts`, because the engine also uses it.
+
+### Fixed
+
+- `map`: a workspace monorepo now has entry roots. The Python tool reads the root `package.json`
+  only, so each workspace source file showed as an orphan. The engine now also reads the
+  `package.json` of each workspace package, then the extra entries of depgraph, then a
+  `src/index.*` file. The workspace roots are a deliberate difference from the Python tool. On
+  MathTS, the roots go from 0 to 1167, and each disposition equals depgraph 1.x.
 
 ## [1.1.0] - 2026-09-25
 
