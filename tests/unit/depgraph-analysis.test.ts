@@ -1,5 +1,4 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { join } from "node:path";
 import {
   buildDependencyMatrix,
   categorizeFiles,
@@ -10,47 +9,50 @@ import {
   splitDormant,
 } from "../../src/depgraph/analysis.ts";
 import { detectCyclicComponents } from "../../src/depgraph/cycles.ts";
-import { parseFile } from "../../src/depgraph/parser.ts";
 import type { ParsedFile, WorkspacePackage } from "../../src/depgraph/types.ts";
+import { toParsedFiles } from "../../src/map/adapter.ts";
+import { buildGraph } from "../../src/map/graph.ts";
 import { makeTree, removeTrees } from "./tree.ts";
 
 afterAll(removeTrees);
 
 const none = new Map<string, WorkspacePackage>();
 
-/** Parses each named file of `root` in single-package mode. */
-function parseAll(
-  root: string,
-  paths: string[],
-  workspaces: Map<string, WorkspacePackage> = none,
-): ParsedFile[] {
-  return paths.map((p) => parseFile({ root, workspaces }, join(root, p)));
+/** The parsed records of `root`, limited to `paths`. */
+async function parseAll(root: string, paths: string[]): Promise<ParsedFile[]> {
+  const records = toParsedFiles(await buildGraph(root), root, { allAreas: true });
+  const want = new Set(paths);
+  return records.filter((r) => want.has(r.path));
 }
 
+const singleRoot = makeTree({
+  "src/index.ts": "export { a } from './a.js';\nexport * from './z/b.js';\n",
+  "src/a.ts": "import { b } from './z/b.js';\nexport function a() { return b(); }\n",
+  "src/z/b.ts": "import type { A } from '../c.js';\nexport function b() {}\nexport type B = A;\n",
+  "src/c.ts":
+    "import { b } from './z/b.js';\nexport interface A { x: 1 }\nexport const unusedC = 1;\nexport function helper(): A { return { x: 1 }; }\nhelper();\nexport type Kept = number;\nconst k: Kept = 1;\n",
+  "src/p.ts": "import { q } from './q.js';\nexport function p() { return q(); }\n",
+  "src/q.ts": "import { p } from './p.js';\nexport function q() { return p(); }\n",
+  "tests/c.test.ts": "import { helper } from '../src/c.js';\n",
+});
+const singleFiles = await parseAll(singleRoot, [
+  "src/index.ts",
+  "src/a.ts",
+  "src/z/b.ts",
+  "src/c.ts",
+  "src/p.ts",
+  "src/q.ts",
+]);
+const singleTests = await parseAll(singleRoot, ["tests/c.test.ts"]);
+
 describe("single-package analysis", () => {
-  const root = makeTree({
-    "src/index.ts": "export { a } from './a.js';\nexport * from './z/b.js';\n",
-    "src/a.ts": "import { b } from './z/b.js';\nexport function a() { return b(); }\n",
-    "src/z/b.ts": "import type { A } from '../c.js';\nexport function b() {}\nexport type B = A;\n",
-    "src/c.ts":
-      "import { b } from './z/b.js';\nexport interface A { x: 1 }\nexport const unusedC = 1;\nexport function helper(): A { return { x: 1 }; }\nhelper();\nexport type Kept = number;\nconst k: Kept = 1;\n",
-    "src/p.ts": "import { q } from './q.js';\nexport function p() { return q(); }\n",
-    "src/q.ts": "import { p } from './p.js';\nexport function q() { return p(); }\n",
-    "tests/c.test.ts": "import { helper } from '../src/c.js';\n",
-  });
-  const files = parseAll(root, [
-    "src/index.ts",
-    "src/a.ts",
-    "src/z/b.ts",
-    "src/c.ts",
-    "src/p.ts",
-    "src/q.ts",
-  ]);
-  const tests = parseAll(root, ["tests/c.test.ts"]);
+  const root = singleRoot;
+  const files = singleFiles;
+  const tests = singleTests;
 
   test("categorizeFiles uses entry, root and the first src subdirectory", () => {
     const modules = categorizeFiles(files, false, none);
-    expect(Object.keys(modules)).toEqual(["entry", "root", "z"]);
+    expect(Object.keys(modules)).toEqual(["root", "entry", "z"]);
     expect(Object.keys(modules.root ?? {})).toEqual([
       "src/a.ts",
       "src/c.ts",
@@ -62,7 +64,7 @@ describe("single-package analysis", () => {
   test("buildDependencyMatrix lists specifiers and importers", () => {
     const matrix = buildDependencyMatrix(files);
     expect(matrix["src/a.ts"]).toEqual({ importsFrom: ["./z/b.js"], exportsTo: ["src/index.ts"] });
-    expect(matrix["src/z/b.ts"]?.exportsTo).toEqual(["src/index.ts", "src/a.ts", "src/c.ts"]);
+    expect(matrix["src/z/b.ts"]?.exportsTo).toEqual(["src/a.ts", "src/c.ts", "src/index.ts"]);
   });
 
   test("detectCyclicComponents splits runtime and type-only components", () => {
@@ -123,43 +125,45 @@ describe("single-package analysis", () => {
   });
 });
 
+const monoRoot = makeTree({
+  "package.json": '{"private":true,"workspaces":["packages/*"]}\n',
+  "packages/core/package.json": '{"name":"@scope/core"}\n',
+  "packages/app/package.json": '{"name":"@scope/app"}\n',
+  "packages/core/src/index.ts": "export { f } from './f.js';\n",
+  "packages/core/src/f.ts": "export function f() {}\n",
+  "packages/core/src/sub.ts": "export const s = 1;\n",
+  "packages/core/src/deep/d.ts": "export const d = 1;\n",
+  "packages/core/src/t.ts": "export const t = 1;\n",
+  "packages/app/src/main.ts":
+    "import { f } from '@scope/core';\nimport { s } from '@scope/core/sub';\n",
+  "packages/core/tests/t.test.ts": "import { t } from '../src/t.js';\n",
+});
+const core: WorkspacePackage = {
+  name: "@scope/core",
+  directory: "packages/core",
+  srcDir: "packages/core/src",
+  extraEntries: ["packages/core/src/sub.ts"],
+};
+const ws = new Map([[core.name, core]]);
+const monoFiles = await parseAll(monoRoot, [
+  "packages/core/src/index.ts",
+  "packages/core/src/f.ts",
+  "packages/core/src/sub.ts",
+  "packages/core/src/deep/d.ts",
+  "packages/core/src/t.ts",
+  "packages/app/src/main.ts",
+]);
+const monoTests = await parseAll(monoRoot, ["packages/core/tests/t.test.ts"]);
+
 describe("monorepo analysis", () => {
-  const core: WorkspacePackage = {
-    name: "@scope/core",
-    directory: "packages/core",
-    srcDir: "packages/core/src",
-    extraEntries: ["packages/core/src/sub.ts"],
-  };
-  const ws = new Map([[core.name, core]]);
-  const root = makeTree({
-    "packages/core/src/index.ts": "export { f } from './f.js';\n",
-    "packages/core/src/f.ts": "export function f() {}\n",
-    "packages/core/src/sub.ts": "export const s = 1;\n",
-    "packages/core/src/deep/d.ts": "export const d = 1;\n",
-    "packages/core/src/t.ts": "export const t = 1;\n",
-    "packages/app/src/main.ts":
-      "import { f } from '@scope/core';\nimport { s } from '@scope/core/sub';\n",
-    "packages/core/tests/t.test.ts": "import { t } from '../src/t.js';\n",
-  });
-  const files = parseAll(
-    root,
-    [
-      "packages/core/src/index.ts",
-      "packages/core/src/f.ts",
-      "packages/core/src/sub.ts",
-      "packages/core/src/deep/d.ts",
-      "packages/core/src/t.ts",
-      "packages/app/src/main.ts",
-    ],
-    ws,
-  );
-  const tests = parseAll(root, ["packages/core/tests/t.test.ts"], ws);
+  const files = monoFiles;
+  const tests = monoTests;
 
   test("categorizeFiles keys by package directory and subdirectory", () => {
     expect(Object.keys(categorizeFiles(files, true, ws))).toEqual([
-      "packages/core",
-      "packages/core/deep",
       "unknown",
+      "packages/core/deep",
+      "packages/core",
     ]);
   });
 

@@ -6,7 +6,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "../../src/depgraph/index.ts";
+import { runMap } from "../../src/map/command.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -15,7 +15,7 @@ afterAll(removeTrees);
 async function runArgs(argv: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
   let stdout = "";
   let stderr = "";
-  const code = await run(argv, {
+  const code = await runMap(argv, {
     stdout: (s) => {
       stdout += s;
     },
@@ -61,7 +61,7 @@ describe("zero source files", () => {
     const root = makeTree({ "package.json": JSON.stringify({ name: "z", version: "1.0.0" }) });
     const r = await runDepgraph(root);
     expect(r.code).toBe(1);
-    expect(r.stderr).toContain("No TypeScript files found");
+    expect(r.stderr).toContain("no source file found");
     expect(r.stdout).not.toContain("Created output directory");
     expect(existsSync(join(root, "docs"))).toBe(false);
   });

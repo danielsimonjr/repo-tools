@@ -40,8 +40,10 @@ export interface ParsedModule {
    */
   reExports: string[];
   /**
-   * The relative specifiers of the `import(...)` calls with a literal argument (TypeScript). The
-   * graph has no edge for them (D1); test coverage counts them as loads.
+   * The relative specifiers of the `import(...)` calls with a literal argument (TypeScript).
+   * The same calls are also import edges (a deliberate difference from the Python tool): a
+   * runtime call is a namespace use, and a type-position call is type-only. Test coverage
+   * still counts the specifiers as loads. A template with a `${` substitution is not here.
    */
   dynamicImports: string[];
   /** The names that the plain `pub use` statements of a Rust file make public. */
@@ -208,11 +210,92 @@ function stripChars(text: string, chars: string): string {
 /** The specifier text of a `source` field, without its quotes. */
 const specifierOf = (node: Node): string => stripChars(node.text, "\"'`");
 
+/**
+ * How a literal `import(...)` is used. A runtime call is a namespace use. A type-position
+ * call is type-only: `typeof import(...)` names nothing, and `import(...).Name` (no call
+ * after the member chain) names `Name`, so that export counts as used.
+ */
+function dynamicImportUse(call: Node): { typeOnly: boolean; names: string[] } {
+  const parent = call.parent;
+  if (parent?.type === "type_query") return { typeOnly: true, names: [] };
+  if (parent?.type === "member_expression") {
+    const first = parent.childForFieldName("property");
+    let top = parent;
+    while (top.parent?.type === "member_expression") top = top.parent;
+    const called =
+      top.parent?.type === "call_expression" &&
+      top.parent.childForFieldName("function")?.id === top.id;
+    if (!called) {
+      const name = first?.type === "property_identifier" ? first.text : "";
+      return { typeOnly: true, names: name !== "" ? [name] : [] };
+    }
+  }
+  return { typeOnly: false, names: ["*"] };
+}
+
+/** One literal `import(...)`: its specifier and how the call uses the module. */
+interface DynamicCall {
+  spec: string;
+  use: { typeOnly: boolean; names: string[] };
+}
+
+/** Adds `name` to `names` when it is not already there. */
+function addName(names: string[], name: string): void {
+  if (!names.includes(name)) names.push(name);
+}
+
+/**
+ * Adds each literal relative `import(...)` as an edge. A runtime call of a specifier that
+ * already has a runtime edge adds `*` to that edge. A type-only call adds its names to an
+ * existing edge and does not add a second edge. A runtime call beside a type-only edge
+ * adds its own runtime edge.
+ */
+function addDynamicImportEdges(mod: ParsedModule, calls: DynamicCall[]): void {
+  const bySpec = new Map<string, { typeOnly: boolean; names: string[] }>();
+  for (const call of calls) {
+    if (!call.spec.startsWith(".")) continue;
+    mod.dynamicImports.push(call.spec);
+    const prev = bySpec.get(call.spec);
+    if (!prev) {
+      bySpec.set(call.spec, { typeOnly: call.use.typeOnly, names: [...call.use.names] });
+      continue;
+    }
+    // One runtime call of the specifier makes the whole import runtime.
+    if (!call.use.typeOnly) {
+      prev.typeOnly = false;
+      addName(prev.names, "*");
+    } else if (prev.typeOnly) {
+      for (const name of call.use.names) addName(prev.names, name);
+    }
+  }
+  for (const [spec, use] of bySpec) {
+    const existing = mod.imports.filter((i) => i.specifier === spec);
+    const runtime = existing.find((i) => !i.typeOnly);
+    if (!use.typeOnly && runtime) {
+      addName(runtime.names, "*");
+      continue;
+    }
+    if (existing.length > 0 && use.typeOnly) {
+      const host = existing.find((i) => i.typeOnly) ?? existing[0];
+      if (host && !host.names.includes("*")) {
+        for (const name of use.names) addName(host.names, name);
+      }
+      continue;
+    }
+    mod.imports.push({
+      specifier: spec,
+      names: use.typeOnly ? use.names : ["*"],
+      typeOnly: use.typeOnly,
+    });
+  }
+}
+
 /** Reads one TypeScript or JavaScript file. */
 export function parseTs(source: string): ParsedModule {
   const tree = parserFor("typescript").parse(source);
   if (!tree) throw new Error("tree-sitter returned no tree");
   const mod = emptyModule();
+  const dynamicCalls: { spec: string; use: { typeOnly: boolean; names: string[] } }[] = [];
   // A pre-order walk (a node, then its children in order), as the recursive Python walk.
   const stack: Node[] = [tree.rootNode];
   while (stack.length > 0) {
@@ -238,7 +321,7 @@ export function parseTs(source: string): ParsedModule {
         (arg?.type === "template_string" && !hasChild(arg, "template_substitution"));
       if (arg && literal) {
         const spec = specifierOf(arg);
-        if (spec.startsWith(".")) mod.dynamicImports.push(spec);
+        if (spec.startsWith(".")) dynamicCalls.push({ spec, use: dynamicImportUse(node) });
       }
     } else if (node.type === "export_statement") {
       if (hasChild(node, "default")) {
@@ -274,6 +357,7 @@ export function parseTs(source: string): ParsedModule {
     }
     for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i] as Node);
   }
+  addDynamicImportEdges(mod, dynamicCalls);
   tree.delete();
   return mod;
 }

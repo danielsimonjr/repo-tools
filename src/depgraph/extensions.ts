@@ -9,8 +9,8 @@
  * WebGPU and parallel pairing reports and the WASM build gate of the pre-port generator are an
  * extension in the consumer repo.
  */
-import { existsSync, statSync } from "node:fs";
-import { isAbsolute, relative, resolve } from "node:path";
+import { existsSync, lstatSync, realpathSync, statSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { type DepgraphConfig, isAbsolutePath, resolveUnderRoot } from "../config.ts";
 import { writeReport } from "../io.ts";
@@ -163,23 +163,54 @@ export function reportContext(
   };
 }
 
+/** True when the path text `path` is outside the path text `folder`. */
+function outsideText(folder: string, path: string): boolean {
+  const rel = relative(folder, path);
+  return (
+    rel === "" ||
+    rel === ".." ||
+    rel.startsWith(`..${sep}`) ||
+    rel.startsWith("../") ||
+    isAbsolute(rel)
+  );
+}
+
+/**
+ * The real path of `path`: the real path of its nearest existing ancestor, with the remaining
+ * names added. Undefined when that ancestor is a link that does not resolve.
+ */
+function realPath(path: string): string | undefined {
+  let existing = resolve(path);
+  const rest: string[] = [];
+  while (!lstatSync(existing, { throwIfNoEntry: false })) {
+    const up = dirname(existing);
+    if (up === existing) return undefined;
+    rest.unshift(basename(existing));
+    existing = up;
+  }
+  try {
+    return join(realpathSync.native(existing), ...rest);
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * The absolute path of `relPath` in `outputDir`. Throws when `relPath` is empty or absolute, or
- * when it names the output folder itself or a path outside it.
+ * when it names the output folder itself or a path outside it. A symbolic link inside the
+ * output folder that points outside it is outside.
  */
 export function outputPath(outputDir: string, relPath: string): string {
   if (typeof relPath !== "string" || relPath === "" || isAbsolutePath(relPath)) {
     throw new Error("write: the path must be relative to the output folder");
   }
   const path = resolve(outputDir, relPath);
-  const rel = relative(outputDir, path);
-  if (
-    rel === "" ||
-    rel === ".." ||
-    rel.startsWith("../") ||
-    rel.startsWith("..\\") ||
-    isAbsolute(rel)
-  ) {
+  if (outsideText(outputDir, path)) {
+    throw new Error("write: the path must stay in the output folder");
+  }
+  const realFolder = realPath(outputDir);
+  const realTarget = realPath(path);
+  if (realFolder === undefined || realTarget === undefined || outsideText(realFolder, realTarget)) {
     throw new Error("write: the path must stay in the output folder");
   }
   return path;

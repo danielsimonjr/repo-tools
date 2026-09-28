@@ -22,9 +22,10 @@ describe("F28: RegExp-safe symbol names", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     const report = result.report("unused-analysis.md");
-    expect(report).toContain("`$store` (constant) — 1 in-file ref\n");
-    expect(report).toContain("`a$b` (constant) — 1 in-file ref\n");
-    const exports = result.graph().modules.root?.["src/store.ts"]?.exports;
+    const referenced = report.split("\n## Exports referenced in their own module\n")[1] ?? "";
+    expect(referenced.split("\n## ")[0]).toContain("`$store`");
+    expect(referenced.split("\n## ")[0]).toContain("`a$b`");
+    const exports = result.graph().modules.src?.["src/store.ts"]?.exports;
     expect(exports).toEqual(["other", "$store", "a$b"]);
   });
 });

@@ -205,6 +205,23 @@ describe("buildGraph: edges and import buckets", () => {
     expect(graph.files.get("src/a.ts")?.internal[0]?.file).toBe("src/b.ts");
   });
 
+  test("a runtime import() is an edge, and it closes a runtime cycle", async () => {
+    const graph = await buildGraph(
+      repo({
+        "src/a.ts":
+          "export async function load(): Promise<unknown> {\n  return await import('./b.js');\n}\n",
+        "src/b.ts": "import './a.js';\nexport const b = 1;\n",
+      }),
+    );
+    expect(graph.files.get("src/a.ts")?.internal).toEqual([
+      expect.objectContaining({ file: "src/b.ts", imports: ["*"], typeOnly: false }),
+    ]);
+    const cycles = findCycles(graph).cycles;
+    expect(
+      cycles.some((c) => new Set(c).size === 2 && c.includes("src/a.ts") && c.includes("src/b.ts")),
+    ).toBe(true);
+  });
+
   test("a broken relative import is counted, not dropped", async () => {
     const n = (
       await buildGraph(repo({ "src/a.ts": 'import { X } from "./missing.js";\n' }))

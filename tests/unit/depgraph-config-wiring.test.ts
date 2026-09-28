@@ -8,7 +8,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG_FILE } from "../../src/config.ts";
-import { parseDepgraphArgs } from "../../src/depgraph/index.ts";
+import { parseDepgraphArgs } from "../../src/depgraph/args.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -86,122 +86,58 @@ describe("--out and depgraph.out", () => {
   });
 });
 
-describe("--src and depgraph.src", () => {
+describe("scan-scope flags and config keys have no effect in 2.0.0", () => {
   const tree = {
     "package.json": PKG,
     "src/index.ts": "/** Entry. */\nexport const main = 1;\n",
     "lib/a.ts": "/** A. */\nexport const a = 1;\n",
     "lib/b.test.ts": "import { a } from './a.js';\n",
-  };
-
-  test("--src replaces the automatic source roots, and the census walks them", async () => {
-    const root = makeTree(tree);
-    const r = await runDepgraph(root, ["--src=lib"]);
-    expect(r.code).toBe(0);
-    const paths = graphPaths(readOut(root, "docs/architecture", "dependency-graph.json"));
-    expect(paths).toContain("lib/a.ts");
-    expect(paths).not.toContain("src/index.ts");
-    const inventory = readOut(root, "docs/architecture", "file-inventory.json");
-    expect(inventory).toContain('"lib/a.ts"');
-    // The tests under a configured source root count.
-    const coverage = JSON.parse(readOut(root, "docs/architecture", "test-coverage.json"));
-    expect(coverage.testedFiles).toEqual(["lib/a.ts"]);
-    expect(r.stdout).toContain("  lib: 1 files");
-  });
-
-  test("depgraph.src does the same", async () => {
-    const root = makeTree({ ...tree, [CONFIG_FILE]: config({ src: ["lib"] }) });
-    expect((await runDepgraph(root)).code).toBe(0);
-    const paths = graphPaths(readOut(root, "docs/architecture", "dependency-graph.json"));
-    expect(paths).toEqual(["lib/a.ts"]);
-  });
-
-  // Ruling (c) of D10a: in monorepo mode the workspace source folders are the roots. A `--src`
-  // that the run ignores would hide a typing error, so the run stops before it writes.
-  const mono = {
-    "package.json": JSON.stringify({ name: "mono", private: true, workspaces: ["packages/*"] }),
-    "packages/core/package.json": JSON.stringify({ name: "@m/core", version: "1.0.0" }),
-    "packages/core/src/index.ts": "/** Entry. */\nexport const core = 1;\n",
-  };
-
-  test("--src in a monorepo exits 1, says why and writes nothing", async () => {
-    const root = makeTree(mono);
-    const r = await runDepgraph(root, ["--src=packages"]);
-    expect(r.code).toBe(1);
-    expect(r.stderr).toContain(
-      "--src (depgraph.src) applies to single-package repos; this root is a workspace",
-    );
-    expect(r.stdout).toBe("");
-    expect(existsSync(join(root, "docs"))).toBe(false);
-  });
-
-  test("depgraph.src in a monorepo exits 1 the same way", async () => {
-    const root = makeTree({ ...mono, [CONFIG_FILE]: config({ src: ["packages"] }) });
-    const r = await runDepgraph(root);
-    expect(r.code).toBe(1);
-    expect(r.stderr).toContain("this root is a workspace");
-    expect(existsSync(join(root, "docs"))).toBe(false);
-  });
-
-  test("--src=auto in a monorepo is the default and runs", async () => {
-    const root = makeTree(mono);
-    expect((await runDepgraph(root, ["--src=auto"])).code).toBe(0);
-  });
-});
-
-describe("--tests and depgraph.tests", () => {
-  const tree = {
-    "package.json": PKG,
-    "src/index.ts": "/** Entry. */\nexport const main = 1;\n",
     "spec/index.test.ts": "import { main } from '../src/index.js';\n",
-  };
-
-  test("by default a spec/ folder holds no test", async () => {
-    const root = makeTree(tree);
-    await runDepgraph(root);
-    const coverage = JSON.parse(readOut(root, "docs/architecture", "test-coverage.json"));
-    expect(coverage.testedFiles).toEqual([]);
-  });
-
-  test("--tests=spec reads its tests, and depgraph.tests does the same", async () => {
-    const root = makeTree(tree);
-    await runDepgraph(root, ["--tests=spec"]);
-    const flag = JSON.parse(readOut(root, "docs/architecture", "test-coverage.json"));
-    expect(flag.testedFiles).toEqual(["src/index.ts"]);
-    const root2 = makeTree({ ...tree, [CONFIG_FILE]: config({ tests: ["spec"] }) });
-    await runDepgraph(root2);
-    const cfg = JSON.parse(readOut(root2, "docs/architecture", "test-coverage.json"));
-    expect(cfg.testedFiles).toEqual(["src/index.ts"]);
-  });
-});
-
-describe("--exclude and --also-exclude", () => {
-  const tree = {
-    "package.json": PKG,
-    "src/index.ts": "/** Entry. */\nexport const main = 1;\n",
     "src/gen/g.ts": "/** Generated. */\nexport const g = 1;\n",
     "src/vendor/v.ts": "/** Vendored. */\nexport const v = 1;\n",
   };
 
-  test("--also-exclude extends the skip list in the graph and the census", async () => {
+  test("a scan-scope flag exits 1 and writes nothing", async () => {
     const root = makeTree(tree);
-    expect((await runDepgraph(root, ["--also-exclude=gen"])).code).toBe(0);
-    const paths = graphPaths(readOut(root, "docs/architecture", "dependency-graph.json"));
-    expect(paths).not.toContain("src/gen/g.ts");
-    expect(paths).toContain("src/vendor/v.ts");
-    expect(readOut(root, "docs/architecture", "file-inventory.json")).not.toContain("src/gen/");
+    const r = await runDepgraph(root, ["--src=lib"]);
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("flag --src has no effect in 2.0.0");
+    expect(r.stdout).toBe("");
+    expect(existsSync(join(root, "docs"))).toBe(false);
+    const tests = await runDepgraph(makeTree(tree), ["--tests=spec"]);
+    expect(tests.code).toBe(1);
+    expect(tests.stderr).toContain("flag --tests has no effect in 2.0.0");
+    const excluded = await runDepgraph(makeTree(tree), ["--exclude=vendor"]);
+    expect(excluded.code).toBe(1);
+    expect(excluded.stderr).toContain("flag --exclude has no effect in 2.0.0");
+    const also = await runDepgraph(makeTree(tree), ["--also-exclude=gen"]);
+    expect(also.code).toBe(1);
+    expect(also.stderr).toContain("flag --also-exclude has no effect in 2.0.0");
+    const auto = await runDepgraph(makeTree(tree), ["--src=auto"]);
+    expect(auto.code).toBe(1);
+    expect(auto.stderr).toContain("flag --src has no effect in 2.0.0");
   });
 
-  test("--exclude replaces the skip list; depgraph.alsoExclude extends it", async () => {
-    const root = makeTree(tree);
-    await runDepgraph(root, ["--exclude=vendor"]);
+  test("a scan-scope config key warns and the census still holds every source file", async () => {
+    const root = makeTree({
+      ...tree,
+      [CONFIG_FILE]: config({ src: ["lib"], tests: ["spec"], alsoExclude: ["gen", "vendor"] }),
+    });
+    const r = await runDepgraph(root);
+    expect(r.code).toBe(0);
+    expect(r.stderr).toContain("config key src:");
+    expect(r.stderr).toContain("config key tests:");
+    expect(r.stderr).toContain("config key alsoExclude:");
     const paths = graphPaths(readOut(root, "docs/architecture", "dependency-graph.json"));
+    expect(paths).toContain("src/index.ts");
+    expect(paths).toContain("lib/a.ts");
     expect(paths).toContain("src/gen/g.ts");
-    expect(paths).not.toContain("src/vendor/v.ts");
-    const root2 = makeTree({ ...tree, [CONFIG_FILE]: config({ alsoExclude: ["gen", "vendor"] }) });
-    await runDepgraph(root2);
-    const paths2 = graphPaths(readOut(root2, "docs/architecture", "dependency-graph.json"));
-    expect(paths2).toEqual(["src/index.ts"]);
+    expect(paths).toContain("src/vendor/v.ts");
+    const coverage = JSON.parse(readOut(root, "docs/architecture", "test-coverage.json")) as {
+      testedFiles: string[];
+    };
+    expect(coverage.testedFiles).toContain("src/index.ts");
+    expect(coverage.testedFiles).toContain("lib/a.ts");
   });
 });
 

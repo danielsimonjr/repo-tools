@@ -9,16 +9,23 @@ import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 afterAll(removeTrees);
 
 describe("F35: package.json type guards", () => {
-  test("a null root package.json warns and uses the defaults", async () => {
+  test("a null root package.json warns and the conventional entry stays a root", async () => {
     const root = makeTree({
       "package.json": "null",
       "src/index.ts": "/** Entry. */\nexport const main = 1;\n",
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stderr).toBe("Warning: package.json is not a JSON object, using defaults\n");
-    const graph = result.graph() as unknown as { metadata: { name: string; version: string } };
-    expect(graph.metadata).toMatchObject({ name: "unknown", version: "0.0.0" });
+    expect(result.stderr).toBe(
+      "Warning: package.json is not a JSON object; its entries are ignored\n" +
+        "Warning: emit_file_inventory: no readable package.json at the root -- package derivation skipped, every file reports '(root)'\n",
+    );
+    const graph = result.graph() as unknown as { reachability: { roots: string[] } };
+    expect(graph.reachability.roots).toContain("src/index.ts");
+    const layers = JSON.parse(result.report("dependency-layers.json")) as {
+      metadata: { version: string };
+    };
+    expect(layers.metadata.version).toBe("unknown");
   });
 
   test("a non-string script keeps its workspace package and warns", async () => {
@@ -40,7 +47,7 @@ describe("F35: package.json type guards", () => {
         "Warning: packages/util/package.json: scripts is not an object; it is ignored\n",
     );
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain("Monorepo detected: 2 workspace packages\n");
+    expect(result.stdout).toContain("Language: typescript; 3 source files");
     const inventory = JSON.parse(result.report("file-inventory.json")) as {
       files: { file: string; disposition: string }[];
     };
@@ -58,9 +65,10 @@ describe("F35: package.json type guards", () => {
     const result = await runDepgraph(root);
     expect(result.stderr).toBe(
       "Warning: package.json: workspace pattern 7 is not a string; it is ignored\n" +
-        "Warning: packages/list/package.json is not a JSON object; the package is skipped\n",
+        "Warning: packages/list/package.json is not a JSON object; the package is skipped\n" +
+        "Warning: emit_file_inventory: workspace candidate 'packages/list' (matched by 'packages/*') has no readable package.json -- skipped, its files will report package '(root)'\n",
     );
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain("Monorepo detected: 1 workspace packages\n  - @f35/core");
+    expect(result.stdout).toContain("Language: typescript; 1 source files");
   });
 });

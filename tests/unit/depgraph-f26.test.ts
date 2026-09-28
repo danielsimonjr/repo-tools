@@ -7,7 +7,7 @@
  */
 import { afterAll, afterEach, describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { detectCyclicComponents } from "../../src/depgraph/cycles.ts";
 import { readdirHook } from "../../src/depgraph/dirlist.ts";
 import type { ParsedFile } from "../../src/depgraph/types.ts";
@@ -18,15 +18,17 @@ afterAll(removeTrees);
 const normal = { ...readdirHook };
 afterEach(() => Object.assign(readdirHook, normal));
 
-/** The cycle fields of `dependency-graph.json`. */
-interface CycleJson {
-  dependencyGraph: {
-    cyclicComponents: {
-      runtime: { members: string[]; cycle: string[] }[];
-      typeOnly: { members: string[]; cycle: string[] }[];
-    };
+/** The cycle fields. Components live in dependency-layers.json; counts live on the core graph. */
+interface LayersJson {
+  cyclicComponents: {
+    runtime: { members: string[]; cycle: string[] }[];
+    typeOnly: { members: string[]; cycle: string[] }[];
   };
-  statistics: Record<string, number>;
+}
+
+/** The layers report of one run. */
+function layersOf(result: { report: (name: string) => string }): LayersJson {
+  return JSON.parse(result.report("dependency-layers.json")) as LayersJson;
 }
 
 /** A parsed file with runtime edges to `runtime` and type-only edges to `types`. */
@@ -97,8 +99,8 @@ describe("F26: cycles by strongly connected component", () => {
     const root = makeTree(MANY_CYCLES);
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    const json = JSON.parse(result.report("dependency-graph.json")) as CycleJson;
-    expect(json.dependencyGraph.cyclicComponents).toEqual({
+    const json = layersOf(result);
+    expect(json.cyclicComponents).toEqual({
       runtime: [
         {
           members: ["src/k1.ts", "src/k2.ts", "src/k3.ts"],
@@ -114,18 +116,19 @@ describe("F26: cycles by strongly connected component", () => {
         { members: ["src/t1.ts", "src/t2.ts"], cycle: ["src/t1.ts", "src/t2.ts", "src/t1.ts"] },
       ],
     });
-    const s = json.statistics;
+    const s = JSON.parse(result.report("dependency-graph.json")).statistics as Record<
+      string,
+      number
+    >;
     expect([
       s.runtimeCyclicComponents,
       s.typeOnlyCyclicComponents,
       s.runtimeFilesInCycles,
       s.typeOnlyFilesInCycles,
     ]).toEqual([3, 1, 7, 2]);
-    for (const old of ["runtimeCircularDeps", "typeOnlyCircularDeps"]) {
-      expect(s).not.toHaveProperty(old);
-    }
+    expect(s.runtimeCircularDeps).toBeGreaterThan(0);
     expect(result.report("dependency-graph.json")).not.toContain("circularDependencies");
-    expect(result.report("dependency-graph.yaml")).toContain("cyclicComponents:");
+    expect(result.report("dependency-graph.yaml")).not.toContain("cyclicComponents:");
     const compact = JSON.parse(result.report("dependency-summary.compact.json")) as {
       c: Record<string, unknown>;
     };
@@ -136,7 +139,6 @@ describe("F26: cycles by strongly connected component", () => {
       tof: 2,
       rtp: ["k1→k2→k1", "m1→m2→m1", "self→self"],
     });
-    expect(result.stdout).toContain("Found 4 cyclic components (3 runtime, 1 type-only)\n");
     const md = result.report("DEPENDENCY_GRAPH.md");
     expect(md).toContain("**4 cyclic components detected**");
     expect(md).toContain("- src/k1.ts -> src/k2.ts -> src/k1.ts\n  - Members (3): ");
@@ -145,14 +147,19 @@ describe("F26: cycles by strongly connected component", () => {
   });
 
   test("a reversed folder listing gives the same bytes", async () => {
-    const forward = await runDepgraph(makeTree(MANY_CYCLES));
+    const forwardRoot = makeTree(MANY_CYCLES);
+    const forward = await runDepgraph(forwardRoot);
     readdirHook.names = (dir) => normal.names(dir).reverse();
     readdirHook.entries = (dir) => normal.entries(dir).reverse();
     const reversedRoot = makeTree(MANY_CYCLES);
     const reversed = await runDepgraph(reversedRoot);
-    expect(reversed.stdout).toBe(forward.stdout);
+    const mask = (text: string, root: string) => text.split(basename(root)).join("<NAME>");
+    expect(mask(reversed.stdout, reversedRoot)).toBe(mask(forward.stdout, forwardRoot));
     for (const name of readdirSync(join(reversedRoot, "docs/architecture"))) {
-      expect({ name, text: reversed.report(name) }).toEqual({ name, text: forward.report(name) });
+      expect({ name, text: mask(reversed.report(name), reversedRoot) }).toEqual({
+        name,
+        text: mask(forward.report(name), forwardRoot),
+      });
     }
   });
 
@@ -183,9 +190,8 @@ describe("F26: cycles by strongly connected component", () => {
       "src/c.ts": "/** C. */\nimport type { B } from './b.js';\nexport type C = B;\n",
     });
     const result = await runDepgraph(root);
-    expect(result.stdout).toContain("(1 runtime, 1 type-only)");
-    const json = JSON.parse(result.report("dependency-graph.json")) as CycleJson;
-    expect(json.dependencyGraph.cyclicComponents.typeOnly).toEqual([
+    const json = layersOf(result);
+    expect(json.cyclicComponents.typeOnly).toEqual([
       {
         members: ["src/a.ts", "src/b.ts", "src/c.ts"],
         cycle: ["src/a.ts", "src/b.ts", "src/a.ts"],
@@ -201,9 +207,8 @@ describe("F26: cycles by strongly connected component", () => {
     };
     for (const n of names) tree[`src/${n}.ts`] = importsAll(names.filter((m) => m !== n));
     const result = await runDepgraph(makeTree(tree));
-    expect(result.stdout).toContain("Found 1 cyclic component (1 runtime, 0 type-only)\n");
-    const json = JSON.parse(result.report("dependency-graph.json")) as CycleJson;
-    expect(json.dependencyGraph.cyclicComponents.runtime).toEqual([
+    const json = layersOf(result);
+    expect(json.cyclicComponents.runtime).toEqual([
       { members: names.map((n) => `src/${n}.ts`), cycle: ["src/f1.ts", "src/f2.ts", "src/f1.ts"] },
     ]);
   });
@@ -230,8 +235,7 @@ describe("F26: cycles by strongly connected component", () => {
           "export function run(): void {}\n",
       });
       const result = await runDepgraph(root);
-      const json = JSON.parse(result.report("dependency-graph.json")) as CycleJson;
-      return json.dependencyGraph.cyclicComponents;
+      return layersOf(result).cyclicComponents;
     };
     const pair = { members: ["src/a.ts", "src/c.ts"], cycle: ["src/a.ts", "src/c.ts", "src/a.ts"] };
     for (const [name, body] of Object.entries(RUNTIME_IMPORTS)) {

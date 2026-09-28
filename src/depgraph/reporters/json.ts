@@ -4,7 +4,7 @@
  * Fix F26: the cycles are cyclic components (`dependencyGraph.cyclicComponents`, the compact
  * `c` object).
  */
-import { cleanExportName, generateFallbackDescription } from "../parser.ts";
+import { cleanExportName, generateFallbackDescription } from "../description.ts";
 import { isSrcIndex } from "../paths.ts";
 import { targetOf } from "../resolver.ts";
 import type { CyclicComponents, ModuleMap, PackageJson, ParsedFile, Statistics } from "../types.ts";
@@ -27,7 +27,14 @@ export function modulesJsonOf(modules: ModuleMap): Record<string, Record<string,
           ...(d.reExport ? { reExport: true } : {}),
           ...(d.typeOnly ? { typeOnly: true } : {}),
         })),
-        workspaceDependencies: file.workspaceDependencies,
+        workspaceDependencies: file.workspaceDependencies.map(
+          ({ package: pkg, directory, imports, subpath }) => ({
+            package: pkg,
+            directory,
+            imports,
+            ...(subpath !== undefined ? { subpath } : {}),
+          }),
+        ),
         exports: ex.named,
         reExported: ex.reExported.length > 0 ? ex.reExported : undefined,
         classes: ex.classes.length > 0 ? ex.classes : undefined,

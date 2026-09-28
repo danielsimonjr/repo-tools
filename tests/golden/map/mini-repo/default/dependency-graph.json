@@ -19,6 +19,13 @@
               "AlphaOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "src/dyn.ts",
+            "imports": [
+              "*"
+            ],
+            "typeOnly": false
           }
         ],
         "exports": [
@@ -285,15 +292,15 @@
     "totalLinesOfCode": 96,
     "totalExports": 20,
     "entryRoots": 3,
-    "reachableFiles": 13,
-    "dormantFiles": 3,
-    "orphanedFiles": 3,
+    "reachableFiles": 14,
+    "dormantFiles": 2,
+    "orphanedFiles": 2,
     "testOnlyFiles": 0,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 1,
     "totalTypeOnlyImports": 3,
-    "noImporterFileCount": 3,
-    "unusedExportsCount": 4,
+    "noImporterFileCount": 2,
+    "unusedExportsCount": 3,
     "circularDepsTruncated": false,
     "runtimeCyclicComponents": 1,
     "typeOnlyCyclicComponents": 1,
@@ -313,11 +320,10 @@
       "src/index.ts",
       "src/util/index.ts"
     ],
-    "reachableCount": 13,
-    "dormantCount": 3,
+    "reachableCount": 14,
+    "dormantCount": 2,
     "orphaned": [
       "src/ambient.d.ts",
-      "src/dyn.ts",
       "src/orphan.ts"
     ],
     "testOnly": []

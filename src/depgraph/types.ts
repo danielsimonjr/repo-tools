@@ -55,6 +55,12 @@ export interface WorkspaceDependency {
   imports: string[];
   /** Set when the specifier names an `exports` subpath (`@scope/pkg/internal` gives "internal"). */
   subpath?: string;
+  /** The resolved source file. The layers report does not write this field. */
+  resolved?: string;
+  /** True when the edge carries types only. */
+  typeOnly?: boolean;
+  /** True for a bare side-effect import of the package. */
+  sideEffect?: boolean;
 }
 
 /** The parse result of one TypeScript file. */
@@ -154,8 +160,9 @@ export interface WorkspacePackage {
    */
   extraEntries: string[];
   /**
-   * Set for the root package of single-package mode only (fix F43): the source file of each
-   * entry, keyed by subpath ("." and each `./x` key of `exports`), for self-imports.
+   * The source file of each entry, keyed by subpath ("." and each `./x` key of `exports`).
+   * The value is the source of the export target, else `src/<sub>.ts` or `src/<sub>/index.ts`.
+   * A package-name import resolves here first.
    */
   entryFiles?: Record<string, string>;
 }

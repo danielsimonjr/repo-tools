@@ -60,7 +60,9 @@ describe("F34: link-safe walk", () => {
       link(siblingTree(), join(root, "packages/linked"), made);
       link(siblingTree(), join(root, "tests"), made);
       const result = await runDepgraph(root);
-      expect(result.stderr).toBe("");
+      expect(result.stderr).toContain(
+        "workspace candidate 'packages/linked' (matched by 'packages/*') has no readable package.json",
+      );
       expect(result.code).toBe(0);
       expect(result.report("dependency-graph.json")).toBe(graphBefore);
       const inventory = JSON.parse(result.report("file-inventory.json"));
@@ -74,10 +76,8 @@ describe("F34: link-safe walk", () => {
       ];
       expect(inventory.skippedLinks).toEqual(expected);
       expect(result.report("FILE_INVENTORY.md")).toContain("- `packages/core/src/sibling`\n");
-      expect(result.stdout).toContain(
-        `Skipped 5 links (not followed):\n${expected.map((p) => `  - ${p}`).join("\n")}\n`,
-      );
       expect(result.stdout).not.toContain("foreign");
+      expect(result.report("dependency-graph.json")).not.toContain("foreign");
     } finally {
       removeLinks(made);
     }
@@ -94,10 +94,11 @@ describe("F34: link-safe walk", () => {
       link(join(root, "src"), join(root, "src/loop"), made);
       const result = await runDepgraph(root);
       expect(result.code).toBe(0);
-      expect(result.stdout).toContain("Found 1 TypeScript files total");
-      expect(result.stdout).toContain(
-        "Skipped 2 links (not followed):\n  - src/loop\n  - src/sibling\n",
-      );
+      expect(result.stdout).toContain("Language: typescript; 1 source files");
+      const inventory = JSON.parse(result.report("file-inventory.json")) as {
+        skippedLinks: string[];
+      };
+      expect(inventory.skippedLinks).toEqual(["src/loop", "src/sibling"]);
       expect(result.report("dependency-graph.json")).not.toContain("foreign");
     } finally {
       removeLinks(made);

@@ -240,13 +240,15 @@ async function runPipeline(
     }),
   );
   written.push(emitUnusedAnalysis(graph, outDir));
-  const view = subsystemView(graph, root, (m) => io.stderr(`Warning: ${m}\n`));
+  // Workspace warnings are already on the graph (findRoots). A second warn here would print them twice.
+  const view = subsystemView(graph, root);
   written.push(emitDependencyLayers(graph, root, outDir, view));
   written.push(...emitSubsystemReports(graph, root, outDir, corePath, { view, banner }));
   written.push(...emitMarkdownReports(outDir, banner));
   written.push(
     ...emitTestCoverage(graph, root, outDir, {
       policyPath: resolveUnderRoot(root, config.coveragePolicy),
+      policyNote: config.coveragePolicy.replace(/\\/g, "/"),
       banner,
     }),
   );
@@ -301,7 +303,9 @@ function checkCensus(root: string, config: DepgraphConfig, io: Io): number {
   const rel = `${config.out.replace(/[\\/]+$/, "")}/file-inventory.json`;
   const path = resolveUnderRoot(root, rel);
   if (!existsSync(path)) {
-    throw new Error(`the inventory ${shown(rel)} does not exist; run repo-tools map first`);
+    throw new Error(
+      `the inventory ${shown(rel)} does not exist; run ${config.regenerateCommand} first`,
+    );
   }
   let committed: Set<string>;
   try {
@@ -320,7 +324,7 @@ function checkCensus(root: string, config: DepgraphConfig, io: Io): number {
   const lines = [`file-census check FAILED: ${shown(rel)} differs from the census.`];
   for (const p of added) lines.push(`  + ${p} (in the census, not in the inventory)`);
   for (const p of removed) lines.push(`  - ${p} (in the inventory, not in the census)`);
-  lines.push("Run repo-tools map, and commit the new inventory.");
+  lines.push(`Run ${config.regenerateCommand}, and commit the new inventory.`);
   io.stderr(`${lines.join("\n")}\n`);
   return 1;
 }

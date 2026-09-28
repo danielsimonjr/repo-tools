@@ -4,14 +4,6 @@
  * change: the graph walk keeps a `.d.ts` file and the census walks skip it.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { join } from "node:path";
-import {
-  collectCensusFiles,
-  getAllSourceTsFiles,
-  getAllTestFiles,
-  getAllTsFiles,
-  walkRepoTsFiles,
-} from "../../src/depgraph/scanner.ts";
 import { graphFile, makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -25,42 +17,6 @@ const TREE = {
   "tests/app.spec.tsx": "import { render } from '../src/view.js';\nrender();\n",
 };
 
-/** The root-relative POSIX form of each absolute path in `paths`. */
-function rel(root: string, paths: string[]): string[] {
-  return paths.map((p) => p.slice(root.length + 1).replace(/\\/g, "/")).sort();
-}
-
-describe("the walks read .tsx", () => {
-  test("the graph walk keeps .tsx and .d.ts and skips .test.tsx", () => {
-    const root = makeTree(TREE);
-    expect(rel(root, getAllTsFiles(join(root, "src")))).toEqual([
-      "src/index.ts",
-      "src/types.d.ts",
-      "src/view.tsx",
-    ]);
-  });
-
-  test("the source walk keeps .tsx and skips .d.ts and .test.tsx", () => {
-    const root = makeTree(TREE);
-    expect(rel(root, getAllSourceTsFiles(join(root, "src")))).toEqual([
-      "src/index.ts",
-      "src/view.tsx",
-    ]);
-  });
-
-  test("the test walk finds .test.tsx and .spec.tsx", () => {
-    const root = makeTree(TREE);
-    expect(rel(root, getAllTestFiles(root))).toEqual(["src/view.test.tsx", "tests/app.spec.tsx"]);
-  });
-
-  test("the census walks list .tsx and skip .d.ts", () => {
-    const root = makeTree(TREE);
-    const want = ["src/index.ts", "src/view.test.tsx", "src/view.tsx", "tests/app.spec.tsx"];
-    expect(walkRepoTsFiles(root)).toEqual(want);
-    expect(collectCensusFiles(root, new Map()).sort()).toEqual(want);
-  });
-});
-
 describe("a .tsx file in the run", () => {
   test("joins the graph with its edge, its census row and its coverage", async () => {
     const root = makeTree(TREE);
@@ -69,7 +25,7 @@ describe("a .tsx file in the run", () => {
     const graph = r.graph();
     expect(graphFile(graph, "src/view.tsx")?.exports).toEqual(["render"]);
     expect(graphFile(graph, "src/index.ts")?.internalDependencies).toContainEqual(
-      expect.objectContaining({ file: "./view.js", imports: ["render"] }),
+      expect.objectContaining({ file: "src/view.tsx", imports: ["render"], typeOnly: false }),
     );
     const inventory = JSON.parse(r.report("file-inventory.json")) as {
       files: { file: string; area: string; disposition: string }[];

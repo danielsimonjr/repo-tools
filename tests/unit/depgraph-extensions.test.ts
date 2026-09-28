@@ -6,9 +6,11 @@
  * `preflight`.
  */
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG_FILE } from "../../src/config.ts";
+import { outputPath } from "../../src/depgraph/extensions.ts";
+import { makeTempDir } from "./temp.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -142,14 +144,14 @@ describe("the context", () => {
     });
     expect(rep).toEqual({
       keys: ["config", "graph", "mask", "root", "write"],
-      files: 1,
+      files: 2,
       mutated: "threw",
       rootIsAbsolute: true,
     });
     // The write keeps the output rules: LF line endings and one trailing LF.
     expect(readFileSync(join(root, OUT, "ext/notes.md"), "utf8")).toBe("line one\nline two\n");
     // The graph copy is read-only: the core report keeps its value.
-    expect(r.graph()).toMatchObject({ metadata: { totalFiles: 1 } });
+    expect(r.graph()).toMatchObject({ metadata: { totalFiles: 2 } });
   });
 
   test("write refuses a path that leaves the output folder", async () => {
@@ -220,5 +222,20 @@ describe("the modes that skip preflight", () => {
     const r = await runDepgraph(root, ["--check-duplicates"]);
     expect(r.code).toBe(1);
     expect(r.stderr).toContain("extension gate failed in preflight: ran");
+  });
+});
+
+describe("write stays inside the output folder", () => {
+  test("a link inside the output folder that points outside it is refused", () => {
+    const base = makeTempDir("ext-link");
+    const out = join(base, "docs/architecture");
+    mkdirSync(out, { recursive: true });
+    const outside = join(base, "secret.txt");
+    writeFileSync(outside, "nope\n");
+    symlinkSync(outside, join(out, "leak.txt"));
+    expect(() => outputPath(out, "leak.txt")).toThrow(
+      "write: the path must stay in the output folder",
+    );
+    expect(outputPath(out, "notes.md")).toBe(join(out, "notes.md"));
   });
 });

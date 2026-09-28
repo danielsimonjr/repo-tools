@@ -25,7 +25,6 @@ describe("F18: .d.ts files are not in the coverage denominator", () => {
     expect(cov.metadata.coveragePercent).toBe("100.0");
     expect(cov.untestedFiles).toEqual([]);
     expect(result.report("TEST_COVERAGE.md")).not.toContain("globals.d.ts");
-    expect(result.stdout).toContain("1/1 source files have tests (100.0%)");
     // The graph keeps the declaration file.
     expect(graphFile(result.graph(), "src/globals.d.ts")).toBeDefined();
   });

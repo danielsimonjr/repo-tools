@@ -47,6 +47,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./a.js` | `AlphaOptions` | Import (type-only) |
+| `./dyn.js` | `*` | Import |
 
 **Exports:**
 - Classes: `Bravo`
@@ -218,18 +219,18 @@ The codebase is organized into the following modules:
 |------|--------------|------------|
 | `src/a` | 1 file | 3 files |
 | `src/index` | 4 files | 0 files |
+| `src/B` | 2 files | 1 file |
 | `src/Z/zed` | 1 file | 2 files |
 | `src/cli` | 3 files | 0 files |
 | `src/ping` | 1 file | 2 files |
-| `src/B` | 1 file | 1 file |
 | `src/Z/index` | 1 file | 1 file |
 | `src/Z/loop` | 1 file | 1 file |
 | `src/pong` | 1 file | 1 file |
 | `src/_x` | 0 files | 1 file |
+| `src/dyn` | 0 files | 1 file |
 | `src/register` | 0 files | 1 file |
 | `src/view` | 0 files | 1 file |
 | `src/ambient.d` | 0 files | 0 files |
-| `src/dyn` | 0 files | 0 files |
 | `src/orphan` | 0 files | 0 files |
 | `src/util/index` | 0 files | 0 files |
 
@@ -293,6 +294,7 @@ graph TD
     end
 
     N0 --> N2
+    N0 --> N5
     N11 --> N13
     N12 --> N13
     N13 --> N12

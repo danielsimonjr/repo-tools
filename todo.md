@@ -87,13 +87,17 @@
   test the exe and the Node bundle on Node 20 and 22.
 - [x] Parity record in the repository (public repositories only): side 1 against `repo_map.py`,
   and side 2 against depgraph 1.x.
-- [ ] Decision for the PR review: dynamic `import()` edges in the core graph (D1 open point).
-- [ ] A bodiless `export function f(): T;` (an overload signature or an ambient declaration in a
-  `.d.ts` file) is not an export of the reader, as in the Python tool. Decide with a parity
-  verdict if the reader records it.
-- [ ] Remove the 1.x depgraph pipeline, which the product no longer calls (`depgraph` is an
-  alias of `map`). Port each 1.x fix test (F1 to F44, M1, R1) to `map` first, or record why
-  the fix has no 2.0.0 meaning. Then delete the 1.x runner, parser, scanner and goldens.
+- [x] Decision for the PR review: dynamic `import()` edges in the core graph (D1). Verdict
+  `repo_map-wrong`: a literal relative `import()` is an edge. A runtime call is a namespace use
+  (`*`). A type-position `import('./c').Name` records that name. `typeof import()` records no
+  names. A template with `${`, and a non-relative specifier, are not edges.
+- [x] A bodiless `export function f(): T;` (an overload signature or an ambient declaration in a
+  `.d.ts` file) is not an export of the reader, as in the Python tool. Verdict `repo_map-kept`.
+  An overload plus an implementation records the name once.
+- [x] Remove the 1.x depgraph pipeline, which the product no longer calls (`depgraph` is an
+  alias of `map`). Each 1.x fix test (F1 to F44, M1, R1) is ported to `map`, or recorded in
+  `docs/fix-ledger-2.0.0.md` when the fix has no 2.0.0 meaning. The 1.x runner, parser, scanner
+  and goldens are deleted.
 - [x] Workspace roots: in a workspace monorepo the graph has 0 roots, so each workspace source
   file shows as an orphan (a repo_map defect that 1.x did not have). Read the entry files of
   each workspace package, and list the change as a deliberate difference from repo_map.
@@ -103,26 +107,34 @@
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose
 data. Other findings are filed here.
 
-- [ ] A named re-export writes an extra empty-imports edge (`./view.js` twice for `src/index.ts`).
-- [ ] The extension `write` does not guard against a link inside the output folder that points
-  outside it.
-- [ ] Mathts migration note: set `depgraph.duplicateAllowlist` to its own allowlist path, or the
-  duplicate gate fails on 283 names.
-- [ ] The skip list (`node_modules, dist, build, coverage, .git`) also skips a real source folder
-  such as `src/build/`, with no warning.
-- [ ] The census messages and the TEST_COVERAGE note name fixed values instead of the configured
-  regenerate command and coverage-policy path.
-- [ ] The walk skip list is module state: two runs in one process would interfere.
-- [ ] The config file rejects a top-level `$schema` key.
-- [ ] A type-position `import('./c').C` records no names, so an export used only that way reads
-  as unreferenced.
-- [ ] Single-package mode: the `exports "."` target or `main` is a root only when it is
-  `src/index.ts`; subpath roots come from the export key, not its target.
-- [ ] Test coverage does not follow package-name imports (self or workspace), in either mode.
-- [ ] Monorepo workspace subpaths ignore `exports` targets and do not try `<sub>/index.ts`.
-- [ ] Import edges by package name (self or workspace) are not in the cycle detection.
-- [ ] The regex rule of the comment stripper misreads `a++ / b / c` and `if (x) /re/.test(s)`.
-- [ ] With a bare `import './x'` and an `import('./x')` in one file, the `*` goes on the bare edge.
+- [x] A named re-export writes one edge per `export ... from` statement. It does not add a second
+  empty-imports edge to the same file.
+- [x] The extension `write` refuses a link inside the output folder that points outside it.
+- [x] Mathts migration note: set `map.duplicateAllowlist` (or `depgraph.duplicateAllowlist`) to
+  Mathts' own allowlist path, or the duplicate gate fails on 283 names. The default is
+  `docs/architecture/duplicate-allowlist.json`. The note is in the README.
+- [x] The skip list (`node_modules, dist, build, coverage, .git`) also skips a real source folder
+  such as `src/build/`. The run warns when that folder holds a source file. A root `build/` or
+  `dist/` folder stays silent.
+- [x] The census messages and the TEST_COVERAGE note name the configured regenerate command and
+  coverage-policy path.
+- [x] The walk skip list is not module state. Each walk builds its own skip set. The 1.x scanner
+  that held the list is deleted.
+- [x] The config file accepts a top-level `$schema` key.
+- [x] A type-position `import('./c').C` records the name `C`. `typeof import()` records no names.
+- [x] Single-package mode: `main` and `exports` targets are roots after `dist/` maps to `src/`,
+  including when the file is not `src/index.ts`. A subpath root is the source of the export
+  target.
+- [x] Test coverage follows package-name imports (self or workspace), including side-effect
+  imports of the resolved file.
+- [x] Monorepo workspace subpaths use the `exports` target, then `<sub>.ts`, then
+  `<sub>/index.ts`.
+- [x] Import edges by package name (self or workspace) are in the cycle detection, including the
+  components in `dependency-layers.json`.
+- [x] The comment stripper treats `a++ / b / c` as division, and `if (x) /re/.test(s)` as a
+  regular expression.
+- [x] A bare `import './x'` together with `import('./x')` is one side-effect edge whose names are
+  `["*"]`.
 - [x] D10 exit rows: a `--root` that is not an existing directory exits 1 before any folder is
   created; standard error shows the root as `<root>`, never an absolute path.
 

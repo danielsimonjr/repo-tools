@@ -158,7 +158,7 @@ describe("--check-duplicates --no-regen", () => {
     const root = makeTree({ ...DUP_TREE, [`${OUT}/duplicate-baseline.json`]: baseline() });
     const r = await runDepgraph(root, ["--check-duplicates", "--no-regen"]);
     expect(r.code).toBe(1);
-    expect(r.stderr).toContain("run repo-tools depgraph first");
+    expect(r.stderr).toContain("run repo-tools map first");
     expect(existsSync(join(root, OUT, "dependency-graph.json"))).toBe(false);
   });
 });
@@ -240,7 +240,7 @@ describe("--write-duplicate-baseline", () => {
     const root = makeTree(DUP_TREE);
     const r = await runDepgraph(root, ["--write-duplicate-baseline"]);
     expect(r.code).toBe(1);
-    expect(r.stderr).toContain("run repo-tools depgraph first");
+    expect(r.stderr).toContain("run repo-tools map first");
     expect(existsSync(join(root, "docs"))).toBe(false);
   });
 });

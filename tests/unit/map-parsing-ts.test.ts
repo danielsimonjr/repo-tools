@@ -9,6 +9,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { loadGrammar } from "../../src/map/grammars.ts";
 import { parseTs } from "../../src/map/parsing.ts";
+import { RUNTIME_IMPORTS, TYPE_IMPORTS } from "./dynamic-imports.ts";
 
 beforeAll(async () => {
   await loadGrammar("typescript");
@@ -109,8 +110,8 @@ describe("parseTs: re-exports are both an export and an import", () => {
   });
 });
 
-describe("parseTs: dynamic imports (for test coverage, not graph edges)", () => {
-  test("a literal relative import() is recorded; a substitution or a package is not", () => {
+describe("parseTs: dynamic imports are edges", () => {
+  test("a literal relative import() is an edge; a substitution or a package is not", () => {
     const mod = parseTs(
       [
         "const x = 'y';",
@@ -123,7 +124,81 @@ describe("parseTs: dynamic imports (for test coverage, not graph edges)", () => 
       ].join("\n"),
     );
     expect(mod.dynamicImports).toEqual(["./a.js", "./b.js"]);
-    expect(mod.imports).toEqual([]);
+    expect(mod.imports).toEqual([
+      { specifier: "./a.js", names: ["*"], typeOnly: false },
+      { specifier: "./b.js", names: ["*"], typeOnly: false },
+    ]);
+  });
+
+  for (const [name, body] of Object.entries(RUNTIME_IMPORTS)) {
+    test(`runtime: ${name}`, () => {
+      const edge = parseTs(body).imports.find((i) => i.specifier === "./c.js");
+      expect(edge).toEqual({ specifier: "./c.js", names: ["*"], typeOnly: false });
+    });
+  }
+
+  for (const [name, body] of Object.entries(TYPE_IMPORTS)) {
+    test(`type-only: ${name}`, () => {
+      const edge = parseTs(body).imports.find((i) => i.specifier === "./c.js");
+      expect(edge?.typeOnly).toBe(true);
+      if (name === "typeof import()") expect(edge?.names).toEqual([]);
+      else expect(edge?.names).toEqual(["C"]);
+    });
+  }
+
+  test("import().then<T>(cb) is a runtime edge", () => {
+    const edge = parseTs("export const p = import('./c.js').then<number>((m) => m.v);\n")
+      .imports[0];
+    expect(edge).toEqual({ specifier: "./c.js", names: ["*"], typeOnly: false });
+  });
+
+  test("a type argument with no call stays type-only and records the name", () => {
+    const edge = parseTs("export type T = import('./c.js').Box<number>;\n").imports[0];
+    expect(edge).toEqual({ specifier: "./c.js", names: ["Box"], typeOnly: true });
+  });
+
+  test("a runtime import() beside a type-only import adds a runtime edge", () => {
+    const mod = parseTs(
+      "import type { C } from './c.js';\n" +
+        "export async function f(): Promise<C> {\n  return (await import('./c.js')).make();\n}\n",
+    );
+    expect(mod.imports).toEqual([
+      { specifier: "./c.js", names: ["C"], typeOnly: true },
+      { specifier: "./c.js", names: ["*"], typeOnly: false },
+    ]);
+  });
+
+  test("a runtime import() of a statically imported file adds * to that edge", () => {
+    const mod = parseTs(
+      "import { one } from './c.js';\n" +
+        "export async function f(): Promise<number> {\n" +
+        "  return one + (await import('./c.js')).two;\n}\n",
+    );
+    expect(mod.imports).toEqual([{ specifier: "./c.js", names: ["one", "*"], typeOnly: false }]);
+  });
+
+  test("a bare import and a runtime import() are one edge that records *", () => {
+    const mod = parseTs("import './c.js';\nexport const p = import('./c.js');\n");
+    expect(mod.imports).toEqual([
+      { specifier: "./c.js", names: ["*"], typeOnly: false, sideEffect: true },
+    ]);
+  });
+});
+
+describe("parseTs: a bodiless export function is not an export", () => {
+  test("an overload signature is not a second export of the implementation", () => {
+    const mod = parseTs(
+      "export function f(x: string): string;\n" +
+        "export function f(x: string): string { return x; }\n",
+    );
+    expect(mod.exports).toEqual(["f"]);
+    expect(mod.exportKinds.f).toBe("function");
+  });
+
+  test("an ambient declaration in a declaration file is not an export", () => {
+    const mod = parseTs("export function f(): void;\nexport declare function g(): void;\n");
+    expect(mod.exports).toEqual([]);
+    expect(mod.defaultExport).toBeNull();
   });
 });
 

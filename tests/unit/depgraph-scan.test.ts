@@ -1,6 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { relativePosix } from "../../src/depgraph/paths.ts";
 import {
   collectEntryPoints,
   configReferencedEntries,
@@ -9,24 +8,12 @@ import {
   seedTsconfigEntries,
   tsupConfigEntries,
 } from "../../src/depgraph/roots.ts";
-import {
-  collectCensusFiles,
-  getAllSourceTsFiles,
-  getAllTestFiles,
-  getAllTsFiles,
-  resolveSourceDirs,
-  TEST_DIR_NAMES,
-  walkRepoTsFiles,
-} from "../../src/depgraph/scanner.ts";
 import type { ParsedFile, WorkspacePackage } from "../../src/depgraph/types.ts";
 import { detectWorkspaces, readWorkspacePatterns } from "../../src/depgraph/workspaces.ts";
 import { sortCodeUnits } from "../../src/sort.ts";
 import { makeTree, removeTrees } from "./tree.ts";
 
 afterAll(removeTrees);
-
-const rel = (root: string, paths: string[]): string[] =>
-  sortCodeUnits(paths.map((p) => relativePosix(root, p)));
 
 /** A parsed-file record with only a path. */
 function parsed(path: string): ParsedFile {
@@ -52,76 +39,6 @@ function parsed(path: string): ParsedFile {
     description: null,
   };
 }
-
-describe("scanner", () => {
-  const root = makeTree({
-    "src/a.ts": "",
-    "src/a.test.ts": "",
-    "src/b.spec.ts": "",
-    "src/g.d.ts": "",
-    "src/x.tsx": "",
-    "src/node_modules/n.ts": "",
-    "tests/t.test.ts": "",
-    "dist/d.ts": "",
-    ".hidden/h.ts": "",
-    "vitest.config.ts": "",
-    "new/n.ts": "",
-  });
-
-  // D10b: `.tsx` is an input (design section 3.2); the pre-port walks skipped it.
-  test("getAllTsFiles keeps .d.ts and .tsx and skips tests and node_modules", () => {
-    expect(rel(root, getAllTsFiles(join(root, "src")))).toEqual([
-      "src/a.ts",
-      "src/g.d.ts",
-      "src/x.tsx",
-    ]);
-    expect(getAllTsFiles(join(root, "absent"))).toEqual([]);
-  });
-
-  test("getAllSourceTsFiles also skips .d.ts", () => {
-    expect(rel(root, getAllSourceTsFiles(join(root, "src")))).toEqual(["src/a.ts", "src/x.tsx"]);
-  });
-
-  test("getAllTestFiles finds .test.ts and .spec.ts", () => {
-    expect(rel(root, getAllTestFiles(join(root, "src")))).toEqual([
-      "src/a.test.ts",
-      "src/b.spec.ts",
-    ]);
-    expect(TEST_DIR_NAMES).toEqual(["test", "tests"]);
-  });
-
-  test("resolveSourceDirs prefers src/ and else lists top-level TypeScript dirs", () => {
-    expect(rel(root, resolveSourceDirs(root))).toEqual(["src"]);
-    const other = makeTree({ "pipeline/p.ts": "", "docs/d.ts": "", "tools/t.ts": "" });
-    expect(rel(other, resolveSourceDirs(other))).toEqual(["pipeline"]);
-  });
-
-  test("walkRepoTsFiles skips dist, dot-dirs, node_modules and .d.ts", () => {
-    expect(walkRepoTsFiles(root)).toEqual([
-      "new/n.ts",
-      "src/a.test.ts",
-      "src/a.ts",
-      "src/b.spec.ts",
-      "src/x.tsx",
-      "tests/t.test.ts",
-      "vitest.config.ts",
-    ]);
-  });
-
-  test("collectCensusFiles walks packages, fixed dirs and root files only", () => {
-    const ws = new Map<string, WorkspacePackage>([
-      ["p", { name: "p", directory: "src", srcDir: "src/src", extraEntries: [] }],
-    ]);
-    expect(sortCodeUnits(collectCensusFiles(root, ws))).toEqual([
-      "src/a.test.ts",
-      "src/a.ts",
-      "src/b.spec.ts",
-      "src/x.tsx",
-      "tests/t.test.ts",
-      "vitest.config.ts",
-    ]);
-  });
-});
 
 describe("roots", () => {
   const root = makeTree({
@@ -253,6 +170,7 @@ describe("workspaces", () => {
       directory: "packages/a",
       srcDir: "packages/a/src",
       extraEntries: ["packages/a/src/x.ts"],
+      entryFiles: { "./x": "packages/a/src/x.ts" },
     });
     expect(detectWorkspaces(makeTree({ "a.ts": "" })).size).toBe(0);
   });

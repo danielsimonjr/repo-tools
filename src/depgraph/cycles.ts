@@ -37,6 +37,13 @@ function buildGraphs(files: readonly ParsedFile[]): { runtime: Graph; all: Graph
       allSets.get(file.path)?.add(target);
       if (!dep.typeOnly) runtimeSets.get(file.path)?.add(target);
     }
+    // A package-name import (self or workspace) is an edge too. The adapter stores its target.
+    for (const dep of file.workspaceDependencies ?? []) {
+      const target = dep.resolved;
+      if (target === undefined || !known.has(target)) continue;
+      allSets.get(file.path)?.add(target);
+      if (!dep.typeOnly) runtimeSets.get(file.path)?.add(target);
+    }
   }
   const toGraph = (sets: Map<string, Set<string>>): Graph =>
     new Map(nodes.map((n) => [n, [...(sets.get(n) ?? [])].sort(compareCodeUnits)]));

@@ -54,23 +54,27 @@ call `src/cli.ts`.
 | `src/config.ts` | Reads `repo-tools.config.json`. Merges the flags, the config file and the defaults. Checks each value. |
 | `src/io.ts` | Writes each output with LF line endings and one trailing LF. |
 | `src/sort.ts` | Compares strings by UTF-16 code unit. No module uses `localeCompare`. |
-| `src/mask.ts` | Replaces comment and string text with spaces (offsets and lines stay), and removes comments. It is the one copy of this code. |
-| `src/depgraph/index.ts` | Runs the pipeline in order: scan, parse, resolve, analyze, report, gate. |
-| `src/depgraph/args.ts` | Reads the `depgraph` flags. An unknown flag or a bad value stops the run. |
-| `src/depgraph/scanner.ts`, `dirlist.ts` | Walk the tree in sorted order and skip the excluded folder names. |
+| `src/mask.ts` | Replaces comment and string text with spaces (offsets and lines stay), and removes comments. It is the one copy of this code. A `/` after `++` or `--` is division. A `/` after `if`, `while`, `for` or `with` is a regular expression. |
+| `src/map/command.ts` | Runs `repo-tools map`: the graph, the reports and the gates. `depgraph` is the alias. |
+| `src/map/discovery.ts` | The census, the language, the area and the disposition. The skip list is not process state. |
+| `src/map/parsing.ts`, `grammars.ts` | Reads imports and exports. A literal relative `import()` is an edge. |
+| `src/map/graph.ts` | Joins discovery, reading and resolution, then sets reachability. |
+| `src/map/artifacts.ts`, `layers.ts`, `reports.ts` | Writes the core graph, the inventory, the unused analysis and the subsystem view. |
+| `src/depgraph/args.ts` | Reads the `map` flags. An unknown flag or a bad value stops the run. |
+| `src/depgraph/dirlist.ts` | Lists a folder in sorted order. |
+| `src/depgraph/exclude.ts` | The default skip names, and a walk that builds a fresh skip set on each call. |
+| `src/depgraph/description.ts` | Reads a JSDoc summary and a fallback description. |
 | `src/depgraph/workspaces.ts` | Finds npm, Yarn and pnpm workspaces, and structural workspaces. |
 | `src/depgraph/paths.ts` | Makes every path POSIX and relative to the root. |
-| `src/depgraph/parser.ts` | Reads imports, exports, re-exports, dynamic `import()` and side-effect imports. |
 | `src/depgraph/resolver.ts` | Finds the file of a specifier: `.js` to `.ts`, `dist/` to `src/`, and `package.json` `exports`. |
 | `src/depgraph/roots.ts` | Finds the reachability roots: exports, `bin`, scripts and build configs. |
-| `src/depgraph/analysis.ts`, `cycles.ts` | Reachability, unused files and exports, statistics, and cyclic components. |
-| `src/depgraph/inventory.ts` | The file inventory: area and disposition per file, and the census check. |
+| `src/depgraph/analysis.ts`, `cycles.ts` | Reachability, unused files and exports, statistics, and cyclic components. A package-name edge is included. |
 | `src/depgraph/coverage.ts` | Which source files a test reaches, through barrels and side-effect imports too. |
 | `src/depgraph/duplicates.ts` | Names that two or more files define, their classes, and the duplicate gate. |
 | `src/depgraph/api-surface.ts` | The per-export facts report (`--api-surface`). |
 | `src/depgraph/extensions.ts` | Loads the repository-local extensions and runs their hooks. |
 | `src/depgraph/reporters/*` | One module per report file, and the generated-file banner. |
-| `src/query/*` | Reads the `depgraph` reports and answers each query. `safety.ts` holds the browser-safety check. |
+| `src/query/*` | Reads the `map` reports and answers each query. `safety.ts` holds the browser-safety check. |
 | `src/chunk/*` | The `split`, `merge` and `status` actions, one splitter per file type, and the manifest. |
 | `src/compress/*` | One compressor per format, the legend, and the JSON restore. |
 
@@ -133,7 +137,8 @@ relative to the root. They load in config order. The default export has this sha
 - `report` runs after the analysis. `graph` is a frozen copy of the analysis result.
 - `mask` gives the functions of `src/mask.ts`, so an extension keeps no copy of its own.
 - `write` writes a file in the output folder, and applies rule R1. `write` refuses an empty
-  path, an absolute path, and a path out of the output folder.
+  path, an absolute path, a path out of the output folder, and a symbolic link inside the output
+  folder that points outside it.
 - A hook that throws, or a module that does not load, stops the run with exit 1. The message names
   the extension.
 - `--no-extensions` loads no extension.
@@ -342,9 +347,23 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
 - An import of a workspace package by name is an edge to its entry file.
 - A Rust `use` alias is the whole word `as` and a name. A path keeps the letters `as` inside a
   name (`HashMap`, `wasm`).
+- A literal relative `import()` is an edge. The Python tool records none. A runtime call is a
+  namespace use (`*`). A type-position `import('./c').Name` records that name. `typeof import()`
+  records no names. A template that contains `${`, and a specifier that is not relative, are not
+  edges. The parity record gives the merge rules and the verdict `repo_map-wrong`.
+- A bodiless `export function f(): T;` is not an export. The Python tool does the same
+  (`repo_map-kept`). An overload plus an implementation records the name once.
 
-The core graph has no edge for a dynamic `import()`, as in the Python tool. depgraph 1.x had
-one. Test coverage counts a literal `import()` in a test file as a load.
+A folder named `dist`, `build`, `coverage`, `node_modules` or `.git` under `src/` stays on the
+skip list. When that folder holds a source file, the run warns, and the files stay out of the
+census. A `build/` folder at the root stays silent. A top-level `$schema` key in the config file
+is not a setting. Census messages name the configured regenerate command. The test-coverage note
+names the configured coverage-policy path. A root config that names a source file with
+`new URL`, and a source file that launches a sibling with `new URL('./x.js', import.meta.url)`,
+seed roots. An `exports` or `main` target is a root after `dist/` maps to `src/`, including when
+that file is not `src/index.ts`. A workspace subpath uses the export target, then
+`<sub>.ts`, then `<sub>/index.ts`. A package-name import is an edge for cycles and for test
+coverage.
 
 ### 14.5 The query
 

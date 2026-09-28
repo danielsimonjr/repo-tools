@@ -12,8 +12,8 @@ import { type Dirent, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
 import { resolveWorkspaceSource, workspaceTarget } from "../depgraph/resolver.ts";
-import { selfPackage } from "../depgraph/roots.ts";
-import type { WorkspacePackage } from "../depgraph/types.ts";
+import { configReferencedEntries, runtimeLaunchedEntries, selfPackage } from "../depgraph/roots.ts";
+import type { ParsedFile, WorkspacePackage } from "../depgraph/types.ts";
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { B, pyRepr, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
@@ -25,6 +25,7 @@ import {
   isReparsePoint,
   type Language,
   readSource,
+  skippedSourceFolders,
 } from "./discovery.ts";
 import { loadGrammar } from "./grammars.ts";
 import { type ParsedModule, parseCs, parsePy, parseRs, parseTs } from "./parsing.ts";
@@ -137,7 +138,9 @@ function packageJsonRoots(root: string, known: ReadonlySet<string>): [string[], 
   } catch {
     return [[], []];
   }
-  if (!isObject(pkg)) return [[], []];
+  if (!isObject(pkg)) {
+    return [[], ["package.json is not a JSON object; its entries are ignored"]];
+  }
   const raw: string[] = [];
   const collect = (value: unknown): void => {
     if (typeof value === "string") raw.push(value);
@@ -340,7 +343,7 @@ function findRoots(
 function workspaceRoots(root: string, known: ReadonlySet<string>): [string[], string[]] {
   const roots: string[] = [];
   const warnings: string[] = [];
-  for (const ws of detectWorkspaces(root).values()) {
+  for (const ws of detectWorkspaces(root, (message) => warnings.push(message)).values()) {
     if (ws.directory === "") continue;
     const prefix = `${ws.directory}/`;
     const local = new Set(
@@ -512,8 +515,26 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
 
   expandBarrelStarReexports(files, parsed, starTargets);
 
-  const [roots, rootWarnings] = findRoots(root, known, language);
+  const [declaredRoots, rootWarnings] = findRoots(root, known, language);
+  const roots = [...declaredRoots];
+  // A build or test config, and a `new URL('./x.js', import.meta.url)` launch, seed roots
+  // the way depgraph 1.x did. A file they name is a build entry, not an orphan.
+  if (language === "typescript") {
+    for (const entry of configReferencedEntries(root)) {
+      if (known.has(entry) && !roots.includes(entry)) roots.push(entry);
+    }
+    const asParsed = [...known].map((path) => ({ path }) as ParsedFile);
+    for (const entry of runtimeLaunchedEntries(root, asParsed)) {
+      if (!roots.includes(entry)) roots.push(entry);
+    }
+  }
   const warnings = [...rootWarnings];
+  for (const folder of skippedSourceFolders(root, language)) {
+    warnings.push(
+      `skipped source folder '${folder}' because its name is in the skip list; ` +
+        "its files are not in the census",
+    );
+  }
   if (found.length === 0) {
     warnings.push(
       `no ${SCANNED[language]} source files found under the root -- this graph is empty because ` +

@@ -6,7 +6,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { parseDepgraphArgs } from "../../src/depgraph/index.ts";
+import { parseDepgraphArgs } from "../../src/depgraph/args.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -26,8 +26,8 @@ describe("strict depgraph flags", () => {
     ["an unknown flag with a value", ["--zz=1"], /unknown flag '--zz'/],
     ["a value flag without its value", ["--root"], /--root needs a value/],
     ["a value flag with an empty value", ["--root="], /--root needs a value/],
-    ["a boolean flag with a value", ["--all=yes"], /--all takes no value/],
-    ["a short boolean flag with a value", ["-a=1"], /-a takes no value/],
+    ["a scan-scope flag with a value", ["--all=yes"], /--all has no effect in 2\.0\.0/],
+    ["a short scan-scope flag with a value", ["-a=1"], /-a has no effect in 2\.0\.0/],
   ];
   for (const [label, flags, message] of bad) {
     test(`${label} exits 1, names the problem and writes nothing`, async () => {
@@ -50,15 +50,16 @@ describe("strict depgraph flags", () => {
     expect([o.all, o.includeTests, o.help, o.root]).toEqual([true, true, true, "some/root"]);
   });
 
-  test("-t stays a no-op with a note", async () => {
+  test("-t exits 1: the scan-scope flags have no effect", async () => {
     const r = await runDepgraph(pkg(), ["-t"]);
-    expect(r.code).toBe(0);
-    expect(r.stdout).toContain("--include-tests is a no-op");
+    expect(r.code).toBe(1);
+    expect(r.stderr).toContain("-t has no effect in 2.0.0");
+    expect(existsSync(join(pkg(), "docs"))).toBe(false);
   });
 
   test("--help wins over an unknown flag", async () => {
     const r = await runDepgraph(pkg(), ["--zz", "--help"]);
     expect(r.code).toBe(0);
-    expect(r.stdout).toContain("Usage: repo-tools depgraph");
+    expect(r.stdout).toContain("Usage: repo-tools map");
   });
 });

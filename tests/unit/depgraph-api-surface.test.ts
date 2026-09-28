@@ -6,10 +6,10 @@
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { cpSync, existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { maskGolden } from "../../scripts/update-depgraph-goldens.ts";
 import { CONFIG_FILE } from "../../src/config.ts";
-import { parseDepgraphArgs } from "../../src/depgraph/index.ts";
+import { parseDepgraphArgs } from "../../src/depgraph/args.ts";
 import { sortCodeUnits } from "../../src/sort.ts";
 import { makeTempDir } from "./temp.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
@@ -34,7 +34,9 @@ function outputs(root: string): Record<string, string> {
   const dir = join(root, "docs/architecture");
   const texts: Record<string, string> = {};
   for (const name of sortCodeUnits(readdirSync(dir))) {
-    texts[name] = maskGolden(readFileSync(join(dir, name), "utf8"), root);
+    texts[name] = maskGolden(readFileSync(join(dir, name), "utf8"), root)
+      .split(basename(root))
+      .join("<NAME>");
   }
   return texts;
 }
@@ -65,15 +67,13 @@ describe("the API-surface report on the mini-repo fixture", () => {
     const first = await runDepgraph(root, ["--api-surface=api-surface.json"]);
     expect(first.code).toBe(0);
     const one = readFileSync(join(root, "api-surface.json"), "utf8");
-    expect(first.stdout).toMatch(
-      /Written: api-surface\.json \(\d+ surface symbols, \d+ unresolved\)/,
-    );
+    expect(first.stdout).toMatch(/Written: api-surface\.json \(\d+ surface symbols\)/);
     expect(first.stdout).not.toContain(root);
     await runDepgraph(root, ["--api-surface=api-surface.json"]);
     expect(readFileSync(join(root, "api-surface.json"), "utf8")).toBe(one);
     expect(JSON.parse(one).schemaVersion).toBe(1);
     expect(maskGolden(one, root)).toBe(
-      readFileSync(join(repo, "tests/golden/depgraph/mini-repo/api-surface.json"), "utf8"),
+      readFileSync(join(repo, "tests/golden/map/mini-repo/api-surface.json"), "utf8"),
     );
   });
 

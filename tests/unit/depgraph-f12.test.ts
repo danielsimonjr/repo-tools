@@ -20,22 +20,16 @@ describe("F12: non-src layouts", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain("  pipeline: 2 files\n");
-    expect(result.stdout).toContain("  lib: 1 files\n");
-    expect(result.stdout).toContain("Found 3 TypeScript files total\n");
+    expect(result.stdout).toContain("Language: typescript; 4 source files");
     const summary = JSON.parse(result.report("dependency-graph.json")) as {
       metadata: { totalFiles: number };
     };
-    expect(summary.metadata.totalFiles).toBe(3);
-    // Each scanned file is in a module of the graph: a folder module, as `src/<folder>` gives.
+    // The census is every source file, including the test. `dist/` stays skipped.
+    expect(summary.metadata.totalFiles).toBe(4);
     const graph = result.graph();
-    const modules = Object.fromEntries(
-      Object.entries(graph.modules).map(([name, files]) => [name, Object.keys(files)]),
-    );
-    expect(modules).toEqual({
-      lib: ["lib/util.ts"],
-      pipeline: ["pipeline/run.ts", "pipeline/step.ts"],
-    });
     expect(graphFile(graph, "pipeline/run.ts")?.exports).toEqual(["run"]);
+    expect(graphFile(graph, "lib/util.ts")?.exports).toEqual(["util"]);
+    expect(graphFile(graph, "dist/out.ts")).toBeUndefined();
+    expect(graphFile(graph, "tests/run.test.ts")).toBeDefined();
   });
 });

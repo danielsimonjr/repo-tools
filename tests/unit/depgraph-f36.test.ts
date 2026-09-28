@@ -1,7 +1,7 @@
 /**
- * Fix F36: a negated workspace pattern (`!packages/skip`) excludes its folder, in the npm form
- * and in the pnpm form. The excluded folder is not a workspace package, and its files are not
- * in the graph.
+ * Fix F36: a negated workspace pattern (`!packages/skip`) excludes its folder from workspace
+ * detection, in the npm form and in the pnpm form. The folder contributes no package root.
+ * The census keeps the files, and they show as orphans.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { detectWorkspaces } from "../../src/depgraph/workspaces.ts";
@@ -33,8 +33,14 @@ describe("F36: negated workspace patterns", () => {
     const result = await runDepgraph(root);
     const graph = result.report("dependency-graph.json");
     expect(graph).toContain("packages/a/src/index.ts");
-    expect(graph).not.toContain("packages/skip");
-    expect(result.stdout).toContain("Monorepo detected: 1 workspace packages\n  - @f36/a");
+    // A negated workspace folder is not a package, and its files stay in the census as orphans.
+    expect(graph).toContain("packages/skip/src/index.ts");
+    const inventory = JSON.parse(result.report("file-inventory.json")) as {
+      files: { file: string; disposition: string }[];
+    };
+    const disposition = (path: string) => inventory.files.find((f) => f.file === path)?.disposition;
+    expect(disposition("packages/skip/src/index.ts")).toBe("orphan");
+    expect(disposition("packages/a/src/index.ts")).toBe("build-entry");
   });
 
   test("pnpm: !packages/skip excludes its folder", async () => {
@@ -45,6 +51,11 @@ describe("F36: negated workspace patterns", () => {
     });
     expect([...detectWorkspaces(root).keys()]).toEqual(["@f36/a", "@f36/skipped-too"]);
     const result = await runDepgraph(root);
-    expect(result.report("dependency-graph.json")).not.toContain("packages/skip/");
+    const inventory = JSON.parse(result.report("file-inventory.json")) as {
+      files: { file: string; disposition: string }[];
+    };
+    const skip = inventory.files.find((f) => f.file === "packages/skip/src/index.ts");
+    expect(skip?.disposition).toBe("orphan");
+    expect(result.report("dependency-graph.json")).toContain("packages/skip/src/index.ts");
   });
 });

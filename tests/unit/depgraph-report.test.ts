@@ -9,22 +9,15 @@ import {
   detectUnused,
   generateStatistics,
 } from "../../src/depgraph/analysis.ts";
+import { parseDepgraphArgs } from "../../src/depgraph/args.ts";
 import { analyzeTestCoverage } from "../../src/depgraph/coverage.ts";
 import { detectCyclicComponents } from "../../src/depgraph/cycles.ts";
 import { loadExtensions } from "../../src/depgraph/extensions.ts";
-import { DEPGRAPH_HELP, parseDepgraphArgs, run } from "../../src/depgraph/index.ts";
-import { buildFileInventory } from "../../src/depgraph/inventory.ts";
-import { parseFile } from "../../src/depgraph/parser.ts";
 import { bannerFor, VERIFICATION_MARKER, withBanner } from "../../src/depgraph/reporters/banner.ts";
 import {
   generateTestCoverageJson,
   generateTestCoverageMarkdown,
 } from "../../src/depgraph/reporters/coverage.ts";
-import {
-  FILE_DISPOSITION_LEGEND,
-  generateFileInventoryJson,
-  generateFileInventoryMarkdown,
-} from "../../src/depgraph/reporters/inventory.ts";
 import {
   dependencyGraphJsonText,
   generateCompactSummary,
@@ -41,10 +34,12 @@ import {
   generateSurfacesJson,
   packageKeyOf,
 } from "../../src/depgraph/reporters/surfaces.ts";
-import { generateUnusedReport } from "../../src/depgraph/reporters/unused.ts";
 import { generateYaml } from "../../src/depgraph/reporters/yaml.ts";
 import type { WorkspacePackage } from "../../src/depgraph/types.ts";
 import type { Io } from "../../src/io-types.ts";
+import { toParsedFiles } from "../../src/map/adapter.ts";
+import { MAP_HELP, runMap } from "../../src/map/command.ts";
+import { buildGraph } from "../../src/map/graph.ts";
 import { makeTree, removeTrees } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -62,10 +57,9 @@ const root = makeTree({
   "src/lib/c.ts": "export interface C { x: number }\n",
   "tests/a.test.ts": "import { a } from '../src/a.js';\n",
 });
-const files = ["src/index.ts", "src/a.ts", "src/b.ts", "src/lib/c.ts"].map((p) =>
-  parseFile({ root, workspaces: none }, join(root, p)),
-);
-const tests = [parseFile({ root, workspaces: none }, join(root, "tests/a.test.ts"))];
+const records = toParsedFiles(await buildGraph(root), root, { allAreas: true });
+const files = records.filter((r) => r.path.startsWith("src/"));
+const tests = records.filter((r) => r.path.startsWith("tests/"));
 const modules = categorizeFiles(files, false, none);
 const cycles = detectCyclicComponents(files);
 const unused = detectUnused(files, tests, root, none);
@@ -84,7 +78,7 @@ async function capture(argv: string[]): Promise<{ code: number; out: string; err
       err += s;
     },
   };
-  const code = await run(argv, io);
+  const code = await runMap(argv, io);
   return { code, out, err };
 }
 
@@ -101,8 +95,10 @@ describe("banner", () => {
 describe("markdown reporter", () => {
   test("generateMermaidDiagram draws subgraphs and edges", () => {
     const text = generateMermaidDiagram(modules, files);
-    expect(text).toContain("    subgraph Entry\n        N0[index]\n    end");
-    expect(text).toContain("    N1 --> N2");
+    expect(text).toContain("    subgraph Root\n        N0[a]\n        N1[b]\n    end");
+    expect(text).toContain("    subgraph Entry\n        N2[index]\n    end");
+    expect(text).toContain("    N0 --> N1");
+    expect(text).toContain("    N2 --> N0");
     expect(text.endsWith("```")).toBe(true);
   });
 
@@ -160,15 +156,7 @@ describe("json and yaml reporters", () => {
   });
 });
 
-describe("unused, coverage, inventory and surface reporters", () => {
-  test("generateUnusedReport lists unused files and exports", () => {
-    const split = { testReachable: new Set<string>(), dormantAll: [], orphaned: [], testOnly: [] };
-    const md = generateUnusedReport(unused, split, none);
-    expect(md).not.toContain("**Generated**");
-    expect(md).toContain("- `src/lib/c.ts`");
-    expect(md).toContain("- `spare` (constant)");
-  });
-
+describe("coverage and surface reporters", () => {
   test("generateTestCoverageMarkdown groups untested files and the JSON sorts them", () => {
     const cov = analyzeTestCoverage(files, tests, root);
     const md = generateTestCoverageMarkdown(cov);
@@ -177,14 +165,6 @@ describe("unused, coverage, inventory and surface reporters", () => {
     const obj = generateTestCoverageJson(cov) as { metadata: Record<string, unknown> };
     expect(obj.metadata).not.toHaveProperty("generatedAt");
     expect(cov.untestedFiles).toEqual(["src/b.ts", "src/index.ts", "src/lib/c.ts"]);
-  });
-
-  test("the inventory reporters render every row", () => {
-    const inv = buildFileInventory(root, none, new Set(), new Set(), new Set());
-    const md = generateFileInventoryMarkdown(inv);
-    expect(FILE_DISPOSITION_LEGEND.map(([d]) => d)).toContain("orphan");
-    expect(md).toContain("| `tests/a.test.ts` | (root) | tests | test |");
-    expect(JSON.parse(generateFileInventoryJson(inv))).toEqual(inv);
   });
 
   test("the surface reporters group names by package key", () => {
@@ -229,24 +209,22 @@ describe("pipeline entry", () => {
   test("--help prints the help and exits 0", async () => {
     const r = await capture(["--help"]);
     expect(r.code).toBe(0);
-    expect(r.out).toBe(DEPGRAPH_HELP);
+    expect(r.out).toBe(MAP_HELP);
   });
 
   test("the --write-duplicate-baseline help says it reads the last run's report", () => {
     // The baseline copies the report of the last depgraph run. The help must say so, so a
     // stale report never gives a surprise baseline.
-    const flat = DEPGRAPH_HELP.replace(/\s+/g, " ");
-    const line = flat.slice(flat.indexOf("--write-duplicate-baseline Write"));
-    expect(line).toStartWith(
-      "--write-duplicate-baseline Write the duplicate baseline from the duplicate-symbols.json " +
-        "of the last depgraph run (run depgraph first).",
+    const flat = MAP_HELP.replace(/\s+/g, " ");
+    expect(flat).toContain(
+      "--write-duplicate-baseline Write the duplicate baseline from the duplicate-symbols.json of the last run.",
     );
   });
 
   test("--check-census fails without a committed inventory", async () => {
     const r = await capture([`--root=${root}`, "--check-census"]);
     expect(r.code).toBe(1);
-    expect(r.err).toContain("not found");
+    expect(r.err).toContain("does not exist");
   });
 
   test("run writes the reports and prints root-relative paths", async () => {

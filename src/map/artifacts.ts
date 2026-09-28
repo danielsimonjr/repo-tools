@@ -22,6 +22,7 @@ import { computePublicSurface } from "../depgraph/analysis.ts";
 import { buildDuplicateReport, detectDuplicateSymbols } from "../depgraph/duplicates.ts";
 import { rootPackageEntries } from "../depgraph/roots.ts";
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
+import { stripComments } from "../mask.ts";
 import { B, reEscape, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
 import { toParsedFiles } from "./adapter.ts";
@@ -415,7 +416,7 @@ export function emitFileInventory(graph: RepoGraph, outDir: string): string {
 }
 
 const UNUSED_CAVEATS = [
-  "Dynamic `import(...)` expressions and runtime module loads (e.g. `new Worker(path)`) are invisible to this analysis -- the parser only walks static `import ... from ...` statements, so a file or export reached ONLY through one of those is reported as no-importer/unreferenced even though it is genuinely live. Confirmed on the real memoryjs corpus: src/cli/commands/check.ts, .../inspect.ts, and src/cli/interactive.ts itself are all consumed exclusively via `await import(...)` inside interactive.ts.",
+  "A literal relative `import(...)` is a graph edge. A runtime call is a namespace use (`*`), so the exports of that file count as used. A type-position `import(...).Name` counts only `Name`, and `typeof import(...)` counts none. A dynamic import built from a variable or a template, and other runtime loads (e.g. `new Worker(path)`), are still invisible -- a file or export reached ONLY through one of those is reported as no-importer/unreferenced even though it may be live.",
   "`noImporterFiles` is NOT a deletion-candidate list. A file with zero in-repo importers is expected, not suspicious, for: a standalone script invoked directly (e.g. a smoketest run via `node script.mjs`, never `import`ed by anything), or a build/lint config file loaded by its own tool rather than by source code (e.g. `eslint.config.mjs`, read by eslint itself). Cross-check against package.json scripts / tool configs before treating any entry here as dead.",
   "Only NAMED exports are analysed (`FileNode.exports` carries named exports only) -- `export default` usage is not checked here.",
   "The `referencedInModule` vs `unreferencedAnywhere` split for exports is a TEXT-LEVEL heuristic (whole-identifier occurrence count within the defining file's own source, minus the declaration site itself), not an AST reference count -- it can over-count a name that also appears in a string literal or comment. When the source text can't be read at all (no `RepoGraph.root_path`, or the file is missing) the export lands in `unclassifiedExports` instead of being guessed into either bucket.",
@@ -504,9 +505,21 @@ function noImporterFiles(graph: RepoGraph): string[] {
   );
 }
 
-/** Whole-identifier occurrences of `name` in `text`, minus the declaration itself. */
+/** A TypeScript identifier character: a letter, a number, `_` or `$` (fix F28). */
+const IDENT = "[\\p{L}\\p{N}_$]";
+/** A boundary on either side of an identifier. Python `\\b` does not hold beside `$`. */
+const IDENT_BOUNDARY = `(?:(?<=${IDENT})(?!${IDENT})|(?<!${IDENT})(?=${IDENT}))`;
+
+/**
+ * Whole-identifier occurrences of `name` in `text`, minus the declaration itself. Comments are
+ * not uses (fix F24). The count reads the comment-stripped source, so a regex literal cannot
+ * hide the use that follows it (fix F39).
+ */
 function inModuleReferenceCount(text: string, name: string): number {
-  const total = [...text.matchAll(new RegExp(`${B}${reEscape(name)}${B}`, "gu"))].length;
+  const code = stripComments(text);
+  const total = [
+    ...code.matchAll(new RegExp(`${IDENT_BOUNDARY}${reEscape(name)}${IDENT_BOUNDARY}`, "gu")),
+  ].length;
   return Math.max(total - 1, 0);
 }
 
@@ -528,9 +541,12 @@ function classifyUnusedExports(graph: RepoGraph): Buckets {
   for (const node of [...graph.files.values()].sort((a, b) => compareCodeUnits(a.path, b.path))) {
     if (node.area !== "src") continue;
     const own = ownExports(node);
+    const used = imported.get(node.path);
+    // A namespace use (`import * as ns`, `export * as ns`, a runtime `import()`) uses every export.
+    const star = used?.has("*") ?? false;
     const missing = pySorted(
       [...own].filter((s) => {
-        if (namesSymbols) return !(imported.get(node.path)?.has(s) ?? false);
+        if (namesSymbols) return !star && !(used?.has(s) ?? false);
         const others = new Set(users.get(s) ?? []);
         others.delete(node.path);
         return others.size === 0;
@@ -588,7 +604,7 @@ function unreferencedAnywhereNotes(
     for (const name of unreferenced[path] ?? []) {
       const note =
         referrer !== undefined
-          ? `Verified: '${referrer}' contains a dynamic import() call that resolves to '${path}' -- this stage's static parser cannot see dynamic import(), so '${name}' may genuinely be consumed there even though nothing else references it. Check '${referrer}' before deleting.`
+          ? `Verified: '${referrer}' has a literal import() of '${path}', but that call does not count as a use of '${name}'. A runtime import() is a namespace use. A type-position import() counts only the name it writes, and typeof import() counts none. Check '${referrer}' before deleting.`
           : `Checked for a dynamic import() call with a LITERAL string specifier resolving to '${path}' across the whole repo and found none. This scan can only see import() calls with a literal string specifier -- a dynamic import built from a variable or template literal (e.g. import(\`./cmds/\${name}.js\`)) is invisible to it, so 'found none' means no LITERAL match was found, NOT that nothing imports this. '${name}' may still be consumed via such a call. Also verify against consumption this scan cannot see at all (docs examples, published API surface, a runtime-built path/\`new Worker(...)\`) before deleting.`;
       const byName = notes[path] ?? {};
       byName[name] = note;

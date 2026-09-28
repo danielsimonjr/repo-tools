@@ -1,6 +1,7 @@
 /**
- * Fix F41: a folder that a negated workspace pattern excludes is not part of the repo's census.
- * Both census walks skip it, so its files do not fail the census as "absent".
+ * Fix F41, as it applies in 2.0.0: a negated workspace pattern drops the package from workspace
+ * detection, so it contributes no root. The census keeps the files. They are orphans, and the
+ * run does not fail them as absent.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
@@ -28,6 +29,13 @@ describe("F41: negated workspace folders are outside the census", () => {
       const result = await runDepgraph(root);
       expect(result.stderr).not.toContain("ABSENT");
       expect(result.code).toBe(0);
+      expect(result.report("dependency-graph.json")).toContain("packages/skip/src/old.ts");
+      const inventory = JSON.parse(result.report("file-inventory.json")) as {
+        files: { file: string; disposition: string }[];
+      };
+      expect(inventory.files.find((f) => f.file === "packages/skip/src/old.ts")?.disposition).toBe(
+        "orphan",
+      );
     });
   }
 });

@@ -23,6 +23,6 @@ describe("F23: backtick specifiers in import()", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     const edges = graphFile(result.graph(), "src/index.ts")?.internalDependencies ?? [];
-    expect(edges.map((e) => e.file)).toEqual(["./x.js"]);
+    expect(edges.map((e) => e.file)).toEqual(["src/x.ts"]);
   });
 });

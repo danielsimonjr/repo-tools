@@ -30,8 +30,8 @@ describe("F13: pnpm workspaces", () => {
     cpSync(fixture, root, { recursive: true });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain("Monorepo detected: 3 workspace packages\n");
-    expect(result.stdout).toContain("Found 3 TypeScript files total\n");
+    expect(result.stdout).toContain("Language: typescript;");
+    expect(result.stdout).toContain("source files");
     const graph = result.graph();
     for (const path of [
       "packages/core/src/index.ts",
