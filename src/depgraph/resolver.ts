@@ -88,9 +88,9 @@ export function workspaceEntryPath(
 
 /**
  * The file that a workspace import of `packageName` (with an optional `subpath`) reaches, or
- * undefined when the package is not known: the subpath file when `known` holds it, else the
- * package entry. For a package with `entryFiles` (the root package of single-package mode, fix
- * F43) the `entryFiles` path comes first, and a subpath also tries `<srcDir>/<subpath>/index.ts`.
+ * undefined when the package is not known. The `entryFiles` path (the source of the export
+ * target) comes first. A subpath then tries `<srcDir>/<subpath>.ts` and
+ * `<srcDir>/<subpath>/index.ts`, and the package entry is the last fallback.
  */
 export function workspaceTarget(
   workspaces: Map<string, WorkspacePackage>,
@@ -106,7 +106,7 @@ export function workspaceTarget(
     const file = workspaceEntryPath(workspaces, packageName, subpath) as string;
     if (known.has(file)) return file;
     const folder = `${ws.srcDir}/${subpath}/index.ts`;
-    if (ws.entryFiles && known.has(folder)) return folder;
+    if (known.has(folder)) return folder;
   }
   return ws.entryFiles?.["."] ?? workspaceEntryPath(workspaces, packageName);
 }

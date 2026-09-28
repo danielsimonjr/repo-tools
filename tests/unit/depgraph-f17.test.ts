@@ -49,8 +49,8 @@ describe("F17: classifier roots for unused and dormant files", () => {
     expect(d["packages/lib/src/cli.ts"]).toBe("build-entry");
     expect(d["packages/lib/src/parse.ts"]).toBe("reachable");
     const report = result.report("unused-analysis.md");
-    expect(section(report, "Potentially Unused Files")).not.toContain("cli.ts");
-    expect(report).not.toContain("`parse`");
+    expect(section(report, "Files with no in-repo importer")).not.toContain("cli.ts");
+    expect(section(report, "Exports unreferenced anywhere")).not.toContain("`parse`");
   });
 
   test("entry root: an exports subpath entry and its re-exported types are public", async () => {
@@ -68,12 +68,11 @@ describe("F17: classifier roots for unused and dormant files", () => {
     expect(d["packages/lib/src/extra.ts"]).toBe("build-entry");
     expect(d["packages/lib/src/shape.ts"]).toBe("reachable");
     const report = result.report("unused-analysis.md");
-    const unusedFiles = section(report, "Potentially Unused Files");
+    const unusedFiles = section(report, "Files with no in-repo importer");
     expect(unusedFiles).not.toContain("extra.ts");
     // A package `src/index.ts` is an entry root even when it re-exports nothing.
     expect(unusedFiles).not.toContain("packages/lib/src/index.ts");
-    expect(report).not.toContain("`extra`");
-    expect(report).not.toContain("`Shape`");
+    expect(section(report, "Exports unreferenced anywhere")).not.toContain("`Shape`");
   });
 
   test("test-only consumer: a test import is use, and a test-reached file is test-only", async () => {
@@ -96,9 +95,7 @@ describe("F17: classifier roots for unused and dormant files", () => {
     expect(d["packages/lib/src/legacy.ts"]).toBe("test-only");
     const report = result.report("unused-analysis.md");
     expect(report).not.toContain("`testedOnly`");
-    expect(section(report, "Dormant Files — Test-only (ships nothing, but exercised)")).toContain(
-      "`packages/lib/src/legacy.ts`",
-    );
+    expect(section(report, "Dormant files: test-only")).toContain("`packages/lib/src/legacy.ts`");
   });
 
   test("config-root seed: a tsc -p tsconfig and a config new URL() seed build roots", async () => {

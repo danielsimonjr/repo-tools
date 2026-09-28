@@ -20,11 +20,12 @@ import {
   TYPE_DUP_CATEGORIES,
   tallyByTag,
 } from "../../src/depgraph/duplicates.ts";
-import { parseFile } from "../../src/depgraph/parser.ts";
 import {
   generateDuplicateSymbolsJson,
   generateDuplicateSymbolsMarkdown,
 } from "../../src/depgraph/reporters/duplicates.ts";
+import { toParsedFiles } from "../../src/map/adapter.ts";
+import { buildGraph } from "../../src/map/graph.ts";
 import { makeTree, removeTrees } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -42,8 +43,8 @@ const root = makeTree({
   }),
 });
 const allowPath = join(root, "docs/architecture/duplicate-allowlist.json");
-const files = ["index", "a", "b", "c", "d", "v", "w"].map((n) =>
-  parseFile({ root, workspaces: new Map() }, join(root, `src/${n}.ts`)),
+const files = toParsedFiles(await buildGraph(root), root).filter((f) =>
+  ["index", "a", "b", "c", "d", "v", "w"].includes(f.name),
 );
 
 describe("duplicate helpers", () => {
@@ -78,7 +79,9 @@ describe("duplicate helpers", () => {
     const list = loadDuplicateAllowlist(allowPath);
     const read = (p: string) =>
       p === "src/c.ts" ? "import { q } from 'x';\nexport const alias = q;" : "";
-    const [, , , c, , v] = files;
+    const byPath = new Map(files.map((f) => [f.path, f]));
+    const c = byPath.get("src/c.ts");
+    const v = byPath.get("src/v.ts");
     if (!c || !v) throw new Error("fixture");
     expect(classifyDefiner(v, "VERSION", "constant", list, read)).toEqual({
       tag: "ALLOWLISTED",
@@ -132,7 +135,10 @@ describe("duplicate detection and report", () => {
   });
 
   test("buildDuplicateEntries keeps names with two distinct files only", () => {
-    const byName = collectOwnDefiners(files.slice(0, 2), RUNTIME_DUP_CATEGORIES);
+    const byName = collectOwnDefiners(
+      files.filter((f) => f.path === "src/index.ts" || f.path === "src/a.ts"),
+      RUNTIME_DUP_CATEGORIES,
+    );
     expect(buildDuplicateEntries(byName, surface, [], () => "")).toEqual([]);
   });
 

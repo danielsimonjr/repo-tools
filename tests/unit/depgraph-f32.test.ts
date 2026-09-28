@@ -22,12 +22,10 @@ describe("F32: strip the .ts suffix only", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(Object.keys(result.graph().modules).sort()).toEqual([
-      "a.ts.d",
-      "entry",
-      "lib.ts",
-      "root",
-    ]);
+    const layers = JSON.parse(result.report("dependency-layers.json")) as {
+      modules: Record<string, unknown>;
+    };
+    expect(Object.keys(layers.modules).sort()).toEqual(["a.ts.d", "entry", "lib.ts", "root"]);
     const compact = JSON.parse(result.report("dependency-summary.compact.json")) as {
       c: { rtp: string[] };
     };

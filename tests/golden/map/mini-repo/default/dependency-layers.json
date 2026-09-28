@@ -25,6 +25,12 @@
               "AlphaOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./dyn.js",
+            "imports": [
+              "*"
+            ]
           }
         ],
         "workspaceDependencies": [],

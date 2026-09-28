@@ -29,6 +29,14 @@ describe("F39: regular-expression literals in the masker", () => {
     );
   });
 
+  test("a++ / b / c is division, and a regex after if () is a regex", () => {
+    expect(blankCommentsAndStrings("const x = a++ / b / c;")).toBe("const x = a++ / b / c;");
+    expect(blankCommentsAndStrings("if (x) /re/.test(s);")).toBe("if (x) /  /.test(s);");
+    expect(blankCommentsAndStrings("if /* c */ (x) /re/.test(s);")).toBe(
+      `if${" ".repeat(9)}(x) /  /.test(s);`,
+    );
+  });
+
   test("a division is not a regex", () => {
     expect(stripComments("const x = a / b; // gone")).toBe("const x = a / b; ");
     expect(stripComments("const y = (a) / 2 / c['k'] / 4; // gone")).toBe(
@@ -55,7 +63,8 @@ describe("F39: regular-expression literals in the masker", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     const report = result.report("unused-analysis.md");
-    expect(report).toContain("`quoted` (function) — 1 in-file ref\n");
-    expect(report).toContain("`slashed` (function) — 1 in-file ref\n");
+    const referenced = report.split("\n## Exports referenced in their own module\n")[1] ?? "";
+    expect(referenced.split("\n## ")[0]).toContain("`quoted`");
+    expect(referenced.split("\n## ")[0]).toContain("`slashed`");
   });
 });

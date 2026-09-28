@@ -1,7 +1,7 @@
 /** Test helper: writes a small file tree into a new temporary folder. */
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { run } from "../../src/depgraph/index.ts";
+import { runMap } from "../../src/map/command.ts";
 import { makeTempDir } from "./temp.ts";
 
 /** The temporary folders that `makeTree` made in this test file. */
@@ -49,11 +49,11 @@ export function graphFile(graph: DependencyGraphJson, path: string): GraphFile |
   return undefined;
 }
 
-/** Runs `repo-tools depgraph` on `root` with `flags`; returns the exit code, output and reports. */
+/** Runs `repo-tools map` on `root` with `flags`; returns the exit code, output and reports. */
 export async function runDepgraph(root: string, flags: string[] = []): Promise<DepgraphRun> {
   let stdout = "";
   let stderr = "";
-  const code = await run([`--root=${root}`, ...flags], {
+  const code = await runMap([`--root=${root}`, ...flags], {
     stdout: (s) => {
       stdout += s;
     },

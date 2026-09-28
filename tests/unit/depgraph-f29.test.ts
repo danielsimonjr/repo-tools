@@ -1,6 +1,7 @@
 /**
  * Fix F29: `export { r as s } from './x.js'` exports `s` only. The re-export edge still names
- * `r`, the name that the source file exports, so `r` stays used.
+ * `r`, the name that the source file exports, so `r` stays used. Each `export ... from` is one
+ * edge (a named re-export does not also write an empty-imports edge).
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { graphFile, makeTree, removeTrees, runDepgraph } from "./tree.ts";
@@ -8,7 +9,7 @@ import { graphFile, makeTree, removeTrees, runDepgraph } from "./tree.ts";
 afterAll(removeTrees);
 
 describe("F29: aliased re-exports", () => {
-  test("an aliased re-export records the alias once", async () => {
+  test("an aliased re-export records the alias once and the source name on the edge", async () => {
     const root = makeTree({
       "package.json": '{ "name": "f29", "version": "1.0.0" }',
       "src/index.ts":
@@ -17,19 +18,15 @@ describe("F29: aliased re-exports", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    const graph = result.graph() as unknown as {
-      statistics: { totalExports: number };
-    } & Parameters<typeof graphFile>[0];
-    const index = graphFile(graph, "src/index.ts") as unknown as {
-      exports: string[];
-      reExported: string[];
-      internalDependencies: { file: string; imports: string[] }[];
-    };
-    expect(index.exports).toEqual(["s", "U"]);
-    expect(index.reExported).toEqual(["s", "U"]);
-    expect(index.internalDependencies.flatMap((d) => d.imports)).toEqual(["r", "T"]);
-    // src/x.ts exports r (1 named export); src/index.ts exports s and U.
-    expect(graph.statistics.totalExports).toBe(3);
-    expect(result.report("unused-analysis.md")).toContain("- **Potentially unused exports**: 0\n");
+    const index = graphFile(result.graph(), "src/index.ts");
+    expect(index?.exports).toEqual(["s", "U"]);
+    expect(index?.internalDependencies).toEqual([
+      { file: "src/x.ts", imports: ["r"], typeOnly: false },
+      { file: "src/x.ts", imports: ["T"], typeOnly: true },
+    ]);
+    const unused = result.report("unused-analysis.md");
+    const dead = unused.split("\n## Exports unreferenced anywhere\n")[1] ?? "";
+    expect(dead.split("\n## ")[0]).not.toContain("`r`");
+    expect(dead.split("\n## ")[0]).not.toContain("`T`");
   });
 });

@@ -9,9 +9,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { listNames } from "./dirlist.ts";
+import { DEFAULT_EXCLUDE, sourceTsFilesUnder } from "./exclude.ts";
 import { relativePosix, toPosix } from "./paths.ts";
 import { distToSrc } from "./resolver.ts";
-import { getAllSourceTsFiles } from "./scanner.ts";
 import type { ParsedFile, WorkspacePackage } from "./types.ts";
 
 /** The `package.json` fields that name build roots. The values are not checked yet. */
@@ -92,7 +92,9 @@ export function seedTsconfigEntries(
     if (p.includes("*")) {
       const base = join(root, cfgDir, p.replace(/\/?\*.*$/, ""));
       if (existsSync(base)) {
-        for (const f of getAllSourceTsFiles(base)) add(relativePosix(root, f));
+        for (const f of sourceTsFilesUnder(base, new Set(DEFAULT_EXCLUDE))) {
+          add(relativePosix(root, f));
+        }
       }
     } else if (p.endsWith(".ts")) {
       add(join(cfgDir, p));
@@ -119,15 +121,10 @@ export function exportsSubpathEntries(
     const norm = toPosix(srcPath);
     if (existsSync(join(root, srcPath)) && !entries.includes(norm)) entries.push(norm);
   };
-  if (isJsonObject(pkg.exports)) {
-    for (const key of Object.keys(pkg.exports)) {
-      if (key === "." || !key.startsWith("./")) continue;
-      // Fix M1: a subpath can name a folder. `./util` is `src/util.ts`, else `src/util/index.ts`.
-      const file = join(pkgDir, "src", `${key.slice(2)}.ts`);
-      addIfExists(
-        existsSync(join(root, file)) ? file : join(pkgDir, "src", key.slice(2), "index.ts"),
-      );
-    }
+  // A subpath root is the source of the export target. The key is the fallback
+  // (`./util` is `src/util.ts`, else `src/util/index.ts`) when that source is absent.
+  for (const [key, file] of Object.entries(packageEntryFiles(root, pkg, pkgDir))) {
+    if (key !== ".") addIfExists(file);
   }
   const binValues =
     typeof pkg.bin === "string" ? [pkg.bin] : isJsonObject(pkg.bin) ? Object.values(pkg.bin) : [];
@@ -196,12 +193,18 @@ function exportTarget(value: unknown): string | undefined {
 export function packageEntryFiles(
   root: string,
   pkg: PackageRootFields & { main?: unknown },
+  pkgDir = "",
 ): Record<string, string> {
+  const base = toPosix(pkgDir).replace(/\/$/, "");
+  const under = (path: string): string => {
+    const joined = base ? toPosix(join(base, path)) : toPosix(path);
+    return joined.replace(/^\.\//, "");
+  };
   const out: Record<string, string> = {};
   const exists = (rel: string): boolean => existsSync(join(root, rel));
   const sourceOf = (target: string | undefined): string | undefined => {
     if (target === undefined || target.endsWith(".d.ts")) return undefined;
-    const rel = distToSrc(toPosix(join(".", target))).replace(/\.[cm]?js$/, ".ts");
+    const rel = distToSrc(under(target)).replace(/\.[cm]?js$/, ".ts");
     return rel.endsWith(".ts") && exists(rel) ? rel : undefined;
   };
   const targets: Record<string, string | undefined> = {};
@@ -213,13 +216,14 @@ export function packageEntryFiles(
     else for (const key of keys) targets[key] = exportTarget(exp[key]);
   }
   if (!("." in targets) && typeof pkg.main === "string") targets["."] = pkg.main;
-  const index = "src/index.ts";
+  const index = under("src/index.ts");
   const rootSource = sourceOf(targets["."]) ?? (exists(index) ? index : undefined);
   if (rootSource) out["."] = rootSource;
   for (const [key, target] of Object.entries(targets)) {
     if (key === "." || !key.startsWith("./") || key.includes("*")) continue;
-    const file = `src/${key.slice(2)}.ts`;
-    const folder = `src/${key.slice(2)}/index.ts`;
+    const sub = key.slice(2);
+    const file = under(`src/${sub}.ts`);
+    const folder = under(`src/${sub}/index.ts`);
     const source = sourceOf(target) ?? (exists(file) ? file : exists(folder) ? folder : undefined);
     if (source) out[key] = source;
   }

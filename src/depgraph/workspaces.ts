@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { load } from "js-yaml";
 import { isLink, isLinkEntry, listEntries, listNames } from "./dirlist.ts";
 import { toPosix } from "./paths.ts";
-import { exportsSubpathEntries, isJsonObject, type Warn } from "./roots.ts";
+import { exportsSubpathEntries, isJsonObject, packageEntryFiles, type Warn } from "./roots.ts";
 import type { WorkspacePackage } from "./types.ts";
 
 /**
@@ -95,6 +95,7 @@ function addPackage(
     directory: toPosix(pkgDir),
     srcDir: toPosix(join(pkgDir, "src")),
     extraEntries: exportsSubpathEntries(root, pkgDir, pkg, warn),
+    entryFiles: packageEntryFiles(root, pkg, pkgDir),
   });
 }
 

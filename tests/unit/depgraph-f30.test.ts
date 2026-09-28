@@ -36,12 +36,14 @@ describe("F30: .tsx files and directory indexes", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    const graph = result.graph() as unknown as {
-      dependencyGraph: { cyclicComponents: { runtime: { members: string[] }[] } };
+    const layers = JSON.parse(result.report("dependency-layers.json")) as {
+      cyclicComponents: { runtime: { members: string[] }[] };
     };
-    expect(graph.dependencyGraph.cyclicComponents.runtime.map((c) => c.members)).toEqual([
+    expect(layers.cyclicComponents.runtime.map((c) => c.members)).toEqual([
       ["src/Z/index.ts", "src/index.ts"],
     ]);
-    expect(result.report("unused-analysis.md")).toContain("- **Potentially unused files**: 0\n");
+    expect(result.report("unused-analysis.md")).toContain(
+      "- **Files with no in-repo importer**: 0\n",
+    );
   });
 });

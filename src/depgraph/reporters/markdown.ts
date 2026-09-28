@@ -7,7 +7,7 @@
  */
 import { basename } from "node:path";
 import { filesInCycles } from "../cycles.ts";
-import { generateFallbackDescription } from "../parser.ts";
+import { generateFallbackDescription } from "../description.ts";
 import { withoutTsExtension } from "../paths.ts";
 import { targetOf } from "../resolver.ts";
 import type {

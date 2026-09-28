@@ -1,17 +1,13 @@
 /**
- * Fix F4: dependency-graph.yaml is built with js-yaml 5, which has no `quotingType` option. The
- * YAML of each golden set must equal the golden file byte for byte under the pinned js-yaml 5.
+ * Fix F4: dependency-graph.yaml is built with js-yaml 5, which has no `quotingType` option.
  * The typecheck rejects a `quotingType` option, because the js-yaml 5 types do not declare it.
+ * Byte comparison of the YAML lives with the map goldens.
  */
-import { afterAll, describe, expect, test } from "bun:test";
-import { cpSync, existsSync, readFileSync, rmSync } from "node:fs";
+import { describe, expect, test } from "bun:test";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { run } from "../../src/depgraph/index.ts";
-import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
-const work = makeTempDir("f4");
-afterAll(() => rmSync(work, { recursive: true, force: true }));
 
 /** The version of the js-yaml copy that the reporter loads. */
 function loadedJsYamlVersion(): string {
@@ -35,20 +31,4 @@ describe("F4: the YAML report is built with js-yaml 5", () => {
     expect(pkg.dependencies["js-yaml"]).toMatch(/^5\.\d+\.\d+$/);
     expect(loadedJsYamlVersion()).toBe(pkg.dependencies["js-yaml"] as string);
   });
-
-  for (const [set, fixture, flags] of [
-    ["mini-repo/default", "mini-repo", []],
-    ["mini-repo/all", "mini-repo", ["--all"]],
-    ["mono-repo/default", "mono-repo", []],
-    ["mono-repo/all", "mono-repo", ["--all"]],
-  ] as const) {
-    test(`${set}: dependency-graph.yaml equals the golden file`, async () => {
-      const root = join(work, set.replace("/", "-"));
-      cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
-      await run([`--root=${root}`, ...flags], { stdout: () => {}, stderr: () => {} });
-      const got = readFileSync(join(root, "docs/architecture/dependency-graph.yaml"), "utf8");
-      const want = readFileSync(join(repo, "tests/golden/depgraph", set, "dependency-graph.yaml"));
-      expect(got).toBe(want.toString("utf8"));
-    });
-  }
 });

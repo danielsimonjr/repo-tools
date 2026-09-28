@@ -12,9 +12,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { posix, resolve, win32 } from "node:path";
 import { DEFAULT_STABILITY_TAGS } from "./depgraph/api-surface.ts";
+import { DEFAULT_EXCLUDE, TEST_DIR_NAMES } from "./depgraph/exclude.ts";
 import { OUTPUT_SUBDIR } from "./depgraph/paths.ts";
 import { DEFAULT_REGENERATE_COMMAND, VERIFICATION_MARKER } from "./depgraph/reporters/banner.ts";
-import { DEFAULT_EXCLUDE, TEST_DIR_NAMES } from "./depgraph/scanner.ts";
 
 /** The name of the config file at the root. */
 export const CONFIG_FILE = "repo-tools.config.json";
@@ -231,6 +231,8 @@ export function parseConfigSections(parsed: unknown, label: string): ConfigSecti
   const fail = (message: string): Error => new Error(`config ${label}: ${message}`);
   if (!isObject(parsed)) throw fail("the file must hold a JSON object");
   for (const key of Object.keys(parsed)) {
+    // `$schema` is a JSON Schema pointer. It is not a setting.
+    if (key === "$schema") continue;
     if (key !== "depgraph" && key !== "map" && key !== "query") {
       throw fail(`unknown key '${key}'`);
     }

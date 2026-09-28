@@ -64,7 +64,7 @@ export interface DiscoveredFile {
  * `tools/` or `scripts/` folder under `src/` is product source, not meta-tooling.
  */
 export function classifyArea(relPath: string): string {
-  const isTestFile = /\.(test|spec)\.ts$/.test(relPath);
+  const isTestFile = /\.(test|spec)\.[cm]?[jt]sx?$/.test(relPath);
   if (!isTestFile && /(^|\/)(tools|scripts)\//.test(relPath) && !relPath.startsWith("src/")) {
     return "tools";
   }
@@ -187,7 +187,11 @@ function walk(
           continue;
         }
         go(full, [...parts, e.name]);
-      } else if (e.isFile() || e.isSymbolicLink()) {
+      } else if (e.isSymbolicLink()) {
+        // A link to a file stays in the census. A dangling link does not, and it is listed.
+        if (isFile(full)) visit(parts, e.name);
+        else onLink([...parts, e.name]);
+      } else if (e.isFile()) {
         visit(parts, e.name);
       }
     }
@@ -288,7 +292,8 @@ function isFile(path: string): boolean {
 /**
  * The path parts of each source file of `suffixes`, in code-unit order. `skippedLinks`, when
  * given, receives the root-relative path of each link that the discovery does not follow: a
- * folder link that the walk prunes, or a tracked link that does not resolve to a file.
+ * folder link that the walk prunes, a dangling link, or a tracked link that does not resolve
+ * to a file.
  */
 export function candidateFiles(
   root: string,
@@ -377,6 +382,44 @@ export function detectLanguage(root: string): Language {
 /** Reads a source file as UTF-8 with replacement, keeping a byte order mark (as Python does). */
 export function readSource(path: string): string {
   return new TextDecoder("utf-8", { ignoreBOM: true }).decode(readFileSync(path));
+}
+
+/**
+ * Source folders that the skip list hides. A folder named `dist`, `build`, `coverage`,
+ * `node_modules` or `.git` under a `src/` tree is skipped with no other notice. This list is
+ * those folders that themselves hold a source file, so the run can say so.
+ */
+export function skippedSourceFolders(root: string, language: Language): string[] {
+  const [suffixes, extraSkip] = LANGUAGE_SCANS[language];
+  const skip = new Set([...SKIP_DIRS, ...extraSkip]);
+  const noted = new Set(["dist", "build", "coverage", "node_modules", ".git"]);
+  const found: string[] = [];
+  const containsSource = (dir: string): boolean => {
+    for (const e of entries(dir)) {
+      const full = join(dir, e.name);
+      if (e.isDirectory() || (e.isSymbolicLink() && isDirectoryTarget(full))) {
+        if (skip.has(e.name) || isReparsePoint(full)) continue;
+        if (containsSource(full)) return true;
+      } else if (suffixes.has(suffixOf(e.name))) return true;
+    }
+    return false;
+  };
+  const visit = (dir: string, parts: string[]): void => {
+    for (const e of entries(dir)) {
+      const full = join(dir, e.name);
+      const isDir = e.isDirectory() || (e.isSymbolicLink() && isDirectoryTarget(full));
+      if (!isDir || isReparsePoint(full)) continue;
+      if (skip.has(e.name)) {
+        if (parts.includes("src") && noted.has(e.name) && containsSource(full)) {
+          found.push([...parts, e.name].join("/"));
+        }
+        continue;
+      }
+      visit(full, [...parts, e.name]);
+    }
+  };
+  visit(root, []);
+  return found.sort((a, b) => compareCodeUnits(a, b));
 }
 
 /** The source files of `root`, with area, disposition (a `src` file is reachable) and lines. */

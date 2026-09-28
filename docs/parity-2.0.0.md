@@ -47,9 +47,13 @@ compared `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json
 The languages are TypeScript, Python (PITS-MRAS, auto-memory, fermat-mcp, memvid), Rust
 (IronClaw) and C# (ui-mcp, Windows-mcp).
 
+The table is the measurement of 2026-09-25 and 2026-09-26. It predates the `import()` decision
+below. A repository that contains a literal relative `import()` now differs from the Python tool
+on that edge. Do not read a row marked "identical" as a claim about that edge.
+
 **Controls.** With the two workspace changes switched off, the four files of Mathts are identical
 to the Python tool. Before the Rust `use` fix, the four files of IronClaw were identical to the
-Python tool.
+Python tool. Those controls also predate the `import()` decision.
 
 ### Deliberate differences from the Python tool
 
@@ -69,13 +73,22 @@ Python tool.
    whole word `as` and a name. On IronClaw, 139 package and standard-library names are
    complete again. The internal edges of 14 files go to the correct modules. The simple
    runtime cycle count goes from 1667 to 1009, because the wrong edges made cycles.
+4. **Dynamic `import()` (verdict `repo_map-wrong`).** The Python tool records no edge for
+   `import()`. The engine records a literal relative `import()` as an edge. A runtime call is a
+   namespace use (`imports: ["*"]`, not type-only). A type-position `import('./c').Name` is
+   type-only and records that name. `typeof import()` is type-only and records no names. A
+   template that contains `${`, and a specifier that is not relative, are not edges. A runtime
+   call beside an existing runtime edge adds `*` to that edge. A type-only call adds its names
+   onto an existing edge and does not add a second edge. A runtime call beside only a type-only
+   edge adds its own runtime edge. A bare `import './x'` together with `import('./x')` is one
+   side-effect edge whose names are `["*"]`.
 
 ### Behavior of the Python tool that the engine keeps
 
-The engine keeps this behavior of the Python tool, so that side 1 stays exact. The behavior has
-an open item in `todo.md`:
+Verdict `repo_map-kept`. The engine keeps this behavior, and a test locks it:
 
-- A bodiless `export function f(): T;` in a declaration file is not an export.
+- A bodiless `export function f(): T;` (an overload signature, or an ambient declaration in a
+  `.d.ts` file) is not an export. An overload plus an implementation records the name once.
 
 ## Side 2: the extras against depgraph 1.x
 
@@ -106,10 +119,13 @@ depgraph code that both engines share, depgraph 1.x wrote its 12 reports on memo
   `DEPENDENCY_GRAPH.md` and the compact summary follow the core statistics.
 - **JavaScript files (approved, D1).** The census reads JavaScript files. depgraph 1.x read
   `.ts` and `.tsx` only.
-- **`import()` (known difference, D1).** depgraph 1.x records a dynamic `import()` as a graph
-  edge. The core graph of 2.0.0 does not, as in the Python tool. On memoryjs, one type-only cyclic component has 3
-  files, not 7. Test coverage counts a literal `import()` in a test file as a load, so the tested
-  files do not change.
+- **`import()` (deliberate difference from the Python tool, `repo_map-wrong`).** The core graph
+  records a literal relative `import()` as an edge. A runtime call records `["*"]`, as depgraph
+  1.x did. A type-position `import('./c').C` records the name `C`. The 1.x reader recorded no
+  names for that form. `typeof import()` records no names. The 2.0.0 release omitted the edge.
+  On memoryjs that release counted one type-only cyclic component as 3 files, not 7. The edge
+  is recorded now, so that count can change on a repository that closes a cycle through
+  `import()`. Test coverage still counts a literal `import()` in a test file as a load.
 - **Local `export type { X }` (expected improvement).** The 1.x reader does not find this form.
   The engine lists the name. On Mathts, 23 surface names are added.
 - **`export * as ns from` (expected improvement).** The 1.x reader does not find the name `ns`.

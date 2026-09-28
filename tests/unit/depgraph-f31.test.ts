@@ -25,7 +25,11 @@ describe("F31: entry check by path segment", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    const graph = result.graph() as unknown as { entryPoints: { file: string }[] };
-    expect(graph.entryPoints.map((e) => e.file)).toEqual(["src/index.ts"]);
+    const layers = JSON.parse(result.report("dependency-layers.json")) as {
+      entryPoints: { file: string }[];
+    };
+    expect(layers.entryPoints.map((e) => e.file)).toEqual(["src/index.ts"]);
+    const graph = result.graph() as unknown as { reachability: { roots: string[] } };
+    expect(graph.reachability.roots).toEqual(["src/index.ts"]);
   });
 });

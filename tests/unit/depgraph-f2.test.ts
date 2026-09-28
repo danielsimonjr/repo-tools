@@ -4,9 +4,9 @@
  */
 import { afterAll, afterEach, describe, expect, test } from "bun:test";
 import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { readdirHook } from "../../src/depgraph/dirlist.ts";
-import { run } from "../../src/depgraph/index.ts";
+import { runMap } from "../../src/map/command.ts";
 import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
@@ -21,7 +21,7 @@ async function snapshot(fixture: string, flags: string[], tag: string) {
   const root = join(work, `${fixture}-${tag}`);
   cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
   let stdout = "";
-  const code = await run([`--root=${root}`, ...flags], {
+  const code = await runMap([`--root=${root}`, ...flags], {
     stdout: (s) => {
       stdout += s;
     },
@@ -31,10 +31,10 @@ async function snapshot(fixture: string, flags: string[], tag: string) {
   const files: Record<string, string> = {};
   for (const name of readdirSync(out)) {
     // Dates differ between runs until fix F1; they are not what this test is about.
-    files[name] = readFileSync(join(out, name), "utf8").replace(
-      /\d{4}-\d{2}-\d{2}[T\d:.Z]*/g,
-      "<D>",
-    );
+    files[name] = readFileSync(join(out, name), "utf8")
+      .replace(/\d{4}-\d{2}-\d{2}[T\d:.Z]*/g, "<D>")
+      .split(basename(root))
+      .join("<NAME>");
   }
   return { code, stdout, files };
 }
@@ -42,9 +42,7 @@ async function snapshot(fixture: string, flags: string[], tag: string) {
 describe("F2: the output does not depend on the folder listing order", () => {
   for (const [fixture, flags] of [
     ["mini-repo", []],
-    ["mini-repo", ["--all"]],
     ["mono-repo", []],
-    ["mono-repo", ["--all"]],
   ] as const) {
     test(`${fixture} ${flags.join(" ") || "(default)"}`, async () => {
       const forward = await snapshot(fixture, [...flags], "fwd");

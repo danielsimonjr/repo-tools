@@ -33,14 +33,20 @@ const REGEX_KEYWORDS = new Set([
  * True when a `/` at an offset after `src[prev]` starts a regular-expression literal. `prev` is
  * the offset of the last code character that is not white space, or -1 at the start. A regex
  * can start after an operator or a punctuator (`( [ { } , ; : ? = ! & | + - * % ^ ~`), after `=>`,
- * after a keyword of `REGEX_KEYWORDS`, and at the start. After `)`, `]`, a name, a number or a
- * literal, the `/` is a division. A `<` or a `>` that is not `=>` gives a division, because in a
- * `.tsx` file `</tag>` is not a regex.
+ * after a keyword of `REGEX_KEYWORDS`, and at the start. After `++` or `--` the `/` is a
+ * division (`a++ / b`). After `)` it is a regex only when that `)` closed `if`, `while`, `for`
+ * or `with` (`if (x) /re/`). After `]`, a name, a number or a literal, the `/` is a division.
+ * A `<` or a `>` that is not `=>` gives a division, because in a `.tsx` file `</tag>` is not a
+ * regex.
  */
-function regexCanStart(src: string, prev: number): boolean {
+function regexCanStart(src: string, prev: number, afterStmtParen: boolean): boolean {
   if (prev < 0) return true;
   const c = src[prev] ?? "";
+  // `if (x) /re/` is a regex. `(a) / 2` is a division. The caller knows which `)` closed.
+  if (c === ")") return afterStmtParen;
   if (c === ">") return src[prev - 1] === "=";
+  // `a++ / b` and `a-- / b` are division. A single `+` or `-` can still precede a regex.
+  if ((c === "+" || c === "-") && src[prev - 1] === c) return false;
   if (/[([{},;:?=!&|+\-*%^~]/.test(c)) return true;
   if (!/[\w$]/.test(c)) return false;
   const word = /[\w$]+$/.exec(src.slice(Math.max(0, prev - 15), prev + 1))?.[0] ?? "";
@@ -121,10 +127,34 @@ function scan(src: string): Segment[] {
   // The offset of the last code character that is not white space (fix F39). After a string or
   // a template it is the closing delimiter; after `${` it is the `{`. A comment does not move it.
   let prev = -1;
+  // True when the open `(` at this depth follows `if`, `while`, `for` or `with`.
+  const parenStmt: boolean[] = [];
+  // True after the `)` that closed such a `(`, until the next code character. A comment does
+  // not clear it: `if (x) /* c */ /re/` is still a regex.
+  let closedStmt = false;
+  // The word before `index`, skipping white space and block comments (`if /* c */ (x)`).
+  const wordEndingAt = (index: number): string => {
+    let end = index;
+    while (end > 0) {
+      const prev = src[end - 1] ?? "";
+      if (/\s/.test(prev)) {
+        end -= 1;
+        continue;
+      }
+      if (prev === "/" && src[end - 2] === "*") {
+        const open = src.lastIndexOf("/*", end - 2);
+        if (open === -1) break;
+        end = open;
+        continue;
+      }
+      break;
+    }
+    return /[\w$]+$/.exec(src.slice(Math.max(0, end - 16), end))?.[0] ?? "";
+  };
   while (i < n) {
     const c = src[i];
     const next = src[i + 1];
-    if (c === "/" && next !== "/" && next !== "*" && regexCanStart(src, prev)) {
+    if (c === "/" && next !== "/" && next !== "*" && regexCanStart(src, prev, closedStmt)) {
       const close = regexBodyEnd(src, i);
       if (close !== -1) {
         push("code", codeStart, i + 1);
@@ -133,6 +163,7 @@ function scan(src: string): Segment[] {
         while (i < n && /[a-z]/i.test(src[i] ?? "")) i += 1;
         push("code", close, i);
         prev = i - 1;
+        closedStmt = false;
         codeStart = i;
         continue;
       }
@@ -164,6 +195,7 @@ function scan(src: string): Segment[] {
       i = end < n && src[end] === c ? end + 1 : end;
       push("code", end, i);
       prev = i - 1;
+      closedStmt = false;
       codeStart = i;
       continue;
     }
@@ -172,10 +204,19 @@ function scan(src: string): Segment[] {
       i += 1;
       readTemplateBody();
       prev = i - 1;
+      closedStmt = false;
       codeStart = i;
       continue;
     }
-    if (!/\s/.test(c ?? "")) prev = i;
+    if (!/\s/.test(c ?? "")) {
+      if (c === "(") {
+        const word = wordEndingAt(i);
+        parenStmt.push(word === "if" || word === "while" || word === "for" || word === "with");
+        closedStmt = false;
+      } else if (c === ")") closedStmt = parenStmt.pop() === true;
+      else closedStmt = false;
+      prev = i;
+    }
     if (templates.length > 0) {
       const depth = templates.length - 1;
       if (c === "{") templates[depth] = (templates[depth] ?? 0) + 1;
@@ -186,6 +227,7 @@ function scan(src: string): Segment[] {
           i += 1;
           readTemplateBody();
           prev = i - 1;
+          closedStmt = false;
           codeStart = i;
           continue;
         }

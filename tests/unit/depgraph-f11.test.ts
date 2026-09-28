@@ -19,12 +19,13 @@ describe("F11: dynamic import() is a dependency", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     const edges = graphFile(result.graph(), "src/index.ts")?.internalDependencies ?? [];
-    expect(edges.map((e) => e.file)).toEqual(["./x.js"]);
-    const unusedFiles = result
-      .report("unused-analysis.md")
-      .split("## Potentially Unused Files")[1]
-      ?.split("\n## ")[0];
-    expect(unusedFiles).toBeDefined();
-    expect(unusedFiles).not.toContain("`src/x.ts`");
+    expect(edges.map((e) => e.file)).toEqual(["src/x.ts"]);
+    expect(edges[0]?.imports).toEqual(["*"]);
+    const unused = JSON.parse(result.report("unused-analysis.json")) as {
+      noImporterFiles: string[];
+      unreferencedAnywhere: Record<string, string[]>;
+    };
+    expect(unused.noImporterFiles).not.toContain("src/x.ts");
+    expect(unused.unreferencedAnywhere["src/x.ts"]).toBeUndefined();
   });
 });

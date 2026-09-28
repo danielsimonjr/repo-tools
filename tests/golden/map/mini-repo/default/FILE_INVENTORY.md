@@ -14,10 +14,10 @@ This report lists each source file that the map census finds, with a disposition
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 10 | A `src`-area file that an entry root reaches. |
+| `reachable` | 11 | A `src`-area file that an entry root reaches. |
 | `build-entry` | 3 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
-| `orphan` | 3 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
+| `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
 | `test` | 2 | A file in a `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
 | `tool` | 0 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 0 | A `*.config.*` file of TypeScript or JavaScript. |
@@ -51,7 +51,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/a.ts` | mini-repo | src | reachable | 17 |
 | `src/ambient.d.ts` | mini-repo | src | orphan | 1 |
 | `src/cli.ts` | mini-repo | src | build-entry | 6 |
-| `src/dyn.ts` | mini-repo | src | orphan | 2 |
+| `src/dyn.ts` | mini-repo | src | reachable | 2 |
 | `src/index.ts` | mini-repo | src | build-entry | 7 |
 | `src/orphan.ts` | mini-repo | src | orphan | 2 |
 | `src/ping.ts` | mini-repo | src | reachable | 6 |

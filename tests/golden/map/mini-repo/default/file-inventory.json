@@ -1,10 +1,10 @@
 {
   "totalFiles": 18,
   "byDisposition": {
-    "reachable": 10,
+    "reachable": 11,
     "build-entry": 3,
     "test-only": 0,
-    "orphan": 3,
+    "orphan": 2,
     "test": 2,
     "tool": 0,
     "config": 0,
@@ -80,7 +80,7 @@
       "file": "src/dyn.ts",
       "package": "mini-repo",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "reachable",
       "loc": 2
     },
     {

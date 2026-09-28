@@ -221,6 +221,14 @@ export function analyzeTestCoverage(
       addCoverage(target, testPath, importedSources);
       addSideEffectClosure(target, testPath, importedSources, visited);
     }
+    for (const dep of sourceByPath.get(fromPath)?.workspaceDependencies ?? []) {
+      if (!dep.sideEffect || dep.resolved === undefined) continue;
+      const target = dep.resolved;
+      if (!sourceFilePaths.has(target) || visited.has(target)) continue;
+      visited.add(target);
+      addCoverage(target, testPath, importedSources);
+      addSideEffectClosure(target, testPath, importedSources, visited);
+    }
   };
   const addTraced = (path: string, testPath: string, importedSources: string[]): void => {
     addCoverage(path, testPath, importedSources);
@@ -242,6 +250,11 @@ export function analyzeTestCoverage(
         addTraced(resolvedPath, testFile.path, importedSources);
       const withTs = `${resolvedPath.replace(/\.ts$/, "")}.ts`;
       if (sourceFilePaths.has(withTs)) addTraced(withTs, testFile.path, importedSources);
+    }
+    // An import of this package, or of a workspace package, by its name.
+    for (const dep of testFile.workspaceDependencies) {
+      if (dep.resolved !== undefined && sourceFilePaths.has(dep.resolved))
+        addTraced(dep.resolved, testFile.path, importedSources);
     }
     testToSourceMap.set(testFile.path, importedSources);
   }

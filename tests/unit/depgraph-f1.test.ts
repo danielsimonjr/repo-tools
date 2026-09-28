@@ -4,8 +4,8 @@
  */
 import { afterAll, afterEach, describe, expect, setSystemTime, test } from "bun:test";
 import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
-import { run } from "../../src/depgraph/index.ts";
+import { basename, join } from "node:path";
+import { runMap } from "../../src/map/command.ts";
 import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
@@ -20,17 +20,18 @@ async function reports(
 ): Promise<Record<string, string>> {
   const root = join(work, `${fixture}-${tag}`);
   cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
-  await run([`--root=${root}`, ...flags], { stdout: () => {}, stderr: () => {} });
+  await runMap([`--root=${root}`, ...flags], { stdout: () => {}, stderr: () => {} });
   const out = join(root, "docs/architecture");
-  return Object.fromEntries(readdirSync(out).map((n) => [n, readFileSync(join(out, n), "utf8")]));
+  const name = basename(root);
+  return Object.fromEntries(
+    readdirSync(out).map((n) => [n, readFileSync(join(out, n), "utf8").split(name).join("<NAME>")]),
+  );
 }
 
 describe("F1: no date stamps", () => {
   for (const [fixture, flags] of [
     ["mini-repo", []],
-    ["mini-repo", ["--all"]],
     ["mono-repo", []],
-    ["mono-repo", ["--all"]],
   ] as const) {
     test(`${fixture} ${flags.join(" ") || "(default)"}`, async () => {
       setSystemTime(new Date("2031-01-02T03:04:05.678Z"));

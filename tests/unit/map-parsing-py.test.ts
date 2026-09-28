@@ -152,7 +152,7 @@ describe("parsePy: the export forms", () => {
   });
 
   test("__all__ string escapes decode as Python decodes them", () => {
-    const src = String.raw`__all__ = ['tab\\x', r'raw\\y', 'q\'s']` + "\n";
+    const src = `${String.raw`__all__ = ['tab\\x', r'raw\\y', 'q\'s']`}\n`;
     expect(parsePy(src).exports).toEqual([String.raw`tab\x`, String.raw`raw\\y`, "q's"]);
   });
 });

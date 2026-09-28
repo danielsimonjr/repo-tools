@@ -5,7 +5,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "../../src/depgraph/index.ts";
+import { runMap } from "../../src/map/command.ts";
 import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
@@ -21,14 +21,12 @@ function ending(text: string): string {
 describe("R1: every report ends with exactly one LF", () => {
   for (const [set, fixture, flags] of [
     ["mini-repo/default", "mini-repo", []],
-    ["mini-repo/all", "mini-repo", ["--all"]],
     ["mono-repo/default", "mono-repo", []],
-    ["mono-repo/all", "mono-repo", ["--all"]],
   ] as const) {
     test(`${set}: the written reports`, async () => {
       const root = join(work, set.replace("/", "-"));
       cpSync(join(repo, "tests/fixtures/depgraph", fixture), root, { recursive: true });
-      await run([`--root=${root}`, ...flags], { stdout: () => {}, stderr: () => {} });
+      await runMap([`--root=${root}`, ...flags], { stdout: () => {}, stderr: () => {} });
       const out = join(root, "docs/architecture");
       const names = readdirSync(out);
       expect(names.length).toBeGreaterThan(9);
@@ -41,7 +39,7 @@ describe("R1: every report ends with exactly one LF", () => {
     });
 
     test(`${set}: the committed goldens`, () => {
-      const dir = join(repo, "tests/golden/depgraph", set);
+      const dir = join(repo, "tests/golden/map", set);
       for (const name of readdirSync(dir).filter((n) => !n.startsWith("_"))) {
         expect({ name, ending: ending(readFileSync(join(dir, name), "utf8")) }).toEqual({
           name,

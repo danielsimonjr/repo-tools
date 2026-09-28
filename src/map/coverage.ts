@@ -38,6 +38,8 @@ export function isTestFile(path: string, language: string, area: string): boolea
 export interface TestCoverageOptions {
   /** The coverage policy. Default: `<root>/docs/architecture/coverage-policy.json` (D9). */
   policyPath?: string;
+  /** The policy path as the report names it. Default: `docs/architecture/coverage-policy.json`. */
+  policyNote?: string;
   banner?: BannerOptions;
 }
 
@@ -63,6 +65,7 @@ export function emitTestCoverage(
   // The Markdown first: the JSON reporter sorts the file lists in place.
   const markdown = generateTestCoverageMarkdown(coverage, {
     expectedTestHint: graph.language === "typescript",
+    policyPath: options.policyNote ?? "docs/architecture/coverage-policy.json",
   });
   writeReport(mdPath, withBanner(markdown, { command: MAP_REGENERATE_COMMAND, ...options.banner }));
   writeReport(jsonPath, JSON.stringify(generateTestCoverageJson(coverage), null, 2));

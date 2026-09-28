@@ -31,13 +31,10 @@ describe("F24: in-file references ignore comments", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     const report = result.report("unused-analysis.md");
-    const dead = section(report, "Unreferenced Anywhere (deletion candidates)");
-    const referenced = section(
-      report,
-      "Referenced In-Module (type contracts / helpers backing live exports)",
-    );
-    expect(dead).toContain("`commentOnly` (function)");
+    const dead = section(report, "Exports unreferenced anywhere");
+    const referenced = section(report, "Exports referenced in their own module");
+    expect(dead).toContain("`commentOnly`");
     expect(referenced).not.toContain("commentOnly");
-    expect(referenced).toContain("`codeUse` (function) — 1 in-file ref\n");
+    expect(referenced).toContain("`codeUse`");
   });
 });

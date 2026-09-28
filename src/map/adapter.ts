@@ -12,7 +12,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join, posix } from "node:path";
-import { extractDescription } from "../depgraph/parser.ts";
+import { extractDescription } from "../depgraph/description.ts";
 import type {
   Dependency as DepgraphDependency,
   ParsedFile,
@@ -150,6 +150,9 @@ export function toParsedFiles(
             directory: workspaces.get(name)?.directory ?? "",
             imports: d.star ? ["*"] : [...d.imports],
             ...(subpath ? { subpath } : {}),
+            resolved: d.file,
+            ...(d.typeOnly ? { typeOnly: true } : {}),
+            ...(d.sideEffect ? { sideEffect: true } : {}),
           };
         }),
       packageName: packageNameOf(node.path, workspaces),

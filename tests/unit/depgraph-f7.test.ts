@@ -58,7 +58,7 @@ describe("F7: dist/ imports land on src/", () => {
       "packages/other/package.json": '{ "name": "@f7/other", "version": "1.0.0" }',
       "packages/other/src/index.ts": "/** Other. */\nexport const other = 1;\n",
     });
-    const result = await runDepgraph(root, ["--all"]);
+    const result = await runDepgraph(root);
     const cov = coverage(result.report("test-coverage.json"));
     expect(cov.testedFiles).toContain("packages/app/src/lib.ts");
     const inventory = JSON.parse(result.report("file-inventory.json")) as {

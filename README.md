@@ -139,7 +139,13 @@ a "GENERATED FILE -- do not edit by hand" banner.
 The census is the set of source files that git tracks (outside a git work tree, a pruned walk).
 The language with the most files decides how `map` reads the repository. Input files never come
 from the output folder. The duplicate allowlist, the duplicate baseline and the coverage policy
-are in `docs/architecture/`, or at the path that the config gives.
+are in `docs/architecture/`, or at the path that the config gives. A repository that already has
+its own allowlist must set `map.duplicateAllowlist` (the old key `depgraph.duplicateAllowlist`
+is also read) to that file. Mathts has 283 allowlisted names. With the default path, the
+duplicate gate fails on those names.
+
+A literal relative `import()` is a graph edge. The Python `repo_map.py` records none. The parity
+record in `docs/parity-2.0.0.md` gives the rules and the verdict.
 
 | File | What it answers |
 |---|---|

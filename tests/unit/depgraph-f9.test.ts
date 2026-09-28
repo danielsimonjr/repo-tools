@@ -1,6 +1,7 @@
 /**
  * Fix F9: each `package.json` `exports` subpath is a reachability root. Its target file, and the
- * files that the target imports, are reachable even when no file imports the target.
+ * files that the target imports, are reachable even when no file imports the target. The graph
+ * still holds a file that nothing reaches; its disposition is `orphan`.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { graphFile, makeTree, removeTrees, runDepgraph } from "./tree.ts";
@@ -28,8 +29,13 @@ describe("F9: exports subpaths are reachability roots", () => {
     const graph = result.graph();
     expect(graphFile(graph, "packages/lib/src/extra.ts")).toBeDefined();
     expect(graphFile(graph, "packages/lib/src/deep.ts")).toBeDefined();
-    // The control: a file that no root reaches is not in the default (reachable-only) graph.
-    expect(graphFile(graph, "packages/lib/src/lost.ts")).toBeUndefined();
-    expect(result.stdout).toContain("Dormant files: 1");
+    expect(graphFile(graph, "packages/lib/src/lost.ts")).toBeDefined();
+    const inventory = JSON.parse(result.report("file-inventory.json")) as {
+      files: { file: string; disposition: string }[];
+    };
+    const disposition = (path: string) => inventory.files.find((f) => f.file === path)?.disposition;
+    expect(disposition("packages/lib/src/extra.ts")).toBe("build-entry");
+    expect(disposition("packages/lib/src/deep.ts")).toBe("reachable");
+    expect(disposition("packages/lib/src/lost.ts")).toBe("orphan");
   });
 });

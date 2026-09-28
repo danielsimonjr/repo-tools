@@ -158,6 +158,14 @@ describe("config file: the query section (design section 3.5)", () => {
     });
   }
 
+  test("a top-level $schema key is accepted", () => {
+    const sections = parseConfigSections(
+      { $schema: "https://example.com/schema.json", map: { out: "reports" } },
+      "<root>/x.json",
+    );
+    expect(sections.depgraph.out).toBe("reports");
+  });
+
   test("the report folder: --out, then query.out, then depgraph.out, then the default", () => {
     const file = { depgraph: { out: "dg" }, query: { out: "q" } };
     expect(mergeQueryConfig({ out: "cli" }, file).out).toBe("cli");
@@ -251,7 +259,12 @@ describe("config file: the run", () => {
     for (const flag of ["--config", "--src", "--tests", "--out", "--api-surface", "--api-entry"]) {
       const r = await runDepgraph(root, [`${flag}=${abs}`]);
       expect(r.code).toBe(1);
-      expect(r.stderr).toBe(`repo-tools depgraph: flag ${flag} ${PASS_RELATIVE}\n`);
+      const prefix = `repo-tools map: flag ${flag} `;
+      if (flag === "--src" || flag === "--tests") {
+        expect(r.stderr.startsWith(`${prefix}has no effect in 2.0.0`)).toBe(true);
+      } else {
+        expect(r.stderr).toBe(`${prefix}${PASS_RELATIVE}\n`);
+      }
     }
     expect(existsSync(join(root, "docs"))).toBe(false);
   });
@@ -261,7 +274,7 @@ describe("config file: the run", () => {
     const r = await runDepgraph(root);
     expect(r.code).toBe(1);
     expect(r.stderr).toBe(
-      `repo-tools depgraph: config <root>/${CONFIG_FILE}: 'depgraph.out' ${PASS_RELATIVE}\n`,
+      `repo-tools map: config <root>/${CONFIG_FILE}: 'depgraph.out' ${PASS_RELATIVE}\n`,
     );
   });
 

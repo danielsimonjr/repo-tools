@@ -29,7 +29,7 @@ describe("F27: comment removal is string-aware", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     const edges = graphFile(result.graph(), "src/index.ts")?.internalDependencies ?? [];
-    expect(edges.map((e) => e.file).sort()).toEqual(["./a.js", "./b.js", "./c.js"]);
+    expect(edges.map((e) => e.file).sort()).toEqual(["src/a.ts", "src/b.ts", "src/c.ts"]);
   });
 
   test("the duplicate classifier keeps an import after a URL string", () => {

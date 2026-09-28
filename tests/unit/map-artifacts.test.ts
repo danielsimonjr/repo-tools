@@ -763,17 +763,28 @@ describe("unused-analysis.json", () => {
     expect(note).toContain("literal string specifier");
   });
 
-  test("a note names a verified dynamic-import referrer", async () => {
+  test("a runtime import() is a namespace use, so the loaded exports are not unreferenced", async () => {
     const root = tmp({
       "src/a.ts": "export function helper() { return 1; }\n",
       "src/b.ts":
         "export async function useIt() {\n  const { helper } = await import('./a');\n  return helper();\n}\n",
     });
     const data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
+    expect(data.unreferencedAnywhere["src/a.ts"]).toBeUndefined();
+    expect(data.noImporterFiles).not.toContain("src/a.ts");
+  });
+
+  test("a type-position import() that does not name an export still notes the referrer", async () => {
+    const root = tmp({
+      "src/a.ts": "export function helper() { return 1; }\nexport interface C { n: number }\n",
+      "src/b.ts": "export type T = import('./a').C;\n",
+    });
+    const data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
     expect(data.unreferencedAnywhere["src/a.ts"]).toEqual(["helper"]);
     const note = data.unreferencedAnywhereNotes["src/a.ts"].helper as string;
     expect(note).toContain("Verified");
     expect(note).toContain("src/b.ts");
+    expect(note).toContain("does not count as a use");
   });
 
   test("a template-literal dynamic import is out of the scan's scope, and the note says so", async () => {

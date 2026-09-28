@@ -5,8 +5,9 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { cpSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "../../src/depgraph/index.ts";
 import { bannerFor, VERIFICATION_MARKER } from "../../src/depgraph/reporters/banner.ts";
+import { runMap } from "../../src/map/command.ts";
+import { MAP_REGENERATE_COMMAND } from "../../src/map/reports.ts";
 import { makeTempDir } from "./temp.ts";
 
 const repo = join(import.meta.dir, "../..");
@@ -33,12 +34,14 @@ describe("F3: the banner", () => {
   test("every Markdown report of a run starts with the banner", async () => {
     const root = join(work, "mono");
     cpSync(join(repo, "tests/fixtures/depgraph/mono-repo"), root, { recursive: true });
-    await run([`--root=${root}`], { stdout: () => {}, stderr: () => {} });
+    await runMap([`--root=${root}`], { stdout: () => {}, stderr: () => {} });
     const out = join(root, "docs/architecture");
     const md = readdirSync(out).filter((n) => n.endsWith(".md"));
     expect(md.length).toBeGreaterThan(3);
     for (const name of md) {
-      const starts = readFileSync(join(out, name), "utf8").startsWith(bannerFor({}));
+      const starts = readFileSync(join(out, name), "utf8").startsWith(
+        bannerFor({ command: MAP_REGENERATE_COMMAND }),
+      );
       expect({ name, starts }).toEqual({ name, starts: true });
     }
   });

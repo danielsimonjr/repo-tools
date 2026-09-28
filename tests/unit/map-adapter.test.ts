@@ -138,14 +138,24 @@ describe("toParsedFiles: workspace packages", () => {
     const records = toParsedFiles(await buildGraph(root), root);
     const all = records.find((r) => r.path === "packages/cli/src/all.ts") as ParsedFile;
     expect(all.workspaceDependencies).toEqual([
-      { package: "@s/core", directory: "packages/core", imports: ["*"] },
+      {
+        package: "@s/core",
+        directory: "packages/core",
+        imports: ["*"],
+        resolved: "packages/core/src/index.ts",
+      },
     ]);
     const cli = toParsedFiles(await buildGraph(root), root).find(
       (r) => r.path === "packages/cli/src/index.ts",
     ) as ParsedFile;
     expect(cli.internalDependencies).toEqual([]);
     expect(cli.workspaceDependencies).toEqual([
-      { package: "@s/core", directory: "packages/core", imports: ["u"] },
+      {
+        package: "@s/core",
+        directory: "packages/core",
+        imports: ["u"],
+        resolved: "packages/core/src/index.ts",
+      },
     ]);
   });
 });

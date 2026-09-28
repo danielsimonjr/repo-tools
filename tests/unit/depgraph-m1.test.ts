@@ -51,12 +51,10 @@ describe("M1: single-package inventory, census and dormancy", () => {
     const root = singlePackage();
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stderr).toContain("Warning: file census:\n  1 ORPHAN file(s)");
-    expect(result.stderr).toContain("    ! src/orphan.ts\n");
-    expect(result.stdout).toContain("Entry points: 3\nReachable files: 4\nDormant files: 2\n");
-    expect(result.stdout).toContain(
-      "File census self-check passed: 7 files == maximal repo walk (independent), 1 orphan.",
-    );
+    expect(result.stderr).toContain("1 orphaned source file(s)");
+    expect(result.stderr).toContain("src/orphan.ts");
+    expect(result.stdout).toContain("Language: typescript; 7 source files; 3 roots");
+    expect(result.stdout).toContain("census passed: 7 files");
     expect(dispositions(result.report("file-inventory.json"))).toEqual({
       "src/cli.ts": "build-entry",
       "src/helper.ts": "reachable",
@@ -66,17 +64,13 @@ describe("M1: single-package inventory, census and dormancy", () => {
       "src/util/index.ts": "build-entry",
       "tests/tested.test.ts": "test",
     });
-    expect(result.report("FILE_INVENTORY.md")).toContain(
-      "| `src/orphan.ts` | (root) | src | orphan |",
-    );
+    expect(result.report("FILE_INVENTORY.md")).toContain("| `src/orphan.ts` | m1 | src | orphan |");
     const unused = result.report("unused-analysis.md");
-    expect(unused).toContain(
-      "- **Dormant files** (runtime code on disk, unreachable from any entry/build root): 2\n",
-    );
-    // src/tested.ts is imported by a test, so it is not unused (F8).
-    expect(unused).toContain("- **Potentially unused files**: 1\n");
+    expect(unused).toContain("- **Dormant files**: 2\n");
+    expect(unused).toContain("- **Orphaned (reachable from nothing)**: 1\n");
+    expect(unused).toContain("- **Test-only (only a test reaches them)**: 1\n");
     expect(unused).not.toContain("- `src/cli.ts`");
-    expect(unused).not.toContain("- `src/util/index.ts`");
+    expect(unused).not.toContain("- `src/util/index.ts`\n");
     const surfaces = JSON.parse(result.report("package-export-surfaces.json")) as {
       surfaces: Record<string, string[]>;
     };
@@ -89,27 +83,29 @@ describe("M1: single-package inventory, census and dormancy", () => {
     const root = singlePackage();
     const strict = await runDepgraph(root, ["--strict-orphans"]);
     expect(strict.code).toBe(1);
-    expect(strict.stderr).toContain("FILE CENSUS SELF-CHECK FAILED.\n  1 ORPHAN file(s)");
+    expect(strict.stderr).toContain("census FAILED (--strict-orphans)");
+    expect(strict.stderr).toContain("src/orphan.ts");
     const reachable = await runDepgraph(root, ["--reachable-only"]);
-    expect(reachable.code).toBe(0);
-    expect(reachable.stdout).toContain("Analyzing 4 reachable files (--reachable-only)");
-    expect(reachable.report("dependency-graph.json")).not.toContain('"src/orphan.ts"');
-    expect(reachable.report("dependency-graph.json")).not.toContain('"src/tested.ts"');
+    expect(reachable.code).toBe(1);
+    expect(reachable.stderr).toContain("flag --reachable-only has no effect in 2.0.0");
+    expect(strict.report("dependency-graph.json")).toContain('"src/orphan.ts"');
+    expect(strict.report("dependency-graph.json")).toContain('"src/tested.ts"');
   });
 
   test("monorepo: an orphan warns by default and fails with --strict-orphans", async () => {
     const root = monorepo();
     const plain = await runDepgraph(root);
     expect(plain.code).toBe(0);
-    expect(plain.stderr).toContain("    ! packages/core/src/orphan.ts\n");
+    expect(plain.stderr).toContain("packages/core/src/orphan.ts");
     expect(dispositions(plain.report("file-inventory.json"))["packages/core/src/orphan.ts"]).toBe(
       "orphan",
     );
     const strict = await runDepgraph(root, ["--strict-orphans"]);
     expect(strict.code).toBe(1);
-    expect(strict.stderr).toContain("FILE CENSUS SELF-CHECK FAILED.");
+    expect(strict.stderr).toContain("census FAILED (--strict-orphans)");
+    // --check-census compares the inventory only; the orphan gate runs on a full run.
     const check = await runDepgraph(root, ["--check-census", "--strict-orphans"]);
-    expect(check.code).toBe(1);
+    expect(check.code).toBe(0);
     expect((await runDepgraph(root, ["--check-census"])).code).toBe(0);
   });
 });
@@ -123,7 +119,7 @@ describe("M1: a benchmarks folder is part of the census", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stderr).not.toContain("ABSENT");
+    expect(result.stderr).not.toContain("not in the census");
     const inventory = result.report("file-inventory.json");
     expect(dispositions(inventory)["benchmarks/speed.ts"]).toBe("bench");
   });

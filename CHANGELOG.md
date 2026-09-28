@@ -6,6 +6,48 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- A literal relative `import()` is an edge of the core graph. This reverses the known difference
+  in 2.0.0. A runtime call is a namespace use (`*`). A type-position `import('./c').Name` records
+  that name. `typeof import()` records no names. A template that contains `${`, and a specifier
+  that is not relative, are not edges. The parity record gives the merge rules. The verdict
+  against the Python tool is `repo_map-wrong`.
+- A bodiless `export function f(): T;` is not an export, as in the Python tool
+  (`repo_map-kept`). An overload plus an implementation records the name once.
+- The 1.x depgraph pipeline is removed: the runner, the regex parser, the scanner, the inventory
+  reporter and the 1.x goldens. `repo-tools depgraph` stays an alias of `repo-tools map`.
+  `docs/fix-ledger-2.0.0.md` records which 1.x fixes the `map` tests lock, and which fixes have
+  no 2.0.0 meaning.
+
+### Fixed
+
+- A named `export { name } from` writes one edge for that statement. It does not add a second
+  empty-imports edge to the same file.
+- `write` refuses a symbolic link inside the output folder that points outside it.
+- A skip-list folder under `src/` (`dist`, `build`, `coverage`, `node_modules`, `.git`) that
+  holds a source file produces a warning. The files stay out of the census. A root `build/` or
+  `dist/` folder stays silent.
+- `--check-census` names the configured regenerate command. The test-coverage note names the
+  configured coverage-policy path.
+- The config file accepts a top-level `$schema` key.
+- The walk skip list is not module state. Each walk builds its own skip set.
+- A type-position `import('./c').C` records the name `C`.
+- In single-package mode, `main` and `exports` targets are roots after `dist/` maps to `src/`,
+  including when the file is not `src/index.ts`. A subpath root is the source of the export
+  target.
+- Test coverage follows an import by package name, including the side-effect imports of the
+  resolved file.
+- A workspace subpath uses the `exports` target, then `<sub>.ts`, then `<sub>/index.ts`.
+- A package-name import is an edge in cycle detection, including the cyclic components in
+  `dependency-layers.json`.
+- The comment mask treats `a++ / b / c` as division, and `if (x) /re/` as a regular expression.
+- A bare `import './x'` together with `import('./x')` is one side-effect edge whose names are
+  `["*"]`.
+- A dangling symbolic link is listed in `skippedLinks`.
+- A `new URL` in a root config, and a `new URL('./x.js', import.meta.url)` launch, seed roots.
+- A `.test.tsx` or `.spec.tsx` file is in the `tests` area.
+
 ## [2.0.0] - 2026-09-26
 
 The unified engine. `repo-tools map` replaces the Python `repo_map.py` and depgraph 1.x with one
@@ -16,10 +58,10 @@ flags have no effect: `map` exits 1 on them, and the alias gives a warning.
 
 ### Known differences
 
-- `map` makes no graph edge for a dynamic `import()`, as the Python tool does. depgraph 1.x
-  made one. So a cycle that closes only through `import()` is not a cycle in 2.0.0. On
-  memoryjs, one type-only cyclic component has 3 files, not 7. Test coverage still counts a
-  literal `import()` in a test file as a load.
+- The 2.0.0 release made no graph edge for a dynamic `import()`. That choice is reversed in
+  Unreleased: a literal relative `import()` is now an edge. On memoryjs, the release counted
+  one type-only cyclic component as 3 files, not 7. Test coverage counted a literal `import()`
+  in a test file as a load, and it still does.
 
 ### Added
 

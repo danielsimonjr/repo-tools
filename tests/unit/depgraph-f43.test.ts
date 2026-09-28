@@ -16,17 +16,26 @@ function section(report: string, title: string): string {
   return body.split("\n## ")[0] ?? "";
 }
 
-/** The workspace and external edges of `src/cli.ts` in `dependency-graph.json`. */
-function cliEdges(graphText: string): { ws: unknown; ext: unknown } {
+/** The disposition of each file in `file-inventory.json`. */
+function dispositions(text: string): Record<string, string> {
+  const inventory = JSON.parse(text) as { files: { file: string; disposition: string }[] };
+  return Object.fromEntries(inventory.files.map((f) => [f.file, f.disposition]));
+}
+
+/** The internal edges of `src/cli.ts` in the core graph. */
+function cliEdges(graphText: string): { file: string; imports: string[]; typeOnly: boolean }[] {
   const graph = JSON.parse(graphText) as {
     modules: Record<
       string,
-      Record<string, { workspaceDependencies: unknown; externalDependencies: unknown }>
+      Record<
+        string,
+        { internalDependencies: { file: string; imports: string[]; typeOnly: boolean }[] }
+      >
     >;
   };
   for (const files of Object.values(graph.modules)) {
     const cli = files["src/cli.ts"];
-    if (cli) return { ws: cli.workspaceDependencies, ext: cli.externalDependencies };
+    if (cli) return cli.internalDependencies;
   }
   throw new Error("no src/cli.ts");
 }
@@ -59,20 +68,19 @@ describe("F43: self-imports in single-package mode", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stderr).not.toContain("ORPHAN");
-    expect(cliEdges(result.report("dependency-graph.json"))).toEqual({
-      ws: [
-        { package: "f43", directory: "", imports: ["core"] },
-        { package: "f43", directory: "", imports: ["helper"], subpath: "sub" },
-      ],
-      ext: [],
-    });
-    const dead = section(
-      result.report("unused-analysis.md"),
-      "Unreferenced Anywhere (deletion candidates)",
-    );
-    expect(dead).not.toContain("`core` (function)");
-    expect(dead).not.toContain("`helper` (function)");
+    expect(result.stderr).not.toContain("orphaned source file");
+    const d = dispositions(result.report("file-inventory.json"));
+    // The "." target is src/core.ts, and the ./sub target is src/lib/sub.ts, not src/sub.ts.
+    expect(d["src/core.ts"]).toBe("build-entry");
+    expect(d["src/lib/sub.ts"]).toBe("build-entry");
+    expect(d["src/cli.ts"]).toBe("build-entry");
+    expect(cliEdges(result.report("dependency-graph.json"))).toEqual([
+      { file: "src/core.ts", imports: ["core"], typeOnly: false },
+      { file: "src/lib/sub.ts", imports: ["helper"], typeOnly: false },
+    ]);
+    const dead = section(result.report("unused-analysis.md"), "Exports unreferenced anywhere");
+    expect(dead).not.toContain("`core`");
+    expect(dead).not.toContain("`helper`");
   });
 
   test("main resolves the package name", async () => {
@@ -89,6 +97,9 @@ describe("F43: self-imports in single-package mode", () => {
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
     expect(result.stderr).not.toContain("ORPHAN");
+    const d = dispositions(result.report("file-inventory.json"));
+    expect(d["src/core.ts"]).toBe("build-entry");
+    expect(d["src/cli.ts"]).toBe("build-entry");
   });
 
   test("without exports and main: src/index.ts, then src/<sub>.ts or src/<sub>/index.ts", async () => {
@@ -108,8 +119,8 @@ describe("F43: self-imports in single-package mode", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.stderr).not.toContain("ORPHAN");
-    expect(result.stdout).toContain("Reachable files: 4\n");
+    expect(result.stderr).not.toContain("orphaned source file");
+    expect(result.stdout).toContain("Language: typescript; 4 source files; 1 roots");
   });
 
   test("a monorepo does not treat its root package name as a self-import", async () => {
@@ -121,7 +132,7 @@ describe("F43: self-imports in single-package mode", () => {
     });
     const result = await runDepgraph(root);
     expect(result.code).toBe(0);
-    expect(result.report("dependency-graph.json")).toContain('"package": "ws-root"');
+    expect(result.report("dependency-graph.json")).toContain('"ws-root"');
     expect(result.report("dependency-graph.json")).not.toContain('"directory": ""');
   });
 });
