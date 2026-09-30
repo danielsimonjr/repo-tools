@@ -6,6 +6,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- The privacy check has an accept-list, `scripts/privacy-accepted.txt`, for a reviewed finding in
+  the commit history. A commit message cannot change after a merge, so a new commit cannot clear
+  a finding in it. An entry holds a full commit sha, one finding kind, one line of the message and
+  a reason. The entry accepts that finding only: no prefix, no wildcard, no whole-commit waiver,
+  and never a finding in a tracked file. An entry that accepts no finding is a finding
+  (`accepted-stale`). The check prints each accepted finding with its reason.
+
 ### Changed
 
 - A literal relative `import()` is an edge of the core graph. This reverses the known difference
@@ -22,8 +31,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
-- A named `export { name } from` writes one edge for that statement. It does not add a second
-  empty-imports edge to the same file.
+- A named `export { name } from` writes one edge for that statement. The statement does not add a
+  second empty-imports edge to the same file.
 - `write` refuses a symbolic link inside the output folder that points outside it.
 - A skip-list folder under `src/` (`dist`, `build`, `coverage`, `node_modules`, `.git`) that
   holds a source file produces a warning. The files stay out of the census. A root `build/` or
@@ -47,6 +56,10 @@ All notable changes to this project are recorded in this file. The format follow
 - A dangling symbolic link is listed in `skippedLinks`.
 - A `new URL` in a root config, and a `new URL('./x.js', import.meta.url)` launch, seed roots.
 - A `.test.tsx` or `.spec.tsx` file is in the `tests` area.
+- The repository scan of the privacy check passes again. A test fixture used an e-mail address
+  that the check rejects. Two trailers of the merge commit of the engine change hold a co-author
+  address and a name. The fixture now uses an allowed address. The accept-list records the two
+  trailers.
 
 ## [2.0.0] - 2026-09-26
 

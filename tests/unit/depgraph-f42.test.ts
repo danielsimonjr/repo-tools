@@ -18,15 +18,7 @@ afterAll(removeTrees);
 function git(root: string, args: string[]): void {
   const result = spawnSync(
     "git",
-    [
-      "-c",
-      "commit.gpgsign=false",
-      "-c",
-      "user.email=test@example.com",
-      "-c",
-      "user.name=Test",
-      ...args,
-    ],
+    ["-c", "commit.gpgsign=false", "-c", "user.email=t@t", "-c", "user.name=Test", ...args],
     { cwd: root, encoding: "utf8" },
   );
   if (result.status !== 0) {

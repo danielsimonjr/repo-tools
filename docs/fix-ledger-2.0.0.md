@@ -71,8 +71,8 @@ These 1.x behaviors are not reimplemented. The tests lock the 2.0 result instead
 - **F44.** A `.d.ts` file with no importer stays in "Files with no in-repo importer". The 1.x
   rule that omitted `.d.ts` from that list is not restored. Classified duplicate lists still
   skip a `.d.ts` definer.
-- **F24 report shape.** The 2.0 unused report uses its own section titles. It does not print the
-  1.x "in-file ref" suffix.
+- **F24 report shape.** The 2.0 unused report uses its own section titles. The report does not
+  print the 1.x "in-file ref" suffix.
 - **Regex `parseFile`.** Double edges and the other regex-parser results have no 2.0 reader.
   The tree-sitter reader replaces them.
 - **Metadata name.** The core graph names the folder. A missing package version is `"unknown"`

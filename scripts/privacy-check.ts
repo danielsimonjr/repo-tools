@@ -6,6 +6,13 @@
  * token whose SHA-256 is in `scripts/privacy-denylist.sha256`. A report line names the file,
  * the line and the rule. A report line never holds the matched value.
  *
+ * A commit message cannot change after a merge, so a new commit cannot clear a finding in it.
+ * `scripts/privacy-accepted.txt` records a reviewed finding of that kind. One entry is one full
+ * commit sha, one finding kind, one line of the commit message and a reason. The entry accepts
+ * that one finding and nothing else: no prefix, no wildcard, no whole-commit waiver, and never
+ * a finding in a tracked file. An entry that accepts no finding is itself a finding
+ * (`accepted-stale`), so the list cannot outlive the history that it describes.
+ *
  * Usage:
  *   bun scripts/privacy-check.ts                    self-test, then scan the repository
  *   bun scripts/privacy-check.ts --commit-msg <f>   scan one commit message file (git hook)
@@ -27,7 +34,8 @@ export type Rule =
   | "email"
   | "session-url"
   | "denylist"
-  | "binary";
+  | "binary"
+  | "accepted-stale";
 
 export interface Finding {
   file: string;
@@ -38,6 +46,8 @@ export interface Finding {
   detail?: string;
   /** Set when the path itself holds a finding: the report then prints this number, not the path. */
   pathId?: number;
+  /** The full sha of the commit, for a finding in a commit message read from the history. */
+  sha?: string;
 }
 
 /** The public owner org. It may appear in a GitHub URL and in the npm scope. */
@@ -214,6 +224,94 @@ export function scanCommitMessage(sha: string, message: string, deny: Denylist):
   return scan(`commit ${sha.slice(0, 12)}`, message, deny, { exemptions: false });
 }
 
+/** The tracked file that holds the accepted findings of the history. */
+export const ACCEPTED_FILE = "scripts/privacy-accepted.txt";
+
+/** The kinds that a commit message can hold. A `denylist` kind names the token by its hash. */
+const ACCEPTED_KIND =
+  /^(?:windows-user-path|posix-home-path|email|session-url|denylist:[0-9a-f]{12})$/;
+
+/** One reviewed finding in the history. */
+export interface Accepted {
+  /** The full 40-digit sha of the commit. */
+  sha: string;
+  /** The kind of the finding, as `findingKind` returns it. */
+  kind: string;
+  /** The 1-based line of the commit message. */
+  line: number;
+  /** Why the finding is acceptable. The text is tracked, so the check scans it too. */
+  reason: string;
+  /** The 1-based line of this entry in the accept-list. */
+  entryLine: number;
+}
+
+/** A finding that an entry accepted, with that entry. */
+export interface AcceptedFinding {
+  finding: Finding;
+  entry: Accepted;
+}
+
+/** Returns the kind of a finding: its rule, or for a denylist hit the rule and the token hash. */
+export function findingKind(f: Finding): string {
+  return f.rule === "denylist" ? `denylist:${f.detail ?? ""}` : f.rule;
+}
+
+/**
+ * Parses the accept-list: one `<sha> <kind> <line> <reason>` entry per line. A line that starts
+ * with `#`, and a blank line, are comments. A bad line throws with its number and never its text.
+ */
+export function parseAccepted(text: string): Accepted[] {
+  const out: Accepted[] = [];
+  const seen = new Set<string>();
+  text.split(/\r?\n/).forEach((raw, index) => {
+    const line = raw.trim();
+    if (line === "" || line.startsWith("#")) return;
+    const [sha = "", kind = "", at = "", ...reason] = line.split(/\s+/);
+    const key = `${sha} ${kind} ${at}`;
+    const valid =
+      /^[0-9a-f]{40}$/.test(sha) &&
+      ACCEPTED_KIND.test(kind) &&
+      /^[1-9]\d*$/.test(at) &&
+      reason.length > 0 &&
+      !seen.has(key);
+    if (!valid) throw new Error(`privacy-accepted: malformed line ${index + 1}`);
+    seen.add(key);
+    out.push({ sha, kind, line: Number(at), reason: reason.join(" "), entryLine: index + 1 });
+  });
+  return out;
+}
+
+/**
+ * Removes the findings that an entry accepts. An entry matches the full sha, the kind and the
+ * line, all three. A finding without a full sha (a tracked file) never matches. An entry that
+ * matches no finding becomes an `accepted-stale` finding at its own line of the accept-list.
+ */
+export function applyAccepted(
+  findings: Finding[],
+  accepted: Accepted[],
+): { findings: Finding[]; accepted: AcceptedFinding[] } {
+  const byKey = new Map(accepted.map((e) => [`${e.sha} ${e.kind} ${e.line}`, e]));
+  const used = new Set<Accepted>();
+  const kept: Finding[] = [];
+  const taken: AcceptedFinding[] = [];
+  for (const finding of findings) {
+    const entry =
+      finding.sha === undefined
+        ? undefined
+        : byKey.get(`${finding.sha} ${findingKind(finding)} ${finding.line}`);
+    if (entry) {
+      used.add(entry);
+      taken.push({ finding, entry });
+    } else {
+      kept.push(finding);
+    }
+  }
+  const stale = accepted
+    .filter((e) => !used.has(e))
+    .map((e): Finding => ({ file: ACCEPTED_FILE, line: e.entryLine, rule: "accepted-stale" }));
+  return { findings: [...kept, ...stale], accepted: taken };
+}
+
 /** Checks one tracked path for the binary rule. */
 export function scanTrackedFile(file: string, sizeBytes: number): Finding[] {
   if (/\.exe$/i.test(file) || sizeBytes > MAX_TRACKED_BYTES) {
@@ -248,6 +346,14 @@ export function selfTest(): Rule[] {
     ["session-url", () => scanCommitMessage("0", `claude.ai/code/${"session"}_x`, deny)],
     ["denylist", () => scanText("README.md", `by ${word}`, deny)],
     ["binary", () => scanTrackedFile("x.exe", 1)],
+    [
+      "accepted-stale",
+      () =>
+        applyAccepted(
+          [],
+          [{ sha: "0".repeat(40), kind: "email", line: 1, reason: "plant", entryLine: 1 }],
+        ).findings,
+    ],
   ];
   return plants.filter(([rule, run]) => !run().some((f) => f.rule === rule)).map(([r]) => r);
 }
@@ -305,6 +411,8 @@ export function decodeForScan(bytes: Buffer): { text: string; binary: boolean } 
 
 export interface CheckResult {
   findings: Finding[];
+  /** The commit-message findings that the accept-list took out of `findings`. */
+  accepted: AcceptedFinding[];
   files: number;
   commits: number;
   denylist: Denylist;
@@ -313,6 +421,7 @@ export interface CheckResult {
 /**
  * Scans the repository at `root`: every blob in the git index (the content that is or will be
  * committed, symlink targets included) and the message of every commit reachable from HEAD.
+ * The accept-list is read from the index too, so the scan uses the content that is committed.
  */
 export async function collect(root: string): Promise<CheckResult> {
   const findings: Finding[] = [];
@@ -333,6 +442,10 @@ export async function collect(root: string): Promise<CheckResult> {
   const denylistBlob = denylistEntry && blobs.get(denylistEntry.id);
   if (!denylistBlob) throw new Error("privacy: scripts/privacy-denylist.sha256 is not tracked");
   const deny = parseDenylist(denylistBlob.toString("utf8"));
+  // No accept-list means no exemption: the check fails closed.
+  const acceptedEntry = entries.find((e) => e.file === ACCEPTED_FILE);
+  const acceptedBlob = acceptedEntry && blobs.get(acceptedEntry.id);
+  const accepted = acceptedBlob ? parseAccepted(acceptedBlob.toString("utf8")) : [];
 
   entries.forEach(({ id, file }, index) => {
     const bytes = blobs.get(id) ?? Buffer.alloc(0);
@@ -345,6 +458,7 @@ export async function collect(root: string): Promise<CheckResult> {
   });
 
   let commits = 0;
+  const history: Finding[] = [];
   if (Bun.spawnSync(["git", "-C", root, "rev-parse", "--verify", "-q", "HEAD"]).exitCode === 0) {
     const ids = git(root, ["rev-list", "HEAD"]).toString("utf8").split("\n").filter(Boolean);
     const objects = readObjects(root, ids);
@@ -353,12 +467,20 @@ export async function collect(root: string): Promise<CheckResult> {
       const split = body.indexOf("\n\n");
       const message = split === -1 ? "" : body.slice(split + 2);
       commits++;
-      findings.push(...scanCommitMessage(id, message, deny));
+      history.push(...scanCommitMessage(id, message, deny).map((f) => ({ ...f, sha: id })));
     }
     const expected = Number(git(root, ["rev-list", "--count", "HEAD"]).toString("utf8").trim());
     if (commits !== expected) throw new Error(`privacy: scanned ${commits} of ${expected} commits`);
   }
-  return { findings, files: entries.length, commits, denylist: deny };
+  const applied = applyAccepted(history, accepted);
+  findings.push(...applied.findings);
+  return {
+    findings,
+    accepted: applied.accepted,
+    files: entries.length,
+    commits,
+    denylist: deny,
+  };
 }
 
 /** Returns the findings for the repository at `root`. */
@@ -395,9 +517,13 @@ async function cli(argv: string[]): Promise<number> {
   const result = await collect(root);
   assertDenylistFloor(result.denylist, DENYLIST_FLOOR);
   for (const f of result.findings) console.error(`privacy: ${formatFinding(f, result.denylist)}`);
+  for (const { finding, entry } of result.accepted) {
+    console.log(`privacy: accepted: ${formatFinding(finding, result.denylist)} (${entry.reason})`);
+  }
   console.log(
     `privacy check: ${result.files} tracked files, ${result.commits} commit messages, ` +
-      `${result.denylist.size} denylisted hashes, ${result.findings.length} findings.`,
+      `${result.denylist.size} denylisted hashes, ${result.findings.length} findings, ` +
+      `${result.accepted.length} accepted.`,
   );
   return result.findings.length > 0 ? 1 : 0;
 }
