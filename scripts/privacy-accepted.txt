@@ -1,0 +1,11 @@
+# Accepted findings in the commit history (design 10.2).
+#
+# A commit message cannot change after a merge. Thus no new commit can clear a finding in it.
+# Each line below accepts one finding of one commit. One entry holds four fields:
+#   <full commit sha> <kind> <line of the commit message> <reason>
+# A kind is a rule name, or denylist:<first 12 digits of the token hash>.
+# An entry accepts no other line, no other kind and no other commit.
+# An entry that accepts no finding fails the check.
+#
+fc930a32f5d2ef55006dee56c6b06e1e4a54a939 email 7 public co-author address of the coding agent that opened the pull request
+fc930a32f5d2ef55006dee56c6b06e1e4a54a939 denylist:bd3dae5fb91f 8 the repository maintainer named as co-author of a squash commit that the maintainer made

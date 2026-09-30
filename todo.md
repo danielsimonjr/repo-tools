@@ -102,6 +102,25 @@
   file shows as an orphan (a repo_map defect that 1.x did not have). Read the entry files of
   each workspace package, and list the change as a deliberate difference from repo_map.
 
+## 2.1.0: `repo-tools check`
+
+- [ ] Gate findings of the merged engine change, in one pull request: the test e-mail address, the
+  three STE findings, and a privacy accept-list for history that no new commit can change. An entry
+  names a full commit sha, one finding kind and one line, and it carries a reason. A stale entry
+  fails the check.
+- [ ] `repo-tools check [root] --docs <dir>`: port `check.py` (claims parser, Verification section,
+  metrics from the map engine, truncation and warning taint, the no-verification marker). Read the
+  root and scan scope from the config file, as `map` does. A root-relative `../` `--out` is pinned
+  by a test. Exit 0 when every claim matches, exit 1 with the problem list otherwise.
+- [ ] `check` parity record against `check.py` on public repositories, then a smoke step.
+- [ ] Fix-ledger audit, after `check`: a script reverts each fix (F1 to F44, M1, R1) in a scratch
+  worktree and records whether a `map` test fails. Each fix that no test catches gets a test.
+
+## 2.2.0: `repo-tools docs`
+
+- [ ] `repo-tools docs`: port `code_docs.py` (scan, stub, check). `stub --apply` stays a dry run by
+  default.
+
 ## Post-release list (filed, not worked in v1)
 
 Scope closed after batch 4: a finding enters v1 only if it makes a real repo exit 1 or can lose

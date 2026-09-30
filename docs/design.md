@@ -137,8 +137,8 @@ relative to the root. They load in config order. The default export has this sha
 - `report` runs after the analysis. `graph` is a frozen copy of the analysis result.
 - `mask` gives the functions of `src/mask.ts`, so an extension keeps no copy of its own.
 - `write` writes a file in the output folder, and applies rule R1. `write` refuses an empty
-  path, an absolute path, a path out of the output folder, and a symbolic link inside the output
-  folder that points outside it.
+  path, an absolute path, and a path out of the output folder. `write` also refuses a symbolic
+  link inside the output folder that points outside it.
 - A hook that throws, or a module that does not load, stops the run with exit 1. The message names
   the extension.
 - `--no-extensions` loads no extension.
@@ -244,11 +244,20 @@ The job fails on one finding.
 | Session URL | a link to a coding-agent session |
 | Email address | an address, except a `noreply` address |
 | Tracked binary | a tracked executable, or a file larger than 5 MB |
+| Stale entry | an entry of the accept-list that accepts no finding |
 
 The check prints the file, the line and the rule. It never prints the matched value. A self-test
 puts one finding per rule into the checker, and it fails the job when a rule does not fire. A
 checker that cannot fail is not a check. The `commit-msg` hook runs the same check before a commit
 exists.
+
+**The history is fixed, so the check has an accept-list.** A commit message cannot change after a
+merge. A new commit therefore cannot clear a finding in an old message. `scripts/privacy-accepted.txt`
+records a reviewed finding of that kind. One entry holds a full commit sha, one finding kind, one
+line of the message and a reason. The entry accepts that finding only. The list has no prefix, no
+wildcard and no whole-commit waiver. The list never accepts a finding in a tracked file. An entry
+that accepts no finding fails the job, so the list cannot outlive the history that it describes.
+The check prints each accepted finding with its reason.
 
 **The denylist hides names only from a reader, not from a guesser.** The list holds SHA-256
 hashes, so the repository does not publish the names that it protects. But a hash of a short word
