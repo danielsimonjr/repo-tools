@@ -5,6 +5,7 @@
  * and calls the subcommand entry. A subcommand module never imports this file.
  */
 import pkg from "../package.json" with { type: "json" };
+import { CHECK_HELP, run as runCheck } from "./check/index.ts";
 import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
 import type { Io } from "./io-types.ts";
@@ -35,6 +36,11 @@ const REGISTRY = {
 
 ${MAP_HELP}`,
     run: (argv: string[], io: Io) => runMap(argv, io, "depgraph"),
+  },
+  check: {
+    summary: "Check the Verification tables of Markdown documents against a fresh graph.",
+    help: CHECK_HELP,
+    run: runCheck,
   },
   chunk: {
     summary: "Split a large file into chunks, merge the chunks back, or show changed chunks.",

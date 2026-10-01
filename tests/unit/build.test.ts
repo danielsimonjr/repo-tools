@@ -162,7 +162,7 @@ describe("smoke test: map on the product (design 13.3 steps 2, 3 and 7)", () => 
     () => {
       const r = smoke([process.execPath, "src/bin.ts"]);
       expect(r.stderr.toString()).toBe("");
-      expect(r.stdout.toString()).toBe("smoke passed: 8 steps.\n");
+      expect(r.stdout.toString()).toBe("smoke passed: 9 steps.\n");
     },
     SMOKE_TIMEOUT_MS,
   );
@@ -186,6 +186,31 @@ describe("smoke test: map on the product (design 13.3 steps 2, 3 and 7)", () => 
       expect(err).toContain("map golden (13.3 step 2)");
       expect(err).toContain("api surface golden (13.3 step 3)");
       expect(err).toContain("extension hooks (13.3 step 7)");
+      expect(err).toContain("check drift gate");
+    },
+    SMOKE_TIMEOUT_MS,
+  );
+
+  test(
+    "a CLI whose check accepts a drifting document fails the check step by name",
+    () => {
+      // A fake CLI that hands every command to the real entry, except `check`: it exits 0 always.
+      const fake = join(work, "fake-check.js");
+      writeFileSync(
+        fake,
+        [
+          'import { spawnSync } from "node:child_process";',
+          "const args = process.argv.slice(2);",
+          'if (args[0] === "check") process.exit(0);',
+          `const entry = ${JSON.stringify(join(root, "src/bin.ts"))};`,
+          `const r = spawnSync(${JSON.stringify(process.execPath)}, [entry, ...args], { stdio: "inherit" });`,
+          "process.exitCode = r.status ?? 1;",
+          "",
+        ].join("\n"),
+      );
+      const err = smoke(["node", fake]).stderr.toString();
+      expect(err).toContain("check drift gate: a drifting claim: exit 0, expected 1");
+      expect(err).not.toContain("map golden");
     },
     SMOKE_TIMEOUT_MS,
   );
