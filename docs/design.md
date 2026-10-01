@@ -462,10 +462,14 @@ A drift line for `orphanedFiles`, `unusedExportsCount`, `unusedExportCount`, `do
 is not a deletion list. A file that only a dynamic `import()` with a computed path loads is live,
 and it still counts.
 
-The check skips a document that holds the opt-out marker. The check looks for the marker first,
-before the sections. So the marker wins over a heading that looks like a Verification heading. `repo-tools map` writes the marker at the top of each generated report. The marker is
+The check skips a document that has the opt-out marker on a line of its own. A line matches when
+it equals the marker after the spaces at both ends are removed. A marker inside a sentence, a
+code span or a table cell does not match. Such a document would skip its own table, and a stale
+claim would pass in silence. The check looks for the marker first, before the sections. So
+the marker wins over a heading that looks like a Verification heading. `repo-tools map` writes the
+marker alone on a line at the top of each generated report. The marker is
 `<!-- repo-map:no-verification -->`, and the config key `map.verificationMarker` adds a second
-line of this kind.
+line of this kind. A blank value of that key matches no line.
 
 On success the check prints one line on standard output.
 
@@ -478,7 +482,7 @@ On success the check prints one line on standard output.
 | Boolean metric | The document states `True` or `False`. | The document can state the value in any letter case. A drift line shows `true` or `false`. |
 | Table values | None exist. | A table value is not a metric (section 15.2). |
 | Dead-looking note | Not on `unusedExportCount`. | On `unusedExportCount` too. |
-| Opt-out marker | One fixed line. | The fixed line, and the line of `map.verificationMarker`. |
+| Opt-out marker | One fixed marker. It matches anywhere in the text. | The fixed marker, and the marker of `map.verificationMarker`. Each must stand alone on a line. |
 | Repository without a source file | A graph of zero files. | Exit 1 with the message of `map`. |
 | Error text | Wraps only `OSError`, `ValueError` and `TypeError`. | Every error is a message with exit 1, and no stack trace. |
 | Line breaks | `splitlines` also splits on form feed, vertical tab and U+2028. | A line break is CRLF, LF or CR. |

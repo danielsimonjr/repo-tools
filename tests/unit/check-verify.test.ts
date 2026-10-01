@@ -284,8 +284,74 @@ describe("verifyDocs: the no-verification marker", () => {
     expect(verify([a], measured(), MARKERS).problems).toHaveLength(1);
   });
 
-  test("a marker inside a claim table cell is still a marker (the text is searched whole)", () => {
-    const text = `## Verification\n${TABLE}| totalFiles | 99 | ${NO_VERIFICATION_MARKER} |\n`;
-    expect(verify([{ name: "A.md", text }]).problems).toEqual([]);
+  describe("only a whole line is a marker", () => {
+    const STALE = doc("A.md", [["totalFiles", "99"]]).text;
+    const DRIFT = ["A.md: totalFiles claims 99 but actual is 1"];
+
+    test("a marker quoted in prose does not opt out, so the stale claim fails", () => {
+      const text = `# Notes\n\nThe line ${NO_VERIFICATION_MARKER} opts a document out.\n\n${STALE}`;
+      const r = verify([{ name: "A.md", text }]);
+      expect(r.problems).toEqual(DRIFT);
+      expect(r).toMatchObject({ docsChecked: 1, docsOptedOut: 0 });
+    });
+
+    test("a marker in an inline code span does not opt out", () => {
+      const text = `Write \`${NO_VERIFICATION_MARKER}\` to opt out.\n\n\`${NO_VERIFICATION_MARKER}\`\n\n${STALE}`;
+      expect(verify([{ name: "A.md", text }]).problems).toEqual(DRIFT);
+    });
+
+    test("a marker in a claim table cell does not opt out", () => {
+      const text = `## Verification\n${TABLE}| totalFiles | 99 | ${NO_VERIFICATION_MARKER} |\n`;
+      expect(verify([{ name: "A.md", text }]).problems).toEqual(DRIFT);
+    });
+
+    test("text before or after the marker on its line does not opt out", () => {
+      for (const line of [`see ${NO_VERIFICATION_MARKER}`, `${NO_VERIFICATION_MARKER} (skip)`]) {
+        expect(verify([{ name: "A.md", text: `${line}\n${STALE}` }]).problems).toEqual(DRIFT);
+      }
+    });
+
+    test("a document without the marker is no different: a stale claim fails", () => {
+      expect(verify([{ name: "A.md", text: STALE }]).problems).toEqual(DRIFT);
+    });
+
+    test("a marker alone on its line opts out, wherever the line stands", () => {
+      const bom = String.fromCharCode(0xfeff);
+      const marker = NO_VERIFICATION_MARKER;
+      const cases: Record<string, string> = {
+        "first line": `${marker}\n${STALE}`,
+        "last line, no final newline": `${STALE}\n${marker}`,
+        "middle of the document": `# Title\n\n${marker}\n\n${STALE}`,
+        "indented, with trailing spaces": `# Title\n   ${marker}  \n${STALE}`,
+        "CRLF line ends": `${marker}\r\n${STALE.replaceAll("\n", "\r\n")}`,
+        "CR line ends": `# Title\r${marker}\r${STALE.replaceAll("\n", "\r")}`,
+        "after a byte-order mark": `${bom}${marker}\n${STALE}`,
+      };
+      for (const [label, text] of Object.entries(cases)) {
+        const r = verify([{ name: "A.md", text }]);
+        expect({ label, problems: r.problems, optedOut: r.docsOptedOut }).toEqual({
+          label,
+          problems: [],
+          optedOut: 1,
+        });
+      }
+    });
+
+    test("a configured marker follows the same rule", () => {
+      const custom = "<!-- my-tool:skip -->";
+      const markers = [NO_VERIFICATION_MARKER, custom];
+      const quoted = { name: "A.md", text: `Use ${custom} to skip.\n${STALE}` };
+      const alone = { name: "B.md", text: `${STALE}\n${custom}\n` };
+      expect(verify([quoted], measured(), markers).problems).toEqual(DRIFT);
+      expect(verify([alone], measured(), markers).problems).toEqual([]);
+    });
+
+    test("a blank configured marker opts out no document", () => {
+      for (const blank of ["", "   "]) {
+        const text = `# Title\n\n${STALE}`;
+        const markers = [NO_VERIFICATION_MARKER, blank];
+        expect(verify([{ name: "A.md", text }], measured(), markers).problems).toEqual(DRIFT);
+      }
+    });
   });
 });

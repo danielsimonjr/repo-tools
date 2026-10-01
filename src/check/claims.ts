@@ -44,7 +44,7 @@ export function scanVerification(markdown: string): Scan {
   let found = false;
   let inSection = false;
   let sectionLevel = 0;
-  for (const raw of markdown.replace(/^﻿/, "").split(/\r\n|\r|\n/)) {
+  for (const raw of markdown.replace(/^\uFEFF/, "").split(/\r\n|\r|\n/)) {
     const line = raw.trimEnd();
     const heading = line.trimStart().startsWith("#") ? HEADING.exec(line) : null;
     if (heading) {

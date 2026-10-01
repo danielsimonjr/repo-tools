@@ -100,9 +100,19 @@ function matches(stated: string, actual: MetricValue): boolean {
 }
 
 /**
+ * True when a line of `text`, trimmed, equals one of `markers`. A marker that is quoted in prose,
+ * in a code span or in a table cell is not a marker: it would skip the table of the document
+ * that quotes it, and a stale claim would pass in silence. A blank marker matches no line.
+ */
+function holdsMarker(text: string, markers: readonly string[]): boolean {
+  const wanted = new Set(markers.map((marker) => marker.trim()).filter((marker) => marker !== ""));
+  return text.split(/\r\n|\r|\n/).some((line) => wanted.has(line.trim()));
+}
+
+/**
  * Checks the claims of `docs` against `measured`. A document that holds a marker of `markers`
- * is skipped: the marker is checked before the sections, so it wins over a heading that happens
- * to look like a Verification heading.
+ * on a line of its own is skipped: the marker is checked before the sections, so it wins over a
+ * heading that happens to look like a Verification heading.
  */
 export function verifyDocs(
   docs: readonly DocFile[],
@@ -115,7 +125,7 @@ export function verifyDocs(
   const verdict: Verdict = { problems: [], claimsChecked: 0, docsChecked: 0, docsOptedOut: 0 };
   const problem = (line: string): number => verdict.problems.push(line);
   for (const { name, text } of docs) {
-    if (markers.some((marker) => text.includes(marker))) {
+    if (holdsMarker(text, markers)) {
       verdict.docsOptedOut += 1;
       continue;
     }

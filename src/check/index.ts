@@ -26,10 +26,12 @@ Each document needs a '## Verification' section: a table of rows
 orphanedFiles, and the value is the number that the document states. The check
 builds the graph again, so a stale report on disk cannot hide drift.
 
-A document passes, and is not read for claims, when its text holds the line
+A document passes, and is not read for claims, when one of its lines is exactly
 ${NO_VERIFICATION_MARKER}
-(repo-tools map writes it into each generated report). The config key
-map.verificationMarker adds a second line of this kind.
+(spaces at the ends of the line do not count). The marker must stand alone on its
+line: a marker inside a sentence, a code span or a table cell does not count.
+repo-tools map writes the line into each generated report. The config key
+map.verificationMarker adds a second marker of this kind.
 
 Every problem is a failure: a folder with no Markdown file, a document without a
 Verification section, a section without a row, an unknown claim, a metric that

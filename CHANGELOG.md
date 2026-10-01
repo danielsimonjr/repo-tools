@@ -21,8 +21,8 @@ edge, removes the 1.x depgraph pipeline, and adds an accept-list to the privacy 
   compares each claim with the graph. Exit 0 means that every claim matched. Exit 1 lists every
   problem on standard error, one per line. A missing or empty docs folder is a problem. A
   document without a Verification section is a problem. So are a section without a row, an
-  unknown claim, a count that the graph build declared unreliable, and a value that differs. A document that
-  holds the line `<!-- repo-map:no-verification -->` opts out. A relative `--docs` path is
+  unknown claim, a count that the graph build declared unreliable, and a value that differs. A
+  document opts out when one of its lines is exactly `<!-- repo-map:no-verification -->`. A relative `--docs` path is
   relative to the root, and an absolute path is used as given. The check reads
   `map.duplicateAllowlist` and `map.verificationMarker` from the config file. Section 15 of
   `docs/design.md` lists the differences from the Python tool. The smoke test has a `check` step.
@@ -45,6 +45,15 @@ edge, removes the 1.x depgraph pipeline, and adds an accept-list to the privacy 
   used, as a runtime `import()` does. The Python tool lists those exports as unused. A name that
   a file mentions only in a comment is not an in-module reference. The Python tool counts the
   comment. The parity record gives the measured effect. A test locks the namespace rule.
+- The opt-out marker of `repo-tools check` must stand alone on a line. `check.py` opts a document
+  out when the marker is anywhere in its text. A document can quote the marker in a sentence, a
+  code span or a table cell. That document then skips its own table, and a stale claim passes in
+  silence.
+  `repo-tools check` opts out only when a line, trimmed, equals the marker. This changes the
+  result for a document that opted out from inside a sentence or a table cell: the check now
+  reads its claims. `repo-tools map` writes the marker alone on a line, so generated reports
+  still opt out. A blank `map.verificationMarker` matches no line. `docs/parity-check.md` records
+  the difference. The verdict is fail-closed.
 - A bodiless `export function f(): T;` is not an export, as in the Python tool
   (`repo_map-kept`). An overload plus an implementation records the name once.
 - The 1.x depgraph pipeline is removed: the runner, the regex parser, the scanner, the inventory
@@ -54,6 +63,9 @@ edge, removes the 1.x depgraph pipeline, and adds an accept-list to the privacy 
 
 ### Fixed
 
+- `src/check/claims.ts` and one test held the byte-order mark as an invisible U+FEFF character.
+  Both files now spell it as an escape sequence. A new test fails when a file under `src/`,
+  `tests/` or `scripts/` holds a literal U+FEFF.
 - A named `export { name } from` writes one edge for that statement. The statement does not add a
   second empty-imports edge to the same file.
 - `write` refuses a symbolic link inside the output folder that points outside it.

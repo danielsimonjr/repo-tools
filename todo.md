@@ -116,6 +116,10 @@
 - [x] The namespace rule (`import * as ns` counts every export of its target as used) and the
   comment rule (a name in a comment is not an in-module reference): the parity check found them
   missing from section 14.4 of the design document. A test locks the namespace rule.
+- [x] PR #8 review, two fixes on `feat/check`: (1) spell the byte-order mark as an escape in
+  `claims.ts` and `check-claims.test.ts`, and add a test that fails on any literal U+FEFF under
+  `src/`, `tests/` or `scripts/`; (2) opt a document out only when a trimmed line equals the
+  marker, with the divergence from `check.py` recorded in `docs/parity-check.md`.
 - [ ] Fix-ledger audit, after `check`: a script reverts each fix (F1 to F44, M1, R1) in a scratch
   worktree and records whether a `map` test fails. Each fix that no test catches gets a test.
 

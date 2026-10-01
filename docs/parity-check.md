@@ -42,7 +42,7 @@ name and the actual value. The script does not compare the text of a message.
    count, tainted reachability metric and mismatch. The output of the tool must equal the
    prediction. This test shows that the document parser and the verdict rules do what the
    metrics say.
-4. **Edge documents.** The script wrote 37 hand-made documents. Both tools checked each one on
+4. **Edge documents.** The script wrote 41 hand-made documents. Both tools checked each one on
    fermat-mcp, in a folder of its own. A second set of 12 cases covers the folder and the path.
    In these 12 cases, both tools ran from a working directory outside the repository. The cases
    are listed in the result below.
@@ -114,28 +114,39 @@ prediction from the metrics of that tool.
 
 ## Result: edge documents
 
-On 34 of the 37 documents, the exit code and the problems are equal. The 34 documents test these
+On 35 of the 41 documents, the exit code and the problems are equal. The 35 documents test these
 cases:
 
 - The heading forms: `## Verification`, `## Verification:`, `## Verification (note)`, upper
   case, `#` and `######`, and no space after the hashes.
 - A heading that only mentions the word, and an indented heading.
-- The opt-out marker beside wrong claims.
+- The opt-out marker alone on a line: first, last and indented. Also the marker beside wrong
+  claims, and the marker after a byte-order mark.
 - The names `constructor` and `__proto__`.
 - A value with a leading zero or a plus sign.
 - A row with two cells, and a row with four cells.
 - A deeper heading inside the section, and two sections.
 - CRLF and CR line ends, and a repeated claim.
 
-The 3 documents with a different verdict come from two rules:
+The 6 documents with a different verdict come from three rules:
 
 1. A boolean claim in lower case or upper case (`false`, `FALSE`) against `circularDepsTruncated`.
    The Python tool compares the text with `False` and reports a mismatch. The engine ignores the
-   letter case of a boolean, and finds a match.
+   letter case of a boolean, and finds a match. This rule gives 2 documents.
 2. A byte-order mark before the first heading. The Python tool does not remove the mark, so it
    finds no Verification section and fails. The engine removes the mark and checks the claims.
+   This rule gives 1 document.
+3. The opt-out marker inside a line, not alone on it. The 3 documents quote the marker in an
+   inline code span, in a sentence and in a table cell. A stale claim follows the marker. The
+   Python tool tests `marker in text`, so it opts the document out and reads no claim. The engine
+   opts a document out only when a line, trimmed, equals the marker. The engine reads the table
+   and reports the stale claim.
 
-Of the 37 documents, every document that passes in the Python tool passes in the engine.
+The two tools differ in both directions:
+
+- In 3 documents (rules 1 and 2), the engine passes a document that the Python tool fails.
+- In 3 documents (rule 3), the engine fails a document that the Python tool passes. This
+  direction fails closed: the engine reports a stale claim that the Python tool never reads.
 
 The 12 folder and path cases are:
 
@@ -176,6 +187,11 @@ document states.
 - **Boolean letter case (deliberate).** The engine accepts any letter case. It prints the value
   in lower case.
 - **Byte-order mark (expected improvement).** The engine removes it. The Python tool fails.
+- **Marker alone on a line (deliberate, fail-closed).** The engine opts a document out when a
+  line, trimmed, equals the marker. The Python tool opts out when the marker is anywhere in the
+  text. A document can quote the marker in a sentence, a code span or a table cell. The engine
+  keeps the table of such a document, and a stale claim in that table fails. In the Python tool,
+  the same stale claim passes in silence. A blank `map.verificationMarker` matches no line.
 - **Root without a source file (deliberate).** The engine fails, because a graph of no file
   verifies nothing. The Python tool passes.
 - **Message text (expected improvement).** The messages of the engine show `<root>` and
@@ -192,3 +208,8 @@ one rule that no test locked.
 1. The namespace rule had no test. A test now locks it.
 2. The namespace rule and the comment rule were not in the list of deliberate differences. The
    list in section 14.4 of the design document and the `CHANGELOG.md` entry now state them.
+
+The method compares two tools, and two equal verdicts can both be wrong. The marker rule shows
+this. Both tools passed a stale claim that followed a quoted marker, so the verdicts were equal.
+The engine now opts out only for a marker alone on a line. The 3 documents of rule 3 measure
+the difference from the Python tool.

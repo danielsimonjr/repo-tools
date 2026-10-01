@@ -200,7 +200,9 @@ When a value drifts, the exit code is 1, and standard error lists every problem,
 OVERVIEW.md: totalFiles claims 243 but actual is 244
 ```
 
-A document passes without a check when it holds the line `<!-- repo-map:no-verification -->`.
+A document passes without a check when one of its lines is exactly
+`<!-- repo-map:no-verification -->`. The marker must stand alone on its line: a marker inside a
+sentence, a code span or a table cell does not count.
 `repo-tools map` writes that line at the top of each generated report. Every other gap is a
 failure. A missing docs folder, a folder with no `*.md` file, a document without a Verification
 section, and a section without a row are failures. An unknown claim name is a failure too. So is a

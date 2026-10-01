@@ -109,7 +109,7 @@ describe("parseClaims", () => {
   });
 
   test("a byte-order mark before the first heading does not hide it", () => {
-    const md = `﻿## Verification\n${TABLE}| a | 1 | s |\n`;
+    const md = `\uFEFF## Verification\n${TABLE}| a | 1 | s |\n`;
     expect(hasVerificationSection(md)).toBe(true);
   });
 

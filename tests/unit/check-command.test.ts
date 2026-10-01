@@ -8,6 +8,7 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { NO_VERIFICATION_MARKER } from "../../src/check/claims.ts";
 import { main } from "../../src/cli.ts";
+import { withBanner } from "../../src/depgraph/reporters/banner.ts";
 import { makeTempDir } from "./temp.ts";
 
 const made: string[] = [];
@@ -231,6 +232,28 @@ describe("repo-tools check: the opt-out marker", () => {
       "repo/arch/GENERATED.md":
         `${NO_VERIFICATION_MARKER}\n# Generated\n\n## Verification of the SHA-384 manifest\n\n` +
         "| File | Imports | Type |\n|---|---|---|\n| `./a.js` | `B` | Import |\n",
+    });
+    const r = await cli(["check", join(base, "repo"), "--docs=arch"]);
+    expect(r.err).toBe("");
+    expect(r.code).toBe(0);
+  });
+
+  test("a marker quoted in prose does not opt out: the stale claim fails", async () => {
+    const base = tree({
+      ...ONE,
+      "repo/arch/NOTES.md":
+        `The line ${NO_VERIFICATION_MARKER} opts a document out.\n\n` +
+        verification(["totalFiles", "99"]),
+    });
+    const r = await cli(["check", join(base, "repo"), "--docs=arch"]);
+    expect(r.code).toBe(1);
+    expect(r.err).toBe("NOTES.md: totalFiles claims 99 but actual is 1\n");
+  });
+
+  test("the banner that map writes still opts out: its marker stands alone on a line", async () => {
+    const base = tree({
+      ...ONE,
+      "repo/arch/REPORT.md": withBanner(verification(["totalFiles", "99"])),
     });
     const r = await cli(["check", join(base, "repo"), "--docs=arch"]);
     expect(r.err).toBe("");
