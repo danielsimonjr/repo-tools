@@ -4,6 +4,7 @@
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { resolveCandidates, resolvePath } from "../../src/depgraph/resolver.ts";
+import { TypeScriptResolver } from "../../src/map/resolvers.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -26,6 +27,18 @@ describe("F30: .tsx files and directory indexes", () => {
       "src/Z/index.tsx",
     ]);
     expect(resolveCandidates("x/a.ts", "../dist/b.js")).toEqual(["src/b.ts", "src/b.tsx"]);
+  });
+
+  test("the map resolver picks a .tsx file and a directory index", () => {
+    // `map` sets `dep.resolved` with this resolver, so `resolvePath` is only a fallback for
+    // an edge the map left open. The fix has to hold here as well.
+    const known = new Set(["src/Z/index.ts", "src/view.tsx", "src/W/index.tsx"]);
+    const resolver = new TypeScriptResolver();
+    expect(resolver.resolve("./Z", "src/a.ts", known)).toBe("src/Z/index.ts");
+    expect(resolver.resolve("./W", "src/a.ts", known)).toBe("src/W/index.tsx");
+    expect(resolver.resolve("./view", "src/a.ts", known)).toBe("src/view.tsx");
+    expect(resolver.resolve("./view.js", "src/a.ts", known)).toBe("src/view.tsx");
+    expect(resolver.resolve("./missing", "src/a.ts", known)).toBeNull();
   });
 
   test("an import of a directory lands on its index.ts", async () => {

@@ -9,16 +9,10 @@
  * folders are listed in code-unit order. The JSON text otherwise matches `json.dumps(indent=2)`:
  * every character above U+007F is written as a `\uXXXX` escape (`ensure_ascii`).
  */
-import {
-  type Dirent,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { type Dirent, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { computePublicSurface } from "../depgraph/analysis.ts";
+import { readdirHook } from "../depgraph/dirlist.ts";
 import { buildDuplicateReport, detectDuplicateSymbols } from "../depgraph/duplicates.ts";
 import { rootPackageEntries } from "../depgraph/roots.ts";
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
@@ -245,7 +239,7 @@ function csprojParts(root: string): string[][] {
   const go = (dir: string, parts: string[]): void => {
     let entries: Dirent[];
     try {
-      entries = readdirSync(dir, { withFileTypes: true });
+      entries = readdirHook.entries(dir);
     } catch {
       return;
     }
@@ -281,7 +275,8 @@ function csprojMap(root: string): [Map<string, string>, string[]] {
 /** The sub-folders of `dir`, in code-unit order. */
 function subdirs(dir: string): string[] {
   try {
-    return readdirSync(dir, { withFileTypes: true })
+    return readdirHook
+      .entries(dir)
       .filter(
         (e) => e.isDirectory() || (e.isSymbolicLink() && statSync(join(dir, e.name)).isDirectory()),
       )

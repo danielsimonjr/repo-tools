@@ -8,9 +8,10 @@
  * rule R4); `.csproj` files are found in code-unit order; a TOML parse-error message has the words
  * of the TOML parser in use.
  */
-import { type Dirent, readdirSync, readFileSync, statSync } from "node:fs";
+import { type Dirent, readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
+import { readdirHook } from "../depgraph/dirlist.ts";
 import { resolveWorkspaceSource, workspaceTarget } from "../depgraph/resolver.ts";
 import { configReferencedEntries, runtimeLaunchedEntries, selfPackage } from "../depgraph/roots.ts";
 import type { ParsedFile, WorkspacePackage } from "../depgraph/types.ts";
@@ -253,7 +254,7 @@ function rglobParts(root: string, suffix: string): string[][] {
   const go = (dir: string, parts: string[]): void => {
     let entries: Dirent[];
     try {
-      entries = readdirSync(dir, { withFileTypes: true });
+      entries = readdirHook.entries(dir);
     } catch {
       return;
     }

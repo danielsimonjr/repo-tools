@@ -93,7 +93,11 @@ describe("F17: classifier roots for unused and dormant files", () => {
     expect(result.code).toBe(0);
     const d = dispositions(result.report("file-inventory.json"));
     expect(d["packages/lib/src/legacy.ts"]).toBe("test-only");
+    // The package declares no entry, so `src/index.ts` is a root only through the fallback.
+    expect(d["packages/lib/src/index.ts"]).toBe("build-entry");
+    expect(d["packages/lib/src/tools.ts"]).toBe("reachable");
     const report = result.report("unused-analysis.md");
+    expect(section(report, "Files with no in-repo importer")).not.toContain("src/index.ts");
     expect(report).not.toContain("`testedOnly`");
     expect(section(report, "Dormant files: test-only")).toContain("`packages/lib/src/legacy.ts`");
   });

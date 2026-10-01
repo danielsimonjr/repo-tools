@@ -2,7 +2,7 @@
  * Fix M1: the single-package model. The inventory, the census self-check and the dormancy split
  * run in both modes. In single-package mode the root `package.json` `exports` subpaths and `bin`
  * targets are build roots. An orphan fails the run with `--strict-orphans` and gives a warning
- * without it. `--reachable-only` removes an unreachable file from the graph.
+ * without it. `--reachable-only` has no effect in 2.0.0, so `map` rejects it with exit 1.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
@@ -79,7 +79,7 @@ describe("M1: single-package inventory, census and dormancy", () => {
     expect(result.report("dependency-graph.json")).toContain('"src/orphan.ts"');
   });
 
-  test("single package: --strict-orphans fails; --reachable-only removes the orphan", async () => {
+  test("single package: --strict-orphans fails; --reachable-only is rejected", async () => {
     const root = singlePackage();
     const strict = await runDepgraph(root, ["--strict-orphans"]);
     expect(strict.code).toBe(1);

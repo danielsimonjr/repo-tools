@@ -10,6 +10,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { rmdirSync, symlinkSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
+import { detectWorkspaces } from "../../src/depgraph/workspaces.ts";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
@@ -100,6 +101,27 @@ describe("F34: link-safe walk", () => {
       };
       expect(inventory.skippedLinks).toEqual(["src/loop", "src/sibling"]);
       expect(result.report("dependency-graph.json")).not.toContain("foreign");
+    } finally {
+      removeLinks(made);
+    }
+  });
+
+  test("a workspace package folder that is a link is not read, even with a package.json", () => {
+    const root = makeTree({
+      "package.json": '{ "name": "ws", "private": true, "workspaces": ["packages/*"] }',
+      "packages/core/package.json": '{ "name": "@f34/core", "version": "1.0.0" }',
+      "packages/core/src/index.ts": "/** Entry. */\nexport const main = 1;\n",
+    });
+    // The target is another repository. Its package.json is valid, so only the link test
+    // keeps `@f34/foreign` out of the workspace map.
+    const foreign = makeTree({
+      "package.json": '{ "name": "@f34/foreign", "version": "1.0.0" }',
+      "src/index.ts": "/** Foreign. */\nexport const foreign = 1;\n",
+    });
+    const made: string[] = [];
+    try {
+      link(foreign, join(root, "packages/linked"), made);
+      expect([...detectWorkspaces(root).keys()]).toEqual(["@f34/core"]);
     } finally {
       removeLinks(made);
     }
