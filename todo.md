@@ -120,8 +120,27 @@
   `claims.ts` and `check-claims.test.ts`, and add a test that fails on any literal U+FEFF under
   `src/`, `tests/` or `scripts/`; (2) opt a document out only when a trimmed line equals the
   marker, with the divergence from `check.py` recorded in `docs/parity-check.md`.
-- [ ] Fix-ledger audit, after `check`: a script reverts each fix (F1 to F44, M1, R1) in a scratch
+- [x] Fix-ledger audit, after `check`: a script reverts each fix (F1 to F44, M1, R1) in a scratch
   worktree and records whether a `map` test fails. Each fix that no test catches gets a test.
+- [ ] Workflow comments: `.github/workflows/build.yml` line 4 ("design 11.3, 11.4") and `ci.yml`
+  line 90 ("design 11.4") name subsections that `docs/design.md` section 11 does not have. Add
+  the subsections (no release step, publish from the CI tarball after a hash check, no token in
+  CI) or point the comments at section 11. Add a check that fails on a dangling section
+  reference.
+- [ ] Dead code in `src/depgraph/analysis.ts`: `detectUnused`, `splitDormant`, `generateStatistics`
+  and `findReachableFiles` have no caller outside that file and the tests. Remove them with their
+  tests, or wire them in.
+- [ ] Single-package roots do not use the `./x` to `src/x.ts` or `src/x/index.ts` fallback of an
+  `exports` subpath whose target has no source. Workspace packages use it
+  (`exportsSubpathEntries`), and the public surface of a single package uses it
+  (`rootPackageEntries`). Compare with the 1.x and Python behavior before any change.
+- [ ] The F36 and F41 tests exercise one code path. Keep one, or give F41 a case that F36 does
+  not reach.
+- [ ] Tests that run the whole pipeline or spawn git lose the 5 s default deadline on this host
+  when other sessions and Defender load it. Two full runs lost 4 different tests
+  (`--check-duplicates`, the accept-list, R1 and one unnamed test), and each test passes alone.
+  Measure the time of the slowest tests. Give those tests an explicit deadline, or cut their
+  work. Do not widen the global deadline blind.
 
 ## 2.2.0: `repo-tools docs`
 

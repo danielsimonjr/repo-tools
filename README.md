@@ -269,6 +269,7 @@ the config key `query.out`, else from `map.out`, else from `docs/architecture`. 
 | `bun run smoke -- <command...>` | Runs the smoke test against one way to run the tool. |
 | `bun run privacy` | Runs the privacy check on the tracked files and the commit messages. |
 | `bun run hooks` | Installs the `commit-msg` hook that runs the privacy check on each message. |
+| `bun run audit:ledger` | Reverts each fix of `docs/fix-ledger-2.0.0.md` in a scratch copy and checks that a test of that fix fails. |
 
 ## Design
 

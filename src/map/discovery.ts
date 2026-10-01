@@ -10,8 +10,9 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { type Dirent, lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { type Dirent, lstatSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { readdirHook } from "../depgraph/dirlist.ts";
 import { pySplitlines } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
 
@@ -161,7 +162,7 @@ export function isReparsePoint(path: string): boolean {
 /** The folders and files of `dir`; empty when the folder cannot be read. */
 function entries(dir: string): Dirent[] {
   try {
-    return readdirSync(dir, { withFileTypes: true });
+    return readdirHook.entries(dir);
   } catch {
     return [];
   }

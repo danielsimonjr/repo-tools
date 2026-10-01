@@ -100,6 +100,10 @@ describe("F43: self-imports in single-package mode", () => {
     const d = dispositions(result.report("file-inventory.json"));
     expect(d["src/core.ts"]).toBe("build-entry");
     expect(d["src/cli.ts"]).toBe("build-entry");
+    // `main` is the only thing that names the package entry: the edge exists through it.
+    expect(cliEdges(result.report("dependency-graph.json"))).toEqual([
+      { file: "src/core.ts", imports: ["core"], typeOnly: false },
+    ]);
   });
 
   test("without exports and main: src/index.ts, then src/<sub>.ts or src/<sub>/index.ts", async () => {
@@ -121,6 +125,37 @@ describe("F43: self-imports in single-package mode", () => {
     expect(result.code).toBe(0);
     expect(result.stderr).not.toContain("orphaned source file");
     expect(result.stdout).toContain("Language: typescript; 4 source files; 1 roots");
+    // Each import lands on its file, including the folder index of the `util` subpath.
+    const edges = cliEdges(result.report("dependency-graph.json"));
+    expect(edges.map((e) => e.file).sort()).toEqual([
+      "src/index.ts",
+      "src/one.ts",
+      "src/util/index.ts",
+    ]);
+  });
+
+  test("a subpath whose target has no source falls back to src/<sub>.ts, then src/<sub>/index.ts", async () => {
+    const root = makeTree({
+      "package.json": '{ "name": "f43d", "private": true, "workspaces": ["packages/*"] }',
+      "packages/lib/package.json": JSON.stringify({
+        name: "@f43/lib",
+        version: "1.0.0",
+        exports: {
+          ".": "./dist/core.js",
+          "./util": "./dist/missing.js",
+          "./flat": "./dist/gone.js",
+        },
+      }),
+      "packages/lib/src/core.ts": CORE,
+      // Nothing imports these two files. Only the subpath fallback makes them build roots.
+      "packages/lib/src/util/index.ts": SUB,
+      "packages/lib/src/flat.ts": "/** Flat. */\nexport const flat = 1;\n",
+    });
+    const result = await runDepgraph(root);
+    expect(result.code).toBe(0);
+    const d = dispositions(result.report("file-inventory.json"));
+    expect(d["packages/lib/src/util/index.ts"]).toBe("build-entry");
+    expect(d["packages/lib/src/flat.ts"]).toBe("build-entry");
   });
 
   test("a monorepo does not treat its root package name as a self-import", async () => {

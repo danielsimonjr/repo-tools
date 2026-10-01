@@ -33,7 +33,8 @@
     "privacy": "bun scripts/privacy-check.ts",
     "build": "bun scripts/build.ts",
     "compile": "bun scripts/build.ts --compile",
-    "smoke": "bun scripts/smoke.ts"
+    "smoke": "bun scripts/smoke.ts",
+    "audit:ledger": "bun scripts/fix-ledger-audit.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",

@@ -6,6 +6,36 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- `bun run audit:ledger`, the audit of the fix ledger. For each fix (F1 to F44, M1 and R1), the
+  script restores the 1.x defect in a scratch copy of the repository. Then it runs the tests.
+  It runs the test file of the fix first, and then the whole suite. A test of the fix file must
+  fail. Each test has a 30 s limit (`--test-timeout-s`). A run in which only tests hit their
+  time limit is an error, because load can cause it.
+  The script exits 0 only when this holds for every mutation. Section 12 of
+  `docs/design.md` describes the audit. `scripts/fix-ledger-mutations.ts` holds the 77
+  mutations. `docs/fix-ledger-audit.md` holds the result: 77 of 77 mutations fail a test of
+  their own fix. The tests of the audit make their temporary repositories with a git identity
+  that the privacy check accepts.
+- Tests for the fixes that no test of their own locked. F12: the module map of
+  `dependency-layers.json`. F26: components sorted by smallest member. F30: the map resolver
+  picks a `.tsx` file and a directory index. F34: a workspace package folder that is a link.
+  F43: the `src/<sub>/index.ts` fallback of an `exports` subpath. The tests of F17, F41 and F43
+  assert more. They assert the `src/index.ts` fallback root, an excluded package that has an
+  entry, and the edges of a self-import.
+
+### Changed
+
+- The directory readers of the map engine read through `readdirHook`. The readers are discovery,
+  the two `.csproj` walks and the folder list of a workspace pattern. The F2 test replaces
+  `readdirHook`. Before, the map never called the reader that the F2 test reversed. The test
+  passed with or without the sort in discovery.
+- `docs/fix-ledger-2.0.0.md` describes what each test locks. The rows for F9 to F12, F19 to F21,
+  F23, F24, F27 and F29 to F31 described other behavior. The rows for F13, F36, F41 and F44 sat
+  in the section "No 2.0.0 meaning", although tests lock them. The test for M1 said that
+  `--reachable-only` removes a file. It asserts that `map` rejects the flag.
+
 ## [2.1.0] - 2026-10-01
 
 `repo-tools check` is the new drift gate for the Markdown documents of a repository. It ports

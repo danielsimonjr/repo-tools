@@ -24,6 +24,10 @@ describe("F41: negated workspace folders are outside the census", () => {
         "packages/core/package.json": JSON.stringify({ name: "@f41/core", version: "1.0.0" }),
         "packages/core/src/index.ts": "/** Entry. */\nexport const core = 1;\n",
         "packages/skip/package.json": JSON.stringify({ name: "@f41/skip", version: "1.0.0" }),
+        // The excluded package has a conventional entry. If detection kept the package, this
+        // entry would be a root and `old.ts` would be reachable, not an orphan.
+        "packages/skip/src/index.ts":
+          "/** Excluded entry. */\nimport { old } from './old.js';\nexport const skip = old;\n",
         "packages/skip/src/old.ts": "/** Excluded. */\nexport const old = 1;\n",
       });
       const result = await runDepgraph(root);

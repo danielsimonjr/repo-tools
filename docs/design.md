@@ -293,6 +293,18 @@ password) on the list. A secret must never be in the repository in any form.
 | No extensions in goldens | The golden runs use `--no-extensions`. A planted extension that throws proves it. |
 | Smoke test (`scripts/smoke.ts`) | On the product itself: `--version`, `--help`, an unknown subcommand, `depgraph` against the goldens, `--api-surface` against its golden, the `chunk` round trip, the `compress` JSON round trip, an extension with both hooks, and the `check` drift gate (a matching claim exits 0, a drifting claim exits 1), run from another folder. |
 | API-surface equivalence | `depgraph --api-surface` gives the same bytes as the generator that the module came from. |
+| Fix-ledger audit (`bun run audit:ledger`) | Each fix of `docs/fix-ledger-2.0.0.md` has a test that fails when the fix is reverted. |
+
+The fix-ledger audit reverts one fix at a time in a scratch copy of the repository. A shared git
+clone of the work tree, plus the uncommitted files, forms the copy. Each mutation of
+`scripts/fix-ledger-mutations.ts` is an exact text anchor and its replacement, and the anchor
+must occur once. The audit runs the unchanged copy first, and the suite must pass there. For each
+mutation, the audit runs the test file of the fix, and then the whole suite with `--bail=1`. A
+failure in the test file of the fix is `caught-by-own`. A failure in another test is
+`caught-elsewhere`, and no failure is `uncaught`. A run in which only tests hit their time limit
+is an `error`, because machine load can cause it. Both `caught-elsewhere` and `uncaught` need a
+test of the fix, so the exit code is 0 only when every mutation is `caught-by-own`. `docs/fix-ledger-audit.md` holds
+the result.
 
 The mini-repo fixture holds names whose case order differs from code-unit order (`B.ts`, `a.ts`,
 `_x.ts` and a folder `Z/`). A fixture with lowercase names only cannot find a missing sort.

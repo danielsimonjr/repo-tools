@@ -163,6 +163,21 @@ describe("F26: cycles by strongly connected component", () => {
     }
   });
 
+  test("components are sorted by smallest member, not in the order that the search ends them", () => {
+    // a1 <-> a2, and a2 imports z1 <-> z2. The search ends the z component first, because it
+    // is a sink. The report lists the a component first.
+    const found = detectCyclicComponents([
+      node("z2", ["z1"]),
+      node("z1", ["z2"]),
+      node("a2", ["a1", "z1"]),
+      node("a1", ["a2"]),
+    ]);
+    expect(found.runtime.map((c) => c.members)).toEqual([
+      ["src/a1.ts", "src/a2.ts"],
+      ["src/z1.ts", "src/z2.ts"],
+    ]);
+  });
+
   test("the result does not depend on the order of the files or of their edges", () => {
     const files = [
       node("a", ["b"], ["c"]),
