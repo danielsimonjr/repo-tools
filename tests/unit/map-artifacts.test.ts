@@ -774,6 +774,17 @@ describe("unused-analysis.json", () => {
     expect(data.noImporterFiles).not.toContain("src/a.ts");
   });
 
+  test("a namespace import statement is a namespace use, so the exports of its target are used", async () => {
+    const root = tmp({
+      "src/a.ts": "export function helper() { return 1; }\nexport const other = 2;\n",
+      "src/b.ts": "import * as a from './a';\nexport const x = a.helper();\n",
+    });
+    const data = read(emitUnusedAnalysis(await buildGraph(root), join(root, "out")));
+    expect(data.unreferencedAnywhere["src/a.ts"]).toBeUndefined();
+    expect(data.referencedInModule["src/a.ts"]).toBeUndefined();
+    expect(data.noImporterFiles).not.toContain("src/a.ts");
+  });
+
   test("a type-position import() that does not name an export still notes the referrer", async () => {
     const root = tmp({
       "src/a.ts": "export function helper() { return 1; }\nexport interface C { n: number }\n",

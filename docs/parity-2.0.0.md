@@ -49,7 +49,9 @@ The languages are TypeScript, Python (PITS-MRAS, auto-memory, fermat-mcp, memvid
 
 The table is the measurement of 2026-09-25 and 2026-09-26. It predates the `import()` decision
 below. A repository that contains a literal relative `import()` now differs from the Python tool
-on that edge. Do not read a row marked "identical" as a claim about that edge.
+on that edge. Do not read a row marked "identical" as a claim about that edge. The rows also
+predate the namespace rule and the comment rule. `docs/parity-check.md` gives the measurement
+of the current default branches.
 
 **Controls.** With the two workspace changes switched off, the four files of Mathts are identical
 to the Python tool. Before the Rust `use` fix, the four files of IronClaw were identical to the

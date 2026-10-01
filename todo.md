@@ -104,15 +104,18 @@
 
 ## 2.1.0: `repo-tools check`
 
-- [ ] Gate findings of the merged engine change, in one pull request: the test e-mail address, the
+- [x] Gate findings of the merged engine change, in one pull request: the test e-mail address, the
   three STE findings, and a privacy accept-list for history that no new commit can change. An entry
   names a full commit sha, one finding kind and one line, and it carries a reason. A stale entry
   fails the check.
-- [ ] `repo-tools check [root] --docs <dir>`: port `check.py` (claims parser, Verification section,
+- [x] `repo-tools check [root] --docs <dir>`: port `check.py` (claims parser, Verification section,
   metrics from the map engine, truncation and warning taint, the no-verification marker). Read the
   root and scan scope from the config file, as `map` does. A root-relative `../` `--out` is pinned
   by a test. Exit 0 when every claim matches, exit 1 with the problem list otherwise.
-- [ ] `check` parity record against `check.py` on public repositories, then a smoke step.
+- [x] `check` parity record against `check.py` on public repositories, then a smoke step.
+- [x] The namespace rule (`import * as ns` counts every export of its target as used) and the
+  comment rule (a name in a comment is not an in-module reference): the parity check found them
+  missing from section 14.4 of the design document. A test locks the namespace rule.
 - [ ] Fix-ledger audit, after `check`: a script reverts each fix (F1 to F44, M1, R1) in a scratch
   worktree and records whether a `map` test fails. Each fix that no test catches gets a test.
 

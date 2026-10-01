@@ -8,6 +8,18 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools check --docs=<dir>`, the drift gate of the architecture documents. The command is
+  a port of `check.py` of the architecture-docs skill. The check reads the `## Verification`
+  tables of the Markdown files in the folder. The check builds a fresh graph, and the check
+  compares each claim with the graph. Exit 0 means that every claim matched. Exit 1 lists every
+  problem on standard error, one per line. A missing or empty docs folder is a problem. A
+  document without a Verification section is a problem. So are a section without a row, an
+  unknown claim, a count that the graph build declared unreliable, and a value that differs. A document that
+  holds the line `<!-- repo-map:no-verification -->` opts out. A relative `--docs` path is
+  relative to the root, and an absolute path is used as given. The check reads
+  `map.duplicateAllowlist` and `map.verificationMarker` from the config file. Section 15 of
+  `docs/design.md` lists the differences from the Python tool. The smoke test has a `check` step.
+  `docs/parity-check.md` records the comparison with the Python tool on 11 repositories.
 - The privacy check has an accept-list, `scripts/privacy-accepted.txt`, for a reviewed finding in
   the commit history. A commit message cannot change after a merge, so a new commit cannot clear
   a finding in it. An entry holds a full commit sha, one finding kind, one line of the message and
@@ -22,6 +34,10 @@ All notable changes to this project are recorded in this file. The format follow
   that name. `typeof import()` records no names. A template that contains `${`, and a specifier
   that is not relative, are not edges. The parity record gives the merge rules. The verdict
   against the Python tool is `repo_map-wrong`.
+- A namespace import (`import * as ns`, `export * as ns`) counts every export of its target as
+  used, as a runtime `import()` does. The Python tool lists those exports as unused. A name that
+  a file mentions only in a comment is not an in-module reference. The Python tool counts the
+  comment. The parity record gives the measured effect. A test locks the namespace rule.
 - A bodiless `export function f(): T;` is not an export, as in the Python tool
   (`repo_map-kept`). An overload plus an implementation records the name once.
 - The 1.x depgraph pipeline is removed: the runner, the regex parser, the scanner, the inventory

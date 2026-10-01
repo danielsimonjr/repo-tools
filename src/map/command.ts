@@ -133,7 +133,7 @@ const SCAN_SCOPE_KEYS: Readonly<Record<string, string>> = {
 };
 
 /** True when `path` is an existing folder. */
-function isDirectory(path: string): boolean {
+export function isDirectory(path: string): boolean {
   try {
     return statSync(path).isDirectory();
   } catch {
@@ -178,7 +178,7 @@ export async function runMap(argv: string[], io: Io, command: MapCommand = "map"
 }
 
 /** Builds the graph; throws a plain error for an unreadable language or an empty repository. */
-async function graphOf(root: string): Promise<RepoGraph> {
+export async function graphOf(root: string): Promise<RepoGraph> {
   let graph: RepoGraph;
   try {
     graph = await buildGraph(root);

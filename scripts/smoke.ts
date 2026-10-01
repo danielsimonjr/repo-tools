@@ -8,7 +8,8 @@
  * an unknown subcommand, `map` on the mini-repo fixture against its goldens (13.3 step 2),
  * the API-surface report against its golden (13.3 step 3), the `chunk split` and `chunk merge`
  * round trip (13.3 step 4), a JSON round trip through `compress` and `compress -d` (13.3 step 5),
- * and a `map` run that loads the fixture extension (13.3 step 7), each in a temp folder.
+ * a `map` run that loads the fixture extension (13.3 step 7), and the drift gate: `check` passes
+ * a matching claim and fails a drifting one, each in a temp folder.
  */
 import {
   copyFileSync,
@@ -50,9 +51,9 @@ const STEPS: Step[] = [
     args: ["--help"],
     exit: 0,
     check: (out) =>
-      ["map", "depgraph", "chunk", "compress", "query"].every((s) => out.includes(s))
+      ["map", "depgraph", "check", "chunk", "compress", "query"].every((s) => out.includes(s))
         ? undefined
-        : "the help does not list map, depgraph, chunk, compress and query",
+        : "the help does not list map, depgraph, check, chunk, compress and query",
   },
   { name: "unknown subcommand", args: ["frobnicate"], exit: 1 },
 ];
@@ -214,6 +215,39 @@ function extensionHooks(command: string[]): string | undefined {
   });
 }
 
+/**
+ * The drift gate: `map` writes the reports of the mini-repo, then `check` reads a document that
+ * states the file total. A matching claim must exit 0, and a claim that is one too high must exit
+ * 1 with the drift line.
+ */
+function checkGate(command: string[]): string | undefined {
+  return inMiniRepo((root) => {
+    const made = map(command, root, GOLDEN_FLAGS);
+    if (made.exitCode !== 0) return `map: exit ${made.exitCode}`;
+    const graph = JSON.parse(
+      readFileSync(join(root, "docs/architecture/dependency-graph.json"), "utf8"),
+    ) as { metadata: { totalFiles: number } };
+    const total = graph.metadata.totalFiles;
+    const doc = join(root, "docs/architecture/CHECK.md");
+    const table = (value: number): string =>
+      `## Verification\n\n| Claim | Value | Source |\n|---|---|---|\n| totalFiles | ${value} | dependency-graph.json |\n`;
+    const check = () =>
+      Bun.spawnSync([...command, "check", `--root=${root}`, "--docs=docs/architecture"], {
+        cwd: join(root, ".."),
+      });
+    writeFileSync(doc, table(total));
+    const match = check();
+    if (match.exitCode !== 0) return `a matching claim: exit ${match.exitCode}, expected 0`;
+    writeFileSync(doc, table(total + 1));
+    const drift = check();
+    if (drift.exitCode !== 1) return `a drifting claim: exit ${drift.exitCode}, expected 1`;
+    const line = `CHECK.md: totalFiles claims ${total + 1} but actual is ${total}`;
+    return drift.stderr.toString().includes(line)
+      ? undefined
+      : `the drift line is missing from ${JSON.stringify(drift.stderr.toString())}`;
+  });
+}
+
 /** Checks that run a command more than once and check files. */
 const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined }[] = [
   { name: "map golden (13.3 step 2)", run: mapGolden },
@@ -221,6 +255,7 @@ const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined
   { name: "chunk round trip", run: chunkRoundTrip },
   { name: "compress JSON round trip", run: jsonRoundTrip },
   { name: "extension hooks (13.3 step 7)", run: extensionHooks },
+  { name: "check drift gate", run: checkGate },
 ];
 
 /** The number of checks that `smoke` runs. */

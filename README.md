@@ -6,6 +6,7 @@
 |---|---|
 | `map` | Writes the dependency graph and the architecture reports of a TypeScript/JavaScript, Python, C# or Rust repository. |
 | `depgraph` | The deprecated alias of `map` (through 2.x). |
+| `check` | Checks the `## Verification` tables of Markdown documents against a fresh graph, and fails on drift. |
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 | `query` | Answers structural questions from the graph of `map`, and writes two derived reports. |
@@ -13,9 +14,9 @@
 
 Status: version 2.0.0.
 
-- `map` and `query` read their settings from `repo-tools.config.json` in the root. The section
-  of `map` is `map` (its old name, `depgraph`, is also read). `--config=<file>` makes either
-  subcommand read another file.
+- `map`, `check` and `query` read their settings from `repo-tools.config.json` in the root. The
+  section of `map` is `map` (its old name, `depgraph`, is also read). `--config=<file>` makes any
+  of the three read another file.
 - `repo-tools depgraph` prints one deprecation line and runs `map`. It accepts the 1.x
   scan-scope flags (`--src`, `--tests`, `--exclude`, `--also-exclude`, `--all`,
   `--reachable-only`, `--include-tests`) with a warning, because they have no effect in 2.0.0.
@@ -171,6 +172,41 @@ depgraph 1.x.
 |---|---|
 | `dependency-reverse.json` | Which files import each file? The reverse edges of the graph. |
 | `node-safety.json` | Which packages are browser-safe, which files import a `node:` builtin, and which of those files does the `.` entry of each browser-safe package reach? |
+
+## Check the documents against the graph
+
+`repo-tools check --docs=<dir>` reads every `*.md` file of the folder. The check reads the
+`## Verification` table of each document. Each row `| claim | value | source |` names a metric of
+the graph (`totalFiles`, `orphanedFiles`, `runtimeCircularDeps` and so on). The value is the
+number that the document states. The check builds the graph again, so a stale report cannot hide
+drift. A relative `--docs` path is relative to the root.
+
+```md
+## Verification
+
+| Claim | Value | Source |
+|---|---|---|
+| totalFiles | 243 | file-inventory.json |
+```
+
+```sh
+repo-tools check --docs=docs/architecture
+# check passed: every claim matches the graph (1 claim in 1 document).
+```
+
+When a value drifts, the exit code is 1, and standard error lists every problem, one per line:
+
+```text
+OVERVIEW.md: totalFiles claims 243 but actual is 244
+```
+
+A document passes without a check when it holds the line `<!-- repo-map:no-verification -->`.
+`repo-tools map` writes that line at the top of each generated report. Every other gap is a
+failure. A missing docs folder, a folder with no `*.md` file, a document without a Verification
+section, and a section without a row are failures. An unknown claim name is a failure too. So is a
+metric that the graph build declared unreliable. `docs/design.md` (section 15) gives the rules and the
+differences from the Python tool. `docs/parity-check.md` records the comparison with that tool on
+11 repositories.
 
 ## Query the graph
 

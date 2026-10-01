@@ -9,6 +9,7 @@ product. The text follows ASD-STE100 Simplified Technical English.
 
 Sections 1 to 13 describe version 1. Section 14 describes the 2.0.0 engine (`repo-tools map`),
 which replaces the `depgraph` pipeline. Where the two differ, section 14 applies to 2.0.0.
+Section 15 describes `repo-tools check`, the drift gate of the architecture documents.
 
 ## 1. Purpose
 
@@ -74,6 +75,7 @@ call `src/cli.ts`.
 | `src/depgraph/api-surface.ts` | The per-export facts report (`--api-surface`). |
 | `src/depgraph/extensions.ts` | Loads the repository-local extensions and runs their hooks. |
 | `src/depgraph/reporters/*` | One module per report file, and the generated-file banner. |
+| `src/check/*` | `repo-tools check`: the claims parser, the metrics of a fresh graph, the verdict and the command (section 15). |
 | `src/query/*` | Reads the `map` reports and answers each query. `safety.ts` holds the browser-safety check. |
 | `src/chunk/*` | The `split`, `merge` and `status` actions, one splitter per file type, and the manifest. |
 | `src/compress/*` | One compressor per format, the legend, and the JSON restore. |
@@ -289,7 +291,7 @@ password) on the list. A secret must never be in the repository in any form.
 | Golden tests | Each report of each fixture equals its committed golden file, byte for byte. |
 | Double run | Each golden set runs twice. The second run must be byte-identical to the first. |
 | No extensions in goldens | The golden runs use `--no-extensions`. A planted extension that throws proves it. |
-| Smoke test (`scripts/smoke.ts`) | On the product itself: `--version`, `--help`, an unknown subcommand, `depgraph` against the goldens, `--api-surface` against its golden, the `chunk` round trip, the `compress` JSON round trip, and an extension with both hooks, run from another folder. |
+| Smoke test (`scripts/smoke.ts`) | On the product itself: `--version`, `--help`, an unknown subcommand, `depgraph` against the goldens, `--api-surface` against its golden, the `chunk` round trip, the `compress` JSON round trip, an extension with both hooks, and the `check` drift gate (a matching claim exits 0, a drifting claim exits 1), run from another folder. |
 | API-surface equivalence | `depgraph --api-surface` gives the same bytes as the generator that the module came from. |
 
 The mini-repo fixture holds names whose case order differs from code-unit order (`B.ts`, `a.ts`,
@@ -360,6 +362,12 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
   namespace use (`*`). A type-position `import('./c').Name` records that name. `typeof import()`
   records no names. A template that contains `${`, and a specifier that is not relative, are not
   edges. The parity record gives the merge rules and the verdict `repo_map-wrong`.
+- A namespace import (`import * as ns`, `export * as ns`) is a namespace use. It counts every
+  export of the target file as used, as a runtime `import()` does. The Python tool lists those
+  exports as unused. The parity record gives the verdict `repo_map-wrong`.
+- A name that a file mentions only in a comment is not an in-module reference. The count reads
+  the source with the comments removed. The Python tool counts the comment, so the name is
+  "referenced in module" there and "unreferenced anywhere" here.
 - A bodiless `export function f(): T;` is not an export. The Python tool does the same
   (`repo_map-kept`). An overload plus an implementation records the name once.
 
@@ -387,3 +395,92 @@ The Node bundle needs the three tree-sitter `.wasm` files. The build writes them
 `dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
 system. A relative asset path resolves against the URL of its module, never against the working
 folder.
+
+## 15. The check subcommand
+
+`repo-tools check` is the drift gate of the architecture documents. The command is a port of
+`check.py` of the architecture-docs skill. The check reads the `## Verification` tables of the
+Markdown files in a folder. The check builds a fresh graph of the repository, and the check
+compares each claim with the graph. A stale report on disk cannot hide drift, because the check
+never reads one.
+
+### 15.1 The command
+
+`repo-tools check [root] --docs=<dir> [--config=<file>]`
+
+- The root is the first argument that is not a flag, or `--root=<path>`. The default is the
+  current folder.
+- `--docs` is required. A relative path is relative to the root and can start with `../`. An
+  absolute path is used as given, so a staged document set outside the repository can pass the
+  gate before it is installed. Standard error shows the folder as `<root>/<path>`, or as
+  `<docs>` when the path is absolute.
+- The check reads the files of the docs folder that end in `.md` (any letter case), without a
+  sub-folder, in code-unit order. A document is UTF-8. A byte that is not valid UTF-8 stops the run with a
+  message.
+- The check loads the config file as `map` does. The check uses two keys of the `map` section:
+  `duplicateAllowlist` and `verificationMarker`. The allowlist defaults to
+  `docs/architecture/duplicate-allowlist.json` and never comes from the docs folder. The check
+  writes nothing in the repository. The four core reports go into a scratch folder, and the
+  check removes that folder before the check returns.
+
+### 15.2 What a claim is
+
+A claim is a row `| name | value | source |` of a table inside a Verification section. The heading
+must be "Verification", with an optional colon and an optional trailing parenthesis. A heading
+that only contains the word does not open a section. The section ends at the next heading of the
+same level or a shallower level. A table outside a section is not a claim. The header row and the
+separator rows are not claims.
+
+The claim names are the scalar entries of five sources. A later source replaces an earlier
+source on a shared name. The order is: `metadata` and `statistics` of `dependency-graph.json`,
+`totalFiles` of `file-inventory.json`, and `summary` of `duplicate-symbols.json` and
+`unused-analysis.json`. A table value, such as the tag counts of the
+duplicate summary, is not a metric. A claim that names one is an unknown claim.
+
+### 15.3 What the check reports
+
+Every failure mode is a problem line on standard error, and the exit code is 1. An empty problem
+list means "checked, and every claim matched". It never means "found nothing to check".
+
+| Case | Problem |
+|---|---|
+| The docs folder is missing, or holds no `.md` file | A message that stops the run. |
+| A document without a Verification section | A problem that names the opt-out marker. |
+| A section without a parseable row | A problem with other words than the previous case. |
+| A claim that names no metric | `unknown claim`. The check never skips it. |
+| A cycle count, when the cycle enumeration was truncated | The claim cannot be verified. The count is a floor. |
+| A reachability metric, when the build found no entry-point root | The claim cannot be verified. The metric is an artifact of the missing roots. |
+| A value that differs from the graph | `claims A but actual is B`. |
+
+The reachability metrics are `orphanedFiles`, `reachableFiles`, `dormantFiles`,
+`testOnlyFiles`, `entryRoots` and `noImporterFileCount`. `unusedExportsCount` is not in the set,
+because it counts import edges and never reads the roots. A warning of another kind taints no
+metric. A package-derivation warning, for example, only changes the package of a file.
+
+A drift line for `orphanedFiles`, `unusedExportsCount`, `unusedExportCount`, `dormantFiles`,
+`testOnlyFiles`, `unreferencedAnywhereCount` or `noImporterFileCount` ends with a note: the count
+is not a deletion list. A file that only a dynamic `import()` with a computed path loads is live,
+and it still counts.
+
+The check skips a document that holds the opt-out marker. The check looks for the marker first,
+before the sections. So the marker wins over a heading that looks like a Verification heading. `repo-tools map` writes the marker at the top of each generated report. The marker is
+`<!-- repo-map:no-verification -->`, and the config key `map.verificationMarker` adds a second
+line of this kind.
+
+On success the check prints one line on standard output.
+
+### 15.4 Differences from the Python tool
+
+| Topic | Python tool | `repo-tools check` |
+|---|---|---|
+| Success | No output. | One line on standard output. |
+| Docs flag | `--docs DIR`. | `--docs=<dir>`, as every flag of this tool. |
+| Boolean metric | The document states `True` or `False`. | The document can state the value in any letter case. A drift line shows `true` or `false`. |
+| Table values | None exist. | A table value is not a metric (section 15.2). |
+| Dead-looking note | Not on `unusedExportCount`. | On `unusedExportCount` too. |
+| Opt-out marker | One fixed line. | The fixed line, and the line of `map.verificationMarker`. |
+| Repository without a source file | A graph of zero files. | Exit 1 with the message of `map`. |
+| Error text | Wraps only `OSError`, `ValueError` and `TypeError`. | Every error is a message with exit 1, and no stack trace. |
+| Line breaks | `splitlines` also splits on form feed, vertical tab and U+2028. | A line break is CRLF, LF or CR. |
+| File names | `glob("*.md")` is case-insensitive on Windows only. | The ending `.md` matches in any letter case on every system, so no file is skipped silently. |
+| Byte-order mark | Stays in the first line, and hides a heading there. | Removed. |
