@@ -36,6 +36,18 @@ All notable changes to this project are recorded in this file. The format follow
   in the section "No 2.0.0 meaning", although tests lock them. The test for M1 said that
   `--reachable-only` removes a file. It asserts that `map` rejects the flag.
 
+### Maintenance
+
+- The root `bun` Dependabot entry is removed from `.github/dependabot.yml`. It cannot succeed:
+  Dependabot's bundled bun reads `bun.lock` lockfileVersion 1 and Bun 1.4 writes 2, and the
+  `npm` alternative aborts during file fetching on a bun-managed project. Each error recommends
+  the other. Measured here: the `bun in /.` updater job failed on 2026-09-24 and again on
+  2026-10-01, while `github_actions in /.` succeeded on both days. `github-actions` updates are
+  unchanged. The file now records the two errors, the cost and a checkable revisit condition.
+  **Unlike the sibling repositories in this sweep, this one also has Dependabot alerts
+  disabled**, so nothing reports a vulnerable dependency either; a bump is entirely a human
+  action (`bun outdated`, `bun update <pkg>`, commit the regenerated `bun.lock`).
+
 ## [2.1.0] - 2026-10-01
 
 `repo-tools check` is the new drift gate for the Markdown documents of a repository. It ports
