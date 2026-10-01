@@ -6,6 +6,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-01
+
+`repo-tools check` is the new drift gate for the Markdown documents of a repository. It ports
+`check.py` of the architecture-docs skill. The release also makes a literal `import()` a graph
+edge, removes the 1.x depgraph pipeline, and adds an accept-list to the privacy check.
+`docs/parity-check.md` lists the differences from the Python tool.
+
 ### Added
 
 - `repo-tools check --docs=<dir>`, the drift gate of the architecture documents. The command is
