@@ -237,16 +237,7 @@ describe("the ledger and the catalog", () => {
 describe("copyRepository", () => {
   const git = (cwd: string, ...args: string[]): string => {
     const run = Bun.spawnSync(
-      [
-        "git",
-        "-c",
-        "user.name=t",
-        "-c",
-        "user.email=t@example.com",
-        "-c",
-        "core.autocrlf=false",
-        ...args,
-      ],
+      ["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c", "core.autocrlf=false", ...args],
       { cwd },
     );
     if (run.exitCode !== 0) throw new Error(`git ${args.join(" ")}: ${run.stderr.toString()}`);

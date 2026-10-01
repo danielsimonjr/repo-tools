@@ -16,7 +16,8 @@ All notable changes to this project are recorded in this file. The format follow
   The script exits 0 only when this holds for every mutation. Section 12 of
   `docs/design.md` describes the audit. `scripts/fix-ledger-mutations.ts` holds the 77
   mutations. `docs/fix-ledger-audit.md` holds the result: 77 of 77 mutations fail a test of
-  their own fix.
+  their own fix. The tests of the audit make their temporary repositories with a git identity
+  that the privacy check accepts.
 - Tests for the fixes that no test of their own locked. F12: the module map of
   `dependency-layers.json`. F26: components sorted by smallest member. F30: the map resolver
   picks a `.tsx` file and a directory index. F34: a workspace package folder that is a link.
