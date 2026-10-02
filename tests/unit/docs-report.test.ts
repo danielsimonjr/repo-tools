@@ -13,6 +13,7 @@ function symbol(name: string, over: Partial<DocSymbol> = {}): DocSymbol {
     file: "a.ts",
     line: 1,
     anchorLine: 1,
+    anchorColumn: 0,
     name,
     kind: "function",
     exported: true,

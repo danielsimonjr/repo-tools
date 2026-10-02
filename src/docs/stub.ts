@@ -41,28 +41,69 @@ export function splitLines(text: string): string[] {
 
 const indentOf = (line: string): string => line.slice(0, line.length - pyLstrip(line).length);
 
-const count = (line: string, ch: string): number => line.split(ch).length - 1;
+const OPENERS = "([{";
+const CLOSERS = ")]}";
+
+/**
+ * The code of one line: a string literal and a comment are left out. `open` is the delimiter of a
+ * triple-quoted string that is still open from the line above, or an empty string. A bracket in a
+ * string, or a `#` comment after the colon, must not change where a signature ends.
+ */
+function codeOf(line: string, open: string): { code: string; open: string } {
+  let code = "";
+  let string = open;
+  let i = 0;
+  while (i < line.length) {
+    const ch = line.charAt(i);
+    if (string !== "") {
+      if (ch === "\\") i += 2;
+      else if (line.startsWith(string, i)) {
+        i += string.length;
+        string = "";
+      } else i += 1;
+    } else if (ch === "#") {
+      break;
+    } else if (ch === '"' || ch === "'") {
+      string = line.startsWith(ch.repeat(3), i) ? ch.repeat(3) : ch;
+      i += string.length;
+    } else {
+      code += ch;
+      i += 1;
+    }
+  }
+  // Only a triple-quoted string goes on to the next line.
+  return { code, open: string.length === 3 ? string : "" };
+}
+
+/**
+ * The 0-based index of the line that ends the signature that starts at `start`: the first line at
+ * bracket depth zero whose code ends with a colon. A signature can span lines, so the code counts
+ * the depth of the brackets and does not assume one line. It returns `start` when it finds none.
+ */
+function headerEnd(lines: string[], start: number): number {
+  let depth = 0;
+  let open = "";
+  for (let i = start; i < Math.min(lines.length, start + 60); i++) {
+    const line = codeOf(lines[i] ?? "", open);
+    open = line.open;
+    for (const ch of line.code) {
+      if (OPENERS.includes(ch)) depth += 1;
+      else if (CLOSERS.includes(ch)) depth -= 1;
+    }
+    if (depth <= 0 && line.code.trimEnd().endsWith(":")) return i;
+  }
+  return start;
+}
 
 /**
  * Returns the insertion that documents `sym`, or null when `sym` has a doc. The Python docstring
- * goes inside the body, on the line after the `def`. A signature can span lines, so the insertion
- * point is the line after the one that ends the signature. The code finds it by the depth of the
- * round brackets, not by an assumption that the signature has one line.
+ * goes inside the body, on the line after the end of the signature.
  */
 export function planPython(sym: DocSymbol, lines: string[]): Insertion | null {
   if (sym.hasDoc) return null;
   const start = sym.line - 1;
   if (start >= lines.length) return null;
-  let depth = 0;
-  let end = start;
-  for (let i = start; i < Math.min(lines.length, start + 60); i++) {
-    const line = lines[i] ?? "";
-    depth += count(line, "(") - count(line, ")");
-    if (depth <= 0 && line.trimEnd().endsWith(":")) {
-      end = i;
-      break;
-    }
-  }
+  const end = headerEnd(lines, start);
   const body = `${indentOf(lines[end] ?? "")}    `;
   const out = [`${body}"""${STUB_MARKER} state what this does, in one active-voice sentence.`];
   if (sym.params.length > 0 || sym.kind === "function") out.push("");
@@ -79,6 +120,17 @@ export function planPython(sym: DocSymbol, lines: string[]): Insertion | null {
   }
   out.push(`${body}"""`);
   return { lineIndex: end + 1, text: `${out.join("\n")}\n`, symbol: sym.name };
+}
+
+/**
+ * True when only white space precedes the anchor of `sym` on its line. `planTypeScript` writes the
+ * block above that line. If a token comes first (the end of a template or of a comment, or another
+ * declaration), the line start is not a safe place: the block could land inside a string, or above
+ * the wrong declaration.
+ */
+export function startsItsLine(sym: DocSymbol, lines: string[]): boolean {
+  const line = lines[sym.anchorLine - 1] ?? "";
+  return line.slice(0, sym.anchorColumn).trim() === "";
 }
 
 /**

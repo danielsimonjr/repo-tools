@@ -9,8 +9,8 @@
  *
  * Standard error shows the root as `<root>`.
  */
-import { readFileSync, writeFileSync } from "node:fs";
-import { basename, isAbsolute, join, relative, resolve } from "node:path";
+import { lstatSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { wantsHelp } from "../depgraph/args.ts";
 import { maskRoot, toPosix } from "../depgraph/paths.ts";
 import type { Io } from "../io-types.ts";
@@ -20,7 +20,14 @@ import { CONFIG_NAME, languageOf } from "./discovery.ts";
 import { type FileReport, isParsed } from "./model.ts";
 import { parsesAsPython } from "./python.ts";
 import { pctText, summarise, writeOutputs } from "./report.ts";
-import { applyInsertions, type Insertion, planPython, planTypeScript, splitLines } from "./stub.ts";
+import {
+  applyInsertions,
+  type Insertion,
+  planPython,
+  planTypeScript,
+  splitLines,
+  startsItsLine,
+} from "./stub.ts";
 import { parsesAsTypeScript } from "./typescript.ts";
 
 /** The help text of `repo-tools docs`. */
@@ -173,14 +180,72 @@ function parseDocsArgs(argv: readonly string[]): DocsOptions {
   return options;
 }
 
-/** A path of the repository as `scope` and `stub` compare it: POSIX, relative to the root. */
+/**
+ * A path of the repository as `scope` and `stub` compare it: POSIX, relative to the root. The root
+ * itself is the empty string.
+ */
 function relativeToRoot(root: string, path: string): string {
   let q = toPosix(path);
   if (isAbsolute(path)) {
     const rel = toPosix(relative(root, path));
-    if (rel !== "" && !rel.startsWith("..") && !isAbsolute(rel)) q = rel;
+    if (rel !== ".." && !rel.startsWith("../") && !isAbsolute(rel)) q = rel;
   }
   return q.replace(/^(\.\/)+/, "");
+}
+
+/** True when `file` is a link, or resolves outside `root`. A write to it would leave the repository. */
+function leavesRoot(root: string, file: string): boolean {
+  try {
+    if (lstatSync(file).isSymbolicLink()) return true;
+    const rel = relative(realpathSync.native(root), realpathSync.native(file));
+    return rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel);
+  } catch {
+    // A file that cannot be resolved is not a file to write.
+    return true;
+  }
+}
+
+/** The single-character escapes of a quoted name, as git writes them. */
+const GIT_ESCAPES: Readonly<Record<string, number>> = {
+  a: 7,
+  b: 8,
+  t: 9,
+  n: 10,
+  v: 11,
+  f: 12,
+  r: 13,
+  '"': 34,
+  "\\": 92,
+};
+
+/**
+ * Returns the name that a line of `git diff --name-only` stands for. Git puts a name in double
+ * quotes when it holds a control character, a quote, a backslash or (by default) a non-ASCII
+ * character, for example `"src/caf\303\251.ts"`. The escapes are the C escapes and three-digit
+ * octal bytes, and the bytes are UTF-8. A line with no quotes is the name itself.
+ */
+export function unquoteGitPath(line: string): string {
+  if (line.length < 2 || !line.startsWith('"') || !line.endsWith('"')) return line;
+  const chars = Array.from(line.slice(1, -1));
+  const encoder = new TextEncoder();
+  const bytes: number[] = [];
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i] ?? "";
+    const octal = chars.slice(i + 1, i + 4).join("");
+    const single = GIT_ESCAPES[chars[i + 1] ?? ""];
+    if (ch !== "\\") {
+      bytes.push(...encoder.encode(ch));
+    } else if (/^[0-7]{3}$/.test(octal)) {
+      bytes.push(Number.parseInt(octal, 8));
+      i += 3;
+    } else if (single !== undefined) {
+      bytes.push(single);
+      i += 1;
+    } else {
+      bytes.push(...encoder.encode(ch));
+    }
+  }
+  return new TextDecoder().decode(Uint8Array.from(bytes));
 }
 
 /** The form of a path in a message: `<root>/<rel>` below the root, the absolute path otherwise. */
@@ -232,9 +297,15 @@ function inScope(report: FileReport, scope: string): boolean {
 /** `stub`: plans the skeleton comments, and writes them only with `--apply`. */
 async function runStub(root: string, options: DocsOptions, io: Io): Promise<number> {
   const analysis = await analyseRepo(root);
-  const scope = options.path === undefined ? undefined : relativeToRoot(root, options.path);
+  // The check comes before the `--path` filter: a root with no source is a failure, as in `scan`.
+  if (analysis.reports.length === 0) throw new NothingToMeasure(analysis.provenance);
+  const scope =
+    options.path === undefined ? undefined : relativeToRoot(root, options.path).replace(/\/+$/, "");
+  // A path that names the root (`.`, `./`, or the root itself) selects every file.
   const reports =
-    scope === undefined ? analysis.reports : analysis.reports.filter((r) => inScope(r, scope));
+    scope === undefined || scope === "" || scope === "."
+      ? analysis.reports
+      : analysis.reports.filter((r) => inScope(r, scope));
   let planned = 0;
   let changed = 0;
   for (const report of reports) {
@@ -245,14 +316,33 @@ async function runStub(root: string, options: DocsOptions, io: Io): Promise<numb
     const targets = report.symbols.filter((s) => s.issues.some((i) => i.rule === "M1"));
     if (targets.length === 0) continue;
     const file = join(root, report.path);
+    // Discovery lists a tracked link as a file. A write follows the link, so it could change a
+    // file outside the repository. The dry run names the link too, so both modes say the same.
+    if (leavesRoot(root, file)) {
+      io.stdout(`  SKIPPED ${report.path}: the path is a link, or it resolves outside the root\n`);
+      continue;
+    }
     const raw = readFileSync(file, "utf8");
     if (/\r(?!\n)/.test(raw)) {
       io.stdout(`  SKIPPED ${report.path}: the file holds a carriage return with no line feed\n`);
       continue;
     }
     const lines = splitLines(raw);
-    const plan = report.language === "python" ? planPython : planTypeScript;
-    const insertions = targets.map((s) => plan(s, lines)).filter((i): i is Insertion => i !== null);
+    const python = report.language === "python";
+    const insertions: Insertion[] = [];
+    for (const symbol of targets) {
+      // A TypeScript block goes above the line of the declaration. A token before the declaration
+      // on that line (the end of a template, a second declaration) makes that place unsafe.
+      if (!python && !startsItsLine(symbol, lines)) {
+        io.stdout(
+          `  cannot place a stub for ${report.path}:${symbol.anchorLine} ${symbol.name}: ` +
+            "another token precedes the declaration on its line\n",
+        );
+        continue;
+      }
+      const insertion = (python ? planPython : planTypeScript)(symbol, lines);
+      if (insertion !== null) insertions.push(insertion);
+    }
     planned += insertions.length;
     if (!options.apply) {
       for (const ins of insertions) {
@@ -292,7 +382,8 @@ function requestedPaths(root: string, options: DocsOptions): string[] | undefine
     raw = text
       .split(/\r\n|\r|\n/)
       .map((l) => l.trim())
-      .filter((l) => l !== "");
+      .filter((l) => l !== "")
+      .map(unquoteGitPath);
   }
   return raw?.map((p) => relativeToRoot(root, p));
 }

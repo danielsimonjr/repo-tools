@@ -30,6 +30,18 @@ design document.
   record lists the differences. Two are defects of the Python tool: a closing `*/` in the
   summary, and comment delimiters in the STE check. The others are the parser of Python, the
   exit codes, and the files that `stub` changes.
+- `repo-tools docs stub` never writes through a link. The command skips a file that is a link or
+  resolves outside the root, and names the file. The command does not write a TypeScript block
+  when another token precedes the declaration on its line, for example the end of a template. The
+  end of a Python signature ignores the brackets in strings and a comment after the colon. A root
+  with no source file gives exit code 1, as for `scan` and `check`. `--path=.` selects the whole
+  repository.
+- `docs check --paths-from` reads the quoted names that `git diff --name-only` writes for a
+  non-ASCII file name. The analysers read a JSDoc parameter name with `$`, and the optional forms
+  `[name]` and `[name=default]`. They read a reST field with a type, for example
+  `:param int x:`. A destructured parameter binds the names on the left of a default value. The
+  analysers read each name from the source as written, so a parameter named `abstract` keeps its
+  name. The Python tool has each of these defects, and design section 16.6 lists them.
 - The smoke test has a step for the doc gate. A run of `docs check` reads a TypeScript, a TSX and
   a Python file, so one run loads the three grammars of the product. The test passes documented
   source and fails a new undocumented export.

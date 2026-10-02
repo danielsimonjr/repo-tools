@@ -15,12 +15,16 @@ import { applyRules } from "./rules.ts";
 
 const GOOGLE = new RegExp(`^${S}*(Args|Arguments|Returns|Raises|Yields):${S}*$`, "mu");
 const NUMPY = new RegExp(`^${S}*Parameters${S}*\\n${S}*-{3,}${S}*$`, "mu");
-const REST = new RegExp(`^${S}*:param${S}+${W}+:`, "mu");
+// A reST field may name a type before the name: `:param int x:` or `:param Dict[str, int] x:`. The
+// optional group takes the type and the space after it, so the name is the last word before the
+// colon. The type cannot hold a colon, so the first colon of the line ends the field.
+const REST_TYPE = `(?:[^:\\n]*${S})?`;
+const REST = new RegExp(`^${S}*:param${S}+${REST_TYPE}\\*{0,2}${W}+${S}*:`, "mu");
 
 // The optional "(type)" group does not capture, so each match yields the name alone.
 const GOOGLE_PARAM = new RegExp(`^${S}{1,8}(\\*{0,2}${W}+)${S}*(?:\\([^)]*\\))?${S}*:`, "gmu");
 const NUMPY_PARAM = new RegExp(`^${S}*(\\*{0,2}${W}+)${S}*:${S}*${NON_SPACE}`, "gmu");
-const REST_PARAM = new RegExp(`^${S}*:param${S}+(\\*{0,2}${W}+)${S}*:`, "gmu");
+const REST_PARAM = new RegExp(`^${S}*:param${S}+${REST_TYPE}(\\*{0,2}${W}+)${S}*:`, "gmu");
 
 /** The section headers that end an `Args` or `Parameters` block. */
 const SECTION_HEADERS = new Set([
@@ -428,6 +432,7 @@ export async function analysePython(path: string, source: string): Promise<FileR
         file: path,
         line,
         anchorLine: line,
+        anchorColumn: 0,
         name,
         kind: isClass ? "class" : "function",
         exported: isExported(name, moduleAll),

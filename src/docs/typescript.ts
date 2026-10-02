@@ -12,15 +12,22 @@
  */
 import type { Node } from "web-tree-sitter";
 import { type GrammarName, loadGrammar, parserFor } from "../map/grammars.ts";
-import { B, NON_SPACE, pySplitlines, pyStrip, S, W } from "../py.ts";
+import { B, NON_SPACE, pySplitlines, pyStrip, S } from "../py.ts";
 import { proseOf } from "../ste/prose.ts";
 import { type DocSymbol, type FileReport, type Kind, newReport } from "./model.ts";
 import { applyRules } from "./rules.ts";
 
+// A JavaScript name may hold `$`, and JSDoc writes an optional parameter in brackets: `[name]` or
+// `[name=default]`. The name is the part after the bracket.
+const NAME = "[\\p{L}\\p{N}_$]";
+
 // The type in `@param {T} name` is optional, and the group `(?:\{...\}\s*)?` matches only when the
 // braces exist. A looser form ate the name itself in `@param alpha - text`, and every untyped
 // parameter was then compared with its own last letter.
-const TSDOC_PARAM = new RegExp(`^${S}*\\*?${S}*@param${S}+(?:\\{[^}]*\\}${S}*)?(${W}+)`, "gmu");
+const TSDOC_PARAM = new RegExp(
+  `^${S}*\\*?${S}*@param${S}+(?:\\{[^}]*\\}${S}*)?\\[?(${NAME}+)`,
+  "gmu",
+);
 const JSDOC_TYPED_PARAM = new RegExp(`@param${S}+\\{[^}]+\\}`, "u");
 
 // The evidence of a dialect. JSDoc puts a `{type}` after a tag, and TSDoc never does. A comment with
@@ -31,7 +38,7 @@ const JSDOC_TYPED_TAG = new RegExp(
   "u",
 );
 const TSDOC_TAG = new RegExp(
-  `@param${S}+${W}+${S}+-${S}|@(?:returns?|throws)${S}+(?!\\{)${NON_SPACE}|@(?:remarks|typeParam|defaultValue)${B}`,
+  `@param${S}+${NAME}+${S}+-${S}|@(?:returns?|throws)${S}+(?!\\{)${NON_SPACE}|@(?:remarks|typeParam|defaultValue)${B}`,
   "u",
 );
 
@@ -68,7 +75,9 @@ const SPACE_CLASS = "[ \\t\\n\\r\\f\\v]";
 // A property named `abstract` is valid TypeScript, and `tsc` compiles it. The grammar reads the
 // word as the class modifier and gives error nodes, so the whole file would not parse. The rewrite
 // has equal length (`abstract` becomes `abstrac_`), so every position of the tree still points at
-// the real source. It applies only to a property position (`abstract:` or `abstract?:`).
+// the real source. It applies to the text `abstract:` or `abstract?:` wherever it stands, also in a
+// parameter name or a comment, so the analyser reads every name and every comment from the original
+// source and uses the rewritten text for the parse only.
 const ABSTRACT_PROPERTY = new RegExp(`\\babstract(${SPACE_CLASS}*\\??${SPACE_CLASS}*:)`, "g");
 
 // `export type * from 'm'` is TypeScript 5.0 syntax, and grammar 0.23.2 does not know it. Four
@@ -84,25 +93,44 @@ export function sanitise(source: string): string {
 /** The identifiers that a pattern binds. An object pattern binds shorthand identifiers. */
 const IDENTIFIERS = new Set(["identifier", "shorthand_property_identifier_pattern"]);
 
-/** Returns the identifiers that one parameter node binds. */
-function boundIdentifiers(node: Node): string[] {
-  if (IDENTIFIERS.has(node.type)) return [node.text];
+/**
+ * The text of a node, read from the source as written. The tree comes from `sanitise(source)`, which
+ * rewrites a few words, so `node.text` can differ from the file. The rewrite keeps the length, so
+ * the offsets of the tree are the offsets of the source.
+ */
+type TextOf = (node: Node) => string;
+
+/**
+ * Returns the identifiers that one parameter node binds. A default value binds nothing, so only the
+ * left side of an assignment pattern counts. A pair pattern (`{ key: value }`) binds its value.
+ */
+function boundIdentifiers(node: Node, text: TextOf): string[] {
+  if (IDENTIFIERS.has(node.type)) return [text(node)];
   const pattern = node.childForFieldName("pattern");
-  if (pattern) return boundIdentifiers(pattern);
-  if (["object_pattern", "array_pattern", "object_assignment_pattern"].includes(node.type)) {
-    return node.namedChildren.flatMap(boundIdentifiers);
+  if (pattern) return boundIdentifiers(pattern, text);
+  const into = (child: Node | null): string[] => (child ? boundIdentifiers(child, text) : []);
+  switch (node.type) {
+    case "object_pattern":
+    case "array_pattern":
+      return node.namedChildren.flatMap((child) => boundIdentifiers(child, text));
+    case "assignment_pattern":
+    case "object_assignment_pattern":
+      return into(node.childForFieldName("left"));
+    case "pair_pattern":
+      return into(node.childForFieldName("value"));
+    case "rest_pattern":
+      return into(node.namedChildren[0] ?? null);
+    default: {
+      const first = node.namedChildren.find((c) => IDENTIFIERS.has(c.type));
+      return first ? [text(first)] : [];
+    }
   }
-  if (node.type === "rest_pattern" && node.namedChildren[0]) {
-    return boundIdentifiers(node.namedChildren[0]);
-  }
-  const first = node.namedChildren.find((c) => IDENTIFIERS.has(c.type));
-  return first ? [first.text] : [];
 }
 
 /** Returns the declared parameter names. A destructured or rest parameter gives its identifiers. */
-function paramsOf(node: Node): string[] {
+function paramsOf(node: Node, text: TextOf): string[] {
   const list = node.childForFieldName("parameters");
-  return (list?.namedChildren ?? []).flatMap(boundIdentifiers);
+  return (list?.namedChildren ?? []).flatMap((param) => boundIdentifiers(param, text));
 }
 
 /** The outermost `export` statement that wraps a declaration, or the declaration itself. */
@@ -117,10 +145,11 @@ function anchorOf(node: Node): Node {
  * with two stars counts. A plain block comment or a line comment is a comment, not documentation,
  * and counting it would inflate the coverage.
  */
-function leadingDoc(anchor: Node): string {
+function leadingDoc(anchor: Node, text: TextOf): string {
   const prev = anchor.previousSibling;
   if (prev?.type !== "comment") return "";
-  return prev.text.startsWith("/**") ? prev.text : "";
+  const comment = text(prev);
+  return comment.startsWith("/**") ? comment : "";
 }
 
 /** True when the declaration is exported from its module. */
@@ -182,22 +211,25 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
       report.error = "parse error (tree-sitter reported ERROR nodes)";
       return report;
     }
+    const text: TextOf = (node) => source.slice(node.startIndex, node.endIndex);
     for (const node of tree.rootNode.descendantsOfType(DECLARATION_TYPES)) {
       const kind = DECLARATIONS[node.type] as Kind;
       const anchor = anchorOf(node);
-      const doc = leadingDoc(anchor);
+      const doc = leadingDoc(anchor, text);
       const dialect = dialectOf(doc);
       const typeLike = kind === "class" || kind === "interface" || kind === "type";
       const line = node.startPosition.row + 1;
+      const nameNode = node.childForFieldName("name");
       const sym: DocSymbol = {
         file: path,
         line,
         anchorLine: anchor.startPosition.row + 1,
-        name: node.childForFieldName("name")?.text ?? "<anonymous>",
+        anchorColumn: anchor.startPosition.column,
+        name: nameNode ? text(nameNode) : "<anonymous>",
         kind,
         exported: isExported(node),
         hasDoc: doc !== "",
-        params: typeLike ? [] : paramsOf(node),
+        params: typeLike ? [] : paramsOf(node, text),
         docParams: doc ? [...doc.matchAll(TSDOC_PARAM)].map((m) => m[1] ?? "") : [],
         summary: summaryOf(doc),
         dialect,

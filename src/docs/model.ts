@@ -38,6 +38,12 @@ export interface DocSymbol {
    * exported declaration with decorators: the comment must precede the decorators.
    */
   anchorLine: number;
+  /**
+   * The column of the anchor on its line, from 0. `stub` writes above the anchor line, so a token
+   * before the anchor on that line (the end of a template, a second declaration) makes the place
+   * unsafe. A Python symbol holds 0: its stub goes inside the body.
+   */
+  anchorColumn: number;
   name: string;
   kind: Kind;
   /** True for the public surface. Only an exported symbol is gated by M1. */
