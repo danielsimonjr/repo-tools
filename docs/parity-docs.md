@@ -10,7 +10,7 @@ Each named repository is public on GitHub. The checks ran on 2026-10-02. Each ru
 | Repository | Commit | Files | Symbols | Exported | Documented | MUST issues | Unparsed |
 | --- | --- | --: | --: | --: | --: | --: | --: |
 | memoryjs | `0158a38` | 698 | 4980 | 1360 | 1346 | 7 | 3 |
-| Mathts | `253aa72` | 1911 | 7964 | 2468 | 2403 | 54 | 0 |
+| Mathts | `253aa72` | 1911 | 7964 | 2468 | 2403 | 57 | 0 |
 | universal-physics-tensor | `0099eda` | 1076 | 3306 | 1669 | 1557 | 211 | 0 |
 | repo-tools | `1b569c2` | 252 | 988 | 518 | 480 | 6 | 1 |
 | fermat-mcp | `ef84ce2` | 14 | 68 | 33 | 5 | 28 | 0 |
@@ -18,10 +18,12 @@ Each named repository is public on GitHub. The checks ran on 2026-10-02. Each ru
 | auto-memory | `d4adb29` | 79 | 350 | 302 | 92 | 51 | 0 |
 | memvid | `c416853` | 29 | 184 | 146 | 130 | 17 | 0 |
 | deepthinking-mcp | `eeb45e5` | 509 | 3574 | 1477 | 1306 | 149 | 0 |
-| Total | | 4665 | 22329 | 8661 | 7752 | 687 | 4 |
+| Total | | 4665 | 22329 | 8661 | 7752 | 690 | 4 |
 
-The columns for the issues and for the unparsed files are equal for both tools. The repositories
-hold TypeScript, JavaScript and Python files. Mathts has 15 Python files of 1911, and
+The columns show the values of `repo-tools docs`. The Python tool gives the same values, except for
+the MUST issues of Mathts. The Python tool gives 54 there and 687 in total. The 3 more issues are
+M3 issues for documented optional parameters (see the verdicts below). The repositories hold
+TypeScript, JavaScript and Python files. Mathts has 15 Python files of 1911, and
 universal-physics-tensor has 9 of 1076. deepthinking-mcp has 15 of 509. Every file of auto-memory
 and memvid is a Python file. PITS-MRAS holds 95 Python files and 2 TypeScript files.
 
@@ -48,6 +50,9 @@ and memvid is a Python file. PITS-MRAS holds 95 Python files and 2 TypeScript fi
 7. **Edge cases.** The unit tests lock the cases that no repository holds. The cases are the
    dialects, the escape sequences and the stub positions. They also cover the config file, the
    paths, the exit codes and the syntax errors.
+8. **Shared defects.** `tests/unit/docs-review.test.ts` locks each defect that the Python tool
+   has too. For each one, a minimal git repository ran through `code_docs.py`. The run showed the
+   defect in the Python tool. For the link, the run read the file outside the root afterwards.
 
 ## Result: scan
 
@@ -55,8 +60,10 @@ The two tools find the same files and the same symbols. The count of symbols tha
 finds is 0. The `summary` and the `provenance` are equal on all nine clones. A file record of
 `coverage.json` holds the language, the error text and the dialects. It also holds every field of
 every symbol, with the text of every issue. Against the control, the file records are equal on
-all nine clones. One exception exists: the order of the symbols in 40 files (see the verdicts
-below). The MUST issues are 687 for each tool. The SHOULD issues are 11208 for each tool.
+all nine clones. Two exceptions exist. One is the order of the symbols in 40 files. The other is
+the doc names of 29 symbols of Mathts (see the verdicts below). The MUST issues are 687 for the Python tool
+and 690 for the command. The 3 more are M3 issues in 2 symbols of Mathts. The SHOULD issues are
+11208 for each tool.
 
 The Markdown report is equal as a set of lines, except for 4 lines of text. Two lines are in the
 header and two lines are in the footer. They name the tool and the command.
@@ -67,7 +74,7 @@ The Python tool without the changes of the control gives other SHOULD counts.
 | --- | --: | --: | --: |
 | M1 | 480 | 480 | 480 |
 | M2 | 120 | 120 | 120 |
-| M3 | 84 | 84 | 84 |
+| M3 | 84 | 84 | 87 |
 | M4 | 3 | 3 | 3 |
 | S2 | 10530 | 7513 | 7513 |
 | S5 | 270 | 270 | 270 |
@@ -76,8 +83,8 @@ The Python tool without the changes of the control gives other SHOULD counts.
 | S6/STE-VOICE | 86 | 86 | 86 |
 | S6/STE-WORD | 6 | 6 | 6 |
 
-The Python tool gives a different list of issues for 3131 symbols. The two defects explain all of
-them.
+The Python tool gives a different list of issues for 3133 symbols. The two defects explain 3131 of
+them. The M3 issues of the 2 symbols of Mathts explain the other 2.
 
 - **Closing delimiter in the summary (`code_docs-wrong`).** For `/** Text. */` the Python tool
   keeps `Text. */` as the summary. The summary does not end with a full stop, so S2 fails. The
@@ -166,8 +173,8 @@ fails. The command measures the file.
 - **Grammar of `.tsx` and `.jsx` (deliberate).** The command uses the TSX grammar for these files
   and for the check after a stub. The Python tool uses the TypeScript grammar for them. The nine
   clones hold 1 such file, so the record measures no effect of this rule. The unit tests lock it.
-- **Nothing to measure (deliberate, fail-closed).** A root with no source file exits 1. The Python
-  tool passes with 0 of 0.
+- **Nothing to measure (deliberate, fail-closed).** A root with no source file exits 1, for `scan`,
+  `check` and `stub`. The Python tool passes with 0 of 0, and a dry run of its `stub` exits 0.
 - **Exit 2 (deliberate).** A root that is not a folder and a malformed `.code-docs.json` exit 2.
   The Python tool passes in the first case and ends with a trace in the second case.
 - **Targets of the stub (deliberate).** Only a symbol with an M1 issue gets a stub. See the result
@@ -178,6 +185,30 @@ fails. The command measures the file.
   A `note:` line names an unmeasured source path.
 - **JSON percentage (deliberate).** `exported_documented_pct` is `55`, not `55.0`. The key names
   are the same.
+- **Link in `stub --apply` (`code_docs-wrong`).** The Python tool writes through a tracked link,
+  and a link to a file outside the root changes that file. The command skips the file and names
+  it. The nine clones hold no such link, so the record measures no effect. The unit tests lock it.
+- **Non-ASCII file names (`code_docs-wrong`).** Git quotes such a name. The Python tool does not
+  decode the quoted text. Its scan does not see the file. A `--paths-from` line with the quoted
+  name matches nothing, and the gate passes. The command sees the file and decodes the line. The
+  two tools found the same files on the nine clones, so none of them holds such a name.
+- **Stub on a shared line (`code_docs-wrong`).** A TypeScript symbol can follow another token on
+  its line. Then the Python tool writes the block in the middle of the line, for example inside a
+  template. The command writes only above a declaration that starts its line. The command names the
+  others.
+- **End of a Python signature (`code_docs-wrong`).** The Python tool misses a colon that a comment
+  follows, and writes the stub below a later line. A bracket in a default string gives a file that
+  does not parse, and the write is reverted. The command reads the code of the signature only.
+- **Scope of `stub --path` (`code_docs-wrong`).** `--path=.` matches no file in the Python tool.
+  The command selects every file.
+- **Parameter names (`code_docs-wrong`).** The Python tool has five defects. The reST field
+  `:param int x:` is not read. The name `foo$bar` gives `foo`. The optional forms `[name]` and
+  `[name=default]` are not read. A parameter named `abstract` fails a correct doc. The pattern
+  `{ a = fallback }` gives `fallback`. The command reads each of these names correctly. On the nine clones the `params` lists of the
+  two tools are equal, so only the doc names differ. The doc names differ in 29 symbols of
+  Mathts, and all 29 hold an optional name in brackets, for example `@param {string} [datatype]`.
+  The command compares these names. In `cumsum` and in `subset` of `ImmutableDenseMatrix`, the
+  signature has the name with a leading underscore, so M3 is correct for the 3 stale names.
 
 ## Gaps that the parity check found
 

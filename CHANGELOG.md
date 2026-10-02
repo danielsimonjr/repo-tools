@@ -25,11 +25,13 @@ design document.
   file. The command reads TypeScript, JavaScript and Python with tree-sitter. A
   `.code-docs.json` file at the root excludes paths, and each entry needs a reason. Section 16
   of `docs/design.md` describes the command. `docs/parity-docs.md` compares the command with the
-  Python tool on 9 public repositories: 4665 files, 22329 symbols, 687 MUST issues and 11208
-  SHOULD issues. The reports are equal, except for the order of the symbols in 40 files. The
-  record lists the differences. Two are defects of the Python tool: a closing `*/` in the
-  summary, and comment delimiters in the STE check. The others are the parser of Python, the
-  exit codes, and the files that `stub` changes.
+  Python tool on 9 public repositories: 4665 files, 22329 symbols, 690 MUST issues and 11208
+  SHOULD issues. The reports are equal, except for the order of the symbols in 40 files and the
+  doc names of 29 symbols of one repository. The command gives 3 MUST issues more than the Python
+  tool, for stale names in optional `[name]` tags. The record lists the differences. Some are
+  defects of the Python tool. The defects are a closing `*/` in the summary, comment delimiters in
+  the STE check, and the parameter names in a doc. The others are the parser of Python, the exit
+  codes, and the files that `stub` changes.
 - `repo-tools docs stub` never writes through a link. The command skips a file that is a link or
   resolves outside the root, and names the file. The command does not write a TypeScript block
   when another token precedes the declaration on its line, for example the end of a template. The

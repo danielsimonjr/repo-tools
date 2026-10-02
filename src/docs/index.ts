@@ -55,13 +55,15 @@ Options:
                        folder.
   --apply              stub: write the stubs. A file that would not parse after
                        the change is not changed.
-  --path=<path>        stub: only this file, or the files below this folder.
+  --path=<path>        stub: only this file, or the files below this folder. The
+                       root itself ('.') selects every file.
   --paths <path>...    check: gate only these files, for example the files of a
                        pull request. Put the root before this flag. The flag
                        takes every argument up to the next flag. No path means
                        that the gate checks nothing, and it passes.
   --paths-from=<file>  check: read the paths from a file, one path on each line,
-                       as 'git diff --name-only' writes them.
+                       as 'git diff --name-only' writes them. The quoted form
+                       that git writes for a non-ASCII name is decoded.
   --help, -h           Show this help.
 
 A flag with a value takes '--name=value' or '--name value'.

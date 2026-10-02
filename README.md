@@ -242,7 +242,8 @@ because an unknown file is not a clean file. A repository with no source file fa
 
 `stub` is a dry run until you pass `--apply`. Each stub holds the marker `TODO:`, so `check` fails
 until you replace the stub with real prose. The command parses a file again after the change.
-A file that would no longer parse stays unchanged.
+A file that would no longer parse stays unchanged. The command skips a file that is a link or
+resolves outside the root, and it names the skipped file.
 
 To gate a pull request and not the whole backlog, give `check` the changed files:
 

@@ -572,14 +572,17 @@ repo-tools docs check [root] [--paths <path>... | --paths-from=<file>]
   folder. `scan` prints the counts and exits 0.
 - `stub` plans one skeleton comment for each symbol that has an M1 issue. The default is a dry run.
   A dry run prints one line for each planned stub and writes nothing. `--apply` writes the stubs.
-  `--path=<path>` limits the stubs to one file, or to the files below one folder.
+  `--path=<path>` limits the stubs to one file, or to the files below one folder. The root itself
+  (`.`, `./` or the absolute root) selects every file. A path that matches no file plans no stub
+  and is not an error.
 - `check` is the gate. On success it prints `PASS` and exits 0. On a failure it prints `FAIL` and
   one line for each MUST issue, up to 100 lines, and exits 1. A file that does not parse is a MUST
   issue.
 - `--paths` limits `check` to the given files, for example the files of a pull request. The flag
   takes every argument up to the next flag, so the root goes before it. `--paths-from=<file>`
   reads one path on each line, as `git diff --name-only` writes them. A path can start with `./`
-  or be absolute. An empty list checks nothing and passes. A path with no report is skipped,
+  or be absolute. A path in double quotes with octal escapes is the form that git writes for a
+  non-ASCII name, and the command decodes it. An empty list checks nothing and passes. A path with no report is skipped,
   because a deleted file is a changed file. A `note:` line names each source path that the run did
   not measure.
 - A flag with a value takes `--name=value` or `--name value`. An unknown flag, a missing value, a
@@ -595,7 +598,7 @@ The exit codes are:
 | 2 | A usage error, a root that is not a folder, or a malformed `.code-docs.json`. |
 
 A root with no source file is a failed gate and not a pass. A gate that measures nothing has the
-look of enforcement and none of the substance.
+look of enforcement and none of the substance. The rule holds for `scan`, `check` and `stub`.
 
 ### 16.2 Modules
 
@@ -652,7 +655,19 @@ an unparsed file. The tool does not know the content of such a file, so the file
 clean. Two constructs are valid TypeScript that
 the grammar cannot read: a property named `abstract`, and `export type * from 'm'`. The analyser
 rewrites both to text of equal length before the parse, so each position of the tree still points
-at the real source.
+at the real source. The analyser reads the text of each node from the original source and not from
+the rewritten text. Thus a parameter named `abstract` keeps its name.
+
+**The parameter names.** Rule M3 compares the names in the doc with the names in the signature.
+
+- A TypeScript parameter gives the names that it binds. A pattern gives each bound name:
+  `{ opts: { b } }` gives `b`, and `{ a = fallback }` gives `a` and not `fallback`. A rest
+  element gives its name. A class, an interface and a type alias have no parameters.
+- A TSDoc or JSDoc `@param` names a parameter with letters, digits, `_` and `$`. A name in
+  brackets, `[name]` or `[name=default]`, gives `name`. A `{type}` before the name is not part of
+  the name.
+- A reST field `:param type name:` gives `name`. The text between `:param` and the name is the
+  type. The type can hold spaces and brackets.
 
 The coverage percentage is the exported symbols with a doc, divided by all exported symbols. The
 count includes the symbols of test files. A report with no exported symbol shows 100.
@@ -688,7 +703,7 @@ line or code.
 
 ### 16.5 The stub writer
 
-`stub` is the only part of the command that changes a source file. Five properties make the change
+`stub` is the only part of the command that changes a source file. Seven properties make the change
 safe.
 
 1. A dry run is the default. A write needs `--apply`.
@@ -698,12 +713,21 @@ safe.
    the output says `REVERTED`.
 5. Every stub holds the marker `TODO:`. The gate fails on a surviving marker (M4), so a skeleton
    cannot become the finished doc.
+6. The writer never writes through a link. The output names a skipped file as `SKIPPED`. The writer
+   skips a symbolic link, and a file with a real path outside the root. A tracked link can point
+   at a file of another repository. A write there changes a file that this run does not own.
+7. A stub goes only above a declaration that starts its line. Another token can come first on the
+   line, for example the end of a template or an earlier declaration. Then the output says
+   `cannot place a stub` and names the symbol. A stub is a block on its own lines, and the writer
+   cannot put such a block in the middle of a line.
 
 The writer keeps the line ends of the file. A file with CRLF stays CRLF. A file that holds a
 carriage return with no line feed is skipped, and the output names the file. A Python stub goes
-inside the body, below the line that ends the signature. The writer finds that line by the depth
-of the round brackets, so a signature on many lines works. A TypeScript stub goes above the
-outermost `export` statement, and thus above each decorator.
+inside the body, below the line that ends the signature. The writer finds that line from the code
+of the signature only. The writer removes the strings and the comments. Then the writer counts the
+round, square and curly brackets. The line is the first line at depth 0 that ends with a colon. Thus a
+signature on many lines, a bracket in a default string and a comment after the colon all work. A
+TypeScript stub goes above the outermost `export` statement, and thus above each decorator.
 
 ### 16.6 Differences from the Python tool
 
@@ -719,7 +743,7 @@ outermost `export` statement, and thus above each decorator.
 | One-line summary | `/** Text. */` gives `Text. */`, so S2 fails. | The closing `*/` is not part of the summary. |
 | STE of a comment | The delimiters count as words. | A delimiter is not prose. This removes false STE-LEN issues and finds the STE-REF issue of the first sentence. |
 | `.tsx` and `.jsx` | The TypeScript grammar. | The TSX grammar, for the scan and for the check after a stub. |
-| Root with no source file | `PASS` with 0 of 0, exit 0. | Exit 1 with a message. |
+| Root with no source file | `scan` and `check`: `PASS` with 0 of 0, exit 0. `stub`: a dry run of 0 stubs, exit 0. | Exit 1 with a message, for all three. |
 | Root that is not a folder | The same pass, with 0 files. | Exit 2 with a message. |
 | Malformed `.code-docs.json` | A Python trace, exit 1. | Exit 2 and one message. |
 | Targets of `stub` | Each exported symbol with no doc, test files too. | Each symbol with an M1 issue. A test file is exempt from M1, so it gets no stub. |
@@ -728,3 +752,13 @@ outermost `export` statement, and thus above each decorator.
 | `exported_documented_pct` in JSON | A float: `55.0`. | A number: `55`. The key names are the same. |
 | Line ends of standard output | The line end of the platform. | LF always (rule R1). |
 | `COVERAGE.md` | Ends with a Verification list. The footer says that `check` recomputes each value of the report. | The same list. `check` measures the code again and does not read the file, and the footer says so. |
+| Link in `stub --apply` | Writes through the link. A link to a file outside the root changes that file. | Skips the file and names it as `SKIPPED`. |
+| Non-ASCII file name | Git quotes the name, the tool does not decode it, and the scan does not see the file. | The scan, `check` and `stub` see the file. |
+| Quoted name in `--paths-from` | The quoted text matches no file, so the file is not checked and the gate passes. | Decodes the octal escapes and checks the file. |
+| TypeScript stub on a shared line | Writes the block in the middle of the line, for example inside a template. Two declarations on one line get two blocks above both. | Writes above a declaration that starts its line. Names each other declaration. |
+| End of a Python signature | A comment after the colon hides the colon, so the stub goes below a later line. A bracket in a default string gives a file that does not parse, and the write is reverted. | Reads the code of the signature only. Both cases get a stub in the right place. |
+| `stub --path=.` | Matches no file, so a dry run plans 0 stubs. | Selects every file. |
+| reST field with a type | `:param int x:` is not a field. A stale parameter passes M3. | The type is not part of the name. |
+| JSDoc name with `$` or brackets | `foo$bar` gives `foo`, so M3 fails a correct doc. `[name]` is not read, so a stale optional parameter passes. | Reads both forms. |
+| Parameter named `abstract` | M3 fails a correct doc. | Reads the name from the original source. |
+| Binding pattern | `{ opts: { b } }` gives no `b`, so M3 fails a correct doc. `{ a = fallback }` gives `fallback`. | Gives the bound names: `b` and `a`. |

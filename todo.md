@@ -177,18 +177,18 @@
     (2.2.0).
   - [x] File the open findings of the port (the `COVERAGE.md` Verification block is not a
     checked claim; the stub planner reverts a file with a one-line body or 2-space indent).
-- [ ] Copilot review of PR #12 (9 inline comments on `bf98770`). For each one, reproduce it with a
+- [x] Copilot review of PR #12 (9 inline comments on `bf98770`). For each one, reproduce it with a
   failing test and fix it, or refute it against the code. A comment that the Python tool shares
   gets a row in `docs/parity-docs.md`, not a silent divergence.
-  - [ ] 1. `docs stub --apply` follows a source symlink (`src/docs/index.ts` line 268).
-  - [ ] 2. A git-quoted path in `--paths-from` (`src/docs/index.ts` line 295).
-  - [ ] 3. The TypeScript stub inserts at the start of the anchor line (`src/docs/stub.ts` line 92).
-  - [ ] 4. `docs stub` on a root with no source exits 0 (`src/docs/index.ts` line 234).
-  - [ ] 5. `docs stub --path=.` plans nothing (`src/docs/index.ts` line 235).
-  - [ ] 6. A typed reST field `:param int x:` (`src/docs/python.ts` line 23).
-  - [ ] 7. A Python header with a trailing comment (`src/docs/stub.ts` line 63).
-  - [ ] 8. A JSDoc `@param` with `$` or `[opt]` (`src/docs/typescript.ts` line 36).
-  - [ ] 9. `sanitise` rewrites parameter names; nested binding patterns (`src/docs/typescript.ts`
+  - [x] 1. `docs stub --apply` follows a source symlink (`src/docs/index.ts` line 268).
+  - [x] 2. A git-quoted path in `--paths-from` (`src/docs/index.ts` line 295).
+  - [x] 3. The TypeScript stub inserts at the start of the anchor line (`src/docs/stub.ts` line 92).
+  - [x] 4. `docs stub` on a root with no source exits 0 (`src/docs/index.ts` line 234).
+  - [x] 5. `docs stub --path=.` plans nothing (`src/docs/index.ts` line 235).
+  - [x] 6. A typed reST field `:param int x:` (`src/docs/python.ts` line 23).
+  - [x] 7. A Python header with a trailing comment (`src/docs/stub.ts` line 63).
+  - [x] 8. A JSDoc `@param` with `$` or `[opt]` (`src/docs/typescript.ts` line 36).
+  - [x] 9. `sanitise` rewrites parameter names; nested binding patterns (`src/docs/typescript.ts`
     lines 81 and 100).
 - [ ] `COVERAGE.md` ends with a `## Verification` list (`src/docs/report.ts` line 124), and the
   footer names `check`. The list has no `| claim | value | source |` rows, so
