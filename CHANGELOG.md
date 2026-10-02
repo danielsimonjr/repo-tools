@@ -8,6 +8,24 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools docs`, the gate of the doc comments. The command is a port of `code_docs.py` of the
+  code-docs skill, and it needs no Python. `docs scan` measures the coverage of the exported
+  symbols and writes `COVERAGE.md` and `coverage.json`. `docs check` is the gate: it exits 1 on a
+  MUST issue (M1 to M5) and on a file that does not parse. `--paths` and `--paths-from=<file>`
+  gate the changed files of a pull request only. `docs stub` plans a skeleton comment with the
+  marker `TODO:` for each exported symbol that has no comment. The default is a dry run until
+  `--apply`. After a change, `stub` parses the file again, and it keeps the line ends of the
+  file. The command reads TypeScript, JavaScript and Python with tree-sitter. A
+  `.code-docs.json` file at the root excludes paths, and each entry needs a reason. Section 16
+  of `docs/design.md` describes the command. `docs/parity-docs.md` compares the command with the
+  Python tool on 9 public repositories: 4665 files, 22329 symbols, 687 MUST issues and 11208
+  SHOULD issues. The reports are equal, except for the order of the symbols in 40 files. The
+  record lists the differences. Two are defects of the Python tool: a closing `*/` in the
+  summary, and comment delimiters in the STE check. The others are the parser of Python, the
+  exit codes, and the files that `stub` changes.
+- The smoke test has a step for the doc gate. A run of `docs check` reads a TypeScript, a TSX and
+  a Python file, so one run loads the three grammars of the product. The test passes documented
+  source and fails a new undocumented export.
 - `bun run audit:ledger`, the audit of the fix ledger. For each fix (F1 to F44, M1 and R1), the
   script restores the 1.x defect in a scratch copy of the repository. Then it runs the tests.
   It runs the test file of the fix first, and then the whole suite. A test of the fix file must
@@ -33,6 +51,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The grammar loader reads a third grammar, TSX. The Node bundle and the npm package now hold four
+  `.wasm` files and not three, and the compiled executable holds the TSX grammar too. `docs` uses
+  it for `.tsx` and `.jsx` files. `map` still reads these files with the TypeScript grammar.
 - The directory readers of the map engine read through `readdirHook`. The readers are discovery,
   the two `.csproj` walks and the folder list of a workspace pattern. The F2 test replaces
   `readdirHook`. Before, the map never called the reader that the F2 test reversed. The test

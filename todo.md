@@ -154,6 +154,35 @@
 
 - [ ] `repo-tools docs`: port `code_docs.py` (scan, stub, check). `stub --apply` stays a dry run by
   default.
+  - [x] The TSX grammar joins `src/map/grammars.ts`, so a `.tsx` or `.jsx` file parses.
+  - [x] `src/docs/`: the model, the discovery with `.code-docs.json`, the Python analyser, the
+    TypeScript analyser, the report, the stub writer and the command.
+  - [x] Tests: the 7 test files of the Python tool, plus the new cases of each deliberate
+    difference (CRLF files, `.tsx` stubs, test-file stubs, a missing root, no source file).
+  - [x] Parity run: both tools on real repositories; the result goes in `docs/parity-docs.md`.
+  - [x] `docs/design.md` section 16, the README, the CHANGELOG, the smoke test and the version
+    (2.2.0).
+  - [x] File the open findings of the port (the `COVERAGE.md` Verification block is not a
+    checked claim; the stub planner reverts a file with a one-line body or 2-space indent).
+- [ ] `COVERAGE.md` ends with a `## Verification` list, and the footer names `check`. The list has
+  no `| claim | value | source |` rows, so `repo-tools check --docs` reports a section without a
+  row if you point it at `docs/code-docs`. Give the report the opt-out marker, or write rows
+  that a command verifies. The Python tool writes the same list.
+- [ ] The Python stub planner writes the docstring at the indent of the `def` line plus 4 spaces.
+  A file that indents by 2 spaces or by tabs, and a `def f(): pass` on one line, fail the parse
+  after the change. The writer reverts such a file and says `REVERTED`, so no source is lost. Read
+  the indent unit of the file, and handle the one-line body. The Python tool has the same limit.
+- [ ] The Python analyser accepts a few errors that CPython finds while it builds the tree
+  (`def f(*)`, `del f()`), and it rejects a name that continues on the next line inside round
+  brackets (`(bar.` then `baz)`). The second case fails closed. See `docs/parity-docs.md`. Report
+  the grammar case to `tree-sitter-python`, and add a check for each error that a real file shows.
+- [ ] The TypeScript grammar (0.23.2) rejects an invalid escape in a tagged template, for example
+  ``String.raw`a\x` ``. ES2018 allows it, and `tsc` accepts it. The doc gate reports such a file as
+  unparsed. `tests/unit/map-parsing-py.test.ts` held one, and the test now avoids it. Update the
+  grammar, or rewrite the escape in `sanitise` with text of equal length.
+- [ ] Two symbols on one line (compact or generated source) list in file order here and in
+  reverse order in the Python tool. No gate reads the order. Close this item only if a consumer of
+  `coverage.json` needs the Python order.
 
 ## Post-release list (filed, not worked in v1)
 

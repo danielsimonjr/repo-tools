@@ -17,8 +17,10 @@ import { basename, dirname, join } from "node:path";
 import { assertInstalledTree } from "./lockcheck.ts";
 
 export const TARGETS = ["bun-windows-x64", "bun-linux-x64", "bun-darwin-arm64"] as const;
+/** One platform of `TARGETS`. */
 export type Target = (typeof TARGETS)[number];
 
+/** The flags of the build script after parsing. */
 export interface BuildArgs {
   compile: boolean;
   target?: string;

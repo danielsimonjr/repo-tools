@@ -9,7 +9,8 @@ product. The text follows ASD-STE100 Simplified Technical English.
 
 Sections 1 to 13 describe version 1. Section 14 describes the 2.0.0 engine (`repo-tools map`),
 which replaces the `depgraph` pipeline. Where the two differ, section 14 applies to 2.0.0.
-Section 15 describes `repo-tools check`, the drift gate of the architecture documents.
+Section 15 describes `repo-tools check`, the drift gate of the architecture documents. Section 16
+describes `repo-tools docs`, which measures and gates the documentation comments of the source.
 
 ## 1. Purpose
 
@@ -76,6 +77,7 @@ call `src/cli.ts`.
 | `src/depgraph/extensions.ts` | Loads the repository-local extensions and runs their hooks. |
 | `src/depgraph/reporters/*` | One module per report file, and the generated-file banner. |
 | `src/check/*` | `repo-tools check`: the claims parser, the metrics of a fresh graph, the verdict and the command (section 15). |
+| `src/docs/*` | `repo-tools docs`: the analysers of Python and TypeScript, the rules, the report, the stub writer and the command (section 16). |
 | `src/query/*` | Reads the `map` reports and answers each query. `safety.ts` holds the browser-safety check. |
 | `src/chunk/*` | The `split`, `merge` and `status` actions, one splitter per file type, and the manifest. |
 | `src/compress/*` | One compressor per format, the legend, and the JSON restore. |
@@ -374,7 +376,7 @@ through 2.x.
 | Module | Job |
 |---|---|
 | `src/map/discovery.ts` | The census: the files that git tracks (else a pruned walk), the language of the repository, and the area and disposition of each file. |
-| `src/map/grammars.ts` | Loads the tree-sitter grammars (TypeScript, Python) once each, when a run needs them. |
+| `src/map/grammars.ts` | Loads the tree-sitter grammars (TypeScript, TSX, Python) once each, when a run needs them. |
 | `src/map/parsing.ts` | One reader per language: tree-sitter for TypeScript/JavaScript and Python, regular expressions for C# and Rust. |
 | `src/map/resolvers.ts` | One resolver per language: an import to a file of the census, a built-in, or an external package. |
 | `src/map/graph.ts` | Builds the graph: edges, entry roots, barrel expansion, reachability and cycles. |
@@ -448,7 +450,8 @@ browser-safety commands serve TypeScript/JavaScript only.
 
 ### 14.6 Assets
 
-The Node bundle needs the three tree-sitter `.wasm` files. The build writes them next to
+The Node bundle needs the four tree-sitter `.wasm` files: the runtime and the TypeScript, TSX
+and Python grammars. The build writes them next to
 `dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
 system. A relative asset path resolves against the URL of its module, never against the working
 folder.
@@ -545,3 +548,183 @@ On success the check prints one line on standard output.
 | Line breaks | `splitlines` also splits on form feed, vertical tab and U+2028. | A line break is CRLF, LF or CR. |
 | File names | `glob("*.md")` is case-insensitive on Windows only. | The ending `.md` matches in any letter case on every system, so no file is skipped silently. |
 | Byte-order mark | Stays in the first line, and hides a heading there. | Removed. |
+
+## 16. The docs subcommand
+
+`repo-tools docs` measures the documentation comments of the source files, plans the missing
+comments, and gates the result. The command is a port of `code_docs.py` of the code-docs skill. It
+reads TypeScript, JavaScript and Python. Tree-sitter parses each file. A regular expression cannot
+tell an exported declaration from the word "export" in a string. A regular expression also cannot
+attach a comment to the declaration below it.
+
+### 16.1 The command
+
+```
+repo-tools docs scan  [root] [--out=<dir>]
+repo-tools docs stub  [root] [--apply] [--path=<path>]
+repo-tools docs check [root] [--paths <path>... | --paths-from=<file>]
+```
+
+- The root is the first argument that is not a flag, or `--root=<path>`. The default is the
+  current folder. A root that is not a folder exits 2.
+- `scan` writes `COVERAGE.md` and `coverage.json`. The default folder is `docs/code-docs` below the
+  root. `--out=<dir>` sets another folder. A relative `--out` path is relative to the current
+  folder. `scan` prints the counts and exits 0.
+- `stub` plans one skeleton comment for each symbol that has an M1 issue. The default is a dry run.
+  A dry run prints one line for each planned stub and writes nothing. `--apply` writes the stubs.
+  `--path=<path>` limits the stubs to one file, or to the files below one folder.
+- `check` is the gate. On success it prints `PASS` and exits 0. On a failure it prints `FAIL` and
+  one line for each MUST issue, up to 100 lines, and exits 1. A file that does not parse is a MUST
+  issue.
+- `--paths` limits `check` to the given files, for example the files of a pull request. The flag
+  takes every argument up to the next flag, so the root goes before it. `--paths-from=<file>`
+  reads one path on each line, as `git diff --name-only` writes them. A path can start with `./`
+  or be absolute. An empty list checks nothing and passes. A path with no report is skipped,
+  because a deleted file is a changed file. A `note:` line names each source path that the run did
+  not measure.
+- A flag with a value takes `--name=value` or `--name value`. An unknown flag, a missing value, a
+  second root and a flag of another action exit 2.
+- Standard error shows the root as `<root>`.
+
+The exit codes are:
+
+| Code | Meaning |
+|---|---|
+| 0 | The action succeeded. For `check`, the gate passed. |
+| 1 | The gate failed, or the root holds no source file to measure. |
+| 2 | A usage error, a root that is not a folder, or a malformed `.code-docs.json`. |
+
+A root with no source file is a failed gate and not a pass. A gate that measures nothing has the
+look of enforcement and none of the substance.
+
+### 16.2 Modules
+
+| Module | Job |
+|---|---|
+| `src/docs/index.ts` | The command: the flags, the three actions and the exit codes. |
+| `src/docs/model.ts` | The shapes `DocSymbol`, `FileReport` and `Stats`, and the `TODO:` marker. |
+| `src/docs/discovery.ts` | The source files, the skip lists, and the exclusions of `.code-docs.json`. |
+| `src/docs/analyse.ts` | Reads each file and calls the analyser of its language. |
+| `src/docs/python.ts`, `typescript.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
+| `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Both analysers call one function. |
+| `src/docs/report.ts` | The counts, `COVERAGE.md` and `coverage.json`. |
+| `src/docs/stub.ts` | Plans the skeleton comments and applies them. |
+
+The analysers use the tree-sitter loader of `repo-tools map` (section 14.1). The S6 rule calls the
+prose check of `repo-tools ste`.
+
+### 16.3 What the tool measures
+
+**The files.** The files are the files that git tracks with the suffix `.py`, `.ts`, `.tsx`,
+`.js`, `.jsx`, `.mjs` or `.cjs`. A file below a folder named `node_modules`, `dist`, `build`,
+`bundle`, `out`, `coverage`, `vendor` or `target` is not read. The same holds for the other
+generated or cache folders that `src/docs/discovery.ts` lists. A file with a generated name
+(`.d.ts`, `.min.js`, `.bundle.js`, `.g.ts`, `_pb2.py`) is not read either. A stub in a generated
+file disappears at the next build.
+
+Outside a git work tree, a walk of the file system finds the files. The provenance string says so.
+If git tracks no source file but the folder holds untracked source, the run measures the untracked
+files and says so. If git tracks source and the folder also holds untracked source, the run does
+not measure the untracked files. It warns with their count. Every report states its provenance,
+because two counts from two methods cannot be compared.
+
+`.code-docs.json` at the root excludes paths from every action. Each entry has a `path` and a
+non-empty `reason`. The path matches whole segments: `assembly/` does not match
+`assembly_tools/`. The output names each exclusion. A file that is not valid JSON, an entry
+without a reason, or a wrong shape exits 2. A broken config would hide files.
+
+**The symbols.** The tool reports the declarations that can have a doc.
+
+- In TypeScript and JavaScript: functions, generators, classes, abstract classes, interfaces,
+  type aliases and methods. A constant that holds an arrow function is not a symbol. A method is
+  not exported, because its class is. A declaration is exported when an `export` statement wraps
+  it. A doc is a block comment that starts with `/**` and ends directly above the declaration, or
+  above the outermost `export` statement. A plain block comment and a line comment are not
+  documentation.
+- In Python: functions, async functions and classes, at any depth. With a literal `__all__` at the
+  top of a module, a name is exported when `__all__` lists it. Without `__all__`, a name is
+  exported when it has no leading underscore, or when it has the form `__x__`. The doc is the
+  docstring: the first statement of the body, when it is a string.
+
+A `.tsx` or `.jsx` file needs the TSX grammar, and another file needs the TypeScript grammar. The
+wrong grammar gives a tree of error nodes and not an exception. Thus a file with a parse error is
+an unparsed file. The tool does not know the content of such a file, so the file never counts as
+clean. Two constructs are valid TypeScript that
+the grammar cannot read: a property named `abstract`, and `export type * from 'm'`. The analyser
+rewrites both to text of equal length before the parse, so each position of the tree still points
+at the real source.
+
+The coverage percentage is the exported symbols with a doc, divided by all exported symbols. The
+count includes the symbols of test files. A report with no exported symbol shows 100.
+
+### 16.4 The rules
+
+| Rule | Tier | The rule |
+|---|---|---|
+| M1 | MUST | An exported symbol has a doc. A test file is exempt. |
+| M2 | MUST | The doc has a summary line. |
+| M3 | MUST | The doc names no parameter that the signature lacks. |
+| M4 | MUST | The doc holds no `TODO:` marker. |
+| M5 | MUST | A file uses one doc dialect. |
+| S2 | SHOULD | The summary ends with a full stop. |
+| S5 | SHOULD | The doc does not repeat a type that the signature holds. |
+| S6 | SHOULD | The prose follows Simplified Technical English. The detail names the `STE-*` rule. |
+
+Only a MUST issue decides the exit code of `check`. A SHOULD issue is in the report and the gate
+does not read it. A test file is a path below `test`, `tests`, `__tests__` or `spec`, or a file
+named `test_*`, `*_test.*`, `*.test.*` or `*.spec.*`. A test file is exempt from M1 only. A stale
+doc is wrong in a test file too, so M3, M4 and M5 still apply. A symbol with an M1 issue gets no
+other issue, because every other rule reads the doc.
+
+The dialects are `google`, `numpy` and `rest` for Python, and `tsdoc` and `jsdoc` for TypeScript. A
+comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
+`{type}` after a tag and TSDoc never does. Thus the `{type}` form is the evidence of JSDoc. M5
+shows the dialects as a list in the Python style, for example `['jsdoc', 'tsdoc']`.
+
+S5 reads an `Args` or `Parameters` block with a type in brackets in Python. In a `.ts` or `.tsx`
+file, S5 reads a `{type}` after `@param`. In a `.js` file the brace is correct JSDoc, so S5 does
+not apply there. The S6 check reads the prose of the doc. The prose has no comment delimiter, tag
+line or code.
+
+### 16.5 The stub writer
+
+`stub` is the only part of the command that changes a source file. Five properties make the change
+safe.
+
+1. A dry run is the default. A write needs `--apply`.
+2. An existing doc is never changed. Only a symbol with an M1 issue gets a stub.
+3. The insertions go bottom up. Each remaining insertion point stays valid.
+4. The file is parsed again after the insertions. A file that no longer parses is not changed, and
+   the output says `REVERTED`.
+5. Every stub holds the marker `TODO:`. The gate fails on a surviving marker (M4), so a skeleton
+   cannot become the finished doc.
+
+The writer keeps the line ends of the file. A file with CRLF stays CRLF. A file that holds a
+carriage return with no line feed is skipped, and the output names the file. A Python stub goes
+inside the body, below the line that ends the signature. The writer finds that line by the depth
+of the round brackets, so a signature on many lines works. A TypeScript stub goes above the
+outermost `export` statement, and thus above each decorator.
+
+### 16.6 Differences from the Python tool
+
+`docs/parity-docs.md` gives the measurement. The table lists each difference.
+
+| Topic | Python tool | `repo-tools docs` |
+|---|---|---|
+| Python parser | The `ast` module. | Tree-sitter. The declarations and the lines are the same. A few errors that CPython finds while it builds the tree, for example `def f(*)` and `del f()`, pass here. |
+| Python syntax error | `SyntaxError: ` and the message of CPython. | `SyntaxError: invalid syntax at line N`, or an `IndentationError`, a Python 2 statement or a leading zero. The line is the line of the first error node. |
+| Byte-order mark in a Python file | The file does not parse. | The mark is removed, and the file parses. |
+| Docstring text | Decoded by CPython. | Decoded with the same rules. `\N{name}` stays as written, because the tool has no table of Unicode names. |
+| Order of the symbols | A Python file: breadth first (`ast.walk`). A TypeScript file: by line, and two symbols on one line in reverse order. | The order of the file, for both languages. |
+| One-line summary | `/** Text. */` gives `Text. */`, so S2 fails. | The closing `*/` is not part of the summary. |
+| STE of a comment | The delimiters count as words. | A delimiter is not prose. This removes false STE-LEN issues and finds the STE-REF issue of the first sentence. |
+| `.tsx` and `.jsx` | The TypeScript grammar. | The TSX grammar, for the scan and for the check after a stub. |
+| Root with no source file | `PASS` with 0 of 0, exit 0. | Exit 1 with a message. |
+| Root that is not a folder | The same pass, with 0 files. | Exit 2 with a message. |
+| Malformed `.code-docs.json` | A Python trace, exit 1. | Exit 2 and one message. |
+| Targets of `stub` | Each exported symbol with no doc, test files too. | Each symbol with an M1 issue. A test file is exempt from M1, so it gets no stub. |
+| Line ends of `stub` | Writes LF in a file that had CRLF. | Keeps CRLF. |
+| `--paths` | Compares the text of the paths. | Removes a `./` prefix and makes an absolute path relative to the root. A `note:` line names an unmeasured source path. |
+| `exported_documented_pct` in JSON | A float: `55.0`. | A number: `55`. The key names are the same. |
+| Line ends of standard output | The line end of the platform. | LF always (rule R1). |
+| `COVERAGE.md` | Ends with a Verification list. The footer says that `check` recomputes each value of the report. | The same list. `check` measures the code again and does not read the file, and the footer says so. |

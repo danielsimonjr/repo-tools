@@ -11,17 +11,22 @@ import { readFileSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import pythonWasm from "tree-sitter-python/tree-sitter-python.wasm" with { type: "file" };
+import tsxWasm from "tree-sitter-typescript/tree-sitter-tsx.wasm" with { type: "file" };
 import typescriptWasm from "tree-sitter-typescript/tree-sitter-typescript.wasm" with {
   type: "file",
 };
 import { Language, Parser } from "web-tree-sitter";
 import runtimeWasm from "web-tree-sitter/web-tree-sitter.wasm" with { type: "file" };
 
-/** A grammar that the engine can load. */
-export type GrammarName = "typescript" | "python";
+/**
+ * A grammar that the engine can load. `tsx` reads JSX, which `typescript` cannot, and `typescript`
+ * reads the angle-bracket type assertion, which `tsx` cannot.
+ */
+export type GrammarName = "typescript" | "tsx" | "python";
 
 const WASM: Readonly<Record<GrammarName, string>> = {
   typescript: typescriptWasm,
+  tsx: tsxWasm,
   python: pythonWasm,
 };
 

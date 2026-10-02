@@ -8,6 +8,7 @@ import pkg from "../package.json" with { type: "json" };
 import { CHECK_HELP, run as runCheck } from "./check/index.ts";
 import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
+import { DOCS_HELP, run as runDocs } from "./docs/index.ts";
 import type { Io } from "./io-types.ts";
 import { DEPGRAPH_DEPRECATION, MAP_HELP, runMap } from "./map/command.ts";
 import { QUERY_HELP, run as runQuery } from "./query/index.ts";
@@ -41,6 +42,11 @@ ${MAP_HELP}`,
     summary: "Check the Verification tables of Markdown documents against a fresh graph.",
     help: CHECK_HELP,
     run: runCheck,
+  },
+  docs: {
+    summary: "Measure, stub and gate the doc comments of TypeScript, JavaScript and Python source.",
+    help: DOCS_HELP,
+    run: runDocs,
   },
   chunk: {
     summary: "Split a large file into chunks, merge the chunks back, or show changed chunks.",
