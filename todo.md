@@ -130,24 +130,37 @@
 - [ ] Names of private decisions (`D2`, `D8`, `D10b`, `criterion 4`) appear about 74 times in
   comments and test titles. `docs/parity-2.0.0.md` defines the 2.0.0 ones. A reader of the public
   repository cannot resolve the 1.x ones. Replace each with a statement of the rule, or with a
-  section of `docs/design.md`.
-- [ ] `check:design` cannot tell a right section number from a wrong one that exists. Four
-  references named section 4 for the chunk and compress modules, and section 4 exists. Read the
-  references to sections 3 to 9 once by hand, or give each section a one-line summary that a
-  check can compare.
-- [ ] Dead code in `src/depgraph/analysis.ts`: `detectUnused`, `splitDormant`, `generateStatistics`
-  and `findReachableFiles` have no caller outside that file and the tests. Remove them with their
-  tests, or wire them in.
+  section of `docs/design.md`. Find them with the pattern `\bD[0-9]+[a-z]?\b|criterion [0-9]+`
+  over `src`, `tests` and `scripts`: it finds 88 hits in 44 files, and some hits can be other
+  uses. The largest counts: `tests/unit/map-artifacts.test.ts` 12, `src/map/artifacts.ts` 7,
+  `tests/unit/map-command.test.ts` 6, `src/config.ts` 4.
+- [ ] `check:design` cannot tell a right section number from a wrong one that exists
+  (`scripts/design-refs.ts`). Four references named section 4 for the chunk and compress modules,
+  and section 4 exists. Read the references to sections 3 to 9 once by hand, or give each section
+  a one-line summary that a check can compare.
+- [ ] Dead code in `src/depgraph/analysis.ts`: `findReachableFiles` (line 114), `detectUnused`
+  (line 192), `generateStatistics` (line 292) and `splitDormant` (line 363) have no caller outside
+  that file and the tests. Remove them with their tests, or wire them in.
 - [ ] Single-package roots do not use the `./x` to `src/x.ts` or `src/x/index.ts` fallback of an
   `exports` subpath whose target has no source. Workspace packages use it
-  (`exportsSubpathEntries`), and the public surface of a single package uses it
-  (`rootPackageEntries`). Compare with the 1.x and Python behavior before any change.
-- [ ] The F36 and F41 tests exercise one code path. Keep one, or give F41 a case that F36 does
-  not reach.
-- [ ] Tests that run the whole pipeline or spawn git lose the 5 s default deadline on this host
-  when other sessions and Defender load it. Two full runs lost 4 different tests
-  (`--check-duplicates`, the accept-list, R1 and one unnamed test), and each test passes alone.
-  Measure the time of the slowest tests. Give those tests an explicit deadline, or cut their
+  (`exportsSubpathEntries`, `src/depgraph/roots.ts` line 113), and the public surface of a single
+  package uses it (`rootPackageEntries`, `src/depgraph/roots.ts` line 238). Compare with the 1.x
+  and Python behavior before any change.
+- [ ] The F36 and F41 tests exercise one code path:
+  `tests/unit/depgraph-f36.test.ts` line 22 and `tests/unit/depgraph-f41.test.ts` line 11, both
+  about a negated workspace pattern. Keep one, or give F41 a case that F36 does not reach.
+  `tests/unit/fix-ledger-audit.test.ts` line 205 lists both as locked, so change it with them.
+- [ ] Tests that run the whole pipeline or spawn git lose the 5 s default deadline under load.
+  Symptom on this host (other sessions and Defender): two full runs lost 4 different tests
+  (`--check-duplicates` in `tests/unit/depgraph-duplicate-gate.test.ts`, the accept-list,
+  R1 in `tests/unit/depgraph-r1.test.ts` and one unnamed test), and each test passes alone.
+  Symptom on CI: the Windows runner of PR #12 (push run 37028571343, head `bf98770`) failed one
+  test, `JSON: every number keeps its text ... 0.12345678901234567890123 in an array at medium`
+  (`tests/unit/compress.test.ts` lines 503 to 539: 6274 ms against 5000 ms). The `pull_request`
+  run of the same commit passed, so the cause is load and not a defect of the change. That test
+  runs `compress` in process and writes files to a temp folder, so the slow part is not measured.
+  Proposed fix: read the `[N ms]` time that `bun test` prints for each test, and list the slowest
+  ones. Give each of them an explicit deadline as the third argument of `test(...)`, or cut its
   work. Do not widen the global deadline blind.
 
 ## 2.2.0: `repo-tools docs`
@@ -164,25 +177,29 @@
     (2.2.0).
   - [x] File the open findings of the port (the `COVERAGE.md` Verification block is not a
     checked claim; the stub planner reverts a file with a one-line body or 2-space indent).
-- [ ] `COVERAGE.md` ends with a `## Verification` list, and the footer names `check`. The list has
-  no `| claim | value | source |` rows, so `repo-tools check --docs` reports a section without a
-  row if you point it at `docs/code-docs`. Give the report the opt-out marker, or write rows
-  that a command verifies. The Python tool writes the same list.
-- [ ] The Python stub planner writes the docstring at the indent of the `def` line plus 4 spaces.
-  A file that indents by 2 spaces or by tabs, and a `def f(): pass` on one line, fail the parse
-  after the change. The writer reverts such a file and says `REVERTED`, so no source is lost. Read
-  the indent unit of the file, and handle the one-line body. The Python tool has the same limit.
-- [ ] The Python analyser accepts a few errors that CPython finds while it builds the tree
-  (`def f(*)`, `del f()`), and it rejects a name that continues on the next line inside round
-  brackets (`(bar.` then `baz)`). The second case fails closed. See `docs/parity-docs.md`. Report
-  the grammar case to `tree-sitter-python`, and add a check for each error that a real file shows.
+- [ ] `COVERAGE.md` ends with a `## Verification` list (`src/docs/report.ts` line 124), and the
+  footer names `check`. The list has no `| claim | value | source |` rows, so
+  `repo-tools check --docs` reports a section without a row if you point it at `docs/code-docs`.
+  Give the report the opt-out marker, or write rows that a command verifies. The Python tool
+  writes the same list.
+- [ ] The Python stub planner writes the docstring at the indent of the last `def` line plus 4
+  spaces (`src/docs/stub.ts` line 66). A file that indents by 2 spaces or by tabs, and a
+  `def f(): pass` on one line, fail the parse after the change. The writer reverts such a file
+  and says `REVERTED`, so no source is lost. Read the indent unit of the file, and handle the
+  one-line body. The Python tool has the same limit.
+- [ ] The Python analyser (`syntaxError`, `src/docs/python.ts` line 361) accepts a few errors that
+  CPython finds while it builds the tree (`def f(*)`, `del f()`), and it rejects a name that
+  continues on the next line inside round brackets (`(bar.` then `baz)`). The second case fails
+  closed. See `docs/parity-docs.md`. Report the grammar case to `tree-sitter-python`, and add a
+  check for each error that a real file shows.
 - [ ] The TypeScript grammar (0.23.2) rejects an invalid escape in a tagged template, for example
   ``String.raw`a\x` ``. ES2018 allows it, and `tsc` accepts it. The doc gate reports such a file as
   unparsed. `tests/unit/map-parsing-py.test.ts` held one, and the test now avoids it. Update the
-  grammar, or rewrite the escape in `sanitise` with text of equal length.
-- [ ] Two symbols on one line (compact or generated source) list in file order here and in
-  reverse order in the Python tool. No gate reads the order. Close this item only if a consumer of
-  `coverage.json` needs the Python order.
+  grammar, or rewrite the escape in `sanitise` (`src/docs/typescript.ts` line 80) with text of
+  equal length.
+- [ ] Two symbols on one line (compact or generated source) list in file order here
+  (`src/docs/typescript.ts` line 221) and in reverse order in the Python tool. No gate reads the
+  order. Close this item only if a consumer of `coverage.json` needs the Python order.
 
 ## Post-release list (filed, not worked in v1)
 
