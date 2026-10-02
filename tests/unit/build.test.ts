@@ -46,7 +46,7 @@ describe("node bundle (design 11.1)", () => {
     const refs = [...readFileSync(bundle, "utf8").matchAll(/["']\.\/([\w.-]+\.wasm)["']/g)].map(
       (m) => m[1] as string,
     );
-    expect(refs.length).toBe(3);
+    expect(refs.length).toBe(4);
     for (const name of refs) expect(existsSync(join(dirname(bundle), name))).toBe(true);
   });
 
@@ -162,7 +162,7 @@ describe("smoke test: map on the product (design 12.1 steps 2, 3 and 7)", () => 
     () => {
       const r = smoke([process.execPath, "src/bin.ts"]);
       expect(r.stderr.toString()).toBe("");
-      expect(r.stdout.toString()).toBe("smoke passed: 9 steps.\n");
+      expect(r.stdout.toString()).toBe("smoke passed: 10 steps.\n");
     },
     SMOKE_TIMEOUT_MS,
   );

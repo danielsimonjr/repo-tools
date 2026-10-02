@@ -8,8 +8,9 @@
  * an unknown subcommand, `map` on the mini-repo fixture against its goldens (12.1 step 2),
  * the API-surface report against its golden (12.1 step 3), the `chunk split` and `chunk merge`
  * round trip (12.1 step 4), a JSON round trip through `compress` and `compress -d` (12.1 step 5),
- * a `map` run that loads the fixture extension (12.1 step 7), and the drift gate: `check` passes
- * a matching claim and fails a drifting one, each in a temp folder.
+ * a `map` run that loads the fixture extension (12.1 step 7), the drift gate: `check` passes
+ * a matching claim and fails a drifting one, each in a temp folder, and the doc gate: `docs check`
+ * passes documented TypeScript, TSX and Python and fails an undocumented export.
  */
 import {
   copyFileSync,
@@ -51,9 +52,11 @@ const STEPS: Step[] = [
     args: ["--help"],
     exit: 0,
     check: (out) =>
-      ["map", "depgraph", "check", "chunk", "compress", "query"].every((s) => out.includes(s))
+      ["map", "depgraph", "check", "docs", "chunk", "compress", "query"].every((s) =>
+        out.includes(s),
+      )
         ? undefined
-        : "the help does not list map, depgraph, check, chunk, compress and query",
+        : "the help does not list map, depgraph, check, docs, chunk, compress and query",
   },
   { name: "unknown subcommand", args: ["frobnicate"], exit: 1 },
 ];
@@ -248,6 +251,40 @@ function checkGate(command: string[]): string | undefined {
   });
 }
 
+/**
+ * The doc-comment gate: `docs check` reads a temp folder with a TypeScript, a TSX and a Python
+ * file, so one run loads all three grammars of the product. Documented source must exit 0. A new
+ * exported symbol with no doc comment must exit 1 with its M1 line.
+ */
+function docsGate(command: string[]): string | undefined {
+  const dir = mkdtempSync(join(tmpdir(), "repo-tools-smoke-"));
+  try {
+    writeFileSync(join(dir, "a.ts"), "/** Returns one. */\nexport function a() {}\n");
+    writeFileSync(
+      join(dir, "b.tsx"),
+      "/** Draws it. */\nexport function B() {\n  return <i />;\n}\n",
+    );
+    writeFileSync(join(dir, "c.py"), 'def c():\n    """Returns one."""\n');
+    const check = () => Bun.spawnSync([...command, "docs", "check", dir]);
+    const pass = check();
+    if (pass.exitCode !== 0) return `documented source: exit ${pass.exitCode}, expected 0`;
+    const line = "PASS -- 3/3 exported symbols documented, 0 MUST issues";
+    if (!pass.stdout.toString().includes(line)) {
+      return `the pass line is missing from ${JSON.stringify(pass.stdout.toString())}`;
+    }
+    writeFileSync(join(dir, "d.ts"), "export function d() {}\n");
+    const fail = check();
+    if (fail.exitCode !== 1) return `an undocumented symbol: exit ${fail.exitCode}, expected 1`;
+    return fail.stdout.toString().includes("d.ts:1 d: M1")
+      ? undefined
+      : `the M1 line is missing from ${JSON.stringify(fail.stdout.toString())}`;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 /** Checks that run a command more than once and check files. */
 const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined }[] = [
   { name: "map golden (12.1 step 2)", run: mapGolden },
@@ -256,6 +293,7 @@ const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined
   { name: "compress JSON round trip", run: jsonRoundTrip },
   { name: "extension hooks (12.1 step 7)", run: extensionHooks },
   { name: "check drift gate", run: checkGate },
+  { name: "docs gate", run: docsGate },
 ];
 
 /** The number of checks that `smoke` runs. */

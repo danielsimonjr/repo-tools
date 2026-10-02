@@ -6,8 +6,47 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-02
+
+`repo-tools docs` is the new gate of the doc comments of a repository. It ports `code_docs.py` of
+the code-docs skill. `docs/parity-docs.md` lists the differences from the Python tool. The
+release also adds the audit of the fix ledger and the check for dangling references to the
+design document.
+
 ### Added
 
+- `repo-tools docs`, the gate of the doc comments. The command is a port of `code_docs.py` of the
+  code-docs skill, and it needs no Python. `docs scan` measures the coverage of the exported
+  symbols and writes `COVERAGE.md` and `coverage.json`. `docs check` is the gate: it exits 1 on a
+  MUST issue (M1 to M5) and on a file that does not parse. `--paths` and `--paths-from=<file>`
+  gate the changed files of a pull request only. `docs stub` plans a skeleton comment with the
+  marker `TODO:` for each exported symbol that has no comment. The default is a dry run until
+  `--apply`. After a change, `stub` parses the file again, and it keeps the line ends of the
+  file. The command reads TypeScript, JavaScript and Python with tree-sitter. A
+  `.code-docs.json` file at the root excludes paths, and each entry needs a reason. Section 16
+  of `docs/design.md` describes the command. `docs/parity-docs.md` compares the command with the
+  Python tool on 9 public repositories: 4665 files, 22329 symbols, 690 MUST issues and 11208
+  SHOULD issues. The reports are equal, except for the order of the symbols in 40 files and the
+  doc names of 29 symbols of one repository. The command gives 3 MUST issues more than the Python
+  tool, for stale names in optional `[name]` tags. The record lists the differences. Some are
+  defects of the Python tool. The defects are a closing `*/` in the summary, comment delimiters in
+  the STE check, and the parameter names in a doc. The others are the parser of Python, the exit
+  codes, and the files that `stub` changes.
+- `repo-tools docs stub` never writes through a link. The command skips a file that is a link or
+  resolves outside the root, and names the file. The command does not write a TypeScript block
+  when another token precedes the declaration on its line, for example the end of a template. The
+  end of a Python signature ignores the brackets in strings and a comment after the colon. A root
+  with no source file gives exit code 1, as for `scan` and `check`. `--path=.` selects the whole
+  repository.
+- `docs check --paths-from` reads the quoted names that `git diff --name-only` writes for a
+  non-ASCII file name. The analysers read a JSDoc parameter name with `$`, and the optional forms
+  `[name]` and `[name=default]`. They read a reST field with a type, for example
+  `:param int x:`. A destructured parameter binds the names on the left of a default value. The
+  analysers read each name from the source as written, so a parameter named `abstract` keeps its
+  name. The Python tool has each of these defects, and design section 16.6 lists them.
+- The smoke test has a step for the doc gate. A run of `docs check` reads a TypeScript, a TSX and
+  a Python file, so one run loads the three grammars of the product. The test passes documented
+  source and fails a new undocumented export.
 - `bun run audit:ledger`, the audit of the fix ledger. For each fix (F1 to F44, M1 and R1), the
   script restores the 1.x defect in a scratch copy of the repository. Then it runs the tests.
   It runs the test file of the fix first, and then the whole suite. A test of the fix file must
@@ -33,6 +72,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The grammar loader reads a third grammar, TSX. The Node bundle and the npm package now hold four
+  `.wasm` files and not three, and the compiled executable holds the TSX grammar too. `docs` uses
+  it for `.tsx` and `.jsx` files. `map` still reads these files with the TypeScript grammar.
 - The directory readers of the map engine read through `readdirHook`. The readers are discovery,
   the two `.csproj` walks and the folder list of a workspace pattern. The F2 test replaces
   `readdirHook`. Before, the map never called the reader that the F2 test reversed. The test

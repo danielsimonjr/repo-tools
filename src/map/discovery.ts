@@ -139,7 +139,7 @@ export class UnsupportedRepoLanguage extends Error {
 }
 
 /** Python `Path(name).suffix`: the last dot extension; none for a leading-dot-only name. */
-function suffixOf(name: string): string {
+export function suffixOf(name: string): string {
   const i = name.lastIndexOf(".");
   if (i <= 0 || i === name.length - 1) return "";
   return name.slice(i);

@@ -7,12 +7,13 @@
 | `map` | Writes the dependency graph and the architecture reports of a TypeScript/JavaScript, Python, C# or Rust repository. |
 | `depgraph` | The deprecated alias of `map` (through 2.x). |
 | `check` | Checks the `## Verification` tables of Markdown documents against a fresh graph, and fails on drift. |
+| `docs` | Measures the doc comments of TypeScript, JavaScript and Python files, plans the missing ones, and gates the result. |
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 | `query` | Answers structural questions from the graph of `map`, and writes two derived reports. |
 | `ste` | Checks Markdown or docstring prose against Simplified Technical English. |
 
-Status: version 2.1.0.
+Status: version 2.2.0.
 
 - `map`, `check` and `query` read their settings from `repo-tools.config.json` in the root. The
   section of `map` is `map` (its old name, `depgraph`, is also read). `--config=<file>` makes any
@@ -40,7 +41,7 @@ repo-tools --version
 
 The executable holds the tool and the Bun runtime. It needs no Bun, Node or `node_modules`.
 Download the file for your platform and `SHA256SUMS` from the
-[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v2.1.0):
+[GitHub release](https://github.com/danielsimonjr/repo-tools/releases/tag/v2.2.0):
 
 | Platform | File |
 |---|---|
@@ -209,6 +210,57 @@ section, and a section without a row are failures. An unknown claim name is a fa
 metric that the graph build declared unreliable. `docs/design.md` (section 15) gives the rules and the
 differences from the Python tool. `docs/parity-check.md` records the comparison with that tool on
 11 repositories.
+
+## Gate the documentation comments
+
+`repo-tools docs` reads the TypeScript, JavaScript and Python files that git tracks. It finds each
+function, class, interface, type alias and method, and the doc comment of each one. It needs no
+Python on the computer.
+
+```sh
+repo-tools docs scan .                      # writes docs/code-docs/COVERAGE.md and coverage.json
+repo-tools docs check .                     # the gate: exit 1 on a MUST issue
+repo-tools docs stub . --path=src/api       # a dry run: lists the stubs and writes nothing
+repo-tools docs stub . --path=src/api --apply
+```
+
+The rules are:
+
+| Rule | Tier | The rule |
+|---|---|---|
+| M1 | MUST | An exported symbol has a doc comment. A test file is exempt. |
+| M2 | MUST | The doc comment has a summary line. |
+| M3 | MUST | The doc comment names no parameter that the signature lacks. |
+| M4 | MUST | The doc comment holds no `TODO:` marker. |
+| M5 | MUST | A file uses one doc dialect: `google`, `numpy` or `rest` for Python, `tsdoc` or `jsdoc` for TypeScript. |
+| S2 | SHOULD | The summary ends with a full stop. |
+| S5 | SHOULD | The doc comment does not repeat a type that the signature holds. |
+| S6 | SHOULD | The prose follows Simplified Technical English (the rules of `repo-tools ste`). |
+
+Only a MUST issue changes the exit code of `check`. A file that does not parse is also a failure,
+because an unknown file is not a clean file. A repository with no source file fails too.
+
+`stub` is a dry run until you pass `--apply`. Each stub holds the marker `TODO:`, so `check` fails
+until you replace the stub with real prose. The command parses a file again after the change.
+A file that would no longer parse stays unchanged. The command skips a file that is a link or
+resolves outside the root, and it names the skipped file.
+
+To gate a pull request and not the whole backlog, give `check` the changed files:
+
+```sh
+git diff --name-only origin/main... > changed.txt
+repo-tools docs check . --paths-from=changed.txt
+```
+
+A `.code-docs.json` file at the root excludes paths. Each entry needs a reason, and the output
+names each exclusion:
+
+```json
+{ "exclude": [ { "path": "assembly/", "reason": "AssemblyScript" } ] }
+```
+
+`docs/design.md` (section 16) gives the rules, the exit codes and the differences from the Python
+tool. `docs/parity-docs.md` records the comparison with that tool on 9 repositories.
 
 ## Query the graph
 

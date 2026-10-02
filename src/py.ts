@@ -21,6 +21,9 @@ export const SPACE_BODY =
 /** Python `\s` (a character class). Use it in a regex with the `u` flag. */
 export const S = `[${SPACE_BODY}]`;
 
+/** Python `\S` (a character class): a character that is not white space. Use the `u` flag. */
+export const NON_SPACE = `[^${SPACE_BODY}]`;
+
 /** Python `\w`: a Unicode letter, a Unicode number or `_`. Use it with the `u` flag. */
 export const W = "[\\p{L}\\p{N}_]";
 

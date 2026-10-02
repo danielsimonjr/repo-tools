@@ -24,10 +24,12 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+/** The class of a denylist entry: the name of a person, or the name of a private repository. */
 export type Category = "person" | "private";
 /** Token hash (SHA-256 hex of the lower-case token) to its category. */
 export type Denylist = Map<string, Category>;
 
+/** The kind of problem that the check reports. */
 export type Rule =
   | "windows-user-path"
   | "posix-home-path"
@@ -37,6 +39,7 @@ export type Rule =
   | "binary"
   | "accepted-stale";
 
+/** One problem that the check found in a file, in a path or in a commit message. */
 export interface Finding {
   file: string;
   /** 1-based line number; 0 for a finding about the file itself. */
@@ -409,6 +412,7 @@ export function decodeForScan(bytes: Buffer): { text: string; binary: boolean } 
   return { text: runs.join("\n"), binary: true };
 }
 
+/** The result of one run: the findings, the accepted findings and the counts. */
 export interface CheckResult {
   findings: Finding[];
   /** The commit-message findings that the accept-list took out of `findings`. */
