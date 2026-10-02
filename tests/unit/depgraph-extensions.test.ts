@@ -1,5 +1,5 @@
 /**
- * The extension loader (D10b, design section 5.2): `depgraph.extensions` names root-relative
+ * The extension loader (D10b, design section 6): `depgraph.extensions` names root-relative
  * `.mjs` modules. They load in config order. `preflight(ctx)` runs before the first write and
  * `report(ctx)` after the analysis. A throw or a rejected promise exits 1 with the extension
  * name. `--no-extensions` loads none. `--check-census` and `--check-duplicates --no-regen` skip

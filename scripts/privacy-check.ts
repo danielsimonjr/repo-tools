@@ -1,5 +1,5 @@
 /**
- * Privacy check (design section 10.2).
+ * Privacy check (design section 10).
  *
  * The check scans every tracked file and every commit message reachable from HEAD. It fails
  * on an absolute user path, an email address, a session URL, a tracked binary, or a word

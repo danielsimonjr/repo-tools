@@ -1,5 +1,5 @@
 /**
- * The config file `repo-tools.config.json` (design section 5.1): every key with its default and
+ * The config file `repo-tools.config.json` (design section 5): every key with its default and
  * type, the rejection of an unknown key, an absolute path, an unreadable file and invalid JSON,
  * the precedence (command line, then config file, then default) and the resolution of paths
  * against the root.
@@ -21,7 +21,7 @@ import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
 afterAll(removeTrees);
 
-/** The defaults of design section 5.1 (the test folders keep both spellings; see `tests`). */
+/** The defaults of design section 5 (the test folders keep both spellings; see `tests`). */
 const DEFAULTS: DepgraphConfig = {
   src: "auto",
   tests: ["test", "tests"],
@@ -128,7 +128,7 @@ describe("config file: keys, defaults and types", () => {
   }
 });
 
-describe("config file: the query section (design section 3.5)", () => {
+describe("config file: the query section (design section 5)", () => {
   test("query.out loads, and the depgraph settings are unchanged", () => {
     const root = pkg({ [CONFIG_FILE]: JSON.stringify({ query: { out: "q/out" } }) });
     expect(loadConfigSections(root).query).toEqual({ out: "q/out" });

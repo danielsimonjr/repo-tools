@@ -1,14 +1,14 @@
 /**
- * Smoke test (design 13.3) for one way to run the tool.
+ * Smoke test (design 12.1) for one way to run the tool.
  *
  *   bun scripts/smoke.ts -- <command...>
  *
  * Examples: `-- bin/repo-tools-linux-x64`, `-- node dist/cli.js`, `-- bun dist/cli.js`.
  * The script runs every step and exits 1 when a step fails. The steps: `--version`, `--help`,
- * an unknown subcommand, `map` on the mini-repo fixture against its goldens (13.3 step 2),
- * the API-surface report against its golden (13.3 step 3), the `chunk split` and `chunk merge`
- * round trip (13.3 step 4), a JSON round trip through `compress` and `compress -d` (13.3 step 5),
- * a `map` run that loads the fixture extension (13.3 step 7), and the drift gate: `check` passes
+ * an unknown subcommand, `map` on the mini-repo fixture against its goldens (12.1 step 2),
+ * the API-surface report against its golden (12.1 step 3), the `chunk split` and `chunk merge`
+ * round trip (12.1 step 4), a JSON round trip through `compress` and `compress -d` (12.1 step 5),
+ * a `map` run that loads the fixture extension (12.1 step 7), and the drift gate: `check` passes
  * a matching claim and fails a drifting one, each in a temp folder.
  */
 import {
@@ -61,7 +61,7 @@ const STEPS: Step[] = [
 const CHUNK_FIXTURE = join(import.meta.dir, "../tests/fixtures/chunk/guide.md");
 
 /**
- * Design 13.3 step 4: `chunk split` and then `chunk merge` on a copy of a Markdown fixture in a
+ * Design 12.1 step 4: `chunk split` and then `chunk merge` on a copy of a Markdown fixture in a
  * temporary folder. The merged file must equal the input byte for byte. Returns an error text or
  * undefined.
  */
@@ -98,7 +98,7 @@ const ROUND_TRIP_INPUT = {
 };
 
 /**
- * Design 13.3 step 5: `compress` then `compress -d` in a temp folder must give a JSON value that
+ * Design 12.1 step 5: `compress` then `compress -d` in a temp folder must give a JSON value that
  * is deep-equal to the input. Returns an error text or undefined.
  */
 function jsonRoundTrip(command: string[]): string | undefined {
@@ -154,7 +154,7 @@ function map(command: string[], root: string, flags: string[]) {
   });
 }
 
-/** Design 13.3 step 2: `map` on the mini-repo fixture equals its goldens, file by file. */
+/** Design 12.1 step 2: `map` on the mini-repo fixture equals its goldens, file by file. */
 function mapGolden(command: string[]): string | undefined {
   return inMiniRepo((root) => {
     const r = map(command, root, GOLDEN_FLAGS);
@@ -175,7 +175,7 @@ function mapGolden(command: string[]): string | undefined {
   });
 }
 
-/** Design 13.3 step 3: `map --api-surface=out.json` equals the API-surface golden. */
+/** Design 12.1 step 3: `map --api-surface=out.json` equals the API-surface golden. */
 function apiSurfaceGolden(command: string[]): string | undefined {
   return inMiniRepo((root) => {
     const r = map(command, root, [...GOLDEN_FLAGS, "--api-surface=out.json"]);
@@ -190,7 +190,7 @@ function apiSurfaceGolden(command: string[]): string | undefined {
 }
 
 /**
- * Design 13.3 step 7: the tool loads the fixture `.mjs` extension of the config file. Both hooks
+ * Design 12.1 step 7: the tool loads the fixture `.mjs` extension of the config file. Both hooks
  * must run: `preflight` writes a marker under the root, and `report` writes a file through
  * `ctx.write` into the output folder.
  */
@@ -250,11 +250,11 @@ function checkGate(command: string[]): string | undefined {
 
 /** Checks that run a command more than once and check files. */
 const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined }[] = [
-  { name: "map golden (13.3 step 2)", run: mapGolden },
-  { name: "api surface golden (13.3 step 3)", run: apiSurfaceGolden },
+  { name: "map golden (12.1 step 2)", run: mapGolden },
+  { name: "api surface golden (12.1 step 3)", run: apiSurfaceGolden },
   { name: "chunk round trip", run: chunkRoundTrip },
   { name: "compress JSON round trip", run: jsonRoundTrip },
-  { name: "extension hooks (13.3 step 7)", run: extensionHooks },
+  { name: "extension hooks (12.1 step 7)", run: extensionHooks },
   { name: "check drift gate", run: checkGate },
 ];
 

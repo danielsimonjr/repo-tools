@@ -1,5 +1,5 @@
 /**
- * The duplicate gate (D10b, design section 3.2): `--check-duplicates`, `--no-regen` and
+ * The duplicate gate (D10b, design section 3): `--check-duplicates`, `--no-regen` and
  * `--write-duplicate-baseline`, with the baseline at `depgraph.duplicateBaseline` (default
  * `<out>/duplicate-baseline.json`).
  */

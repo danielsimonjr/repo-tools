@@ -24,6 +24,12 @@ All notable changes to this project are recorded in this file. The format follow
   F43: the `src/<sub>/index.ts` fallback of an `exports` subpath. The tests of F17, F41 and F43
   assert more. They assert the `src/index.ts` fallback root, an excluded package that has an
   entry, and the edges of a self-import.
+- `bun run check:design`, the check for dangling references to `docs/design.md`. A comment, a
+  test title or a workflow can name a part of the design, for example `design 11.4`. The script
+  finds each such reference and looks for a heading with that number. It prints each reference
+  that has no heading, and it exits 1. The unit tests run it on this repository. The check
+  proves that the number exists. It cannot prove that the heading has the meaning that the
+  reference gives.
 
 ### Changed
 
@@ -35,18 +41,25 @@ All notable changes to this project are recorded in this file. The format follow
   F23, F24, F27 and F29 to F31 described other behavior. The rows for F13, F36, F41 and F44 sat
   in the section "No 2.0.0 meaning", although tests lock them. The test for M1 said that
   `--reachable-only` removes a file. It asserts that `map` rejects the flag.
+- `docs/design.md` now holds the parts that the code names. Section 11 has the subsections 11.1
+  to 11.4: the Node bundle, the compiled executables, the workflows and the release. Section 12
+  has 12.1, the steps of the smoke test. Section 14.2 describes the API-surface flags.
+- The check found 50 references in comments, test titles and workflows to a part that the
+  document never had. Each reference now names an existing section. Four more references named
+  section 4 for the chunk and compress modules. Section 4 holds the output rules, so they now
+  name section 8.
 
 ### Maintenance
 
-- The root `bun` Dependabot entry is removed from `.github/dependabot.yml`. It cannot succeed:
-  Dependabot's bundled bun reads `bun.lock` lockfileVersion 1 and Bun 1.4 writes 2, and the
+- The root `bun` Dependabot entry is removed from `.github/dependabot.yml`. It cannot succeed.
+  The bun updater of Dependabot reads `bun.lock` lockfileVersion 1, and Bun 1.4 writes 2. The
   `npm` alternative aborts during file fetching on a bun-managed project. Each error recommends
   the other. Measured here: the `bun in /.` updater job failed on 2026-09-24 and again on
   2026-10-01, while `github_actions in /.` succeeded on both days. `github-actions` updates are
   unchanged. The file now records the two errors, the cost and a checkable revisit condition.
   **Unlike the sibling repositories in this sweep, this one also has Dependabot alerts
-  disabled**, so nothing reports a vulnerable dependency either; a bump is entirely a human
-  action (`bun outdated`, `bun update <pkg>`, commit the regenerated `bun.lock`).
+  disabled.** Thus nothing reports a vulnerable dependency either. A bump is entirely a human
+  action: `bun outdated`, `bun update <pkg>`, then commit the regenerated `bun.lock`.
 
 ## [2.1.0] - 2026-10-01
 

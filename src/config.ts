@@ -1,7 +1,7 @@
 /**
- * The config file `repo-tools.config.json` (design section 5.1) and the merge of the command-line
+ * The config file `repo-tools.config.json` (design section 5) and the merge of the command-line
  * flags, the config file and the defaults. The file has a `depgraph` section and a `query`
- * section (design section 3.5).
+ * section (design section 5).
  *
  * Precedence: a command-line flag, then the config file, then the default. Every path is POSIX or
  * native, relative to the project root; the loader rejects an absolute path, so a committed
@@ -19,7 +19,7 @@ import { DEFAULT_REGENERATE_COMMAND, VERIFICATION_MARKER } from "./depgraph/repo
 /** The name of the config file at the root. */
 export const CONFIG_FILE = "repo-tools.config.json";
 
-/** The `depgraph.apiSurface` settings: the per-export facts report (design section 6.2). */
+/** The `depgraph.apiSurface` settings: the per-export facts report (design section 5). */
 export interface ApiSurfaceConfig {
   /** The report file, relative to the root. `null`: no report. */
   out: string | null;
@@ -195,7 +195,7 @@ function checkSection(
   return out;
 }
 
-/** The settings of the `query` section of the config file (design section 3.5). */
+/** The settings of the `query` section of the config file (design section 5). */
 export interface QuerySettings {
   /** The report folder, relative to the root. */
   out?: string;

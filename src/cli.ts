@@ -1,5 +1,5 @@
 /**
- * Command-line dispatch for `repo-tools` (design section 3.1).
+ * Command-line dispatch for `repo-tools` (design section 3).
  *
  * This module parses the first argument, prints the global help and version,
  * and calls the subcommand entry. A subcommand module never imports this file.

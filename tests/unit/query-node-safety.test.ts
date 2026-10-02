@@ -1,5 +1,5 @@
 /**
- * `repo-tools query node-safety` and `--check-browser-safety` (design section 3.5): the Node
+ * `repo-tools query node-safety` and `--check-browser-safety` (design section 7): the Node
  * runtimes come from `--node-runtime` or `query.nodeRuntimes`, not from a fixed package name.
  * The core graph (design decision D8) holds the edges of workspace imports, so a leak through an
  * import of another package by name is found; depgraph 1.x followed relative imports only.

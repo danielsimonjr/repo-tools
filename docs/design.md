@@ -270,6 +270,25 @@ password) on the list. A secret must never be in the repository in any form.
 
 ## 11. Build and CI
 
+One script builds the product in two forms, and two workflows run that script. No workflow
+publishes the product.
+
+### 11.1 The Node bundle
+
+`bun scripts/build.ts` writes `dist/cli.js`: one ESM file for Node 20 or later. The bundle holds
+the third-party code, so the npm package has no runtime dependency (section 2). The script first
+compares `node_modules` with `bun.lock`. On a difference, it exits 1.
+
+### 11.2 The compiled executables
+
+`bun scripts/build.ts --compile --target=<target>` writes one executable into `bin/`. Without
+`--target`, the target is the host. The three targets are `bun-windows-x64`, `bun-linux-x64` and
+`bun-darwin-arm64`. The files are `repo-tools-windows-x64.exe`, `repo-tools-linux-x64` and
+`repo-tools-darwin-arm64`. This mode also checks `node_modules` first. The script writes no
+checksum file.
+
+### 11.3 The workflows
+
 - Every action in a workflow is pinned to a full 40-character commit SHA. A tag can move; a SHA
   cannot.
 - The workflows have `contents: read` permission only. No workflow holds a publish token or
@@ -281,7 +300,14 @@ password) on the list. A secret must never be in the repository in any form.
     executable, on `node dist/cli.js` and on `bun dist/cli.js`;
   - a last job that packs the npm package and records its SHA-256.
 - `build.yml` runs on a version tag. It checks that the tag equals the `package.json` version,
-  builds the three executables, and writes their SHA-256 sums.
+  builds the three executables, runs the smoke test on each, and writes their SHA-256 sums.
+
+### 11.4 The release
+
+No workflow creates a release, and no workflow holds a token. The last job of `ci.yml` packs the
+npm package, writes its SHA-256 to `SHA256SUMS`, and uploads both as a workflow artifact.
+`build.yml` uploads the three executables and their `SHA256SUMS` as workflow artifacts. The release
+publishes the tarball that CI built, after a check of its hash against `SHA256SUMS`.
 
 ## 12. Verification
 
@@ -291,9 +317,10 @@ password) on the list. A secret must never be in the repository in any form.
 | Golden tests | Each report of each fixture equals its committed golden file, byte for byte. |
 | Double run | Each golden set runs twice. The second run must be byte-identical to the first. |
 | No extensions in goldens | The golden runs use `--no-extensions`. A planted extension that throws proves it. |
-| Smoke test (`scripts/smoke.ts`) | On the product itself: `--version`, `--help`, an unknown subcommand, `depgraph` against the goldens, `--api-surface` against its golden, the `chunk` round trip, the `compress` JSON round trip, an extension with both hooks, and the `check` drift gate (a matching claim exits 0, a drifting claim exits 1), run from another folder. |
+| Smoke test (`scripts/smoke.ts`) | On the product itself: `--version`, `--help`, an unknown subcommand, `depgraph` against the goldens, `--api-surface` against its golden, the `chunk` round trip, the `compress` JSON round trip, an extension with both hooks, and the `check` drift gate (a matching claim exits 0, a drifting claim exits 1), run from another folder. Section 12.1 lists the steps. |
 | API-surface equivalence | `depgraph --api-surface` gives the same bytes as the generator that the module came from. |
 | Fix-ledger audit (`bun run audit:ledger`) | Each fix of `docs/fix-ledger-2.0.0.md` has a test that fails when the fix is reverted. |
+| Design references (`bun run check:design`) | Each reference to a section of this document, in a comment, a test title or a workflow, names a heading that exists. The check cannot prove that the heading has the meaning that the reference gives. |
 
 The fix-ledger audit reverts one fix at a time in a scratch copy of the repository. A shared git
 clone of the work tree, plus the uncommitted files, forms the copy. Each mutation of
@@ -311,6 +338,21 @@ The mini-repo fixture holds names whose case order differs from code-unit order 
 
 A killed test run cannot remove its temporary folders. Each test folder name holds the process ID
 of its run, and the next run removes the folders of runs that are no longer alive.
+
+### 12.1 The smoke test
+
+`scripts/smoke.ts` runs the steps below against one way to run the tool: a compiled executable,
+`node dist/cli.js` or `bun dist/cli.js`. It exits 1 when a step fails.
+
+1. `--version` prints the package version, `--help` lists the subcommands, and an unknown
+   subcommand exits 1.
+2. `map` on the mini-repo fixture gives its golden files, file by file.
+3. `map --api-surface=<file>` gives the API-surface golden.
+4. `chunk split` and then `chunk merge`, on a copy of a Markdown fixture, give the input bytes.
+5. `compress` and then `compress -d`, on a JSON file, give the same JSON value.
+6. CI runs the script for each of the three ways to run the tool, on each operating system.
+7. A `map` run loads the fixture `.mjs` extension, and both hooks run.
+8. The drift gate: `check` exits 0 on a matching claim and exits 1 on a drifting claim.
 
 ## 13. Limits of version 1
 
@@ -353,6 +395,9 @@ through 2.x.
   exits 1.
 - Input files never come from the output folder. The duplicate allowlist, the duplicate baseline
   and the coverage policy default to `docs/architecture/`.
+- `--api-surface=<file>` writes the per-export facts report of one entry file. `--api-entry=<path>`
+  names the entry file, and `--stability-tags=<a,b>` sets the tags. A missing entry file stops the
+  run with exit 1 before the run writes any file.
 - A repository with no source file, or with a language that the engine cannot read, exits 1
   and gets no output folder.
 

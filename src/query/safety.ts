@@ -1,5 +1,5 @@
 /**
- * The browser-safety model of `repo-tools query` (design section 3.5).
+ * The browser-safety model of `repo-tools query` (design section 7).
  *
  * A package is the folder above a `src/index.ts` file of the graph; the package of the root
  * `src/index.ts` is ".". Each package is browser-safe unless it is a Node runtime. The `.` entry

@@ -1,5 +1,5 @@
 /**
- * `repo-tools compress` (design sections 3.4 and 4).
+ * `repo-tools compress` (design section 8).
  *
  * Writes a compact copy of a file for a model context, in the CTON format, or restores a compact
  * file. Single-file mode and batch mode are available.

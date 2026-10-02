@@ -1,4 +1,4 @@
-// Fixture extension for the smoke test (design 13.3 step 7), in the section 5.2 shape.
+// Fixture extension for the smoke test (design 12.1 step 7), in the shape of design section 6.
 // `preflight` writes a marker file under the root; `report` writes through `ctx.write`.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";

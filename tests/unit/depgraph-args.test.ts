@@ -1,5 +1,5 @@
 /**
- * Strict flag parsing of `repo-tools depgraph` (design section 3.2, exit-code table): an unknown
+ * Strict flag parsing of `repo-tools depgraph` (design section 14.2): an unknown
  * flag, a flag without its value and an invalid value exit 1 with a message on standard error,
  * and the run writes nothing.
  */

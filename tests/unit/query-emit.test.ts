@@ -1,5 +1,5 @@
 /**
- * `repo-tools query --emit` (design section 3.5): dependency-reverse.json and node-safety.json,
+ * `repo-tools query --emit` (design section 7): dependency-reverse.json and node-safety.json,
  * sorted, with LF line endings, one trailing LF and no timestamp.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";

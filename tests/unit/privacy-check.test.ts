@@ -35,7 +35,7 @@ const DENY: Denylist = new Map([
 
 const rules = (fs: Finding[]) => fs.map((f) => f.rule);
 
-describe("scanText rules (design 10.2)", () => {
+describe("scanText rules (design section 10)", () => {
   test("clean text has no finding", () => {
     expect(scanText("README.md", "A plain sentence about graphs.\n", DENY)).toEqual([]);
   });

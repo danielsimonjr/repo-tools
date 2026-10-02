@@ -6,7 +6,7 @@ import { statSync } from "node:fs";
 import { join } from "node:path";
 import { isLink, isWalkable, listNames } from "./dirlist.ts";
 
-/** The default skip list of folder names (design section 3.2). */
+/** The default skip list of folder names (design section 3). */
 export const DEFAULT_EXCLUDE: readonly string[] = [
   "node_modules",
   "dist",

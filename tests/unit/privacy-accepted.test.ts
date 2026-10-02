@@ -4,7 +4,7 @@ import { join } from "node:path";
 import * as privacy from "../../scripts/privacy-check.ts";
 import { makeTempDir } from "./temp.ts";
 
-// The accept-list (design 10.2) records a reviewed finding in the history of a repository.
+// The accept-list (design section 10) records a reviewed finding in the history of a repository.
 // The history cannot change, so a new commit cannot clear the finding. An entry names a full
 // commit sha, one finding kind and one line of the commit message. Every plant is built from
 // fragments, so this file never holds a literal finding.

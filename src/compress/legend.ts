@@ -1,5 +1,5 @@
 /**
- * Legend build and parse for `repo-tools compress` (design section 4).
+ * Legend build and parse for `repo-tools compress` (design section 8).
  *
  * A legend maps a short abbreviation to the full text that it replaces. The compressors build
  * legends with the helpers here, and `decompress` reads the legend back from a compact JSON file

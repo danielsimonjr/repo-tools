@@ -1,5 +1,5 @@
 /**
- * The chunk manifest: its types, its hash and its file I/O (design section 4).
+ * The chunk manifest: its types, its hash and its file I/O (design section 8).
  *
  * A manifest lives in the chunk folder as `manifest.json`. It records the source file, the file
  * type and one entry for each chunk file.

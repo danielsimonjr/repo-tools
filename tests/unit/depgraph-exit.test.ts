@@ -1,5 +1,5 @@
 /**
- * The exit rows of design section 3.2 and criterion 4: a root that is not an existing directory
+ * The exit rows of design section 14.2 and criterion 4: a root that is not an existing directory
  * exits 1 before any folder is made; zero source files exit 1 and make no output folder; every
  * error text on standard error shows the root as `<root>`, never as an absolute path.
  */

@@ -192,7 +192,7 @@ describe("directories and --batch", () => {
   });
 });
 
-describe("round trip (design 13.3 step 5)", () => {
+describe("round trip (design 12.1 step 5)", () => {
   for (const level of ["light", "medium", "aggressive"]) {
     test(`JSON at ${level}: compress then -d gives a deep-equal value`, async () => {
       const dir = folder("sample.json");

@@ -1,4 +1,4 @@
-# Accepted findings in the commit history (design 10.2).
+# Accepted findings in the commit history (design section 10).
 #
 # A commit message cannot change after a merge. Thus no new commit can clear a finding in it.
 # Each line below accepts one finding of one commit. One entry holds four fields:
