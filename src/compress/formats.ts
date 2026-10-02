@@ -1,5 +1,5 @@
 /**
- * One compressor per file format for `repo-tools compress` (design section 4).
+ * One compressor per file format for `repo-tools compress` (design section 8).
  *
  * Each compressor returns the compact text, its legend and the size statistics. The output of
  * each compressor is the CTON format and does not change.

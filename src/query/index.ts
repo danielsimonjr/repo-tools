@@ -1,6 +1,6 @@
 /**
  * `repo-tools query`: answers structural questions from the core graph that `repo-tools map`
- * writes, and writes two derived reports (design section 3.5, design decision D8). It reads
+ * writes, and writes two derived reports (design section 7, design decision D8). It reads
  * `dependency-graph.json` (and `package-export-surfaces.json` for `is-public`); it never parses
  * source code.
  */

@@ -1,5 +1,5 @@
 /**
- * The command line of `repo-tools query` (design section 3.5).
+ * The command line of `repo-tools query` (design section 7).
  *
  * The parser is strict. An unknown command or flag, a missing or extra argument, a flag without
  * its value, a value on a flag that takes none, and two commands in one run each throw an error;

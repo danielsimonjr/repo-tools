@@ -1,5 +1,5 @@
 /**
- * Repo-local extensions of depgraph (design section 5.2).
+ * Repo-local extensions of depgraph (design section 6).
  *
  * An extension is a `.mjs` module with a default export `{ name, preflight?, report? }`.
  * `depgraph.extensions` names the modules, relative to the root; they load in that order. The

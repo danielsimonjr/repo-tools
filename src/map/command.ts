@@ -208,7 +208,7 @@ async function runPipeline(
   const log = (line: string): void => io.stdout(`${line}\n`);
   const outDir = resolveUnderRoot(root, config.out);
   const outRel = relativePosix(root, outDir) || ".";
-  // The API-surface entry must exist before the run writes anything (design section 6.2).
+  // The API-surface entry must exist before the run writes anything (design section 14.2).
   const api = config.apiSurface;
   if (api.out !== null && !existsSync(resolveUnderRoot(root, api.entry))) {
     throw new Error(`the --api-entry file ${shown(api.entry)} does not exist`);

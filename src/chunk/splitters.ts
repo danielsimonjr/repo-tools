@@ -1,5 +1,5 @@
 /**
- * Splitters for the `chunk` subcommand (design section 4): Markdown, JSON and TypeScript.
+ * Splitters for the `chunk` subcommand (design section 8): Markdown, JSON and TypeScript.
  *
  * Each splitter returns the sections of one file. `split` writes one chunk file per section.
  * The splitters are a port of the original chunker. The TypeScript splitter keeps the string,

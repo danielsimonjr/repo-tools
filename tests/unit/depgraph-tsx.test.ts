@@ -1,5 +1,5 @@
 /**
- * `.tsx` input (design section 3.2, "Input files: `.ts` and `.tsx`"). The graph walk, the census
+ * `.tsx` input (design section 13: `.ts` and `.tsx`). The graph walk, the census
  * walks, the test walk and the resolver read `.tsx` as well as `.ts`. The `.d.ts` rules do not
  * change: the graph walk keeps a `.d.ts` file and the census walks skip it.
  */

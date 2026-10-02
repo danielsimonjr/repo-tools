@@ -17,7 +17,7 @@ async function query(argv: string[]) {
   return { code, out, err };
 }
 
-describe("repo-tools query: the command line (design section 3.5)", () => {
+describe("repo-tools query: the command line (design section 7)", () => {
   test("query --help prints the query help and exits 0", async () => {
     const r = await query(["--help"]);
     expect(r.code).toBe(0);

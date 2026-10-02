@@ -122,11 +122,19 @@
   marker, with the divergence from `check.py` recorded in `docs/parity-check.md`.
 - [x] Fix-ledger audit, after `check`: a script reverts each fix (F1 to F44, M1, R1) in a scratch
   worktree and records whether a `map` test fails. Each fix that no test catches gets a test.
-- [ ] Workflow comments: `.github/workflows/build.yml` line 4 ("design 11.3, 11.4") and `ci.yml`
+- [x] Workflow comments: `.github/workflows/build.yml` line 4 ("design 11.3, 11.4") and `ci.yml`
   line 90 ("design 11.4") name subsections that `docs/design.md` section 11 does not have. Add
   the subsections (no release step, publish from the CI tarball after a hash check, no token in
   CI) or point the comments at section 11. Add a check that fails on a dangling section
   reference.
+- [ ] Names of private decisions (`D2`, `D8`, `D10b`, `criterion 4`) appear about 74 times in
+  comments and test titles. `docs/parity-2.0.0.md` defines the 2.0.0 ones. A reader of the public
+  repository cannot resolve the 1.x ones. Replace each with a statement of the rule, or with a
+  section of `docs/design.md`.
+- [ ] `check:design` cannot tell a right section number from a wrong one that exists. Four
+  references named section 4 for the chunk and compress modules, and section 4 exists. Read the
+  references to sections 3 to 9 once by hand, or give each section a one-line summary that a
+  check can compare.
 - [ ] Dead code in `src/depgraph/analysis.ts`: `detectUnused`, `splitDormant`, `generateStatistics`
   and `findReachableFiles` have no caller outside that file and the tests. Remove them with their
   tests, or wire them in.

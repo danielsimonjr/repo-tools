@@ -1,6 +1,6 @@
 /**
  * `repo-tools query`: the commands `dependents`, `symbol-users`, `is-public` and `cycles` on the
- * core graph that `repo-tools map` writes for a fixture (design section 3.5, decision D8).
+ * core graph that `repo-tools map` writes for a fixture (design section 7, decision D8).
  * `dependents`, `symbol-users` and `cycles` have repo_map's meaning.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";

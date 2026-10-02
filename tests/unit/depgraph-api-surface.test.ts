@@ -1,5 +1,5 @@
 /**
- * The per-export facts report (design section 6.2): `--api-surface=<file>`, `--api-entry=<path>`,
+ * The per-export facts report (design section 14.2): `--api-surface=<file>`, `--api-entry=<path>`,
  * `--stability-tags=<a,b>` and the config keys `depgraph.apiSurface.out`, `.entry` and
  * `.stabilityTags`. The report is deterministic, has `schemaVersion` 1 and equals its golden.
  * Without the flag, no other output changes.

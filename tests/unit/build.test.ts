@@ -75,7 +75,7 @@ describe("node bundle (design 11.1)", () => {
   });
 });
 
-describe("smoke test script (design 13.3)", () => {
+describe("smoke test script (design 12.1)", () => {
   const smoke = (command: string[]) =>
     Bun.spawnSync([process.execPath, "scripts/smoke.ts", "--", ...command], { cwd: root });
 
@@ -102,7 +102,7 @@ describe("smoke test script (design 13.3)", () => {
   );
 
   test(
-    "the smoke test fails when chunk split and merge do not round-trip (13.3 step 4)",
+    "the smoke test fails when chunk split and merge do not round-trip (12.1 step 4)",
     () => {
       // A fake CLI that passes the first three steps but whose `chunk` does nothing.
       const fake = join(work, "fake-chunk.js");
@@ -153,7 +153,7 @@ describe("smoke test script (design 13.3)", () => {
   );
 });
 
-describe("smoke test: map on the product (design 13.3 steps 2, 3 and 7)", () => {
+describe("smoke test: map on the product (design 12.1 steps 2, 3 and 7)", () => {
   const smoke = (command: string[]) =>
     Bun.spawnSync([process.execPath, "scripts/smoke.ts", "--", ...command], { cwd: root });
 
@@ -183,9 +183,9 @@ describe("smoke test: map on the product (design 13.3 steps 2, 3 and 7)", () => 
         ].join("\n"),
       );
       const err = smoke(["node", fake]).stderr.toString();
-      expect(err).toContain("map golden (13.3 step 2)");
-      expect(err).toContain("api surface golden (13.3 step 3)");
-      expect(err).toContain("extension hooks (13.3 step 7)");
+      expect(err).toContain("map golden (12.1 step 2)");
+      expect(err).toContain("api surface golden (12.1 step 3)");
+      expect(err).toContain("extension hooks (12.1 step 7)");
       expect(err).toContain("check drift gate");
     },
     SMOKE_TIMEOUT_MS,

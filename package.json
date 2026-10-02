@@ -34,7 +34,8 @@
     "build": "bun scripts/build.ts",
     "compile": "bun scripts/build.ts --compile",
     "smoke": "bun scripts/smoke.ts",
-    "audit:ledger": "bun scripts/fix-ledger-audit.ts"
+    "audit:ledger": "bun scripts/fix-ledger-audit.ts",
+    "check:design": "bun scripts/design-refs.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",

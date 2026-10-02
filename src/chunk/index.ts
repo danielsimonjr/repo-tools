@@ -1,5 +1,5 @@
 /**
- * `repo-tools chunk` (design sections 3.3 and 4): split a large file into chunk files, merge
+ * `repo-tools chunk` (design section 8): split a large file into chunk files, merge
  * the chunks back, or show which chunks changed.
  *
  * Output goes to `io`. Errors return exit code 1; this module never ends the process.

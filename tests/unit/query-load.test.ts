@@ -1,5 +1,5 @@
 /**
- * `repo-tools query`: the input reports (design section 3.5, decision D8). The query reads the
+ * `repo-tools query`: the input reports (design section 7, decision D8). The query reads the
  * core `dependency-graph.json` of `repo-tools map`, and `package-export-surfaces.json` for
  * `is-public` only. A missing, unreadable, invalid or 1.x report exits 1 and says to run map
  * first. Error text shows the root as `<root>`.

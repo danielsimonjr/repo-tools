@@ -1,5 +1,5 @@
 /**
- * The command line of `repo-tools depgraph` (design section 3.2).
+ * The command line of `repo-tools depgraph` (design section 14.2).
  *
  * The parser is strict. An unknown flag, a flag without its value, a value on a flag that takes
  * none, and a second root each throw an error; the run then exits 1 and writes nothing. An error
@@ -30,7 +30,7 @@ export interface DepgraphOptions {
   noRegen: boolean;
   /** Write the duplicate baseline from the current duplicate-symbols.json. */
   writeDuplicateBaseline: boolean;
-  /** Load no extension (design section 5.2). */
+  /** Load no extension (design section 6). */
   noExtensions: boolean;
   help: boolean;
   /**
