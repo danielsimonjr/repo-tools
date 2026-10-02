@@ -6,6 +6,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-02
+
+`repo-tools docs` is the new gate of the doc comments of a repository. It ports `code_docs.py` of
+the code-docs skill. `docs/parity-docs.md` lists the differences from the Python tool. The
+release also adds the audit of the fix ledger and the check for dangling references to the
+design document.
+
 ### Added
 
 - `repo-tools docs`, the gate of the doc comments. The command is a port of `code_docs.py` of the
