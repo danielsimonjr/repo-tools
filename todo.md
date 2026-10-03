@@ -165,7 +165,7 @@
 
 ## 2.2.0: `repo-tools docs`
 
-- [ ] `repo-tools docs`: port `code_docs.py` (scan, stub, check). `stub --apply` stays a dry run by
+- [x] `repo-tools docs`: port `code_docs.py` (scan, stub, check). `stub --apply` stays a dry run by
   default.
   - [x] The TSX grammar joins `src/map/grammars.ts`, so a `.tsx` or `.jsx` file parses.
   - [x] `src/docs/`: the model, the discovery with `.code-docs.json`, the Python analyser, the
