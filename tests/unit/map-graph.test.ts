@@ -162,7 +162,7 @@ describe("findCycles", () => {
     expect(plain.warnings).toEqual([]);
   });
 
-  // Builds ~9,000 nodes. Measured: 0.85 s on the EVO, 4.57 s on the slower ZBOOK, against bun's 5 s default.
+  // Builds ~9,000 nodes. Measured: 0.85 s on a fast machine, 4.57 s on a slower one, against bun's 5 s default.
   // The bound under test is steps, not time, so the timeout only has to outlast the slowest builder.
   test("a large acyclic fan-out costs almost no backtracking", () => {
     const edges: Record<string, string[]> = { aaa_hub: [] };

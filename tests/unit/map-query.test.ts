@@ -253,7 +253,7 @@ describe("cycles", () => {
     expect(result.warning).toBeUndefined();
   });
 
-  // Builds ~9,000 nodes. Measured: 0.85 s on the EVO, 4.57 s on the slower ZBOOK, against bun's 5 s default.
+  // Builds ~9,000 nodes. Measured: 0.85 s on a fast machine, 4.57 s on a slower one, against bun's 5 s default.
   // The bound under test is steps, not time, so the timeout only has to outlast the slowest builder.
   test("ignores a large acyclic fan-out hub (bounded steps, not wall-clock)", () => {
     const files: Record<string, { internalDependencies: Dep[] }> = {
