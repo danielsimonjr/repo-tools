@@ -253,6 +253,8 @@ describe("cycles", () => {
     expect(result.warning).toBeUndefined();
   });
 
+  // Builds ~9,000 nodes. Measured: 0.85 s on a fast machine, 4.57 s on a slower one, against bun's 5 s default.
+  // The bound under test is steps, not time, so the timeout only has to outlast the slowest builder.
   test("ignores a large acyclic fan-out hub (bounded steps, not wall-clock)", () => {
     const files: Record<string, { internalDependencies: Dep[] }> = {
       aaa_hub: { internalDependencies: [] },
@@ -275,7 +277,7 @@ describe("cycles", () => {
     expect(result.cycles).toHaveLength(1);
     expect(new Set(result.cycles[0])).toEqual(new Set(["zzz_a", "zzz_b"]));
     expect(result.steps).toBeLessThanOrEqual(20);
-  });
+  }, 30_000);
 
   test("gives the same cycles as the graph's findCycles, through the real toJson", () => {
     const edges: Record<string, string[]> = {
