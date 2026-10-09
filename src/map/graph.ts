@@ -125,6 +125,20 @@ function launcherEntry(root: string, spec: string, known: ReadonlySet<string>): 
   return null;
 }
 
+/**
+ * The source file that a package.json entry names itself (`bin/tool.mjs`, `./lib/index.js`), or
+ * null. It is the last resort, after the build-output mapping into `src/` and the launcher scan.
+ * It applies only to a package with no `src/` tree: there, the entries are the sources (`bin/` and
+ * `lib/` only) and no build output stands behind them. A package with a `src/` tree resolves
+ * exactly as before, so a thin launcher that fails the scan still warns instead of becoming a
+ * root that reaches nothing.
+ */
+function declaredSource(spec: string, known: ReadonlySet<string>): string | null {
+  for (const path of known) if (path.startsWith("src/")) return null;
+  const posix = lstripDotSlash(spec.replaceAll("\\", "/"));
+  return known.has(posix) ? posix : null;
+}
+
 /** A plain JSON object. */
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -153,10 +167,11 @@ function packageJsonRoots(root: string, known: ReadonlySet<string>): [string[], 
   const warnings: string[] = [];
   for (const spec of raw) {
     if (spec.endsWith(".json")) continue;
-    const mapped = mapDistToSrc(spec, known) ?? launcherEntry(root, spec, known);
+    const mapped =
+      mapDistToSrc(spec, known) ?? launcherEntry(root, spec, known) ?? declaredSource(spec, known);
     if (mapped === null) {
       warnings.push(
-        `package.json entry ${pyRepr(spec)} did not resolve to a known source file under src/ -- ` +
+        `package.json entry ${pyRepr(spec)} did not resolve to a known source file -- ` +
           "ignored; if no other declared entry resolves either, the entry-point root falls back to " +
           "a conventional src/index.* file instead",
       );
