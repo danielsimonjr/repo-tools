@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/repo-tools",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "One CLI for repository analysis: dependency graphs creation and query with per-export API facts, file chunking, and context compression. TypeScript on Bun, compiled to a single executable.",
   "type": "module",
   "license": "MIT",

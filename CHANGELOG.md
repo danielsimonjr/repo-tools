@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-10-08
+
 ### Fixed
 
 - `repo-tools map` finds the entry roots of a package that has no `src/` tree. A `bin`, `main`,
