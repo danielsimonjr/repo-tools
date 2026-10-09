@@ -416,6 +416,65 @@ describe("buildGraph: dispositions and roots", () => {
   });
 });
 
+describe("buildGraph: roots declared outside src/ (a deliberate difference from repo_map)", () => {
+  const BIN_LIB = {
+    "package.json": JSON.stringify({ bin: { tool: "bin/tool.mjs" } }),
+    "bin/tool.mjs": 'import { used } from "../lib/used.mjs";\n' + "used();\n",
+    "lib/used.mjs": "export function used() {}\n",
+    "lib/orphan.mjs": "export const O = 1;\n",
+  };
+
+  test("a bin entry in bin/ is a root, with no src/ folder", async () => {
+    const graph = await buildGraph(repo(BIN_LIB));
+    expect(graph.roots).toEqual(["bin/tool.mjs"]);
+    expect(graph.files.get("bin/tool.mjs")?.disposition).toBe("build-entry");
+    expect(graph.files.get("lib/used.mjs")?.disposition).toBe("reachable");
+    expect(graph.files.get("lib/orphan.mjs")?.disposition).toBe("orphan");
+    expect(graph.warnings).toEqual([]);
+  });
+
+  test("main and exports entries in lib/ are roots, with no src/ folder", async () => {
+    const graph = await buildGraph(
+      repo({
+        "package.json": JSON.stringify({
+          main: "./lib/index.js",
+          exports: { ".": "./lib/index.js", "./extra": "./lib/extra.js" },
+        }),
+        "lib/index.js": 'import "./dep.js";\n',
+        "lib/dep.js": "export const D = 1;\n",
+        "lib/extra.js": "export const E = 1;\n",
+      }),
+    );
+    expect(new Set(graph.roots)).toEqual(new Set(["lib/index.js", "lib/extra.js"]));
+    expect(graph.files.get("lib/dep.js")?.disposition).toBe("reachable");
+    expect(graph.warnings).toEqual([]);
+  });
+
+  test("a build-output mapping into src/ still wins over a file of the same name", async () => {
+    const graph = await buildGraph(
+      repo({
+        "package.json": JSON.stringify({ main: "lib/index.js" }),
+        "src/index.ts": "export const A = 1;\n",
+        "lib/index.js": "export const Built = 1;\n",
+      }),
+    );
+    expect(graph.roots).toEqual(["src/index.ts"]);
+  });
+
+  test("an entry that names no known file still warns", async () => {
+    const graph = await buildGraph(
+      repo({
+        "package.json": JSON.stringify({ bin: { tool: "bin/missing.mjs" } }),
+        "lib/a.mjs": "export const A = 1;\n",
+      }),
+    );
+    expect(graph.roots).toEqual([]);
+    expect(
+      graph.warnings.some((w) => w.includes("bin/missing.mjs") && w.includes("did not resolve")),
+    ).toBe(true);
+  });
+});
+
 describe("buildGraph: workspace roots (a deliberate difference from repo_map)", () => {
   const MONO = {
     "package.json": '{"name": "mono", "private": true, "workspaces": ["packages/*"]}\n',

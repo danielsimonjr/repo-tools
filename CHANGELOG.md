@@ -6,6 +6,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `repo-tools map` finds the entry roots of a package that has no `src/` tree. A `bin`, `main`,
+  `module` or `exports` entry that names a tracked source file (`bin/tool.mjs`, `./lib/index.js`)
+  is now a root. Before, only entries that map into `src/` counted. A package with `bin/` and `lib/`
+  and no `src/` showed `entryRoots` 0, and its `unused-analysis.md` listed every file as an orphan or
+  test-only. A package with a `src/` tree resolves as before, so a thin launcher that fails the scan
+  still warns. The warning text no longer says "under src/".
+
 ## [2.2.0] - 2026-10-02
 
 `repo-tools docs` is the new gate of the doc comments of a repository. It ports `code_docs.py` of

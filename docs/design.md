@@ -414,6 +414,9 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
 ### 14.4 Deliberate differences from the Python tool
 
 - A workspace monorepo gets the entry roots of each workspace package.
+- A package with no `src/` tree gets the files that its `package.json` entries name as entry roots.
+  The Python tool maps entries into `src/` only, so such a package showed no root and every file
+  as an orphan.
 - An import of a workspace package by name is an edge to its entry file.
 - A Rust `use` alias is the whole word `as` and a name. A path keeps the letters `as` inside a
   name (`HashMap`, `wasm`).
