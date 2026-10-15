@@ -9,3 +9,4 @@
 #
 fc930a32f5d2ef55006dee56c6b06e1e4a54a939 email 7 public co-author address of the coding agent that opened the pull request
 fc930a32f5d2ef55006dee56c6b06e1e4a54a939 denylist:bd3dae5fb91f 8 the repository maintainer named as co-author of a squash commit that the maintainer made
+46a45d4c19aff98892139615448298365f78e0c1 denylist:bd3dae5fb91f 53 the repository maintainer named as co-author of a squash commit that GitHub built from the maintainer's own commit on the pull request branch

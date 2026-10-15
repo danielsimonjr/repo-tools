@@ -19,6 +19,11 @@ All notable changes to this project are recorded in this file. The format follow
   9,000 nodes. The graph test took 0.85 s on a fast machine and 4.57 s on a slower one, against bun's 5 s default, so it
   failed there under any load. The tests check a step bound, not time, so only the timeout changes. A comment on each test records the measurement and
   names no machine, because the privacy check rejects machine names.
+- The privacy check accepts one finding in the history: the squash commit of #18 (`46a45d4c19af`) carries a
+  `Co-authored-by` trailer that GitHub added for the maintainer identity on the pull request branch, at line 53 of the
+  message. A commit message cannot change after a merge, so `scripts/privacy-accepted.txt` holds the entry, as it does
+  for `fc930a32f5d2`. Before, the `privacy` job and the test `this repository scans clean` failed on `main` after the
+  merge, although the pull request was green. A squash whose commits are all by the pull request opener adds no trailer.
 
 ## [2.2.1] - 2026-10-08
 
