@@ -6,6 +6,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- The workflows pin three GitHub Actions to a newer release: `actions/upload-artifact` v7.0.1 to v7.0.2 (in `ci.yml` and
+  `build.yml`), `actions/download-artifact` v8.0.1 to v8.0.2 (in `build.yml`) and `actions/setup-node` v7.0.0 to v7.1.0 (in
+  `ci.yml`). Each pin is the commit of the upstream release tag. `build.yml` runs only on a `v*` tag, so the next release
+  build is the first run of the new `download-artifact` pin.
+
 ### Fixed
 
 - Two fan-out tests (`map-graph.test.ts` and `map-query.test.ts`) have an explicit 30 s timeout. Each builds a graph of about
