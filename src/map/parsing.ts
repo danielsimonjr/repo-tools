@@ -292,9 +292,10 @@ function addDynamicImportEdges(mod: ParsedModule, calls: DynamicCall[]): void {
 }
 
 /**
- * Reads one TypeScript or JavaScript file. The extension of `path` selects the grammar: a `.tsx`
- * or `.jsx` file uses the TSX grammar, and every other file, and a call without a path, uses the
- * TypeScript grammar. Call `loadGrammar` for the grammar first.
+ * Reads one TypeScript or JavaScript file.
+ * The extension of `path` selects the grammar. A `.tsx` or `.jsx` file uses the TSX grammar.
+ * Every other file uses the TypeScript grammar. A call without a path also uses the TypeScript
+ * grammar. Call `loadGrammar` for the grammar first.
  */
 export function parseTs(source: string, path = ""): ParsedModule {
   const tree = parserFor(grammarFor(path)).parse(source);

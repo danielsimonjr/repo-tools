@@ -437,6 +437,7 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
   That grammar gives error nodes, and the export statements that survive the error recovery depend on
   the text of the file. The same component file then gave a different export list with and without
   doc comments.
+  A `.js`, `.mjs` or `.cjs` file that holds JSX still uses the TypeScript grammar.
 
 A folder named `dist`, `build`, `coverage`, `node_modules` or `.git` under `src/` stays on the
 skip list. When that folder holds a source file, the run warns, and the files stay out of the

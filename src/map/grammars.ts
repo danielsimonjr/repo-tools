@@ -63,9 +63,9 @@ export function loadGrammar(name: GrammarName): Promise<Parser> {
 }
 
 /**
- * The grammar for a TypeScript or JavaScript path: TSX reads JSX, which the TypeScript grammar
- * cannot. The TypeScript grammar gives ERROR nodes for JSX, and the export statements that survive
- * the error recovery then depend on the text of the file.
+ * The grammar for a TypeScript or JavaScript path.
+ * TSX reads JSX, but the TypeScript grammar cannot. The TypeScript grammar gives ERROR nodes for
+ * JSX. The export statements that survive the error recovery then depend on the text of the file.
  */
 export function grammarFor(path: string): GrammarName {
   return path.endsWith(".tsx") || path.endsWith(".jsx") ? "tsx" : "typescript";

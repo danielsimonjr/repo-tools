@@ -14,6 +14,7 @@ All notable changes to this project are recorded in this file. The format follow
   comments. In one application repository of 746 source files, the export count rises from 3259 to 3406, and the
   count is the same with and without the doc comments. A drift gate (`repo-tools check`) that holds the earlier count
   fails until `repo-tools map` writes the reports again.
+  A `.js`, `.mjs` or `.cjs` file that holds JSX still uses the TypeScript grammar.
 
 ## [2.2.2] - 2026-10-15
 
