@@ -113,6 +113,132 @@ describe("typescript: which comment is a doc comment", () => {
   });
 });
 
+describe("typescript: an overload set has one documentation", () => {
+  const overloaded = [
+    "/** Doubles a value. */",
+    "export function f(a: string): string;",
+    "export function f(a: number): number;",
+    "export function f(a: string | number): string | number {",
+    "  return a;",
+    "}",
+    "",
+  ].join("\n");
+
+  test("the doc of the first overload covers the implementation signature", async () => {
+    const sym = only(await symbols(overloaded));
+    expect(sym.name).toBe("f");
+    expect(sym.hasDoc).toBe(true);
+    expect(sym.summary).toBe("Doubles a value.");
+    expect(sym.issues).toEqual([]);
+  });
+
+  test("an overload set with no doc comment at all is still M1", async () => {
+    const src = overloaded.replace("/** Doubles a value. */\n", "");
+    expect(rulesOf(only(await symbols(src)))).toEqual(["M1"]);
+  });
+
+  test("a doc on a later overload only does not cover the first one's set", async () => {
+    const src = [
+      "export function f(a: string): string;",
+      "/** Doubles a number. */",
+      "export function f(a: number): number;",
+      "export function f(a: string | number): string | number {",
+      "  return a;",
+      "}",
+      "",
+    ].join("\n");
+    expect(rulesOf(only(await symbols(src)))).toEqual(["M1"]);
+  });
+
+  test("the implementation of another name does not borrow the doc", async () => {
+    const src = [
+      "/** Doubles a value. */",
+      "export function f(a: string): string;",
+      "export function g(a: string): string {",
+      "  return a;",
+      "}",
+      "",
+    ].join("\n");
+    const found = await symbols(src);
+    expect(found.map((s) => `${s.name}:${s.hasDoc}`)).toEqual(["g:false"]);
+  });
+
+  test("a statement between the overloads and the implementation ends the set", async () => {
+    const src = [
+      "/** Doubles a value. */",
+      "export function f(a: string): string;",
+      "const x = 1;",
+      "export function f(a: string): string {",
+      "  return a;",
+      "}",
+      "",
+    ].join("\n");
+    expect(rulesOf(only(await symbols(src)))).toEqual(["M1"]);
+  });
+
+  test("the own doc of the implementation wins over the doc of the first overload", async () => {
+    const src = [
+      "/** First. */",
+      "export function f(a: string): string;",
+      "/** Implementation. */",
+      "export function f(a: string): string {",
+      "  return a;",
+      "}",
+      "",
+    ].join("\n");
+    expect(only(await symbols(src)).summary).toBe("Implementation.");
+  });
+
+  test("an overload set that is not exported takes the same doc and stays ungated", async () => {
+    const src = [
+      "/** Doubles a value. */",
+      "function f(a: string): string;",
+      "function f(a: number): number;",
+      "function f(a: string | number): string | number {",
+      "  return a;",
+      "}",
+      "",
+    ].join("\n");
+    const sym = only(await symbols(src));
+    expect(sym.exported).toBe(false);
+    expect(sym.hasDoc).toBe(true);
+  });
+
+  test("the overloads of a class member set give the implementation the first doc", async () => {
+    const src = [
+      "/** The class. */",
+      "export class K {",
+      "  /** Doubles a value. */",
+      "  go(a: string): string;",
+      "  go(a: number): number;",
+      "  go(a: string | number): string | number {",
+      "    return a;",
+      "  }",
+      "}",
+      "",
+    ].join("\n");
+    const found = await symbols(src);
+    const go = found.find((s) => s.name === "go");
+    expect(go?.hasDoc).toBe(true);
+    expect(go?.summary).toBe("Doubles a value.");
+  });
+
+  test("a documented parameter is checked against the implementation (M3 still runs)", async () => {
+    const src = [
+      "/**",
+      " * Doubles a value.",
+      " * @param gone - A parameter that no signature has.",
+      " */",
+      "export function f(a: string): string;",
+      "export function f(a: string | number): string | number {",
+      "  return a;",
+      "}",
+      "",
+    ].join("\n");
+    expect(rulesOf(only(await symbols(src)))).toEqual(["M3"]);
+  });
+});
+
 describe("typescript: the summary", () => {
   test("a one-line comment has its closing delimiter removed", async () => {
     const sym = only(await symbols("/** Returns one. */\nexport function f() {}\n"));
