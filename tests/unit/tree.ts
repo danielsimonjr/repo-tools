@@ -32,6 +32,7 @@ export interface DepgraphRun {
 
 /** The parts of `dependency-graph.json` that the fix tests read. */
 export interface DependencyGraphJson {
+  metadata: { totalExports: number };
   modules: Record<string, Record<string, GraphFile>>;
 }
 
