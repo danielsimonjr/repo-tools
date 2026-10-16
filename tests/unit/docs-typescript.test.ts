@@ -204,6 +204,25 @@ describe("typescript: an overload set has one documentation", () => {
     expect(sym.hasDoc).toBe(true);
   });
 
+  test("the overloads of a class member set give the implementation the first doc", async () => {
+    const src = [
+      "/** The class. */",
+      "export class K {",
+      "  /** Doubles a value. */",
+      "  go(a: string): string;",
+      "  go(a: number): number;",
+      "  go(a: string | number): string | number {",
+      "    return a;",
+      "  }",
+      "}",
+      "",
+    ].join("\n");
+    const found = await symbols(src);
+    const go = found.find((s) => s.name === "go");
+    expect(go?.hasDoc).toBe(true);
+    expect(go?.summary).toBe("Doubles a value.");
+  });
+
   test("a documented parameter is checked against the implementation (M3 still runs)", async () => {
     const src = [
       "/**",

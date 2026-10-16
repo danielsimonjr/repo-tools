@@ -182,7 +182,8 @@ function leadingDoc(anchor: Node, node: Node, text: TextOf): string {
   const implementation = text(name);
   let first: Node | null = null;
   for (let sibling = anchor.previousSibling; sibling; sibling = sibling.previousSibling) {
-    if (sibling.type === "comment") continue;
+    // A class body holds the `;` that ends a member signature as a sibling node of its own.
+    if (sibling.type === "comment" || sibling.type === ";") continue;
     if (signatureName(sibling, text) !== implementation) break;
     first = sibling;
   }
