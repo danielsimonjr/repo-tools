@@ -15,6 +15,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `repo-tools docs` reads a `.tsx` or `.jsx` file that has a bare `&` in JSX text (`<h3>Review & Start</h3>`).
+  React and `tsc` accept the text, and the grammar gave an error node, so the file was an unparsed file and its
+  symbols were not measured. The analyser now writes a space over a `&` that is the first character of an error
+  node directly inside a JSX element, which keeps the length, and parses again. Any other error stays an error.
+  A real syntax error beside such a text is still reported. In one application repository four files moved from
+  unparsed to measured, and two files with `import()` type expressions stay unparsed.
 - `repo-tools docs check` reads the documentation of an overload set from its first overload. Before, the analyser read only
   the comment that directly precedes a declaration, so an implementation signature that follows overload signatures counted
   as undocumented (M1), although a caller sees only the overloads. A repository then needed a comment that no reader sees.

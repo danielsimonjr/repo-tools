@@ -423,6 +423,52 @@ describe("typescript: the grammar follows the extension", () => {
   });
 });
 
+describe("typescript: a bare ampersand in JSX text", () => {
+  // React and tsc accept `Review & Start`. The grammar reads the `&` as an error node.
+  const doc = "/** The view. */\n";
+
+  test("a .tsx file with an ampersand in an element text parses, and its symbol is read", async () => {
+    const src = `${doc}export function View() {\n  return <h3>Review & Start</h3>;\n}\n`;
+    const report = await analyseTypeScript("a.tsx", src);
+    expect(report.error).toBe("");
+    const sym = only(report.symbols);
+    expect(sym.name).toBe("View");
+    expect(sym.line).toBe(2);
+    expect(sym.hasDoc).toBe(true);
+  });
+
+  test("several ampersands in one text and in a fragment parse", async () => {
+    const src = `${doc}export function View() {\n  return (\n    <>\n      <p>A & B & C</p>\n      Tips & Tricks\n    </>\n  );\n}\n`;
+    const report = await analyseTypeScript("a.tsx", src);
+    expect(report.error).toBe("");
+    expect(only(report.symbols).name).toBe("View");
+  });
+
+  test("the positions after the repaired text are the positions of the source", async () => {
+    const src = `${doc}export function View() {\n  return <h3>Review & Start</h3>;\n}\n\nexport function Other() {}\n`;
+    const names = (await symbols(src, "a.tsx")).map((s) => `${s.name}:${s.line}`);
+    expect(names).toEqual(["View:2", "Other:6"]);
+  });
+
+  test("an ampersand that is a real error outside JSX text stays an error", async () => {
+    const report = await analyseTypeScript("a.tsx", "export const x = & 5;\n");
+    expect(report.error).toContain("parse error");
+    expect(report.symbols).toEqual([]);
+  });
+
+  test("a real error beside a repaired ampersand is still reported", async () => {
+    const src = "export function View() {\n  return <h3>A & B</h3>;\n}\nexport function (\n";
+    expect((await analyseTypeScript("a.tsx", src)).error).toContain("parse error");
+  });
+
+  test("parsesAsTypeScript accepts the same text, so the stub writer does not refuse the file", () => {
+    return analyseTypeScript("a.tsx", "export const x = 1;\n").then(() => {
+      expect(parsesAsTypeScript("a.tsx", "export const V = () => <b>A & B</b>;\n")).toBe(true);
+      expect(parsesAsTypeScript("a.tsx", "export const x = & 5;\n")).toBe(false);
+    });
+  });
+});
+
 describe("typescript: a parse error", () => {
   test("is reported on the file, not raised, and no symbol is guessed", async () => {
     const report = await analyseTypeScript("bad.ts", "export function (\n");

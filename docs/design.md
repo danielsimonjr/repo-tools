@@ -662,6 +662,11 @@ the grammar cannot read: a property named `abstract`, and `export type * from 'm
 rewrites both to text of equal length before the parse, so each position of the tree still points
 at the real source. The analyser reads the text of each node from the original source and not from
 the rewritten text. Thus a parameter named `abstract` keeps its name.
+A third case is a bare `&` in JSX text (`<h3>Review & Start</h3>`). React and `tsc` accept it, and
+the grammar gives an error node. The analyser repairs only an error node that is a direct child of a
+JSX element and whose first character is `&`. It writes a space over that one character, which keeps
+the length, and parses again. Any other error stays an error, so a file with a real syntax error is
+still an unparsed file.
 
 **The parameter names.** Rule M3 compares the names in the doc with the names in the signature.
 
