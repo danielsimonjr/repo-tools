@@ -15,6 +15,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `repo-tools docs check` reads the documentation of an overload set from its first overload. Before, the analyser read only
+  the comment that directly precedes a declaration, so an implementation signature that follows overload signatures counted
+  as undocumented (M1), although a caller sees only the overloads. A repository then needed a comment that no reader sees.
+  The implementation signature now takes the doc of the first overload of the same name, in a function set and in a class
+  member set. A doc that directly precedes the implementation still wins. A statement between the overloads and the
+  implementation ends the set. The `;` that ends a member signature in a class body does not end the set.
+  Rule M3 still compares the documented parameters with the implementation.
 - Two fan-out tests (`map-graph.test.ts` and `map-query.test.ts`) have an explicit 30 s timeout. Each builds a graph of about
   9,000 nodes. The graph test took 0.85 s on a fast machine and 4.57 s on a slower one, against bun's 5 s default, so it
   failed there under any load. The tests check a step bound, not time, so only the timeout changes. A comment on each test records the measurement and

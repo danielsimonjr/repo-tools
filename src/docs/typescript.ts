@@ -145,11 +145,49 @@ function anchorOf(node: Node): Node {
  * with two stars counts. A plain block comment or a line comment is a comment, not documentation,
  * and counting it would inflate the coverage.
  */
-function leadingDoc(anchor: Node, text: TextOf): string {
+function docBefore(anchor: Node, text: TextOf): string {
   const prev = anchor.previousSibling;
   if (prev?.type !== "comment") return "";
   const comment = text(prev);
   return comment.startsWith("/**") ? comment : "";
+}
+
+// The grammar gives an overload signature (a declaration with no body) its own node type: a
+// function has `function_signature` and a class member has `method_signature`.
+const SIGNATURES = new Set(["function_signature", "method_signature"]);
+
+/** The name of an overload signature that `sibling` is, or wraps in an `export` statement. */
+function signatureName(sibling: Node, text: TextOf): string | null {
+  const inner =
+    sibling.type === "export_statement" ? sibling.childForFieldName("declaration") : sibling;
+  if (!inner || !SIGNATURES.has(inner.type)) return null;
+  const name = inner.childForFieldName("name");
+  return name ? text(name) : null;
+}
+
+/**
+ * Returns the doc comment of a declaration, or "". The comment that directly precedes the
+ * declaration wins. An implementation signature has no such comment when it follows overload
+ * signatures: a caller sees only the overloads, so the set has one documentation, on the first
+ * overload. The walk goes back over the overloads of the same name, and over the comments between
+ * them, and reads the comment before the first one.
+ */
+function leadingDoc(anchor: Node, node: Node, text: TextOf): string {
+  const own = docBefore(anchor, text);
+  if (own || (node.type !== "function_declaration" && node.type !== "method_definition")) {
+    return own;
+  }
+  const name = node.childForFieldName("name");
+  if (!name) return "";
+  const implementation = text(name);
+  let first: Node | null = null;
+  for (let sibling = anchor.previousSibling; sibling; sibling = sibling.previousSibling) {
+    // A class body holds the `;` that ends a member signature as a sibling node of its own.
+    if (sibling.type === "comment" || sibling.type === ";") continue;
+    if (signatureName(sibling, text) !== implementation) break;
+    first = sibling;
+  }
+  return first ? docBefore(first, text) : "";
 }
 
 /** True when the declaration is exported from its module. */
@@ -215,7 +253,7 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
     for (const node of tree.rootNode.descendantsOfType(DECLARATION_TYPES)) {
       const kind = DECLARATIONS[node.type] as Kind;
       const anchor = anchorOf(node);
-      const doc = leadingDoc(anchor, text);
+      const doc = leadingDoc(anchor, node, text);
       const dialect = dialectOf(doc);
       const typeLike = kind === "class" || kind === "interface" || kind === "type";
       const line = node.startPosition.row + 1;

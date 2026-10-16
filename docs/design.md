@@ -646,7 +646,9 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   not exported, because its class is. A declaration is exported when an `export` statement wraps
   it. A doc is a block comment that starts with `/**` and ends directly above the declaration, or
   above the outermost `export` statement. A plain block comment and a line comment are not
-  documentation.
+  documentation. An implementation signature that follows overload signatures of the same name
+  has no doc of its own and takes the doc of the first overload, because a caller sees only the
+  overloads. A doc that directly precedes the implementation signature wins.
 - In Python: functions, async functions and classes, at any depth. With a literal `__all__` at the
   top of a module, a name is exported when `__all__` lists it. Without `__all__`, a name is
   exported when it has no leading underscore, or when it has the form `__x__`. The doc is the
