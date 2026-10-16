@@ -469,6 +469,64 @@ describe("typescript: a bare ampersand in JSX text", () => {
   });
 });
 
+describe("typescript: an import() type expression", () => {
+  // tsc accepts `import("fs").Dirent[]` and `typeof import("m")` in a type. The grammar reads the
+  // import call as a member expression, so it cannot take `[]` after it, and it reads
+  // `f<typeof import("m")>()` as a comparison. Both give error nodes.
+  const doc = "/** The reader. */\n";
+
+  test("an import type followed by [] parses, and its symbol is read", async () => {
+    const src = `${doc}export function read(): number {\n  let items: import("fs").Dirent[];\n  return items.length;\n}\n`;
+    const report = await analyseTypeScript("a.ts", src);
+    expect(report.error).toBe("");
+    const sym = only(report.symbols);
+    expect(sym.name).toBe("read");
+    expect(sym.line).toBe(2);
+    expect(sym.hasDoc).toBe(true);
+  });
+
+  test("typeof import() as the type argument of a call parses", async () => {
+    const src = `${doc}export async function load() {\n  return importOriginal<typeof import("../m")>();\n}\n`;
+    const report = await analyseTypeScript("a.ts", src);
+    expect(report.error).toBe("");
+    expect(only(report.symbols).name).toBe("load");
+  });
+
+  test("an import call that spans lines keeps the line of every later symbol", async () => {
+    const src = 'export function a(x: import(\n  "fs"\n).Dirent[]) {}\nexport function b() {}\n';
+    const names = (await symbols(src)).map((s) => `${s.name}:${s.line}`);
+    expect(names).toEqual(["a:1", "b:4"]);
+  });
+
+  test("a .tsx file reads the same import type", async () => {
+    const src = `${doc}export function View() {\n  const xs: import("fs").Dirent[] = [];\n  return <b>{xs.length}</b>;\n}\n`;
+    const report = await analyseTypeScript("a.tsx", src);
+    expect(report.error).toBe("");
+    expect(only(report.symbols).name).toBe("View");
+  });
+
+  test("a real error beside an import type is still reported", async () => {
+    const src = 'let items: import("fs").Dirent[];\nexport function (\n';
+    expect((await analyseTypeScript("a.ts", src)).error).toContain("parse error");
+  });
+
+  test("a file that parses without the repair is not rewritten", async () => {
+    const src = `${doc}export async function lazy() {\n  return import("./x");\n}\n`;
+    const report = await analyseTypeScript("a.ts", src);
+    expect(report.error).toBe("");
+    expect(only(report.symbols).name).toBe("lazy");
+  });
+
+  test("parsesAsTypeScript accepts the same text, so the stub writer does not refuse the file", () => {
+    return analyseTypeScript("a.ts", "export const x = 1;\n").then(() => {
+      expect(parsesAsTypeScript("a.ts", 'export let v: import("fs").Dirent[] = [];\n')).toBe(true);
+      expect(parsesAsTypeScript("a.ts", 'let v: import("fs").Dirent[];\nexport function (\n')).toBe(
+        false,
+      );
+    });
+  });
+});
+
 describe("typescript: a parse error", () => {
   test("is reported on the file, not raised, and no symbol is guessed", async () => {
     const report = await analyseTypeScript("bad.ts", "export function (\n");

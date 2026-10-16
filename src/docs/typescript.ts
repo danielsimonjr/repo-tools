@@ -226,18 +226,56 @@ const JSX_PARENTS = new Set(["jsx_element", "jsx_fragment"]);
 // rounds of bare ampersands in one parse is not a case worth a longer loop.
 const MAX_REPAIRS = 16;
 
+// An import type: `import("fs").Dirent[]` and `typeof import("m")`. The grammar reads the call as a
+// member expression of a value, so it cannot take `[]` after it, and it reads `f<typeof import("m")>()`
+// as a comparison. Both give error nodes. Only a call with a string literal is matched.
+const IMPORT_CALL = new RegExp(
+  `\\bimport${SPACE_CLASS}*\\(${SPACE_CLASS}*(?:"[^"\\n]*"|'[^'\\n]*')${SPACE_CLASS}*\\)`,
+  "g",
+);
+
 /**
- * Parses `text`, and repairs a bare `&` in JSX text.
+ * Writes an identifier of equal length over each `import("m")` call of `text`. The first run of
+ * characters of a call becomes underscores, which is a type name that the grammar reads. The rest
+ * of the call becomes spaces and keeps its line breaks, so every position and every line of the
+ * tree still points at the real source.
+ */
+function blankImportCalls(text: string): string {
+  return text.replace(IMPORT_CALL, (call) => {
+    let name = true;
+    let out = "";
+    for (const ch of call) {
+      if (/\s/u.test(ch)) {
+        name = false;
+        out += ch;
+      } else {
+        // One code unit of the source is one character of the result, also for an astral character.
+        out += (name ? "_" : " ").repeat(ch.length);
+      }
+    }
+    return out;
+  });
+}
+
+/**
+ * Parses `text`, and repairs the two cases that `tsc` accepts and the grammar cannot read.
  *
- * React and `tsc` accept `<h3>Review & Start</h3>`. The grammar reads the `&` as an error node.
- * The repair is narrow. It takes an error node that is a direct child of a JSX element and starts
- * with `&`. It writes a space over that one character. The text keeps its length, so each position
- * of the tree still points at the real source. Then the parser runs again. Any other error stays
- * an error, so a file with a real syntax error is still an unparsed file.
+ * The first is a bare `&` in JSX text: React and `tsc` accept `<h3>Review & Start</h3>`, and the
+ * grammar reads the `&` as an error node. The repair takes an error node that is a direct child of
+ * a JSX element and starts with `&`, and writes a space over that one character.
+ *
+ * The second is an `import("m")` type. A file that parses is never rewritten. When the first parse
+ * has an error, the repair writes an identifier over each `import("m")` call once, and the parser
+ * runs again.
+ *
+ * Both repairs keep the length of the text, so each position of the tree still points at the real
+ * source. Any other error stays an error, so a file with a real syntax error is still an unparsed
+ * file.
  */
 function parseSource(parser: Parser, text: string): Tree | null {
   let current = sanitise(text);
   let tree = parser.parse(current);
+  let importsBlanked = false;
   for (let pass = 0; tree?.rootNode.hasError && pass < MAX_REPAIRS; pass++) {
     const marks: number[] = [];
     for (const node of tree.rootNode.descendantsOfType("ERROR")) {
@@ -246,10 +284,14 @@ function parseSource(parser: Parser, text: string): Tree | null {
         marks.push(start);
       }
     }
-    if (marks.length === 0) break;
     // Offsets are code units of the string, so a slice by index keeps every position.
     let next = current;
     for (const at of marks) next = `${next.slice(0, at)} ${next.slice(at + 1)}`;
+    if (!importsBlanked) {
+      importsBlanked = true;
+      next = blankImportCalls(next);
+    }
+    if (next === current) break;
     tree.delete();
     current = next;
     tree = parser.parse(current);
