@@ -63,9 +63,16 @@ const DOCUMENTED = SKELETON.replace(
 );
 
 // The same component file with its types removed, as a `.jsx` file holds it.
-const JSX_SOURCE = SKELETON.replace(": SkeletonProps", "")
-  .replace(/interface SkeletonProps \{[^}]*\}\n\n/, "")
-  .replace(": { lines?: number; className?: string }", "");
+const untyped = (text: string): string =>
+  text
+    .replace(": SkeletonProps", "")
+    .replace(/interface SkeletonProps \{[^}]*\}\n\n/, "")
+    .replace(": { lines?: number; className?: string }", "");
+const JSX_SOURCE = untyped(SKELETON);
+const JSX_DOCUMENTED = untyped(DOCUMENTED);
+
+// A `.js`, `.mjs` or `.cjs` file can hold JSX too. Each suffix needs the same grammar as `.jsx`.
+const JS_SUFFIXES = ["js", "mjs", "cjs"];
 
 const SKELETON_EXPORTS = ["Skeleton", "SkeletonText"];
 
@@ -94,16 +101,34 @@ describe("a graph of a repository that has JSX files", () => {
     expect(run.code).toBe(0);
     expect(graphFile(run.graph(), "src/Skeleton.jsx")?.exports).toEqual(SKELETON_EXPORTS);
   });
+
+  test.each(JS_SUFFIXES)(
+    "every export of a .%s file that holds JSX is in the graph, with and without doc comments",
+    async (suffix) => {
+      const file = `src/Skeleton.${suffix}`;
+      const plain = await runDepgraph(makeTree({ "package.json": PACKAGE, [file]: JSX_SOURCE }));
+      const commented = await runDepgraph(
+        makeTree({ "package.json": PACKAGE, [file]: JSX_DOCUMENTED }),
+      );
+      expect(plain.code).toBe(0);
+      expect(commented.code).toBe(0);
+      expect(graphFile(plain.graph(), file)?.exports).toEqual(SKELETON_EXPORTS);
+      expect(graphFile(commented.graph(), file)?.exports).toEqual(SKELETON_EXPORTS);
+    },
+  );
 });
 
 describe("grammarFor: the grammar follows the extension", () => {
   test.each([
     ["src/a.tsx", "tsx"],
     ["a.jsx", "tsx"],
+    ["a.js", "tsx"],
+    ["a.mjs", "tsx"],
+    ["a.cjs", "tsx"],
     ["a.ts", "typescript"],
-    ["a.js", "typescript"],
-    ["a.mjs", "typescript"],
+    ["a.d.ts", "typescript"],
     ["a.tsx.ts", "typescript"],
+    ["a.jsx.ts", "typescript"],
     ["", "typescript"],
   ] as const)("%j gives the %s grammar", (path, grammar) => {
     expect(grammarFor(path)).toBe(grammar);
@@ -126,6 +151,22 @@ describe("parseTs: the grammar follows the file extension", () => {
 
   test("a .jsx file gives every export", () => {
     expect(parseTs(JSX_SOURCE, "src/Skeleton.jsx").exports).toEqual(SKELETON_EXPORTS);
+  });
+
+  test.each(JS_SUFFIXES)("a .%s file that holds JSX gives every export", (suffix) => {
+    expect(parseTs(JSX_SOURCE, `src/Skeleton.${suffix}`).exports).toEqual(SKELETON_EXPORTS);
+    expect(parseTs(JSX_DOCUMENTED, `src/Skeleton.${suffix}`).exports).toEqual(SKELETON_EXPORTS);
+  });
+
+  // This test is a guard, not a red test. Plain JavaScript can use `<` and `>` as comparison
+  // operators. The TSX grammar must read these files as before, because a `.js` file now uses it.
+  const COMPARISONS =
+    "export const lt = (a, b) => a < b;\nexport const gt = (a, b) => a > b;\n" +
+    "export const inside = (x) => x > 0 && x < 1;\n" +
+    "export const call = (f, a, b, c) => f(a < b, c > (1));\n";
+
+  test.each(JS_SUFFIXES)("a .%s file with comparison operators gives every export", (suffix) => {
+    expect(parseTs(COMPARISONS, `src/c.${suffix}`).exports).toEqual(["lt", "gt", "inside", "call"]);
   });
 
   // An angle-bracket type assertion is valid TypeScript, but TSX reads it as a JSX element.

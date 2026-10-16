@@ -180,6 +180,13 @@ describe("planTypeScript", () => {
     expect(out.startsWith("/**\n")).toBe(true);
   });
 
+  test("a .js file that holds JSX is stubbed and checked with the TSX grammar", async () => {
+    const src = "export function View() {\n  return <div>hi</div>;\n}\n";
+    const out = await stubTypeScript(src, "a.js");
+    expect(parsesAsTypeScript("a.js", out)).toBe(true);
+    expect(out.startsWith("/**\n")).toBe(true);
+  });
+
   test("the stubbed file has no M1, has M4 on every stub, and has no M3", async () => {
     const src = "export function f(a: number) {}\nexport class K {\n  go(x: number) {}\n}\n";
     const out = await stubTypeScript(src);

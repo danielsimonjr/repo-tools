@@ -432,12 +432,12 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
   "referenced in module" there and "unreferenced anywhere" here.
 - A bodiless `export function f(): T;` is not an export. The Python tool does the same
   (`repo_map-kept`). An overload plus an implementation records the name once.
-- A `.tsx` or `.jsx` file uses the TSX grammar, and every other TypeScript or JavaScript file uses the
+- A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file uses the TSX grammar, and a `.ts` file uses the
   TypeScript grammar. The Python tool reads `.tsx` with the TypeScript grammar, which cannot read JSX.
   That grammar gives error nodes, and the export statements that survive the error recovery depend on
   the text of the file. The same component file then gave a different export list with and without
-  doc comments.
-  A `.js`, `.mjs` or `.cjs` file that holds JSX still uses the TypeScript grammar.
+  doc comments. A JavaScript file can hold JSX, and it cannot hold an angle-bracket type assertion,
+  so TSX is the right grammar for every JavaScript suffix.
 
 A folder named `dist`, `build`, `coverage`, `node_modules` or `.git` under `src/` stays on the
 skip list. When that folder holds a source file, the run warns, and the files stay out of the
@@ -666,10 +666,10 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   exported when it has no leading underscore, or when it has the form `__x__`. The doc is the
   docstring: the first statement of the body, when it is a string.
 
-A `.tsx` or `.jsx` file needs the TSX grammar, and another file needs the TypeScript grammar. The
-wrong grammar gives a tree of error nodes and not an exception. Thus a file with a parse error is
-an unparsed file. The tool does not know the content of such a file, so the file never counts as
-clean. Two constructs are valid TypeScript that
+A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file needs the TSX grammar, and a `.ts` file needs the
+TypeScript grammar. The wrong grammar gives a tree of error nodes and not an exception. Thus a file
+with a parse error is an unparsed file. The tool does not know the content of such a file, so the
+file never counts as clean. Two constructs are valid TypeScript that
 the grammar cannot read: a property named `abstract`, and `export type * from 'm'`. The analyser
 rewrites both to text of equal length before the parse, so each position of the tree still points
 at the real source. The analyser reads the text of each node from the original source and not from

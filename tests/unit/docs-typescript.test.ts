@@ -473,6 +473,12 @@ describe("typescript: the grammar follows the extension", () => {
     expect(only(report.symbols).name).toBe("View");
   });
 
+  test.each(["a.js", "a.mjs", "a.cjs"])("%s that holds JSX parses and is read", async (path) => {
+    const report = await analyseTypeScript(path, jsx);
+    expect(report.error).toBe("");
+    expect(only(report.symbols).name).toBe("View");
+  });
+
   test("an angle-bracket type assertion parses in .ts and not in .tsx", async () => {
     const src = "export function f(x: unknown) {\n  return <string>x;\n}\n";
     expect((await analyseTypeScript("a.ts", src)).error).toBe("");
