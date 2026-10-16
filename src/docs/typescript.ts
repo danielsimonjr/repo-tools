@@ -11,7 +11,7 @@
  * reports a parse error when the root node holds one.
  */
 import type { Node, Parser, Tree } from "web-tree-sitter";
-import { type GrammarName, loadGrammar, parserFor } from "../map/grammars.ts";
+import { grammarFor, loadGrammar, parserFor } from "../map/grammars.ts";
 import { B, NON_SPACE, pySplitlines, pyStrip, S } from "../py.ts";
 import { proseOf } from "../ste/prose.ts";
 import { type DocSymbol, type FileReport, type Kind, newReport } from "./model.ts";
@@ -64,11 +64,6 @@ const DECLARATIONS: Readonly<Record<string, Kind>> = {
 };
 
 const DECLARATION_TYPES = Object.keys(DECLARATIONS);
-
-/** The grammar for a path: TSX reads JSX, which the TypeScript grammar cannot. */
-function grammarFor(path: string): GrammarName {
-  return path.endsWith(".tsx") || path.endsWith(".jsx") ? "tsx" : "typescript";
-}
 
 const SPACE_CLASS = "[ \\t\\n\\r\\f\\v]";
 
