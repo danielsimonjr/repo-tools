@@ -432,6 +432,11 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
   "referenced in module" there and "unreferenced anywhere" here.
 - A bodiless `export function f(): T;` is not an export. The Python tool does the same
   (`repo_map-kept`). An overload plus an implementation records the name once.
+- A `.tsx` or `.jsx` file uses the TSX grammar, and every other TypeScript or JavaScript file uses the
+  TypeScript grammar. The Python tool reads `.tsx` with the TypeScript grammar, which cannot read JSX.
+  That grammar gives error nodes, and the export statements that survive the error recovery depend on
+  the text of the file. The same component file then gave a different export list with and without
+  doc comments.
 
 A folder named `dist`, `build`, `coverage`, `node_modules` or `.git` under `src/` stays on the
 skip list. When that folder holds a source file, the run warns, and the files stay out of the

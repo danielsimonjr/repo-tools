@@ -2,13 +2,14 @@
  * The source readers of the map engine: one per language, each giving the same language-neutral
  * `ParsedModule`. Ported from `repo_map/parsing.py` of the architecture-docs skill.
  *
- * TypeScript and JavaScript use tree-sitter-typescript, the grammar that the Python tool uses, for
- * every TS and JS file (the Python tool also reads `.tsx` with the typescript grammar). Call
- * `loadGrammar` for the language before a reader runs.
+ * TypeScript and JavaScript use tree-sitter-typescript. A `.tsx` or `.jsx` file uses its TSX
+ * grammar, because the TypeScript grammar cannot read JSX; the Python tool read `.tsx` with the
+ * TypeScript grammar, and that gave a different export list for the same file with and without
+ * comments. Call `loadGrammar` for the language before a reader runs.
  */
 import type { Node } from "web-tree-sitter";
 import { S, W } from "../py.ts";
-import { parserFor } from "./grammars.ts";
+import { grammarFor, parserFor } from "./grammars.ts";
 
 /** One import of a module: its specifier, the names it binds, and whether it is type-only. */
 export interface RawImport {
@@ -290,9 +291,13 @@ function addDynamicImportEdges(mod: ParsedModule, calls: DynamicCall[]): void {
   }
 }
 
-/** Reads one TypeScript or JavaScript file. */
-export function parseTs(source: string): ParsedModule {
-  const tree = parserFor("typescript").parse(source);
+/**
+ * Reads one TypeScript or JavaScript file. The extension of `path` selects the grammar: a `.tsx`
+ * or `.jsx` file uses the TSX grammar, and every other file, and a call without a path, uses the
+ * TypeScript grammar. Call `loadGrammar` for the grammar first.
+ */
+export function parseTs(source: string, path = ""): ParsedModule {
+  const tree = parserFor(grammarFor(path)).parse(source);
   if (!tree) throw new Error("tree-sitter returned no tree");
   const mod = emptyModule();
   const dynamicCalls: { spec: string; use: { typeOnly: boolean; names: string[] } }[] = [];

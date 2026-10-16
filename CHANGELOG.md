@@ -6,6 +6,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `repo-tools map` reads a `.tsx` or `.jsx` file with the TSX grammar. It read the file with the TypeScript grammar,
+  which cannot read JSX. That grammar gives error nodes, and the export statements that survive the error recovery
+  depend on the text of the file. The same component file gave 1 export without doc comments and 2 exports with doc
+  comments. In one application repository of 746 source files, the export count rises from 3259 to 3406, and the
+  count is the same with and without the doc comments. A drift gate (`repo-tools check`) that holds the earlier count
+  fails until `repo-tools map` writes the reports again.
+
 ## [2.2.2] - 2026-10-15
 
 ### Changed

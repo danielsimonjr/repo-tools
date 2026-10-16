@@ -28,7 +28,7 @@ import {
   readSource,
   skippedSourceFolders,
 } from "./discovery.ts";
-import { loadGrammar } from "./grammars.ts";
+import { grammarFor, loadGrammar } from "./grammars.ts";
 import { type ParsedModule, parseCs, parsePy, parseRs, parseTs } from "./parsing.ts";
 import { getResolver } from "./resolvers.ts";
 import { type Dependency, type FileNode, newRepoGraph, type RepoGraph } from "./schema.ts";
@@ -378,7 +378,7 @@ function workspaceRoots(root: string, known: ReadonlySet<string>): [string[], st
   return [roots, warnings];
 }
 
-const READERS: Readonly<Record<Language, (source: string) => ParsedModule>> = {
+const READERS: Readonly<Record<Language, (source: string, path: string) => ParsedModule>> = {
   typescript: parseTs,
   python: parsePy,
   csharp: parseCs,
@@ -407,6 +407,9 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       workspaces.set(name, ws);
   }
   if (language === "typescript" || language === "python") await loadGrammar(language);
+  // A `.tsx` or `.jsx` file needs the TSX grammar, which reads JSX.
+  if (language === "typescript" && found.some((f) => grammarFor(f.path) === "tsx"))
+    await loadGrammar("tsx");
   const resolver = getResolver(language);
   const read = READERS[language];
 
@@ -416,7 +419,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
     // Universal newlines, as Python's read_text.
     const text = readSource(join(root, f.path)).replace(/\r\n?/g, "\n");
     sources.set(f.path, text);
-    parsed.set(f.path, read(text));
+    parsed.set(f.path, read(text, f.path));
   }
   resolver.indexNamespaces?.(parsed);
 
