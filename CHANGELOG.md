@@ -16,13 +16,13 @@ All notable changes to this project are recorded in this file. The format follow
   removed the error nodes of the one file that held JSX. No export count changed. A `.ts` file keeps the
   TypeScript grammar.
 
-- `repo-tools map` writes `duplicate-symbols.md` and `unused-analysis.md` with text that passes `repo-tools ste`. The
-  two reports held a 70-word introduction, two caveat sentences of 28 and 44 words, and an ambiguous "This is". The
-  C# report held four more findings (three long sentences and one ambiguous reference), and the Rust report held one
-  long sentence. A hand edit of a generated report is lost at the next run. A repository that gates `repo-tools ste`
-  over `docs/architecture` therefore could not reach exit 0 until the generator text changed. The introduction of
-  `duplicate-symbols.md` is now three short sentences and a list of the four tags. Each long caveat is split into
-  short sentences. No fact changed, and no opt-out marker is added. The new test `map-reports-ste.test.ts` maps a TypeScript, a C#, a Rust and a Python
+- `repo-tools map` writes `duplicate-symbols.md` and `unused-analysis.md` with text that passes `repo-tools ste`. A
+  TypeScript repository got a 70-word introduction in `duplicate-symbols.md`. `unused-analysis.md` held caveat
+  sentences of 28 and 44 words and an ambiguous "This is". For C#, it held four more findings (three long sentences
+  and one ambiguous reference), and for Rust one long sentence. A hand edit of a generated report is lost at the
+  next run, so the generator text had to change. The introduction of `duplicate-symbols.md` is now three short
+  sentences and a list of the four tags. Each long caveat is split into short sentences. No fact changed, and no
+  opt-out marker is added. The new test `map-reports-ste.test.ts` maps a TypeScript, a C#, a Rust and a Python
   repository and expects no STE finding in either report. A repository that commits these reports sees a one-time
   diff at its next `repo-tools map`.
 

@@ -50,6 +50,17 @@ describe("the generated prose passes the STE check", () => {
     expect(await findings(root)).toEqual([]);
   });
 
+  test("TypeScript: the per-export note that names a dynamic import", async () => {
+    const root = repo({
+      "package.json": '{"name": "demo", "main": "src/index.ts"}\n',
+      "src/index.ts": "export type Lazy = typeof import('./lazy.js');\nexport const go = 1;\n",
+      "src/lazy.ts": "export const unusedThing = 1;\n",
+    });
+    expect(await findings(root)).toEqual([]);
+    const text = readFileSync(join(root, "docs/architecture/unused-analysis.md"), "utf8");
+    expect(text).toContain("`unusedThing`: Verified: 'src/index.ts' has a literal import()");
+  });
+
   test("C#: the namespace caveat", async () => {
     const root = repo({
       "src/App/App.csproj":
