@@ -21,6 +21,13 @@ All notable changes to this project are recorded in this file. The format follow
   node directly inside a JSX element, which keeps the length, and parses again. Any other error stays an error.
   A real syntax error beside such a text is still reported. In one application repository four files moved from
   unparsed to measured, and two files with `import()` type expressions stay unparsed.
+- `repo-tools docs check` reads the documentation of an overload set from its first overload. Before, the analyser read only
+  the comment that directly precedes a declaration, so an implementation signature that follows overload signatures counted
+  as undocumented (M1), although a caller sees only the overloads. A repository then needed a comment that no reader sees.
+  The implementation signature now takes the doc of the first overload of the same name, in a function set and in a class
+  member set. A doc that directly precedes the implementation still wins. A statement between the overloads and the
+  implementation ends the set. The `;` that ends a member signature in a class body does not end the set.
+  Rule M3 still compares the documented parameters with the implementation.
 - `repo-tools docs` reads a file that has an `import("m")` type expression (`let v: import("fs").Dirent[]` and
   `f<typeof import("m")>()`). `tsc` accepts both. The grammar reads the call as a member expression of a value, so it
   cannot take `[]` after it, and it reads the call in a type argument as a comparison. Both gave error nodes, so the
