@@ -15,6 +15,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `repo-tools docs` reads a `.tsx` or `.jsx` file that has a bare `&` in JSX text (`<h3>Review & Start</h3>`).
+  React and `tsc` accept the text, and the grammar gave an error node, so the file was an unparsed file and its
+  symbols were not measured. The analyser now writes a space over a `&` that is the first character of an error
+  node directly inside a JSX element, which keeps the length, and parses again. Any other error stays an error.
+  A real syntax error beside such a text is still reported. In one application repository four files moved from
+  unparsed to measured, and two files with `import()` type expressions stay unparsed.
 - Two fan-out tests (`map-graph.test.ts` and `map-query.test.ts`) have an explicit 30 s timeout. Each builds a graph of about
   9,000 nodes. The graph test took 0.85 s on a fast machine and 4.57 s on a slower one, against bun's 5 s default, so it
   failed there under any load. The tests check a step bound, not time, so only the timeout changes. A comment on each test records the measurement and

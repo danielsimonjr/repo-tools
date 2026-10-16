@@ -10,7 +10,7 @@
  * exception, and a broken parse that finds no symbol looks like a clean file. Thus the analyser
  * reports a parse error when the root node holds one.
  */
-import type { Node } from "web-tree-sitter";
+import type { Node, Parser, Tree } from "web-tree-sitter";
 import { type GrammarName, loadGrammar, parserFor } from "../map/grammars.ts";
 import { B, NON_SPACE, pySplitlines, pyStrip, S } from "../py.ts";
 import { proseOf } from "../ste/prose.ts";
@@ -181,12 +181,50 @@ function proseOfComment(doc: string): string {
   return proseOf(lines.join("\n"));
 }
 
+// The element types whose text can hold a bare `&`.
+const JSX_PARENTS = new Set(["jsx_element", "jsx_fragment"]);
+
+// Each pass can expose one more `&` of the same text, so the repair repeats. A file with this many
+// rounds of bare ampersands in one parse is not a case worth a longer loop.
+const MAX_REPAIRS = 16;
+
+/**
+ * Parses `text`, and repairs a bare `&` in JSX text.
+ *
+ * React and `tsc` accept `<h3>Review & Start</h3>`. The grammar reads the `&` as an error node.
+ * The repair is narrow. It takes an error node that is a direct child of a JSX element and starts
+ * with `&`. It writes a space over that one character. The text keeps its length, so each position
+ * of the tree still points at the real source. Then the parser runs again. Any other error stays
+ * an error, so a file with a real syntax error is still an unparsed file.
+ */
+function parseSource(parser: Parser, text: string): Tree | null {
+  let current = sanitise(text);
+  let tree = parser.parse(current);
+  for (let pass = 0; tree?.rootNode.hasError && pass < MAX_REPAIRS; pass++) {
+    const marks: number[] = [];
+    for (const node of tree.rootNode.descendantsOfType("ERROR")) {
+      const start = node.startIndex;
+      if (current[start] === "&" && node.parent && JSX_PARENTS.has(node.parent.type)) {
+        marks.push(start);
+      }
+    }
+    if (marks.length === 0) break;
+    // Offsets are code units of the string, so a slice by index keeps every position.
+    let next = current;
+    for (const at of marks) next = `${next.slice(0, at)} ${next.slice(at + 1)}`;
+    tree.delete();
+    current = next;
+    tree = parser.parse(current);
+  }
+  return tree;
+}
+
 /**
  * True when `text` parses without an error node. The stub writer calls this on the changed file.
  * The grammar must be loaded (`analyseTypeScript` loads it).
  */
 export function parsesAsTypeScript(path: string, text: string): boolean {
-  const tree = parserFor(grammarFor(path)).parse(sanitise(text.replace(/^\uFEFF/, "")));
+  const tree = parseSource(parserFor(grammarFor(path)), text.replace(/^\uFEFF/, ""));
   if (!tree) return false;
   try {
     return !tree.rootNode.hasError;
@@ -200,7 +238,7 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
   const report = newReport(path, "typescript");
   const grammar = grammarFor(path);
   await loadGrammar(grammar);
-  const tree = parserFor(grammar).parse(sanitise(source));
+  const tree = parseSource(parserFor(grammar), source);
   if (!tree) {
     report.error = "parse error (the parser returned no tree)";
     return report;
