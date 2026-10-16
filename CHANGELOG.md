@@ -13,6 +13,8 @@ All notable changes to this project are recorded in this file. The format follow
   One repository therefore gets a different graph in a folder with a different name. The tests record this state and
   change no behavior. A change of the rule changes the expectations that carry the comment PIN.
 
+## [2.2.3] - 2026-10-16
+
 ### Fixed
 
 - `repo-tools map` reads a `.tsx` or `.jsx` file with the TSX grammar. It read the file with the TypeScript grammar,
