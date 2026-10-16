@@ -665,6 +665,12 @@ the grammar gives an error node. The analyser repairs only an error node that is
 JSX element and whose first character is `&`. It writes a space over that one character, which keeps
 the length, and parses again. Any other error stays an error, so a file with a real syntax error is
 still an unparsed file.
+A fourth case is an `import("m")` type: `let v: import("fs").Dirent[]` and
+`f<typeof import("m")>()`. `tsc` accepts both. The grammar reads the call as a member expression of
+a value, so it cannot take `[]` after it, and it reads the call in a type argument as a
+comparison. A file that parses is never rewritten. When the first parse has an error, the analyser
+writes an identifier of equal length over each `import("m")` call that holds a string literal, keeps
+the line breaks of the call, and parses again.
 
 **The parameter names.** Rule M3 compares the names in the doc with the names in the signature.
 
