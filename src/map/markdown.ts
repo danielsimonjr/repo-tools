@@ -167,7 +167,10 @@ export function unusedMarkdown(unused: Json, graph: Json): string {
   lines.push("Source files that only a test reaches. They ship nothing, but a test uses them.", "");
   bulletList(lines, testOnly);
   lines.push("## Files with no in-repo importer", "");
-  lines.push("No file of this repository imports these files. This is not a deletion list.", "");
+  lines.push(
+    "No file of this repository imports these files. Do not use the list as a deletion list.",
+    "",
+  );
   bulletList(lines, unused.noImporterFiles ?? []);
   bucket(
     lines,

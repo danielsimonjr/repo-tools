@@ -48,14 +48,19 @@ function renderTaggedSection(
 /** The duplicate-symbols.md body (without the banner). */
 export function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): string {
   let md = "# Duplicate Symbols\n\n";
-  md += "Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files across ";
-  md += "the monorepo, then CLASSIFIED (see `DupEntryTag`) so the actionable subset is clear: ";
-  md += "`TRUE_DUPLICATE` (real merge targets) vs `DISPATCH_VARIANT` (>=2 `mathTyped(...)` ";
-  md += "registrations of the same public name — distinct dispatch surfaces, Bucket C delegation ";
-  md += "candidates, not copy-paste bodies), `ALIAS_DELEGATION` (a `const X = importedY` ";
-  md += "forward, excluded once <2 real bodies remain), and `ALLOWLISTED` (matches ";
-  md += "`duplicate-allowlist.json`: hot-path `is*` guards, AssemblyScript mirrors, ";
-  md += "per-package `VERSION` strings).\n\n";
+  md += "A name is listed here when two or more distinct files across the monorepo define it. ";
+  md += "A file that only re-exports the name does not count. ";
+  md += "Each name carries one tag (see `DupEntryTag`), so the actionable subset is clear:\n\n";
+  md += "- `TRUE_DUPLICATE`: a real merge target.\n";
+  md +=
+    "- `DISPATCH_VARIANT`: two or more `mathTyped(...)` registrations of the same public name. ";
+  md += "The registrations are distinct dispatch surfaces and Bucket C delegation candidates, ";
+  md += "not copy-paste bodies.\n";
+  md += "- `ALIAS_DELEGATION`: a `const X = importedY` forward. ";
+  md += "The entry is excluded once fewer than two real bodies remain.\n";
+  md += "- `ALLOWLISTED`: the name matches `duplicate-allowlist.json`. ";
+  md += "Examples are hot-path `is*` guards, AssemblyScript mirrors and per-package `VERSION` ";
+  md += "strings.\n\n";
   md += `> **Note:** ${report.note}\n\n`;
   md += "## Summary — runtime (function/constant/class)\n\n";
   md += summaryTable(report.summary.runtimeByTag, report.runtime.length);
