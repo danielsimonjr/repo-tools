@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-10-15
+
 ### Changed
 
 - The workflows pin three GitHub Actions to a newer release: `actions/upload-artifact` v7.0.1 to v7.0.2 (in `ci.yml` and
