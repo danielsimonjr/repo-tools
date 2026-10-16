@@ -158,7 +158,12 @@ describe("duplicate detection and report", () => {
   test("the reporters render the tables and the JSON", () => {
     const report = buildDuplicateReport(dup);
     const md = generateDuplicateSymbolsMarkdown(report);
-    expect(md.startsWith("# Duplicate Symbols\n\nNames that are OWN-DEFINED")).toBe(true);
+    expect(md.startsWith("# Duplicate Symbols\n\nA name is listed here when two or more")).toBe(
+      true,
+    );
+    for (const tag of ["TRUE_DUPLICATE", "DISPATCH_VARIANT", "ALIAS_DELEGATION", "ALLOWLISTED"]) {
+      expect(md).toContain(`- \`${tag}\`: `);
+    }
     expect(md).toContain("| `same` | function | `src/a.ts` (unknown, public, PLAIN)<br>`src/b.ts`");
     expect(md).toContain("(unknown, internal, ALLOWLISTED: per-package version)");
     expect(md).toContain("| `op` | constant |");
