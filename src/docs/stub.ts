@@ -135,7 +135,8 @@ export function startsItsLine(sym: DocSymbol, lines: string[]): boolean {
 
 /**
  * Returns the TSDoc block that documents `sym`, or null when `sym` has a doc. The block goes above
- * the anchor line of the symbol: the first line of its export statement, above any decorator.
+ * the anchor line of the symbol: the first line of its export statement, above any decorator and
+ * above any tool directive that stands directly above it.
  */
 export function planTypeScript(sym: DocSymbol, lines: string[]): Insertion | null {
   if (sym.hasDoc) return null;

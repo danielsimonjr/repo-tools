@@ -98,6 +98,63 @@ describe("typescript: which comment is a doc comment", () => {
     expect(sym.hasDoc).toBe(false);
   });
 
+  test("a tool directive between the doc comment and the symbol does not hide the doc", async () => {
+    const directives = [
+      "// eslint-disable-next-line react-refresh/only-export-components -- hook next to its provider",
+      "// @ts-expect-error the typings lag",
+      "// prettier-ignore",
+      "// biome-ignore lint/suspicious/noExplicitAny: reason",
+    ];
+    for (const directive of directives) {
+      const sym = only(await symbols(`/** Doc. */\n${directive}\nexport function f() {}\n`));
+      expect(sym.hasDoc).toBe(true);
+      expect(sym.line).toBe(3);
+    }
+  });
+
+  test("several directives and a decorator between the doc comment and the symbol keep the doc", async () => {
+    const src =
+      "/** The class. */\n// eslint-disable-next-line x\n// prettier-ignore\n@Dec()\nexport class K {}\n";
+    expect(only(await symbols(src)).hasDoc).toBe(true);
+  });
+
+  test("a plain line comment before a directive still hides the doc", async () => {
+    const src = "/** Doc. */\n// note\n// eslint-disable-next-line x\nexport function f() {}\n";
+    expect(only(await symbols(src)).hasDoc).toBe(false);
+  });
+
+  test("a directive never documents a symbol by itself", async () => {
+    const sym = only(await symbols("// eslint-disable-next-line x\nexport function f() {}\n"));
+    expect(rulesOf(sym)).toEqual(["M1"]);
+  });
+
+  test("the doc above a directive is read for the parameters, so M3 still runs", async () => {
+    const src =
+      "/**\n * Adds.\n * @param nope - not a parameter\n */\n// eslint-disable-next-line x\nexport function f(a: number) {}\n";
+    expect(rulesOf(only(await symbols(src)))).toContain("M3");
+  });
+
+  test("the anchor of an undocumented symbol is the first directive line above it", async () => {
+    const two = only(
+      await symbols("// eslint-disable-next-line x\n// prettier-ignore\nexport function f() {}\n"),
+    );
+    expect(two.anchorLine).toBe(1);
+    expect(two.line).toBe(3);
+    const deco = only(await symbols("// eslint-disable-next-line x\n@Dec()\nexport class K {}\n"));
+    expect(deco.anchorLine).toBe(1);
+  });
+
+  test("the anchor stays on the symbol when the directive shares a line, a blank line follows it, or the comment is plain", async () => {
+    const shared = only(
+      await symbols("const a = 1; // eslint-disable-line\nexport function f() {}\n"),
+    );
+    expect(shared.anchorLine).toBe(2);
+    const blank = only(await symbols("// eslint-disable-next-line x\n\nexport function f() {}\n"));
+    expect(blank.anchorLine).toBe(3);
+    const plain = only(await symbols("// note\nexport function f() {}\n"));
+    expect(plain.anchorLine).toBe(2);
+  });
+
   test("a doc comment before a decorator documents the decorated class", async () => {
     const src = "/** The class. */\n@Dec()\nexport class K {}\n";
     const sym = only(await symbols(src));

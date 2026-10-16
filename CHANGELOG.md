@@ -44,6 +44,14 @@ All notable changes to this project are recorded in this file. The format follow
   message. A commit message cannot change after a merge, so `scripts/privacy-accepted.txt` holds the entry, as it does
   for `fc930a32f5d2`. Before, the `privacy` job and the test `this repository scans clean` failed on `main` after the
   merge, although the pull request was green. A squash whose commits are all by the pull request opener adds no trailer.
+- `repo-tools docs` keeps the doc of a declaration when a tool directive stands between the doc comment and the
+  declaration (`// eslint-disable-next-line`, `// @ts-expect-error`, `// prettier-ignore`, `// biome-ignore` and the
+  other directives of a closed list). Before, the directive hid the doc and the symbol counted as undocumented (M1),
+  although a directive applies to the next line and so must stay directly above the declaration; a React repository
+  with the `react-refresh` lint rule had four such hooks and components. A plain line comment can move, so it still
+  separates a doc comment from its declaration. `docs stub` also writes
+  a new block above the directive and not between the directive and the declaration, where the directive would apply
+  to the block.
 
 ## [2.2.1] - 2026-10-08
 

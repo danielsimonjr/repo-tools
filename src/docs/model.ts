@@ -35,7 +35,9 @@ export interface DocSymbol {
   line: number;
   /**
    * The line above which `stub` writes a doc comment, from 1. It equals `line`, except for an
-   * exported declaration with decorators: the comment must precede the decorators.
+   * exported declaration with decorators, and for a declaration with tool directives directly above
+   * it (`// eslint-disable-next-line`): the comment must precede both, so a directive still applies
+   * to the declaration.
    */
   anchorLine: number;
   /**
