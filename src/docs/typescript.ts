@@ -140,16 +140,50 @@ function anchorOf(node: Node): Node {
   return target;
 }
 
+// A line comment that is an instruction to a tool: it applies to the next line, so it must stay
+// directly above the declaration, and a doc comment goes above it. The list is closed: a plain
+// line comment is a comment, and it still separates a doc comment from its declaration.
+const DIRECTIVE = new RegExp(
+  `^//${SPACE_CLASS}*(?:eslint-(?:disable|enable)(?:-next-line|-line)?|@ts-(?:ignore|expect-error|nocheck|check)|` +
+    "prettier-ignore|biome-ignore|oxlint-disable|deno-lint-ignore|tslint:(?:disable|enable)|" +
+    `(?:istanbul|c8|v8)${SPACE_CLASS}+ignore)(?![\\w-])`,
+);
+
+/** True when `node` is a line comment that is a tool directive. */
+function isDirective(node: Node, text: TextOf): boolean {
+  return node.type === "comment" && DIRECTIVE.test(text(node));
+}
+
 /**
- * Returns the doc comment that directly precedes `anchor`, or "". Only a block comment that opens
- * with two stars counts. A plain block comment or a line comment is a comment, not documentation,
- * and counting it would inflate the coverage.
+ * Returns the doc comment that precedes `anchor`, or "". Only a block comment that opens with two
+ * stars counts. A plain block comment or a line comment is a comment, not documentation, and
+ * counting it would inflate the coverage. A tool directive between the doc comment and the
+ * declaration (`// eslint-disable-next-line`) does not detach the doc: `tsc` and editors read the
+ * doc across it, and the directive must stay on the line above the declaration.
  */
 function docBefore(anchor: Node, text: TextOf): string {
-  const prev = anchor.previousSibling;
+  let prev = anchor.previousSibling;
+  while (prev && isDirective(prev, text)) prev = prev.previousSibling;
   if (prev?.type !== "comment") return "";
   const comment = text(prev);
   return comment.startsWith("/**") ? comment : "";
+}
+
+/**
+ * The node that `stub` writes above: the first directive of the unbroken run of directives that
+ * stand directly above `anchor`, each on a line of its own, or `anchor` itself. A block written
+ * between a directive and its declaration would take the directive for itself.
+ */
+function stubAnchor(anchor: Node, source: string, text: TextOf): Node {
+  let first = anchor;
+  for (let prev = anchor.previousSibling; prev && isDirective(prev, text); ) {
+    if (prev.endPosition.row + 1 < first.startPosition.row) break;
+    const lineStart = source.lastIndexOf("\n", prev.startIndex - 1) + 1;
+    if (source.slice(lineStart, prev.startIndex).trim() !== "") break;
+    first = prev;
+    prev = prev.previousSibling;
+  }
+  return first;
 }
 
 // The grammar gives an overload signature (a declaration with no body) its own node type: a
@@ -291,6 +325,7 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
     for (const node of tree.rootNode.descendantsOfType(DECLARATION_TYPES)) {
       const kind = DECLARATIONS[node.type] as Kind;
       const anchor = anchorOf(node);
+      const lead = stubAnchor(anchor, source, text);
       const doc = leadingDoc(anchor, node, text);
       const dialect = dialectOf(doc);
       const typeLike = kind === "class" || kind === "interface" || kind === "type";
@@ -299,8 +334,8 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
       const sym: DocSymbol = {
         file: path,
         line,
-        anchorLine: anchor.startPosition.row + 1,
-        anchorColumn: anchor.startPosition.column,
+        anchorLine: lead.startPosition.row + 1,
+        anchorColumn: lead.startPosition.column,
         name: nameNode ? text(nameNode) : "<anonymous>",
         kind,
         exported: isExported(node),

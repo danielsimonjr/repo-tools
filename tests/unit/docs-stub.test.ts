@@ -160,6 +160,19 @@ describe("planTypeScript", () => {
     expect(out.indexOf("@Dec()")).toBeGreaterThan(out.indexOf(" */"));
   });
 
+  test("a block goes above a directive, so the directive still applies to the symbol", async () => {
+    const src =
+      "// eslint-disable-next-line react-refresh/only-export-components\nexport function useX() {}\n";
+    const out = await stubTypeScript(src);
+    expect(out.startsWith("/**\n")).toBe(true);
+    expect(out.endsWith(src)).toBe(true);
+  });
+
+  test("a plain line comment keeps its place: the block goes directly above the symbol", async () => {
+    const out = await stubTypeScript("// note\nexport function f() {}\n");
+    expect(out.startsWith("// note\n/**\n")).toBe(true);
+  });
+
   test("a .tsx file is checked with the TSX grammar", async () => {
     const src = "export function View() {\n  return <div>hi</div>;\n}\n";
     const out = await stubTypeScript(src, "a.tsx");
