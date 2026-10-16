@@ -6,6 +6,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- `tests/unit/map-project-name.test.ts` pins the project name in the generated reports. `dependency-graph.json` and
+  `dependency-graph.yaml` write the name of the checkout folder. The other reports write the `name` of `package.json`.
+  One repository therefore gets a different graph in a folder with a different name. The tests record this state and
+  change no behavior. A change of the rule changes the expectations that carry the comment PIN.
+
 ## [2.2.2] - 2026-10-15
 
 ### Changed
