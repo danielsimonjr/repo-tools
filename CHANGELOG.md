@@ -40,8 +40,9 @@ All notable changes to this project are recorded in this file. The format follow
 - `repo-tools docs` keeps the doc of a declaration when a tool directive stands between the doc comment and the
   declaration (`// eslint-disable-next-line`, `// @ts-expect-error`, `// prettier-ignore`, `// biome-ignore` and the
   other directives of a closed list). Before, the directive hid the doc and the symbol counted as undocumented (M1),
-  although `tsc` and editors read the doc across it; a React repository with the `react-refresh` lint rule had four such
-  hooks and components. A plain line comment still separates a doc comment from its declaration. `docs stub` also writes
+  although a directive applies to the next line and so must stay directly above the declaration; a React repository
+  with the `react-refresh` lint rule had four such hooks and components. A plain line comment can move, so it still
+  separates a doc comment from its declaration. `docs stub` also writes
   a new block above the directive and not between the directive and the declaration, where the directive would apply
   to the block.
 

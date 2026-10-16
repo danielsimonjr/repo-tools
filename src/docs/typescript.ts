@@ -158,8 +158,9 @@ function isDirective(node: Node, text: TextOf): boolean {
  * Returns the doc comment that precedes `anchor`, or "". Only a block comment that opens with two
  * stars counts. A plain block comment or a line comment is a comment, not documentation, and
  * counting it would inflate the coverage. A tool directive between the doc comment and the
- * declaration (`// eslint-disable-next-line`) does not detach the doc: `tsc` and editors read the
- * doc across it, and the directive must stay on the line above the declaration.
+ * declaration (`// eslint-disable-next-line`) does not detach the doc: a directive applies to the
+ * next line, so it cannot move, and the doc could never be adjacent. A plain line comment can
+ * move, so it still detaches the doc.
  */
 function docBefore(anchor: Node, text: TextOf): string {
   let prev = anchor.previousSibling;

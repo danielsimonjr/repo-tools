@@ -648,9 +648,10 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   above the outermost `export` statement. A plain block comment and a line comment are not
   documentation. A line comment that is a tool directive (`// eslint-disable-next-line`,
   `// @ts-expect-error`, `// prettier-ignore`, `// biome-ignore`, and the other directives of
-  the closed list `DIRECTIVE` in `src/docs/typescript.ts`) does not detach the doc: `tsc` and
-  editors read the doc across it. `docs stub` writes a new block above such a directive, so the
-  directive still applies to the declaration. An implementation signature that follows overload
+  the closed list `DIRECTIVE` in `src/docs/typescript.ts`) does not detach the doc: a directive
+  applies to the next line, so it cannot move away from the declaration. A plain line comment
+  can move, so it still detaches the doc. `docs stub` writes a new block above such a
+  directive, so the directive still applies to the declaration. An implementation signature that follows overload
   signatures of the same name has no doc of its own and takes the doc of the first overload,
   because a caller sees only the overloads. A doc that directly precedes the implementation
   signature wins.
