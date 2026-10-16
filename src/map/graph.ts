@@ -407,7 +407,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
       workspaces.set(name, ws);
   }
   if (language === "typescript" || language === "python") await loadGrammar(language);
-  // A `.tsx` or `.jsx` file needs the TSX grammar, which reads JSX.
+  // A `.tsx`, `.jsx` or JavaScript file needs the TSX grammar, which reads JSX.
   if (language === "typescript" && found.some((f) => grammarFor(f.path) === "tsx"))
     await loadGrammar("tsx");
   const resolver = getResolver(language);

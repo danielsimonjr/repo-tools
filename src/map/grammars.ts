@@ -62,13 +62,18 @@ export function loadGrammar(name: GrammarName): Promise<Parser> {
   return pending;
 }
 
+/** The suffixes that use the TSX grammar: the two JSX suffixes and every JavaScript suffix. */
+const TSX_SUFFIXES = [".tsx", ".jsx", ".js", ".mjs", ".cjs"];
+
 /**
  * The grammar for a TypeScript or JavaScript path.
  * TSX reads JSX, but the TypeScript grammar cannot. The TypeScript grammar gives ERROR nodes for
  * JSX. The export statements that survive the error recovery then depend on the text of the file.
+ * A JavaScript file can hold JSX, and it cannot hold an angle-bracket type assertion. So every
+ * JavaScript suffix uses TSX. Only a `.ts` file, or a path without a known suffix, uses TypeScript.
  */
 export function grammarFor(path: string): GrammarName {
-  return path.endsWith(".tsx") || path.endsWith(".jsx") ? "tsx" : "typescript";
+  return TSX_SUFFIXES.some((suffix) => path.endsWith(suffix)) ? "tsx" : "typescript";
 }
 
 /** The parser of a grammar that `loadGrammar` already loaded. Throws when it is not loaded. */

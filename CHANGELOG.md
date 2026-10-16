@@ -6,6 +6,16 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `repo-tools map` and `repo-tools docs` read a `.js`, `.mjs` or `.cjs` file with the TSX grammar. These files used
+  the TypeScript grammar, which cannot read JSX. A JavaScript file that holds JSX then gave error nodes, and a
+  `docs` run counted the file as unparsed. A JavaScript file cannot hold an angle-bracket type assertion, which
+  TSX cannot read. The measurement used 2446 tracked JavaScript files in 87 repositories. It skipped build-output
+  and vendor folders, minified files and files over 1.5 MB. The TSX grammar added no error node to any file. It
+  removed the error nodes of the one file that held JSX. No export count changed. A `.ts` file keeps the
+  TypeScript grammar.
+
 ## [2.2.3] - 2026-10-16
 
 ### Fixed
