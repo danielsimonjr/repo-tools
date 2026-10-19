@@ -652,15 +652,15 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   not exported, because its class is. A declaration is exported when an `export` statement wraps
   it. A doc is a block comment that starts with `/**` and ends directly above the declaration, or
   above the outermost `export` statement. A plain block comment and a line comment are not
-  documentation. A line comment that is a tool directive (`// eslint-disable-next-line`,
-  `// @ts-expect-error`, `// prettier-ignore`, `// biome-ignore`, and the other directives of
-  the closed list `DIRECTIVE` in `src/docs/typescript.ts`) does not detach the doc: a directive
-  applies to the next line, so it cannot move away from the declaration. A plain line comment
-  can move, so it still detaches the doc. `docs stub` writes a new block above such a
-  directive, so the directive still applies to the declaration. An implementation signature that follows overload
-  signatures of the same name has no doc of its own and takes the doc of the first overload,
-  because a caller sees only the overloads. A doc that directly precedes the implementation
-  signature wins.
+  documentation. A line comment that is a tool directive does not detach the doc. Examples are
+  `// eslint-disable-next-line`, `// @ts-expect-error`, `// prettier-ignore` and `// biome-ignore`.
+  The closed list `DIRECTIVE` in `src/docs/typescript.ts` holds the other directives. A directive
+  applies to the next line, so it cannot move away from the declaration. A plain line comment can
+  move, so it still detaches the doc. `docs stub` writes a new block above such a directive, so the
+  directive still applies to the declaration. An implementation signature that follows overload
+  signatures of the same name has no doc of its own. The implementation signature takes the doc of
+  the first overload, because a caller sees only the overloads. A doc that directly precedes the
+  implementation signature wins.
 - In Python: functions, async functions and classes, at any depth. With a literal `__all__` at the
   top of a module, a name is exported when `__all__` lists it. Without `__all__`, a name is
   exported when it has no leading underscore, or when it has the form `__x__`. The doc is the
@@ -681,10 +681,11 @@ the length, and parses again. Any other error stays an error, so a file with a r
 still an unparsed file.
 A fourth case is an `import("m")` type: `let v: import("fs").Dirent[]` and
 `f<typeof import("m")>()`. `tsc` accepts both. The grammar reads the call as a member expression of
-a value, so it cannot take `[]` after it, and it reads the call in a type argument as a
-comparison. A file that parses is never rewritten. When the first parse has an error, the analyser
-writes an identifier of equal length over each `import("m")` call that holds a string literal, keeps
-the line breaks of the call, and parses again.
+a value. Thus the grammar cannot take `[]` after the call. The grammar reads the call in a type
+argument as a comparison. A file that parses is never rewritten. When the first parse has an error,
+the analyser rewrites each `import("m")` call that holds a string literal. The analyser writes an
+identifier of equal length over the call and keeps the line breaks of the call. Then the analyser
+parses again.
 
 **The parameter names.** Rule M3 compares the names in the doc with the names in the signature.
 

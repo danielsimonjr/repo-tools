@@ -6,6 +6,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- `docs/design.md` passes `repo-tools ste` with 0 problems. The check reported 4 sentences of 31 to 43 words in
+  section 16.3. Each of the 4 sentences is now a group of shorter sentences. No fact changes.
+
 ## [2.2.4] - 2026-10-19
 
 ### Fixed

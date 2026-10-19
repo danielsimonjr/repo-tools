@@ -276,7 +276,7 @@ data. Other findings are filed here.
   Simplified Technical English findings where 2.2.3 gave 4; security — 0 open Dependabot alerts and
   `bun audit` finds no vulnerability in 43 packages; maintainability — the version is written in 3 places
   (`package.json` and twice in the README) and all three read 2.2.4. NOT done: the three open items below.
-- [ ] `docs/design.md`: split the 4 sentences over the Simplified Technical English limit (near lines 650 and
+- [x] `docs/design.md`: split the 4 sentences over the Simplified Technical English limit (near lines 650 and
   669). `repo-tools ste docs/design.md` reports them, and they pre-date 2.2.4.
 - [ ] README: the version line and the release link repeat the version of `package.json`. Remove the second
   copy, or write a test that fails when the two differ.
