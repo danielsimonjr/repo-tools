@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.4] - 2026-10-19
+
 ### Fixed
 
 - `repo-tools map` and `repo-tools docs` read a `.js`, `.mjs` or `.cjs` file with the TSX grammar. These files used
