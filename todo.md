@@ -268,3 +268,18 @@ data. Other findings are filed here.
 - [x] chunk and compress: exit 1 on an unknown flag, a flag without a value, a missing batch
   input, and a second input without `-b`.
 - [x] Second review of the chunk and compress fixes: link-safe paths, line-ending round trips, number safety, output overwrite guard.
+
+- [x] 2026-10-19 · five-axis pass (release v2.2.4): speed — 1748 tests run in 191.5 s on one Windows
+  machine and nothing in the release touches that path; stability — 1747 pass, 0 fail, 1 skip (a test that
+  needs a platform feature); reliability — the shipped Windows executable, the registry package in a clean
+  directory and the global install on two machines each report 2.2.4, and a map of this repository gives 0
+  Simplified Technical English findings where 2.2.3 gave 4; security — 0 open Dependabot alerts and
+  `bun audit` finds no vulnerability in 43 packages; maintainability — the version is written in 3 places
+  (`package.json` and twice in the README) and all three read 2.2.4. NOT done: the three open items below.
+- [ ] `docs/design.md`: split the 4 sentences over the Simplified Technical English limit (near lines 650 and
+  669). `repo-tools ste docs/design.md` reports them, and they pre-date 2.2.4.
+- [ ] README: the version line and the release link repeat the version of `package.json`. Remove the second
+  copy, or write a test that fails when the two differ.
+- [ ] Write the release steps in the repository. The executable artifacts use `archive: false`, so
+  `gh run download` fails on them with "not a valid zip file"; the REST artifact endpoint returns the raw
+  file. A local `dist/` is older than the version bump, so the publish must use the tarball that CI built.
