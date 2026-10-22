@@ -13,7 +13,13 @@ import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
 import { readdirHook } from "../depgraph/dirlist.ts";
 import { resolveWorkspaceSource, workspaceTarget } from "../depgraph/resolver.ts";
-import { configReferencedEntries, runtimeLaunchedEntries, selfPackage } from "../depgraph/roots.ts";
+import {
+  configReferencedEntries,
+  htmlReferencedEntries,
+  rootPackageEntries,
+  runtimeLaunchedEntries,
+  selfPackage,
+} from "../depgraph/roots.ts";
 import type { ParsedFile, WorkspacePackage } from "../depgraph/types.ts";
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { B, pyRepr, S, SPACE_BODY, W } from "../py.ts";
@@ -343,7 +349,11 @@ function findRoots(
   if (language === "rust") return rustRoots(known);
   const [rootRoots, rootWarnings] = packageJsonRoots(root, known);
   const [wsRoots, wsWarnings] = workspaceRoots(root, known);
-  const roots = [...new Set([...rootRoots, ...wsRoots])];
+  // A single-package repo has no workspace package to carry its script and tsconfig entries, so
+  // the root package does (`tsc -p tsconfig.cli.json`, a tsup config, `node dist/x.js`).
+  const scriptRoots =
+    detectWorkspaces(root).size === 0 ? rootPackageEntries(root).filter((e) => known.has(e)) : [];
+  const roots = [...new Set([...rootRoots, ...wsRoots, ...scriptRoots])];
   const warnings = [...rootWarnings, ...wsWarnings];
   if (roots.length > 0) return [roots, warnings];
   for (const cand of FALLBACK_ROOTS) if (known.has(cand)) return [[cand], warnings];
@@ -539,7 +549,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
   // A build or test config, and a `new URL('./x.js', import.meta.url)` launch, seed roots
   // the way depgraph 1.x did. A file they name is a build entry, not an orphan.
   if (language === "typescript") {
-    for (const entry of configReferencedEntries(root)) {
+    for (const entry of [...configReferencedEntries(root), ...htmlReferencedEntries(root)]) {
       if (known.has(entry) && !roots.includes(entry)) roots.push(entry);
     }
     const asParsed = [...known].map((path) => ({ path }) as ParsedFile);
