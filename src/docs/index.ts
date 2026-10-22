@@ -16,7 +16,12 @@ import { maskRoot, toPosix } from "../depgraph/paths.ts";
 import type { Io } from "../io-types.ts";
 import { isDirectory } from "../map/command.ts";
 import { analyseRepo } from "./analyse.ts";
-import { CONFIG_NAME, languageOf } from "./discovery.ts";
+import {
+  assertReadableLanguage,
+  CONFIG_NAME,
+  languageOf,
+  UnreadableRepoLanguage,
+} from "./discovery.ts";
 import { type FileReport, isParsed } from "./model.ts";
 import { parsesAsPython } from "./python.ts";
 import { pctText, summarise, writeOutputs } from "./report.ts";
@@ -38,7 +43,9 @@ export const DOCS_HELP = `Usage: repo-tools docs scan  [root] [--out=<dir>]
 Measure, stub and gate the documentation comments of the TypeScript, JavaScript
 and Python files of a repository. The files are the files that git tracks. A
 file in a skipped folder (node_modules, dist, build, bundle, out, vendor) or
-with a generated name (.d.ts, .min.js, _pb2.py) is not read.
+with a generated name (.d.ts, .min.js, _pb2.py) is not read. A repository with
+more files of another language (for example Rust or Go) than TypeScript,
+JavaScript and Python together is refused: the run names the language and exits 1.
 
 Actions:
   scan   Measure the coverage. Write COVERAGE.md and coverage.json.
@@ -473,13 +480,15 @@ export async function run(argv: string[], io: Io): Promise<number> {
     const options = parseDocsArgs(argv);
     root = resolve(options.root);
     if (!isDirectory(root)) throw new Error("the root <root> is not an existing directory");
+    assertReadableLanguage(root);
     if (options.action === "scan") return await runScan(root, options, io);
     if (options.action === "stub") return await runStub(root, options, io);
     return await runCheck(root, options, io);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     stderr(`repo-tools docs: ${message}\n`);
-    // A run that found nothing to measure is a failed gate. Every other error is a misuse.
-    return error instanceof NothingToMeasure ? 1 : 2;
+    // A run that found nothing to measure, or that cannot read the repository, is a failed gate.
+    // Every other error is a misuse.
+    return error instanceof NothingToMeasure || error instanceof UnreadableRepoLanguage ? 1 : 2;
   }
 }
