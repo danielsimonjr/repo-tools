@@ -15,10 +15,26 @@ function percent(tested: number, total: number): string {
   return total > 0 ? ((tested / total) * 100).toFixed(1) : "0";
 }
 
+/** The value of `coverageBasis` in test-coverage.json when an import names a namespace. */
+export const NAMESPACE_IMPORT_BASIS = "namespace-import";
+
+/**
+ * The note on a report whose import edges name a namespace (a C# `using`). The percentage stays
+ * the raw figure. The note says what the figure counts.
+ */
+export const NAMESPACE_IMPORT_COVERAGE_CAVEAT =
+  "Coverage is counted by namespace import. A C# `using` directive usually names a namespace, not a type, so a test covers every file that declares the namespace. A namespace import does not show that a test uses the file. A test in the same namespace, or in a nested namespace, needs no `using` and does not count. The percentage can be too high or too low.";
+
+/** The options that name how the report counts a covered file. */
+export interface CoverageBasisOptions {
+  /** True when an import names a namespace, not a symbol. Adds the basis and the caveat. */
+  namespaceImportBasis?: boolean;
+}
+
 /** The TEST_COVERAGE.md body (without the banner). */
 export function generateTestCoverageMarkdown(
   coverage: TestCoverageAnalysis,
-  options: { expectedTestHint?: boolean; policyPath?: string } = {},
+  options: CoverageBasisOptions & { expectedTestHint?: boolean; policyPath?: string } = {},
 ): string {
   const hint = options.expectedTestHint ?? true;
   const lines: string[] = [];
@@ -38,11 +54,16 @@ export function generateTestCoverageMarkdown(
   lines.push(`| Coverage (raw, direct-import) | **${percent(totalTested, totalSource)}%** |`);
 
   const b = coverage.policyBreakdown;
+  // The note about the basis follows the summary table and comes before any policy text.
+  const basisNote = options.namespaceImportBasis
+    ? [`> ${NAMESPACE_IMPORT_COVERAGE_CAVEAT}`, ""]
+    : [];
   if (coverage.policy) {
     lines.push(
       `| Coverage (effective, active code only) | **${b.effectivePercent}%** (${b.testedActive} / ${b.activeFiles}) |`,
     );
     lines.push("");
+    lines.push(...basisNote);
     const policyPath = options.policyPath ?? "docs/architecture/coverage-policy.json";
     lines.push(
       "> The raw figure counts every source file the CDG tool finds, including code that is " +
@@ -65,6 +86,9 @@ export function generateTestCoverageMarkdown(
       `| **Active (real gap — needs a test)** | ${b.byCategory.active_untested ?? 0} | These are the files that should grow a direct-import test. |`,
     );
     lines.push("");
+  } else if (basisNote.length > 0) {
+    // The table has no closing blank line when no policy is loaded.
+    lines.push("", ...basisNote);
   }
   lines.push("---");
   lines.push("");
@@ -130,7 +154,10 @@ export function generateTestCoverageMarkdown(
 }
 
 /** The test-coverage.json object. Sorts the tested and untested lists in place. */
-export function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
+export function generateTestCoverageJson(
+  coverage: TestCoverageAnalysis,
+  options: CoverageBasisOptions = {},
+): object {
   const coverageMapObj: Record<string, string[]> = {};
   for (const [source, tests] of coverage.coverageMap) coverageMapObj[source] = tests;
   const testToSourceObj: Record<string, string[]> = {};
@@ -143,6 +170,12 @@ export function generateTestCoverageJson(coverage: TestCoverageAnalysis): object
       testedCount: coverage.testedFiles.length,
       untestedCount: coverage.untestedFiles.length,
       coveragePercent: percent(coverage.testedFiles.length, coverage.sourceFiles.length),
+      ...(options.namespaceImportBasis
+        ? {
+            coverageBasis: NAMESPACE_IMPORT_BASIS,
+            coverageCaveat: NAMESPACE_IMPORT_COVERAGE_CAVEAT,
+          }
+        : {}),
       effectiveCoverage: {
         policyLoaded: coverage.policy !== null,
         activeFiles: b.activeFiles,

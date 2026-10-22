@@ -426,6 +426,12 @@ const IMPORTS_NAME_SYMBOLS: Readonly<Record<string, boolean>> = {
   csharp: false,
   rust: true,
 };
+
+/** Whether an import in `language` names the symbols it brings in. An unknown language does. */
+export function importsNameSymbols(language: string): boolean {
+  return IMPORTS_NAME_SYMBOLS[language] ?? true;
+}
+
 /** Languages whose public surface is consumed outside the repository. */
 const PUBLIC_API_LANGUAGES = new Set(["rust"]);
 
@@ -465,7 +471,7 @@ function identifierUsers(graph: RepoGraph): Map<string, Set<string>> {
 /** The caveats that apply to this graph's language. */
 function caveatsFor(graph: RepoGraph): string[] {
   const caveats = [...UNUSED_CAVEATS];
-  if (!(IMPORTS_NAME_SYMBOLS[graph.language] ?? true)) caveats.push(NAMESPACE_IMPORT_CAVEAT);
+  if (!importsNameSymbols(graph.language)) caveats.push(NAMESPACE_IMPORT_CAVEAT);
   if (PUBLIC_API_LANGUAGES.has(graph.language)) caveats.push(PUBLIC_API_CAVEAT);
   return caveats;
 }
@@ -526,7 +532,7 @@ function classifyUnusedExports(graph: RepoGraph): Buckets {
   const unreferenced: Record<string, string[]> = {};
   const referencedInModule: Record<string, string[]> = {};
   const unclassified: Record<string, string[]> = {};
-  const namesSymbols = IMPORTS_NAME_SYMBOLS[graph.language] ?? true;
+  const namesSymbols = importsNameSymbols(graph.language);
   const users = namesSymbols ? new Map<string, Set<string>>() : identifierUsers(graph);
   const push = (bucket: Record<string, string[]>, path: string, name: string) => {
     const list = bucket[path] ?? [];

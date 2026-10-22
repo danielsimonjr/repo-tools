@@ -7,6 +7,9 @@
  * The coverage policy is an input, so it never comes from the output folder (D9). The TypeScript
  * report keeps depgraph's "Expected test" hint; for another language that hint would name a file
  * that cannot exist, so the report lists the untested files only.
+ *
+ * A C# `using` names a namespace, so a test covers every file of that namespace. The percentage
+ * stays the raw figure, and the Markdown and the JSON both state that basis and its limit.
  */
 import { join } from "node:path";
 import { analyzeTestCoverage } from "../depgraph/coverage.ts";
@@ -17,6 +20,7 @@ import {
 } from "../depgraph/reporters/coverage.ts";
 import { writeReport } from "../io.ts";
 import { toParsedFiles } from "./adapter.ts";
+import { importsNameSymbols } from "./artifacts.ts";
 import { MAP_REGENERATE_COMMAND } from "./reports.ts";
 import type { RepoGraph } from "./schema.ts";
 
@@ -62,12 +66,17 @@ export function emitTestCoverage(
   );
   const mdPath = join(outDir, "TEST_COVERAGE.md");
   const jsonPath = join(outDir, "test-coverage.json");
+  const namespaceImportBasis = !importsNameSymbols(graph.language);
   // The Markdown first: the JSON reporter sorts the file lists in place.
   const markdown = generateTestCoverageMarkdown(coverage, {
     expectedTestHint: graph.language === "typescript",
     policyPath: options.policyNote ?? "docs/architecture/coverage-policy.json",
+    namespaceImportBasis,
   });
   writeReport(mdPath, withBanner(markdown, { command: MAP_REGENERATE_COMMAND, ...options.banner }));
-  writeReport(jsonPath, JSON.stringify(generateTestCoverageJson(coverage), null, 2));
+  writeReport(
+    jsonPath,
+    JSON.stringify(generateTestCoverageJson(coverage, { namespaceImportBasis }), null, 2),
+  );
   return [mdPath, jsonPath];
 }

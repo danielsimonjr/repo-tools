@@ -8,6 +8,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The C# test-coverage report states its basis. A C# `using` usually names a namespace, so a test covers every file
+  that declares the namespace, and a covered file is not proof that a test uses the file. A test in the same namespace,
+  or in a nested namespace, needs no `using` and does not count, so the percentage can be too high or too low.
+  `TEST_COVERAGE.md` now has a note under the summary table that says "counted by namespace import".
+  `test-coverage.json` now has `metadata.coverageBasis` (`namespace-import`) and `metadata.coverageCaveat`. The
+  percentage does not change. The reports of TypeScript, Python and Rust have no note and no new key, and the golden
+  files do not change.
+  `importsNameSymbols` in `src/map/artifacts.ts` is now the one rule for "does an import name a symbol"; the
+  unused-analysis caveat and its export classification use it as well.
 - `docs/design.md` passes `repo-tools ste` with 0 problems. The check reported 4 sentences of 31 to 43 words in
   section 16.3. Each of the 4 sentences is now a group of shorter sentences. No fact changes.
 
