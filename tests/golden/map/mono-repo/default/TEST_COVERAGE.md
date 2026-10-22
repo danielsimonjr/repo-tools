@@ -21,15 +21,15 @@ The following 6 source files are not directly imported by any test file:
 
 ### cli/
 
-- `packages/cli/src/format.ts` → Expected test: `tests/unit/cli/format.test.ts`
-- `packages/cli/src/main.ts` → Expected test: `tests/unit/cli/main.test.ts`
+- `packages/cli/src/format.ts`
+- `packages/cli/src/main.ts`
 
 ### core/
 
-- `packages/core/src/index.ts` → Expected test: `tests/unit/core/index.test.ts`
-- `packages/core/src/internal.ts` → Expected test: `tests/unit/core/internal.test.ts`
-- `packages/core/src/types.ts` → Expected test: `tests/unit/core/types.test.ts`
-- `packages/core/src/worker.ts` → Expected test: `tests/unit/core/worker.test.ts`
+- `packages/core/src/index.ts`
+- `packages/core/src/internal.ts`
+- `packages/core/src/types.ts`
+- `packages/core/src/worker.ts`
 
 ---
 

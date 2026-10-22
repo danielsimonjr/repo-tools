@@ -14,6 +14,15 @@ All notable changes to this project are recorded in this file. The format follow
 - The warning that `repo-tools map` writes for a `package.json` entry that does not resolve is shorter (15 words).
   It had 30 words, so `repo-tools ste` flagged the generated `FILE_INVENTORY.md`. A test now checks the word limit
   of every warning and that the generated report passes `repo-tools ste`.
+- `repo-tools map` reads a folder named `test/` as a tests folder, as version 1.x did. Before, only `tests/` counted,
+  so a file such as `test/setup.ts` got the area `src` in `FILE_INVENTORY.md` and counted as a source file in
+  `TEST_COVERAGE.md`. The disposition legend and the `--tests` message name both folders.
+- The `TEST_COVERAGE.md` note on the coverage policy no longer links `COVERAGE_POLICY.md`, a file that the tool does
+  not write, and no longer names mathjs or AssemblyScript.
+- The `Expected test` hint in `TEST_COVERAGE.md` names `tests/unit/<module>/`. It appears only when the repository
+  keeps tests in `tests/unit/`. Other repositories get the plain list of untested files.
+- The text of `duplicate-symbols.md` and of the `duplicate-symbols.json` note no longer names `Bucket C` or
+  `AssemblyScript`.
 
 ## [2.2.6] - 2026-10-22
 

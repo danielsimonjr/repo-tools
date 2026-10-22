@@ -43,12 +43,22 @@ async function coverage(root: string): Promise<{ md: string; json: Json }> {
   };
 }
 
-const TS = {
+const TS_SRC = {
   "package.json": '{"name": "demo", "main": "src/a.ts"}\n',
   "src/a.ts": 'import "./side.js";\nexport const a = 1;\n',
   "src/side.ts": "globalThis.x = 1;\nexport {};\n",
   "src/b.ts": "export const b = 2;\n",
+};
+
+const TS = {
+  ...TS_SRC,
   "tests/a.test.ts": 'import { a } from "../src/a.js";\nexport const t = a;\n',
+};
+
+/** The same sources with the tests in `tests/unit/`, the layout that the test hint names. */
+const TS_UNIT = {
+  ...TS_SRC,
+  "tests/unit/a.test.ts": 'import { a } from "../../src/a.js";\nexport const t = a;\n',
 };
 
 describe("emitTestCoverage", () => {
@@ -60,8 +70,8 @@ describe("emitTestCoverage", () => {
     expect(json.testToSourceMap["tests/a.test.ts"]).toEqual(["src/a.ts", "src/side.ts"]);
   });
 
-  test("the Markdown has the `repo-tools map` banner and the TypeScript test hint", async () => {
-    const { md } = await coverage(repo(TS));
+  test("the Markdown has the `repo-tools map` banner and the test hint of a tests/unit/ layout", async () => {
+    const { md } = await coverage(repo(TS_UNIT));
     expect(md).toContain("Regenerate with `repo-tools map`.");
     expect(md).toContain("# Test Coverage Analysis");
     expect(md).toContain("- `src/b.ts` → Expected test: `tests/unit/");
@@ -82,6 +92,33 @@ describe("emitTestCoverage", () => {
     expect(json.metadata.effectiveCoverage.excludedTotal).toBe(1);
     ({ json } = await coverage(repo({ ...TS, "out/coverage-policy.json": policy })));
     expect(json.metadata.effectiveCoverage.policyLoaded).toBe(false);
+  });
+
+  test("a repo whose tests are not in tests/unit/ gets the plain list, with no test hint", async () => {
+    const { md } = await coverage(repo(TS));
+    expect(md).toContain("- `src/b.ts`");
+    expect(md).not.toContain("Expected test");
+  });
+
+  test("a file in a test/ folder is no source file", async () => {
+    const { json } = await coverage(repo({ ...TS, "test/setup.ts": "export {};\n" }));
+    expect(json.metadata.totalSourceFiles).toBe(3);
+    expect(json.untestedFiles).toEqual(["src/b.ts"]);
+  });
+
+  test("the policy note names the policy file and links to no file that the tool does not write", async () => {
+    const policy = JSON.stringify({
+      categories: {
+        gen: { label: "Generated", rationale: "Made by a tool.", exactPaths: ["src/b.ts"] },
+      },
+    });
+    const { md } = await coverage(
+      repo({ ...TS, "docs/architecture/coverage-policy.json": policy }),
+    );
+    expect(md).toContain("docs/architecture/coverage-policy.json");
+    expect(md).not.toContain("COVERAGE_POLICY.md");
+    expect(md).not.toContain("mathjs");
+    expect(md).not.toContain("AssemblyScript");
   });
 
   test("a test covers a file it loads with import(), or through dist/, as in 1.x", async () => {

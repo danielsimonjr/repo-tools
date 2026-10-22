@@ -5,8 +5,9 @@
  * barrel re-exports, and the bare side-effect imports behind them.
  *
  * The coverage policy is an input, so it never comes from the output folder (D9). The TypeScript
- * report keeps depgraph's "Expected test" hint; for another language that hint would name a file
- * that cannot exist, so the report lists the untested files only.
+ * report keeps depgraph's "Expected test" hint when the repository keeps its tests in
+ * `tests/unit/`. For another language or another layout that hint would name a file that does not
+ * fit, so the report lists the untested files only.
  *
  * A C# `using` names a namespace, so a test covers every file of that namespace. The percentage
  * stays the raw figure, and the Markdown and the JSON both state that basis and its limit.
@@ -69,7 +70,9 @@ export function emitTestCoverage(
   const namespaceImportBasis = !importsNameSymbols(graph.language);
   // The Markdown first: the JSON reporter sorts the file lists in place.
   const markdown = generateTestCoverageMarkdown(coverage, {
-    expectedTestHint: graph.language === "typescript",
+    // The hint names `tests/unit/<module>/`, so it applies only where the tests are kept there.
+    expectedTestHint:
+      graph.language === "typescript" && tests.some((t) => t.path.startsWith("tests/unit/")),
     policyPath: options.policyNote ?? "docs/architecture/coverage-policy.json",
     namespaceImportBasis,
   });
