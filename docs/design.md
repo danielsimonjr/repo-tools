@@ -451,7 +451,12 @@ census. A `build/` folder at the root stays silent. A top-level `$schema` key in
 is not a setting. Census messages name the configured regenerate command. The test-coverage note
 names the configured coverage-policy path. A root config that names a source file with
 `new URL`, and a source file that launches a sibling with `new URL('./x.js', import.meta.url)`,
-seed roots. An `exports` or `main` target is a root after `dist/` maps to `src/`, including when
+seed roots. A root config also seeds the source files in the value of an `entry`, `input`,
+`setupFiles`, `globalSetup` or `globalTeardown` key, for example
+`path.resolve(__dirname, 'electron/main.ts')`. The module script of `index.html` or
+`src/index.html` seeds a root. In a repository without workspaces, the scripts of the root
+package seed roots, as they do for a workspace package. A `tsc -p` tsconfig can hold comments
+and trailing commas. An `exports` or `main` target is a root after `dist/` maps to `src/`, including when
 that file is not `src/index.ts`. A workspace subpath uses the export target, then
 `<sub>.ts`, then `<sub>/index.ts`. A package-name import is an edge for cycles and for test
 coverage.

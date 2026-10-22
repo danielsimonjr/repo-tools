@@ -68,10 +68,59 @@ export function tsupConfigEntries(root: string, pkgDir: string): string[] {
   return out;
 }
 
+/** The end index (exclusive) of the string literal that starts at `start` in `text`. */
+function stringEnd(text: string, start: number): number {
+  let j = start + 1;
+  while (j < text.length && text.charAt(j) !== '"') j += text.charAt(j) === "\\" ? 2 : 1;
+  return Math.min(j + 1, text.length);
+}
+
+/**
+ * `text` without its comments and trailing commas, so `JSON.parse` reads a tsconfig. A tsconfig
+ * is JSONC: `//` and block comments, and a comma before `}` or `]`, are all valid in it. A
+ * comment mark inside a string stays.
+ */
+export function stripJsonc(text: string): string {
+  // Pass 1: drop the comments.
+  let plain = "";
+  for (let i = 0; i < text.length; ) {
+    const c = text.charAt(i);
+    if (c === '"') {
+      const end = stringEnd(text, i);
+      plain += text.slice(i, end);
+      i = end;
+    } else if (c === "/" && text.charAt(i + 1) === "/") {
+      while (i < text.length && text.charAt(i) !== "\n") i++;
+    } else if (c === "/" && text.charAt(i + 1) === "*") {
+      const end = text.indexOf("*/", i + 2);
+      i = end === -1 ? text.length : end + 2;
+    } else {
+      plain += c;
+      i++;
+    }
+  }
+  // Pass 2: drop each comma whose next non-space character closes an object or array.
+  let out = "";
+  for (let i = 0; i < plain.length; ) {
+    const c = plain.charAt(i);
+    if (c === '"') {
+      const end = stringEnd(plain, i);
+      out += plain.slice(i, end);
+      i = end;
+    } else if (c === "," && /^\s*[}\]]/.test(plain.slice(i + 1))) {
+      i++;
+    } else {
+      out += c;
+      i++;
+    }
+  }
+  return out;
+}
+
 /**
  * Adds the entry files of a secondary tsconfig (`tsc -p <cfg>`) with `add`: its `files`, each
  * non-glob `include` path that ends in `.ts`, and every source file under the base directory of
- * a glob `include`.
+ * a glob `include`. The file may hold comments and trailing commas (JSONC).
  */
 export function seedTsconfigEntries(
   root: string,
@@ -83,7 +132,7 @@ export function seedTsconfigEntries(
   if (!existsSync(cfgPath)) return;
   let cfg: { files?: string[]; include?: string[] };
   try {
-    cfg = JSON.parse(readFileSync(cfgPath, "utf-8"));
+    cfg = JSON.parse(stripJsonc(readFileSync(cfgPath, "utf-8")));
   } catch {
     return;
   }
@@ -267,9 +316,19 @@ export function selfPackage(root: string): WorkspacePackage | undefined {
   };
 }
 
+/** The config keys whose value names source files: a build entry or a test setup file. */
+const CONFIG_ENTRY_KEY =
+  /\b(?:entry|input|setupFiles|globalSetup|globalTeardown)["']?\s*:\s*(\[[^\]]*\]|\{[^}]*\}|[\w$.]+\([^)]*\)|['"`][^'"`]*['"`])/g;
+
+/** A source file path in a string literal. */
+const SOURCE_LITERAL = /['"`]([^'"`]+\.[cm]?[jt]sx?)['"`]/g;
+
 /**
- * Source files that a root-level build or test config names in `new URL('<...src/x.ts>', ...)`
- * (a bundler alias or entry target). Returns root-relative paths without a leading `./`.
+ * Source files that a root-level build or test config names: in `new URL('<...src/x.ts>', ...)`
+ * (a bundler alias or entry target), and in the value of an `entry`, `input`, `setupFiles`,
+ * `globalSetup` or `globalTeardown` key, as a string, an array, an object or the argument of a
+ * call such as `path.resolve(__dirname, 'electron/main.ts')`. Returns root-relative paths
+ * without a leading `./`.
  */
 export function configReferencedEntries(root: string): string[] {
   const out = new Set<string>();
@@ -292,8 +351,40 @@ export function configReferencedEntries(root: string): string[] {
     for (const m of code.matchAll(/new\s+URL\(\s*['"`]([^'"`]*?src\/[\w./-]+\.ts)['"`]/g)) {
       out.add((m[1] ?? "").replace(/^\.\//, ""));
     }
+    for (const key of code.matchAll(CONFIG_ENTRY_KEY)) {
+      for (const lit of (key[1] ?? "").matchAll(SOURCE_LITERAL)) {
+        out.add(toPosix(lit[1] ?? "").replace(/^\.\//, ""));
+      }
+    }
   }
   return [...out];
+}
+
+/**
+ * The module scripts that the HTML entry page of a front-end app loads, as root-relative paths
+ * that exist on disk. The pages are `index.html` and `src/index.html` (a Vite app sets its root
+ * to either). A `src` that starts with `/` is tried against the repo root, then the page folder.
+ * A script from another site is ignored.
+ */
+export function htmlReferencedEntries(root: string): string[] {
+  const out: string[] = [];
+  for (const page of ["index.html", "src/index.html"]) {
+    let html: string;
+    try {
+      html = readFileSync(join(root, page), "utf-8");
+    } catch {
+      continue;
+    }
+    for (const m of html.matchAll(/<script\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']/gi)) {
+      const src = m[1] ?? "";
+      if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(src) || !/\.[cm]?[jt]sx?$/.test(src)) continue;
+      const fromPage = toPosix(join(dirname(page), src)).replace(/^\.\//, "");
+      const candidates = src.startsWith("/") ? [src.slice(1), fromPage] : [fromPage];
+      const found = candidates.find((c) => existsSync(join(root, c)));
+      if (found !== undefined && !out.includes(found)) out.push(found);
+    }
+  }
+  return out;
 }
 
 /**

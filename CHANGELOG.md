@@ -6,6 +6,22 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `repo-tools map` finds the entry roots of an app whose build output is not `dist/` and whose sources are not
+  only under `src/`. On an Electron app (main process built to `dist-electron/`, CLI built to `dist-cli/`, renderer
+  loaded from `src/index.html`) it reported 74 dormant files, among them 11 orphans, and now reports 5 dormant files,
+  among them 3 orphans. Four sources of roots were missing or broken:
+  - A `tsc -p <tsconfig>` script of the root package in a repository without workspaces seeds the files of that
+    tsconfig. Only a workspace package did this before.
+  - A tsconfig that holds comments or trailing commas is read. `JSON.parse` rejected it and the whole tsconfig was
+    ignored without a message.
+  - A root build or test config names entry files with an `entry`, `input`, `setupFiles`, `globalSetup` or
+    `globalTeardown` key (for example `path.resolve(__dirname, 'electron/main.ts')`). Each such file is a root.
+    Only `new URL(...)` was read before.
+  - The module script of `index.html` or `src/index.html` is a root.
+  The ambient declaration files (`vite-env.d.ts`) stay in the list of files without an importer, as before.
+
 ## [2.2.5] - 2026-10-22
 
 ### Changed

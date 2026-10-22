@@ -444,8 +444,8 @@ export const MUTATIONS: Mutation[] = [
     "A file that a build or test config names in new URL() is not a build root.",
     at(
       GRAPH,
-      "    for (const entry of configReferencedEntries(root)) {",
-      "    for (const entry of [] as string[]) {",
+      "    for (const entry of [...configReferencedEntries(root), ...htmlReferencedEntries(root)]) {",
+      "    for (const entry of [...([] as string[]), ...htmlReferencedEntries(root)]) {",
     ),
   ),
   fix(
