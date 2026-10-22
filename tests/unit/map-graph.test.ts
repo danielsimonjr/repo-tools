@@ -407,6 +407,8 @@ describe("buildGraph: dispositions and roots", () => {
     expect(
       bad.warnings.some((w) => w.includes("dist/foo.js") && w.includes("did not resolve")),
     ).toBe(true);
+    // The warning lands in FILE_INVENTORY.md, so it follows the 25-word limit of the STE check.
+    for (const w of bad.warnings) expect(w.split(/\s+/).length).toBeLessThanOrEqual(25);
     const good = await buildGraph(
       repo({
         "package.json": JSON.stringify({ main: "dist/index.js" }),

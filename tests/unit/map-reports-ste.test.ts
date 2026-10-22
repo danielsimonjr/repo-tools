@@ -82,6 +82,17 @@ describe("the generated prose passes the STE check", () => {
     expect(await findings(root)).toEqual([]);
   });
 
+  test("TypeScript: the warning for a package.json entry that does not resolve", async () => {
+    const root = repo({
+      "package.json": '{"name": "demo", "main": "dist/foo.js"}\n',
+      "src/index.ts": "export const go = 1;\n",
+    });
+    expect(await findings(root)).toEqual([]);
+    const text = readFileSync(join(root, "docs/architecture/FILE_INVENTORY.md"), "utf8");
+    expect(text).toContain("did not resolve to a known source file");
+    expect(checkMarkdown("FILE_INVENTORY.md", text.replace(/\r\n?/g, "\n"))).toEqual([]);
+  });
+
   test("Python: the base caveats", async () => {
     const root = repo({
       "pkg/a.py": "def helper():\n    pass\n\ndef run():\n    pass\n",
