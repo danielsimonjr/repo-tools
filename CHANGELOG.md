@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.6] - 2026-10-22
+
 ### Fixed
 
 - `repo-tools map` finds the entry roots of an app whose build output is not `dist/` and whose sources are not
