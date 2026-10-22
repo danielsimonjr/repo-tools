@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.7] - 2026-10-22
+
 ### Fixed
 
 - `repo-tools ste` exits 2 when any path in the argument list does not exist, and prints `ERROR: path does not exist:
