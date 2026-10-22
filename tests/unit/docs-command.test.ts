@@ -156,6 +156,50 @@ describe("docs check: the gate on the whole repository", () => {
     expect(run.err).toContain("nothing to measure. This is a failure, not a pass");
   });
 
+  // `map` refuses a repository that is mostly of a language it cannot read. `docs` printed
+  // `PASS -- 0/0` for a Rust repository that held one Python file, so the gate said nothing true.
+  describe("a repository that is mostly of a language that docs cannot read", () => {
+    const rust = (): Record<string, string> => ({
+      "src/a.rs": "/// One.\npub fn a() {}\n",
+      "src/b.rs": "/// Two.\npub fn b() {}\n",
+      "src/c.rs": "/// Three.\npub fn c() {}\n",
+      "scripts/tool.py": '"""Tool."""\n',
+    });
+    for (const action of ["check", "scan", "stub"]) {
+      test(`${action} fails, names the language and counts the files`, async () => {
+        const run = await cli(["docs", action, repo(rust())]);
+        expect(run.code).toBe(1);
+        expect(run.err).toContain(
+          "this repo is rust: 3 rust file(s) against 1 TypeScript, JavaScript or Python file(s)",
+        );
+        expect(run.err).toContain("repo-tools docs reads TypeScript, JavaScript and Python only");
+        expect(run.out).not.toContain("PASS");
+      });
+    }
+
+    test("a repository of only Go files fails the same way", async () => {
+      const run = await cli(["docs", "check", repo({ "main.go": "package main\n" })]);
+      expect(run.code).toBe(1);
+      expect(run.err).toContain("this repo is go: 1 go file(s) against 0 TypeScript");
+    });
+
+    test("a tie between an unreadable language and a readable one is measured", async () => {
+      const run = await cli(["docs", "check", repo({ "a.ts": DOC, "x.rs": "pub fn x() {}\n" })]);
+      expect(run.code).toBe(0);
+      expect(run.out).toContain("PASS -- 1/1 exported symbols documented, 0 MUST issues");
+    });
+
+    test("a TypeScript repository with one Rust file is still measured", async () => {
+      const run = await cli([
+        "docs",
+        "check",
+        repo({ "a.ts": DOC, "b.ts": DOC, "native/x.rs": "pub fn x() {}\n" }),
+      ]);
+      expect(run.code).toBe(0);
+      expect(run.out).toContain("PASS -- 2/2 exported symbols documented, 0 MUST issues");
+    });
+  });
+
   // The Python tool counts the exported symbols of a test file in the denominator and exempts them
   // from M1 only, so the figure is 1/2 here and the gate still passes. The port keeps that rule.
   test("a test file is exempt from M1 but its exports stay in the denominator", async () => {

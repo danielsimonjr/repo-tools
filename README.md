@@ -238,7 +238,9 @@ The rules are:
 | S6 | SHOULD | The prose follows Simplified Technical English (the rules of `repo-tools ste`). |
 
 Only a MUST issue changes the exit code of `check`. A file that does not parse is also a failure,
-because an unknown file is not a clean file. A repository with no source file fails too.
+because an unknown file is not a clean file. A repository with no source file fails too. So does a
+repository with more files of another language (Rust or Go, for example) than TypeScript, JavaScript
+and Python together. The command names the language and exits 1.
 
 `stub` is a dry run until you pass `--apply`. Each stub holds the marker `TODO:`, so `check` fails
 until you replace the stub with real prose. The command parses a file again after the change.

@@ -603,11 +603,17 @@ The exit codes are:
 | Code | Meaning |
 |---|---|
 | 0 | The action succeeded. For `check`, the gate passed. |
-| 1 | The gate failed, or the root holds no source file to measure. |
+| 1 | The gate failed, the root holds no source file to measure, or most of its files are of a language that the command cannot read. |
 | 2 | A usage error, a root that is not a folder, or a malformed `.code-docs.json`. |
 
 A root with no source file is a failed gate and not a pass. A gate that measures nothing has the
 look of enforcement and none of the substance. The rule holds for `scan`, `check` and `stub`.
+
+A root has the same result when a language that the command cannot read has more files than
+TypeScript, JavaScript and Python together. The command names that language and the two counts, and
+it exits 1. A tie is measured. The count is the file walk of `map`, so `map` and `docs` give the
+same repository the same language. A pass over the few readable files of a Rust repository would
+describe the wrong files.
 
 ### 16.2 Modules
 

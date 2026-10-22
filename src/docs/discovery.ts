@@ -9,7 +9,7 @@
 import { spawnSync } from "node:child_process";
 import { type Dirent, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { suffixOf } from "../map/discovery.ts";
+import { countLanguages, suffixOf } from "../map/discovery.ts";
 import { sortCodeUnits } from "../sort.ts";
 
 const PYTHON_SUFFIXES = new Set([".py"]);
@@ -49,6 +49,41 @@ export class ConfigError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ConfigError";
+  }
+}
+
+/**
+ * The error of a repository that is mostly of a language that `docs` cannot read. It fails the
+ * gate, as a run with no file to measure does: a PASS over the few readable files would describe
+ * the wrong part of the repository.
+ */
+export class UnreadableRepoLanguage extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnreadableRepoLanguage";
+  }
+}
+
+/**
+ * Throws `UnreadableRepoLanguage` when a language that `docs` cannot read has more files below
+ * `root` than TypeScript, JavaScript and Python together. A tie is measured. The count is the walk
+ * of `map`, so `docs` and `map` call the same repository by the same language. The language with
+ * the most files is named; a tie between two of them goes to the first name in code-unit order.
+ */
+export function assertReadableLanguage(root: string): void {
+  const counts = countLanguages(root);
+  const readable = (counts.typescript ?? 0) + (counts.python ?? 0);
+  const unreadable = Object.entries(counts)
+    .filter(([language]) => language !== "typescript" && language !== "python")
+    .sort(([a, x], [b, y]) => y - x || (a < b ? -1 : a > b ? 1 : 0));
+  const [language, n] = unreadable[0] ?? ["", 0];
+  if (n > readable) {
+    throw new UnreadableRepoLanguage(
+      `this repo is ${language}: ${n} ${language} file(s) against ${readable} TypeScript, ` +
+        "JavaScript or Python file(s). repo-tools docs reads TypeScript, JavaScript and Python " +
+        "only, so a PASS here would describe the wrong files. It fails rather than print a gate " +
+        "that measured nothing.",
+    );
   }
 }
 

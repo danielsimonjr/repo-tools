@@ -11,6 +11,17 @@ All notable changes to this project are recorded in this file. The format follow
 - `docs/design.md` passes `repo-tools ste` with 0 problems. The check reported 4 sentences of 31 to 43 words in
   section 16.3. Each of the 4 sentences is now a group of shorter sentences. No fact changes.
 
+### Fixed
+
+- `repo-tools docs` fails on a repository that has more files of a language it cannot read than TypeScript,
+  JavaScript and Python together. It printed `PASS -- 0/0 exported symbols documented, 0 MUST issues` and exited 0
+  for IronClaw, a Rust repository. `docs check src` measured the 1 JavaScript file below `src` and none of the 247
+  Rust files. `scan`, `check` and `stub` now exit 1 and print
+  `this repo is rust: 247 rust file(s) against 1 TypeScript, JavaScript or Python file(s)`. `map` already refused
+  such a repository. `docs` uses the file walk of `map`, so both commands give a repository the same language. A tie
+  is measured. A TypeScript repository with a few Rust files is measured as before. A repository of Go files only
+  now names Go. It said before that it found no source file.
+
 ## [2.2.4] - 2026-10-19
 
 ### Fixed
