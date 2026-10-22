@@ -176,10 +176,9 @@ function packageJsonRoots(root: string, known: ReadonlySet<string>): [string[], 
     const mapped =
       mapDistToSrc(spec, known) ?? launcherEntry(root, spec, known) ?? declaredSource(spec, known);
     if (mapped === null) {
+      // The text lands in FILE_INVENTORY.md, so it keeps the 25-word limit of the STE check.
       warnings.push(
-        `package.json entry ${pyRepr(spec)} did not resolve to a known source file -- ` +
-          "ignored; if no other declared entry resolves either, the entry-point root falls back to " +
-          "a conventional src/index.* file instead",
+        `package.json entry ${pyRepr(spec)} did not resolve to a known source file. The entry is ignored.`,
       );
       continue;
     }

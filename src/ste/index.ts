@@ -35,8 +35,8 @@ identifiers are not checked. A file whose first five lines hold
   --help, -h      Show this help.
 
 Exit codes: 0 when no finding (Markdown mode) or always (--prose mode). 1 when a
-Markdown finding exists. 2 on a usage error, when no Markdown file was examined,
-or when a file is not UTF-8.
+Markdown finding exists. 2 on a usage error, when a path does not exist, when no
+Markdown file was examined, or when a file is not UTF-8.
 `;
 
 /** The marker that opts a dated record out of the check. */
@@ -128,7 +128,9 @@ export async function run(argv: string[], io: Io): Promise<number> {
   let total = 0;
   let checked = 0;
   let skipped = 0;
+  const missing: string[] = [];
   for (const arg of argv) {
+    if (!existsSync(arg)) missing.push(arg);
     for (const target of targetsFor(arg)) {
       const name = basename(target);
       if (isHistoricalRecord(target)) {
@@ -153,12 +155,14 @@ export async function run(argv: string[], io: Io): Promise<number> {
   }
   const tail = skipped > 0 ? `; ${skipped} skipped as historical record(s)` : "";
   io.stdout(`\nTOTAL: ${total} problem(s) in ${checked} file(s)${tail}\n`);
+  // A mistyped path must not look like a clean run, even when other paths were checked.
+  for (const path of missing) io.stderr(`ERROR: path does not exist: ${path}\n`);
   // Checking nothing is not passing: a mistyped path must not look like a clean run.
   if (checked === 0) {
     io.stderr(
       "ERROR: no Markdown file was examined. This is a failure, not a clean result -- check the path(s) given.\n",
     );
-    return 2;
   }
+  if (missing.length > 0 || checked === 0) return 2;
   return total > 0 ? 1 : 0;
 }

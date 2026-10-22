@@ -49,6 +49,26 @@ describe("repo-tools ste: exit codes", () => {
     expect(r.err).toContain("no Markdown file was examined");
   });
 
+  test("a missing path among valid ones is a failure, and the valid ones are still checked", async () => {
+    const dir = tmp();
+    const doc = join(dir, "clean.md");
+    writeFileSync(doc, "# Title\n\nThe tool reads the file. It writes a report.\n");
+    const r = await ste(doc, join(dir, "gone.md"));
+    expect(r.code).toBe(2);
+    expect(r.err).toContain("path does not exist: ");
+    expect(r.err).toContain("gone.md");
+    expect(r.out).toContain("clean.md: OK");
+  });
+
+  test("an existing directory without Markdown among valid paths is not an error", async () => {
+    const dir = tmp();
+    const doc = join(dir, "clean.md");
+    writeFileSync(doc, "# Title\n\nThe tool reads the file. It writes a report.\n");
+    const empty = join(dir, "empty");
+    mkdirSync(empty);
+    expect((await ste(doc, empty)).code).toBe(0);
+  });
+
   test("an empty directory is also a failure", async () => {
     const dir = tmp();
     writeFileSync(join(dir, "notes.txt"), "not markdown\n");

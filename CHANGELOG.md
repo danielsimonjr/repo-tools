@@ -6,6 +6,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `repo-tools ste` exits 2 when any path in the argument list does not exist, and prints `ERROR: path does not exist:
+  <path>` on stderr for each such path. Before, a mistyped path among valid paths was ignored and the run exited 0.
+  The report of each valid path is still printed.
+- The warning that `repo-tools map` writes for a `package.json` entry that does not resolve is shorter (15 words).
+  It had 30 words, so `repo-tools ste` flagged the generated `FILE_INVENTORY.md`. A test now checks the word limit
+  of every warning and that the generated report passes `repo-tools ste`.
+
 ## [2.2.6] - 2026-10-22
 
 ### Fixed
