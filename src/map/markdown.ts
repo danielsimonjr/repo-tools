@@ -24,7 +24,7 @@ const DISPOSITION_LEGEND: readonly [string, string][] = [
   ["build-entry", "A `src`-area file that is an entry root."],
   ["test-only", "A `src`-area file that only a test reaches."],
   ["orphan", "A `src`-area file that nothing reaches. Delete it, or wire it to a root."],
-  ["test", "A file in a `tests/` folder, or a `*.test.ts` or `*.spec.ts` file."],
+  ["test", "A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file."],
   ["tool", "A file in a `tools/` or `scripts/` folder outside `src/`."],
   ["config", "A `*.config.*` file of TypeScript or JavaScript."],
   ["example", "A file in `examples/` or `docs/`."],

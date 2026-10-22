@@ -70,7 +70,7 @@ export function classifyArea(relPath: string): string {
     return "tools";
   }
   if (CONFIG_PATTERN.test(relPath)) return "config";
-  if (isTestFile || /(^|\/)tests\//.test(relPath)) return "tests";
+  if (isTestFile || /(^|\/)tests?\//.test(relPath)) return "tests";
   if (/^(bench|benchmarks)\//.test(relPath) || /\.bench\.\w+$/.test(relPath)) return "benchmarks";
   if (/^examples\//.test(relPath)) return "examples";
   if (/^docs\//.test(relPath)) return "docs";

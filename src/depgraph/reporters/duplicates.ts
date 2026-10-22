@@ -54,13 +54,12 @@ export function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport)
   md += "- `TRUE_DUPLICATE`: a real merge target.\n";
   md +=
     "- `DISPATCH_VARIANT`: two or more `mathTyped(...)` registrations of the same public name. ";
-  md += "The registrations are distinct dispatch surfaces and Bucket C delegation candidates, ";
-  md += "not copy-paste bodies.\n";
+  md += "The registrations are distinct dispatch surfaces, not copy-paste bodies.\n";
   md += "- `ALIAS_DELEGATION`: a `const X = importedY` forward. ";
   md += "The entry is excluded once fewer than two real bodies remain.\n";
   md += "- `ALLOWLISTED`: the name matches `duplicate-allowlist.json`. ";
-  md += "Examples are hot-path `is*` guards, AssemblyScript mirrors and per-package `VERSION` ";
-  md += "strings.\n\n";
+  md += "Examples are hot-path `is*` guards, mirrors in another language and per-package ";
+  md += "`VERSION` strings.\n\n";
   md += `> **Note:** ${report.note}\n\n`;
   md += "## Summary — runtime (function/constant/class)\n\n";
   md += summaryTable(report.summary.runtimeByTag, report.runtime.length);
@@ -73,7 +72,7 @@ export function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport)
     "TRUE_DUPLICATE",
   );
   md += renderTaggedSection(
-    "DISPATCH_VARIANT — distinct public typed-dispatch surfaces (Bucket C candidates)",
+    "DISPATCH_VARIANT — distinct public typed-dispatch surfaces",
     report.runtime,
     "DISPATCH_VARIANT",
   );

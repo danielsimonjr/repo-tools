@@ -40,8 +40,16 @@ describe("area of a path", () => {
     expect(classifyArea("examples/e.ts")).toBe("examples");
     expect(classifyArea("docs/d.ts")).toBe("docs");
     expect(classifyArea("pkg/src/a.ts")).toBe("src");
-    // A folder named test/ is source unless the file name is a test.
-    expect(classifyArea("pkg/test/h.ts")).toBe("src");
+  });
+
+  test("classifyArea reads a test/ folder and a tests/ folder as tests, at any depth", () => {
+    expect(classifyArea("test/setup.ts")).toBe("tests");
+    expect(classifyArea("test/e2e/global-setup.ts")).toBe("tests");
+    expect(classifyArea("pkg/test/h.ts")).toBe("tests");
+    expect(classifyArea("pkg/tests/h.ts")).toBe("tests");
+    // A folder whose name only ends or starts with the word is not a test folder.
+    expect(classifyArea("src/contest/h.ts")).toBe("src");
+    expect(classifyArea("src/testing/h.ts")).toBe("src");
   });
 });
 

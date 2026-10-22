@@ -66,11 +66,10 @@ export function generateTestCoverageMarkdown(
     lines.push(...basisNote);
     const policyPath = options.policyPath ?? "docs/architecture/coverage-policy.json";
     lines.push(
-      "> The raw figure counts every source file the CDG tool finds, including code that is " +
-        "intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, " +
-        "AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those " +
-        `per \`${policyPath}\` so the number reflects the genuinely-active hand-written code only. ` +
-        "See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.",
+      "> The raw figure counts every source file the map finds, including files that no test " +
+        "imports directly by design (for example generated code, type-only barrels and code in " +
+        `another language). The **effective** figure excludes the files that \`${policyPath}\` ` +
+        "classifies, so it shows the active code only.",
     );
     lines.push("");
     lines.push("### Untested-file breakdown by category");

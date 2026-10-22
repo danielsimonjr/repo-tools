@@ -155,6 +155,14 @@ describe("duplicate detection and report", () => {
     expect(report.summary.typeDuplicates).toBe(1);
   });
 
+  test("the report text names no project of its own", () => {
+    const md = generateDuplicateSymbolsMarkdown(buildDuplicateReport(dup));
+    for (const text of [DUPLICATE_SYMBOLS_NOTE, md]) {
+      expect(text).not.toContain("Bucket C");
+      expect(text).not.toContain("AssemblyScript");
+    }
+  });
+
   test("the reporters render the tables and the JSON", () => {
     const report = buildDuplicateReport(dup);
     const md = generateDuplicateSymbolsMarkdown(report);

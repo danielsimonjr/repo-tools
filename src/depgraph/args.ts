@@ -49,7 +49,7 @@ export type MapCommand = "map" | "depgraph";
  */
 export const SCAN_SCOPE_FLAGS: Readonly<Record<string, string>> = {
   "--src": "the census finds the source files itself; the area of a file comes from its path",
-  "--tests": "a test file is found by its name or its tests/ folder",
+  "--tests": "a test file is found by its name or by its test/ or tests/ folder",
   "--exclude": "the census reads the files that git tracks; list a file in .gitignore instead",
   "--also-exclude": "the census reads the files that git tracks; list a file in .gitignore instead",
   "--all": "the graph always holds every file; the disposition of each file shows reachability",

@@ -21,21 +21,21 @@ The following 9 source files are not directly imported by any test file:
 
 ### Z/
 
-- `src/Z/loop.ts` → Expected test: `tests/unit/Z/loop.test.ts`
+- `src/Z/loop.ts`
 
 ### root/
 
-- `src/_x.ts` → Expected test: `tests/unit/root/_x.test.ts`
-- `src/cli.ts` → Expected test: `tests/unit/root/cli.test.ts`
-- `src/dyn.ts` → Expected test: `tests/unit/root/dyn.test.ts`
-- `src/orphan.ts` → Expected test: `tests/unit/root/orphan.test.ts`
-- `src/ping.ts` → Expected test: `tests/unit/root/ping.test.ts`
-- `src/pong.ts` → Expected test: `tests/unit/root/pong.test.ts`
-- `src/register.ts` → Expected test: `tests/unit/root/register.test.ts`
+- `src/_x.ts`
+- `src/cli.ts`
+- `src/dyn.ts`
+- `src/orphan.ts`
+- `src/ping.ts`
+- `src/pong.ts`
+- `src/register.ts`
 
 ### util/
 
-- `src/util/index.ts` → Expected test: `tests/unit/util/index.test.ts`
+- `src/util/index.ts`
 
 ---
 
