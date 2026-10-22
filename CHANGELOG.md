@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.2.5] - 2026-10-22
+
 ### Changed
 
 - The C# test-coverage report states its basis. A C# `using` usually names a namespace, so a test covers every file
