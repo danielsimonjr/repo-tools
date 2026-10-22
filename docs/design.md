@@ -402,6 +402,12 @@ through 2.x.
   run with exit 1 before the run writes any file.
 - A repository with no source file, or with a language that the engine cannot read, exits 1
   and gets no output folder.
+- A C# `using` usually names a namespace, not a type. A test therefore covers each file that
+  declares the namespace. The C# coverage report states this basis. `TEST_COVERAGE.md` has a note under the
+  summary table, and `test-coverage.json` has `metadata.coverageBasis` (`namespace-import`) and
+  `metadata.coverageCaveat`. A test in the same namespace, or in a nested namespace, needs no
+  `using` and does not count. The percentage can therefore be too high or too low. It stays the
+  raw figure. The reports of the other languages have no note and no key.
 
 ### 14.3 Output rules
 

@@ -7,6 +7,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { NAMESPACE_IMPORT_COVERAGE_CAVEAT } from "../../src/depgraph/reporters/coverage.ts";
 import { emitTestCoverage } from "../../src/map/coverage.ts";
 import { buildGraph } from "../../src/map/graph.ts";
 import { makeTempDir } from "./temp.ts";
@@ -146,5 +147,115 @@ describe("emitTestCoverage", () => {
     expect(json.untestedFiles).toEqual(["pkg/__init__.py", "pkg/b.py"]);
     expect(md).toContain("- `pkg/b.py`");
     expect(md).not.toContain("Expected test");
+  });
+});
+
+describe("emitTestCoverage, the basis of a C# report", () => {
+  const CS = {
+    "src/Core/Core.csproj": '<Project Sdk="Microsoft.NET.Sdk"></Project>\n',
+    "src/Core/A.cs": "namespace Demo.Core;\npublic class A { }\n",
+    "src/Core/B.cs": "namespace Demo.Core;\npublic class B { }\n",
+    "tests/ATests.cs": "using Demo.Core;\nnamespace Demo.Tests;\npublic class ATests { }\n",
+  };
+
+  test("a C# `using` covers every file of the namespace, and the percentage stays 100.0", async () => {
+    const { json } = await coverage(repo(CS));
+    expect(json.testedFiles).toEqual(["src/Core/A.cs", "src/Core/B.cs"]);
+    expect(json.untestedFiles).toEqual([]);
+    expect(json.metadata.coveragePercent).toBe("100.0");
+  });
+
+  test("the JSON names the namespace-import basis and the caveat", async () => {
+    const { json } = await coverage(repo(CS));
+    expect(json.metadata.coverageBasis).toBe("namespace-import");
+    expect(json.metadata.coverageCaveat).toContain("namespace");
+    expect(json.metadata.coverageCaveat).toContain("does not show that a test uses the file");
+  });
+
+  test("the Markdown states the basis between the summary table and the file lists", async () => {
+    const { md } = await coverage(repo(CS));
+    const table = md.indexOf("Coverage (raw, direct-import)");
+    const note = md.indexOf("by namespace import");
+    const lists = md.indexOf("## Source Files Without Test Coverage");
+    expect(table).toBeGreaterThan(-1);
+    expect(note).toBeGreaterThan(table);
+    expect(lists).toBeGreaterThan(note);
+    expect(md).toContain("does not show that a test uses the file");
+  });
+
+  test("a test in the same or a nested namespace needs no `using`, so it does not count", async () => {
+    const { json } = await coverage(
+      repo({
+        "src/Core/Core.csproj": CS["src/Core/Core.csproj"],
+        "src/Core/A.cs": CS["src/Core/A.cs"],
+        "src/Core/B.cs": CS["src/Core/B.cs"],
+        "tests/SameTests.cs": "namespace Demo.Core;\npublic class SameTests { A a; }\n",
+        "tests/NestedTests.cs": "namespace Demo.Core.Tests;\npublic class NestedTests { B b; }\n",
+      }),
+    );
+    // Both files are tests, so an empty tested list is a real miss and not a missing test.
+    expect(json.metadata.totalTestFiles).toBe(2);
+    expect(json.testedFiles).toEqual([]);
+    expect(json.untestedFiles).toEqual(["src/Core/A.cs", "src/Core/B.cs"]);
+    expect(json.metadata.coverageCaveat).toContain("too high or too low");
+  });
+
+  test("the note stands alone between the table and the rule when no policy is loaded", async () => {
+    const { md } = await coverage(repo(CS));
+    const row = "| Coverage (raw, direct-import) | **100.0%** |";
+    expect(md).toContain(`${row}\n\n> ${NAMESPACE_IMPORT_COVERAGE_CAVEAT}\n\n---\n`);
+  });
+
+  test("with a policy the note follows the table and comes before the policy text", async () => {
+    const policy = JSON.stringify({
+      categories: {
+        gen: { label: "Generated", rationale: "Made by a tool.", exactPaths: ["src/Core/B.cs"] },
+      },
+    });
+    const { md } = await coverage(
+      repo({ ...CS, "docs/architecture/coverage-policy.json": policy }),
+    );
+    const effective = md.indexOf("| Coverage (effective, active code only) |");
+    const note = md.indexOf(`> ${NAMESPACE_IMPORT_COVERAGE_CAVEAT}`);
+    const policyText = md.indexOf("The **effective** figure excludes");
+    const breakdown = md.indexOf("### Untested-file breakdown by category");
+    expect(effective).toBeGreaterThan(-1);
+    expect(note).toBeGreaterThan(effective);
+    expect(policyText).toBeGreaterThan(note);
+    expect(breakdown).toBeGreaterThan(policyText);
+    expect(md.slice(effective, note)).toMatch(/\|\n\n$/);
+  });
+
+  test("a Rust report keeps its output: no basis key and no caveat", async () => {
+    const { md, json } = await coverage(
+      repo({
+        "Cargo.toml": '[package]\nname = "demo"\nversion = "0.1.0"\n',
+        "src/lib.rs": "pub fn a() {}\n",
+        "tests/t.rs": "fn main() {}\n",
+      }),
+    );
+    expect(json.metadata.totalSourceFiles).toBeGreaterThan(0);
+    expect(Object.keys(json.metadata)).not.toContain("coverageBasis");
+    expect(Object.keys(json.metadata)).not.toContain("coverageCaveat");
+    expect(md).not.toContain("namespace import");
+  });
+
+  test("a TypeScript report keeps its output: no basis key and no caveat", async () => {
+    const { md, json } = await coverage(repo(TS));
+    expect(Object.keys(json.metadata)).not.toContain("coverageBasis");
+    expect(Object.keys(json.metadata)).not.toContain("coverageCaveat");
+    expect(md).not.toContain("namespace import");
+  });
+
+  test("a Python report keeps its output: no basis key and no caveat", async () => {
+    const { md, json } = await coverage(
+      repo({
+        "pkg/__init__.py": "",
+        "pkg/a.py": "x = 1\n",
+        "tests/test_a.py": "from pkg.a import x\n",
+      }),
+    );
+    expect(Object.keys(json.metadata)).not.toContain("coverageBasis");
+    expect(md).not.toContain("namespace import");
   });
 });
