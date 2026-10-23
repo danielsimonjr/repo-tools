@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-22
+
 ### Added
 
 - `repo-tools clones` lists the functions of a TypeScript or JavaScript repository and finds the functions that copy
