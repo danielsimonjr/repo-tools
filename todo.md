@@ -286,8 +286,9 @@ data. Other findings are filed here.
 
 ## 2.3.0: `repo-tools clones`
 
-- [x] Add `repo-tools clones`: the read-only function inventory and clone detector, its `clones` config section,
-  `docs/design.md` section 17, the unit tests, the smoke step and `docs/parity-clones.md`.
+- [ ] Add `repo-tools clones`: the read-only function inventory and clone detector, its `clones` config section,
+  `docs/design.md` section 17, the unit tests, the smoke step and `docs/parity-clones.md`. The feature is in
+  PR 40. Tick this row in the release PR, when the release is published.
 - [x] 2026-10-22 · five-axis pass (feature `clones`): speed — the command reads the 292 files of memoryjs in 2.6 to
   4.2 s when warm; stability — 1868 tests pass, 0 fail, 1 skip, and the node and bun runs of the shipped bundle write
   the same bytes; reliability — the smoke test passes 11 steps against `dist/cli.js` with Node and with Bun;
