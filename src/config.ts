@@ -1,7 +1,7 @@
 /**
  * The config file `repo-tools.config.json` (design section 5) and the merge of the command-line
- * flags, the config file and the defaults. The file has a `depgraph` section and a `query`
- * section (design section 5).
+ * flags, the config file and the defaults. The file has a `depgraph` section, a `query` section
+ * and a `clones` section (design section 5).
  *
  * Precedence: a command-line flag, then the config file, then the default. Every path is POSIX or
  * native, relative to the project root; the loader rejects an absolute path, so a committed
@@ -92,7 +92,9 @@ type KeyKind =
   | "names"
   | "boolean"
   | "string"
-  | "string-or-null";
+  | "string-or-null"
+  | "count"
+  | "fraction";
 
 /** The keys of `depgraph` in the config file, and the kind of each value. */
 const DEPGRAPH_KEYS: Readonly<Record<string, KeyKind>> = {
@@ -176,6 +178,16 @@ function checkValue(
       return text(value, "a non-empty string");
     case "string-or-null":
       return value === null ? null : text(value, "a non-empty string or null");
+    case "count":
+      if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
+        throw fail(`'${key}' must be a whole number of 1 or more`);
+      }
+      return value;
+    case "fraction":
+      if (typeof value !== "number" || !(value >= 0 && value <= 1)) {
+        throw fail(`'${key}' must be a number from 0 to 1`);
+      }
+      return value;
   }
 }
 
@@ -211,10 +223,33 @@ export interface QueryConfig {
   nodeRuntimes: string[];
 }
 
+/** The settings of the `clones` section of the config file (design section 17.5). */
+export interface ClonesSettings {
+  /** The folders to read, relative to the root, or `"auto"` for the `src` area. */
+  src?: string[] | "auto";
+  /** The folder for the two JSON files, relative to the root. `null`: write no file. */
+  out?: string | null;
+  /** The smallest number of labels of a unit. */
+  minNodes?: number;
+  /** The labels in one shingle. */
+  shingleLength?: number;
+  /** The smallest Jaccard score of a near pair. */
+  nearThreshold?: number;
+  /** The smallest containment of a near pair. */
+  containmentThreshold?: number;
+  /** The smallest shingle count of the smaller unit, for the containment rule. */
+  containmentMinShingles?: number;
+  /** A shingle in more units than this number does not pick candidate pairs. */
+  rareShingleLimit?: number;
+  /** The rare shingles that a candidate pair must share. */
+  minSharedShingles?: number;
+}
+
 /** The checked sections of one config file. An absent section is `{}`. */
 export interface ConfigSections {
   depgraph: DepgraphSettings;
   query: QuerySettings;
+  clones: ClonesSettings;
 }
 
 /** The keys of `query` in the config file, and the kind of each value. */
@@ -222,6 +257,27 @@ const QUERY_KEYS: Readonly<Record<string, KeyKind>> = {
   out: "path",
   nodeRuntimes: "names",
 };
+
+/** The keys of `clones` in the config file, and the kind of each value. */
+const CLONES_KEYS: Readonly<Record<string, KeyKind>> = {
+  src: "src",
+  out: "path-or-null",
+  minNodes: "count",
+  shingleLength: "count",
+  nearThreshold: "fraction",
+  containmentThreshold: "fraction",
+  containmentMinShingles: "count",
+  rareShingleLimit: "count",
+  minSharedShingles: "count",
+};
+
+/**
+ * Checks one `clones` value that comes from a command-line flag and returns it. `label` names
+ * the flag in the error text. Throws on a value of the wrong kind.
+ */
+export function checkClonesFlag(label: string, key: keyof ClonesSettings, value: unknown): unknown {
+  return checkValue(label, CLONES_KEYS[key] as KeyKind, value, (message) => new Error(message));
+}
 
 /**
  * Checks a parsed config file and returns the settings of each section. Throws on an unknown
@@ -233,7 +289,7 @@ export function parseConfigSections(parsed: unknown, label: string): ConfigSecti
   for (const key of Object.keys(parsed)) {
     // `$schema` is a JSON Schema pointer. It is not a setting.
     if (key === "$schema") continue;
-    if (key !== "depgraph" && key !== "map" && key !== "query") {
+    if (key !== "depgraph" && key !== "map" && key !== "query" && key !== "clones") {
       throw fail(`unknown key '${key}'`);
     }
   }
@@ -243,7 +299,7 @@ export function parseConfigSections(parsed: unknown, label: string): ConfigSecti
     throw fail("use the section 'map' or its old name 'depgraph', not both");
   }
   const sectionName = parsed.map !== undefined ? "map" : "depgraph";
-  const sections: ConfigSections = { depgraph: {}, query: {} };
+  const sections: ConfigSections = { depgraph: {}, query: {}, clones: {} };
   const section = parsed[sectionName];
   if (section !== undefined) {
     if (!isObject(section)) throw fail(`'${sectionName}' must be an object`);
@@ -269,6 +325,11 @@ export function parseConfigSections(parsed: unknown, label: string): ConfigSecti
     if (!isObject(query)) throw fail("'query' must be an object");
     sections.query = checkSection("query.", query, QUERY_KEYS, fail) as QuerySettings;
   }
+  const clones = parsed.clones;
+  if (clones !== undefined) {
+    if (!isObject(clones)) throw fail("'clones' must be an object");
+    sections.clones = checkSection("clones.", clones, CLONES_KEYS, fail) as ClonesSettings;
+  }
   return sections;
 }
 
@@ -293,7 +354,7 @@ export function loadConfigSections(root: string, configPath?: string): ConfigSec
   const rel = configPath ?? CONFIG_FILE;
   const label = `<root>/${rel.replace(/\\/g, "/")}`;
   const path = resolveUnderRoot(root, rel);
-  if (configPath === undefined && !existsSync(path)) return { depgraph: {}, query: {} };
+  if (configPath === undefined && !existsSync(path)) return { depgraph: {}, query: {}, clones: {} };
   let text: string;
   try {
     text = readFileSync(path, "utf8");

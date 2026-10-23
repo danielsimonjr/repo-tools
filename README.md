@@ -11,6 +11,7 @@
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 | `query` | Answers structural questions from the graph of `map`, and writes two derived reports. |
+| `clones` | Lists the functions of a TypeScript or JavaScript repository, and finds the functions that copy each other. |
 | `ste` | Checks Markdown or docstring prose against Simplified Technical English. |
 
 Status: version 2.2.7.
@@ -18,6 +19,8 @@ Status: version 2.2.7.
 - `map`, `check` and `query` read their settings from `repo-tools.config.json` in the root. The
   section of `map` is `map` (its old name, `depgraph`, is also read). `--config=<file>` makes any
   of the three read another file.
+- `clones` reads its settings from the `clones` section of the same file. A flag overrides the
+  file, and the file overrides the default.
 - `repo-tools depgraph` prints one deprecation line and runs `map`. It accepts the 1.x
   scan-scope flags (`--src`, `--tests`, `--exclude`, `--also-exclude`, `--all`,
   `--reachable-only`, `--include-tests`) with a warning, because they have no effect in 2.0.0.
@@ -310,6 +313,38 @@ repo-tools query --emit
 `--check-browser-safety` exits 1 on a leak. The query reads its reports from `--out`, else from
 the config key `query.out`, else from `map.out`, else from `docs/architecture`. Run
 `repo-tools query --help` for every option.
+
+## Find the functions that copy each other
+
+`repo-tools clones` lists the functions of a TypeScript or JavaScript repository. It finds the
+functions that copy each other. The command only reads the repository. It writes files only when
+you name an output folder.
+
+```sh
+repo-tools clones .                              # prints the summary and writes no file
+repo-tools clones . --src=src --out=reports/clones
+repo-tools clones . --min-nodes=30 --near=0.7
+```
+
+A function is a unit when it has a name and its body has at least 50 labels. A label is one node
+of the body. Names, literals, types and comments give no detail, so a copy with other names still
+matches. The command finds two kinds of result:
+
+| Result | Meaning |
+|---|---|
+| Exact group | Units with the same label sequence. |
+| Near pair | Two units that share enough runs of 6 labels. |
+
+`--src=<path>...` names the folders to read. The default `auto` reads the files of the `src` area.
+`--out=<dir>` writes `inventory.jsonl` (one line for each unit) and `clones.json` (the groups and the
+pairs) into a folder. Give the folder as a path relative to the root. Run `repo-tools clones --help` for every limit.
+
+Exit codes: 0 when the run finished, even if it found no copy. 1 when the root holds no source file
+to read. 2 on a usage error, a bad config file or a root that is not a folder.
+
+The result is a list of candidates. Read both bodies of a pair before you change anything.
+`docs/design.md` (section 17) gives the rules. `docs/parity-clones.md` records the comparison with the
+prototype of the memoryjs audit.
 
 ## Develop
 

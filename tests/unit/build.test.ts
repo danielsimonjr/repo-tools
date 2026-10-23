@@ -162,7 +162,7 @@ describe("smoke test: map on the product (design 12.1 steps 2, 3 and 7)", () => 
     () => {
       const r = smoke([process.execPath, "src/bin.ts"]);
       expect(r.stderr.toString()).toBe("");
-      expect(r.stdout.toString()).toBe("smoke passed: 10 steps.\n");
+      expect(r.stdout.toString()).toBe("smoke passed: 11 steps.\n");
     },
     SMOKE_TIMEOUT_MS,
   );

@@ -6,6 +6,22 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- `repo-tools clones` lists the functions of a TypeScript or JavaScript repository and finds the functions that copy
+  each other. It reads the source and writes files only when `--out` or the `clones.out` config key names a folder.
+  A unit is a named function with at least 50 labels (`--min-nodes`). The command reports exact groups (the same label
+  sequence) and near pairs (shared runs of labels, scored by Jaccard and containment). It prints a summary, and
+  with an output folder it writes `inventory.jsonl` and `clones.json`. Every limit is a flag and a key of the new
+  `clones` section of `repo-tools.config.json`. A flag overrides the file, and the file overrides the default.
+  Exit code 0 means the run finished, 1 means the root holds no source file to read, and 2 means a usage or config
+  error. `docs/design.md` section 17 gives the rules.
+- `docs/parity-clones.md` compares the command with the prototype of the memoryjs duplicate-function audit on 292
+  files. 1,368 units are the same. The command finds all 20 exact groups of the prototype. Every unit that only one
+  side reports lies at the cutoff of 50 labels.
+- The smoke test runs `clones` on a small repository that holds a planted copy, so the shipped bundle proves the
+  command and its tree-sitter loader.
+
 ## [2.2.7] - 2026-10-22
 
 ### Fixed
