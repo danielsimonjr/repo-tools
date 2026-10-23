@@ -7,6 +7,7 @@
 import pkg from "../package.json" with { type: "json" };
 import { CHECK_HELP, run as runCheck } from "./check/index.ts";
 import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
+import { CLONES_HELP, run as runClones } from "./clones/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
 import { DOCS_HELP, run as runDocs } from "./docs/index.ts";
 import type { Io } from "./io-types.ts";
@@ -67,6 +68,11 @@ ${MAP_HELP}`,
     summary: "Check Markdown or docstring prose against Simplified Technical English.",
     help: STE_HELP,
     run: runSte,
+  },
+  clones: {
+    summary: "List the functions of a repository and find the functions that copy each other.",
+    help: CLONES_HELP,
+    run: runClones,
   },
 } satisfies Record<string, Subcommand>;
 

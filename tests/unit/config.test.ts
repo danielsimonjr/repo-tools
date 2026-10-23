@@ -167,18 +167,20 @@ describe("config file: the query section (design section 5)", () => {
   });
 
   test("the report folder: --out, then query.out, then depgraph.out, then the default", () => {
-    const file = { depgraph: { out: "dg" }, query: { out: "q" } };
+    const file = { depgraph: { out: "dg" }, query: { out: "q" }, clones: {} };
     expect(mergeQueryConfig({ out: "cli" }, file).out).toBe("cli");
     expect(mergeQueryConfig({}, file).out).toBe("q");
-    expect(mergeQueryConfig({}, { depgraph: { out: "dg" }, query: {} }).out).toBe("dg");
-    expect(mergeQueryConfig({}, { depgraph: {}, query: {} }).out).toBe("docs/architecture");
+    expect(mergeQueryConfig({}, { depgraph: { out: "dg" }, query: {}, clones: {} }).out).toBe("dg");
+    expect(mergeQueryConfig({}, { depgraph: {}, query: {}, clones: {} }).out).toBe(
+      "docs/architecture",
+    );
   });
 
   test("the Node runtimes: --node-runtime, then query.nodeRuntimes, then none", () => {
-    const file = { depgraph: {}, query: { nodeRuntimes: ["a"] } };
+    const file = { depgraph: {}, query: { nodeRuntimes: ["a"] }, clones: {} };
     expect(mergeQueryConfig({ nodeRuntimes: ["b"] }, file).nodeRuntimes).toEqual(["b"]);
     expect(mergeQueryConfig({}, file).nodeRuntimes).toEqual(["a"]);
-    expect(mergeQueryConfig({}, { depgraph: {}, query: {} }).nodeRuntimes).toEqual([]);
+    expect(mergeQueryConfig({}, { depgraph: {}, query: {}, clones: {} }).nodeRuntimes).toEqual([]);
   });
 });
 

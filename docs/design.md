@@ -11,6 +11,8 @@ Sections 1 to 13 describe version 1. Section 14 describes the 2.0.0 engine (`rep
 which replaces the `depgraph` pipeline. Where the two differ, section 14 applies to 2.0.0.
 Section 15 describes `repo-tools check`, the drift gate of the architecture documents. Section 16
 describes `repo-tools docs`, which measures and gates the documentation comments of the source.
+Section 17 describes `repo-tools clones`, which lists the functions of a repository and finds the
+functions that copy each other.
 
 ## 1. Purpose
 
@@ -78,6 +80,7 @@ call `src/cli.ts`.
 | `src/depgraph/reporters/*` | One module per report file, and the generated-file banner. |
 | `src/check/*` | `repo-tools check`: the claims parser, the metrics of a fresh graph, the verdict and the command (section 15). |
 | `src/docs/*` | `repo-tools docs`: the analysers of Python and TypeScript, the rules, the report, the stub writer and the command (section 16). |
+| `src/clones/*` | `repo-tools clones`: the settings, the function units, the normaliser, the clone detector, the report and the command (section 17). |
 | `src/query/*` | Reads the `map` reports and answers each query. `safety.ts` holds the browser-safety check. |
 | `src/chunk/*` | The `split`, `merge` and `status` actions, one splitter per file type, and the manifest. |
 | `src/compress/*` | One compressor per format, the legend, and the JSON restore. |
@@ -108,8 +111,8 @@ Standard output and standard error show the root as `<root>`, never as an absolu
 ## 5. Config
 
 The config file is `repo-tools.config.json` at the root, or the file of `--config=<path>`. The file
-has a `depgraph` section and a `query` section. The order of precedence is: a flag, then the config
-file, then the default.
+has a `depgraph` section, a `query` section and a `clones` section. The order of precedence is: a
+flag, then the config file, then the default.
 
 The tool refuses a config file with an unknown key, a value of the wrong kind, or invalid JSON. A
 misspelled key otherwise has no effect and gives no sign of it.
@@ -122,6 +125,7 @@ messages.
 |---|---|
 | `depgraph` | `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `duplicateAllowlist`, `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`, `extensions`, `apiSurface` (`out`, `entry`, `stabilityTags`) |
 | `query` | `out`, `nodeRuntimes` |
+| `clones` | `src`, `out`, `minNodes`, `shingleLength`, `nearThreshold`, `containmentThreshold`, `containmentMinShingles`, `rareShingleLimit`, `minSharedShingles` |
 
 ## 6. Extensions
 
@@ -808,3 +812,174 @@ TypeScript stub goes above the outermost `export` statement, and thus above each
 | JSDoc name with `$` or brackets | `foo$bar` gives `foo`, so M3 fails a correct doc. `[name]` is not read, so a stale optional parameter passes. | Reads both forms. |
 | Parameter named `abstract` | M3 fails a correct doc. | Reads the name from the original source. |
 | Binding pattern | `{ opts: { b } }` gives no `b`, so M3 fails a correct doc. `{ a = fallback }` gives `fallback`. | Gives the bound names: `b` and `a`. |
+
+## 17. The clones subcommand
+
+`repo-tools clones` lists the functions of a repository and finds the functions that copy each
+other. The command reads the source and writes nothing into the repository. The result is a list of
+candidates for a refactoring audit. A person must read both bodies of a pair before any change. A
+high score is a reason to look. A high score is not proof of a copy.
+
+The command reads TypeScript and JavaScript. Tree-sitter parses each file with the loader of
+`repo-tools map` (section 14.1).
+
+### 17.1 The command
+
+```
+repo-tools clones [root] [--out=<dir>] [--config=<path>] [--src=<path>...]
+                  [--min-nodes=<n>] [--shingle=<n>] [--near=<f>]
+                  [--containment=<f>] [--containment-min=<n>]
+                  [--rare=<n>] [--min-shared=<n>]
+```
+
+- The root is the first argument that is not a flag, or `--root=<path>`. The default is the
+  current folder. A root that is not a folder exits 2.
+- The command prints the summary to standard output. It writes files only when `--out` or the
+  `clones.out` key names a folder.
+- Each limit is a flag and a config key (section 17.5). A flag overrides the config file. The
+  config file overrides the default.
+- `--src` takes every argument up to the next flag, so the root goes before it. Any other flag
+  with a value takes `--name=value` or `--name value`.
+- An unknown flag, a missing value, a value of the wrong kind, a second root and an absolute path
+  in `--src` or `--out` exit 2. Standard error shows the root as `<root>`.
+
+The exit codes are:
+
+| Code | Meaning |
+|---|---|
+| 0 | The run finished. The run can find no copy. |
+| 1 | The root holds no function that the command can measure. |
+| 2 | A usage error, a bad config file, or a root that is not a folder. |
+
+A run that measures nothing is a failure and not a clean result. The summary of such a run would
+look like a report that found no copy.
+
+### 17.2 Modules
+
+| Module | Job |
+|---|---|
+| `src/clones/index.ts` | The command: the flags, the exit codes and the output files. |
+| `src/clones/settings.ts` | The defaults, and the merge of the flags, the config file and the defaults. |
+| `src/clones/units.ts` | Finds the functions of one parsed file. Gives each one a name, a kind and a line range. |
+| `src/clones/normalise.ts` | Turns a function body into a sequence of node labels. |
+| `src/clones/detect.ts` | Groups the exact copies and scores the near copies. |
+| `src/clones/report.ts` | The summary text and the two JSON files. |
+
+`src/config.ts` holds the keys of the `clones` section with the keys of the other sections.
+
+### 17.3 What a unit is
+
+A unit is a function that has a name and a body. The files are the TypeScript and JavaScript files
+of the census of `repo-tools map` (section 14.1), except the `.d.ts` files. With `src` set to
+`auto`, the command reads the files of the `src` area. This area holds each file that `map` does not
+class as a test, a tool, a config file, a benchmark, an example or a document. With a list, the
+command reads the files below each listed folder, in every area. A folder of `.` selects every file.
+
+| Source form | Kind | Name |
+|---|---|---|
+| A function or generator declaration | `function` | The declared name. |
+| A variable that holds a function expression or an arrow function | `function` | The variable name. |
+| A method of a class | `method` | The method name. |
+| A constructor | `ctor` | `constructor`. |
+| A `get` or `set` accessor | `get`, `set` | The property name. |
+| A class field that holds a function | `field` | The field name. |
+| A method or a property of an object literal that holds a function | `prop` | The key. |
+
+A declaration or a variable inside a class has the kind `local`. The container of a unit is the name
+of the nearest class, or an empty string. An anonymous function is not a unit, and its labels are
+part of the body that holds it. A unit with fewer labels than `minNodes` is not kept. A unit that
+sits inside another unit is a separate unit. The command never pairs a unit with a unit that
+contains it.
+
+A unit is `exported` when an export statement holds the declaration. The `doc` field holds the text
+of the JSDoc block that ends directly above the declaration. The text stops before the first tag.
+The field joins the lines with spaces and keeps the first 160 characters.
+
+### 17.4 The normal form
+
+The normaliser walks the body in pre-order. It writes one label for each named node:
+
+- `ID` for an identifier. The lower-case name goes into the name set of the unit.
+- `LIT` for a string, a number, a regular expression, `true`, `false` and `null`. `TPL` for each
+  text fragment of a template string.
+- The node type for any other node. A binary, unary, update or augmented assignment expression adds
+  its operator, for example `binary_expression:+`.
+
+Type syntax gives no label: type annotations, type arguments, type parameters, and the
+declarations of types and interfaces. An `as` or `satisfies` expression, a non-null assertion and
+an angle-bracket assertion give the label of the inner expression. Comments, decorators and
+modifier keywords give no label.
+
+Two functions that differ only in names, literals, types and comments have the same sequence. The
+SHA-1 hash of the sequence is the `exactHash`. The SHA-1 hash of the body text without white space
+is the `textHash`.
+
+### 17.5 The settings
+
+| Key | Flag | Default | Meaning |
+|---|---|---|---|
+| `src` | `--src` | `auto` | The folders to read, or `auto` for the `src` area. |
+| `out` | `--out` | none | The folder for the two JSON files. |
+| `minNodes` | `--min-nodes` | 50 | The smallest number of labels of a unit. |
+| `shingleLength` | `--shingle` | 6 | The labels in one shingle. |
+| `nearThreshold` | `--near` | 0.6 | The smallest Jaccard score of a near pair. |
+| `containmentThreshold` | `--containment` | 0.9 | The smallest containment of a near pair. |
+| `containmentMinShingles` | `--containment-min` | 20 | The smallest shingle count of the smaller unit, for the containment rule. |
+| `rareShingleLimit` | `--rare` | 60 | A shingle in more units than this number does not pick candidate pairs. |
+| `minSharedShingles` | `--min-shared` | 3 | The rare shingles that a candidate pair must share. |
+
+The defaults are in `src/clones/settings.ts` only. A count must be an integer of 1 or more. A
+threshold must be a number from 0 to 1.
+
+### 17.6 How the copies are found
+
+1. **Exact groups.** Units with the same `exactHash` form a group. Units with the same `textHash`
+   form a text group. A group has two or more units.
+2. **Shingles.** A shingle is `shingleLength` labels in a row. The command hashes each shingle with
+   32-bit FNV-1a. Two different shingles can have one hash. Such a collision raises a score a
+   little, so a score is a hint and not a measurement.
+3. **Candidates.** An index maps each shingle to its units. A shingle in more than
+   `rareShingleLimit` units is skipped. A pair of units that share at least `minSharedShingles`
+   rare shingles is a candidate.
+4. **Scores.** `jStruct` is the Jaccard score of the two shingle sets. `contain` is the shared
+   count divided by the size of the smaller set. `jNames` is the Jaccard score of the two name
+   sets.
+5. **Near pairs.** A candidate is a near pair when `jStruct` is at least `nearThreshold`. A candidate
+   is also a near pair when `contain` is at least `containmentThreshold`. The containment case needs
+   at least `containmentMinShingles` shingles in the smaller set. The pairs are in the order of `jStruct`
+   (high first), then of the two ids.
+
+A pair from an exact group is also a near pair with `jStruct` 1.
+
+### 17.7 The output
+
+The summary on standard output has five lines:
+
+- The file count, the parse-error count and the unit count.
+- The 50th, 90th and 99th percentile and the maximum of the label counts.
+- The exact groups, the units in them, and the text groups.
+- The near pairs, in five bands of `jStruct`.
+- The unit count of each folder. A folder is the first two folders of the path, or `.` for a
+  file at the root.
+
+A file with parse errors still gives the units that tree-sitter recovered. The summary counts such
+files, and a count of 0 is the clean result.
+
+With an output folder, the command writes two files:
+
+- `inventory.jsonl` has one JSON object for each unit: `id`, `file`, `name`, `container`, `kind`,
+  `exported`, `startLine`, `endLine`, `loc`, `params`, `async`, `nodes`, `doc`, `exactHash` and
+  `textHash`.
+- `clones.json` has `params` (the settings of the run), `exactGroups`, `textGroups` and `near`.
+  Each group is a list of unit ids. Each near pair has `a`, `b`, `jStruct`, `contain` and `jNames`.
+
+The units are in the order of the path (code units), then of the line. The files obey the rules R1,
+R3 and R4 (section 4), so the same input gives the same bytes.
+
+### 17.8 Limits
+
+- The command reads TypeScript and JavaScript only.
+- A copy that a person renamed, reordered or split can score below `nearThreshold`. A pair that
+  scores above it can still do different jobs.
+- The command compares the shape of the code. A pair of functions with the same job and a different
+  shape is not a candidate.

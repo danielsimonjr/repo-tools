@@ -9,8 +9,9 @@
  * the API-surface report against its golden (12.1 step 3), the `chunk split` and `chunk merge`
  * round trip (12.1 step 4), a JSON round trip through `compress` and `compress -d` (12.1 step 5),
  * a `map` run that loads the fixture extension (12.1 step 7), the drift gate: `check` passes
- * a matching claim and fails a drifting one, each in a temp folder, and the doc gate: `docs check`
- * passes documented TypeScript, TSX and Python and fails an undocumented export.
+ * a matching claim and fails a drifting one, each in a temp folder, the doc gate: `docs check`
+ * passes documented TypeScript, TSX and Python and fails an undocumented export, and the clone
+ * finder: `clones` groups a renamed copy and leaves a function of another shape alone.
  */
 import {
   copyFileSync,
@@ -52,11 +53,11 @@ const STEPS: Step[] = [
     args: ["--help"],
     exit: 0,
     check: (out) =>
-      ["map", "depgraph", "check", "docs", "chunk", "compress", "query"].every((s) =>
-        out.includes(s),
+      ["map", "depgraph", "check", "docs", "chunk", "compress", "query", "ste", "clones"].every(
+        (s) => out.includes(s),
       )
         ? undefined
-        : "the help does not list map, depgraph, check, docs, chunk, compress and query",
+        : "the help does not list map, depgraph, check, docs, chunk, compress, query, ste and clones",
   },
   { name: "unknown subcommand", args: ["frobnicate"], exit: 1 },
 ];
@@ -285,6 +286,57 @@ function docsGate(command: string[]): string | undefined {
   }
 }
 
+/**
+ * The clone finder: `clones` reads a temp folder with two functions that differ only in names and
+ * literals, and a third function of another shape. The run must exit 0 and report one exact group
+ * of two units among three. The run loads the TypeScript grammar and hashes with `node:crypto`,
+ * the two parts of the command that differ between the source and the shipped files.
+ */
+function clonesGate(command: string[]): string | undefined {
+  const dir = mkdtempSync(join(tmpdir(), "repo-tools-smoke-"));
+  try {
+    mkdirSync(join(dir, "src"));
+    const lines = (...rows: string[]): string => `${rows.join("\n")}\n`;
+    const body = (name: string, list: string, item: string, start: number, bound: number): string =>
+      lines(
+        `export function ${name}(${list}: number[]) {`,
+        `  let sum = ${start};`,
+        `  for (const ${item} of ${list}) {`,
+        `    if (${item} > ${bound}) {`,
+        `      sum += ${item} * 2;`,
+        "    }",
+        "  }",
+        "  return sum;",
+        "}",
+      );
+    writeFileSync(join(dir, "src/a.ts"), body("a", "xs", "x", 0, 1));
+    writeFileSync(join(dir, "src/b.ts"), body("b", "ys", "y", 5, 9));
+    writeFileSync(
+      join(dir, "src/c.ts"),
+      lines(
+        "export function c(zs: string[]) {",
+        "  while (zs.length > 0) {",
+        "    zs.pop();",
+        "  }",
+        "  return zs;",
+        "}",
+      ),
+    );
+    const run = Bun.spawnSync([...command, "clones", dir, "--min-nodes=5"]);
+    if (run.exitCode !== 0) return `exit ${run.exitCode}, expected 0: ${run.stderr.toString()}`;
+    const out = run.stdout.toString();
+    for (const line of ["units(minNodes=5)=3", "exact groups=1 (units in them=2)"]) {
+      if (!out.includes(line))
+        return `${JSON.stringify(line)} is missing from ${JSON.stringify(out)}`;
+    }
+    return undefined;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 /** Checks that run a command more than once and check files. */
 const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined }[] = [
   { name: "map golden (12.1 step 2)", run: mapGolden },
@@ -294,6 +346,7 @@ const FILE_STEPS: { name: string; run: (command: string[]) => string | undefined
   { name: "extension hooks (12.1 step 7)", run: extensionHooks },
   { name: "check drift gate", run: checkGate },
   { name: "docs gate", run: docsGate },
+  { name: "clones gate", run: clonesGate },
 ];
 
 /** The number of checks that `smoke` runs. */

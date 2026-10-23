@@ -283,3 +283,16 @@ data. Other findings are filed here.
 - [ ] Write the release steps in the repository. The executable artifacts use `archive: false`, so
   `gh run download` fails on them with "not a valid zip file"; the REST artifact endpoint returns the raw
   file. A local `dist/` is older than the version bump, so the publish must use the tarball that CI built.
+
+## 2.3.0: `repo-tools clones`
+
+- [x] Add `repo-tools clones`: the read-only function inventory and clone detector, its `clones` config section,
+  `docs/design.md` section 17, the unit tests, the smoke step and `docs/parity-clones.md`.
+- [x] 2026-10-22 · five-axis pass (feature `clones`): speed — the command reads the 292 files of memoryjs in 2.6 to
+  4.2 s when warm; stability — 1868 tests pass, 0 fail, 1 skip, and the node and bun runs of the shipped bundle write
+  the same bytes; reliability — the smoke test passes 11 steps against `dist/cli.js` with Node and with Bun;
+  security — `bun audit` finds no vulnerability in 43 packages and no Dependabot alert is open; maintainability —
+  the defaults are in `src/clones/settings.ts` only, and the feature adds no dependency. NOT done: the two open
+  items below.
+- [ ] `clones` reads TypeScript and JavaScript only. The Python grammar is already bundled, so add Python units.
+- [ ] `docs/parity-clones.md` covers one repository. Add a second repository with other naming habits.
