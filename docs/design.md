@@ -430,6 +430,11 @@ through 2.x.
   `metadata.coverageCaveat`. A test in the same namespace, or in a nested namespace, needs no
   `using` and does not count. The percentage can therefore be too high or too low. It stays the
   raw figure. The reports of the other languages have no note and no key.
+- `TEST_COVERAGE.md` measures imports. A source file counts when a test file imports it: directly,
+  through a barrel, through a side-effect import, or by `import()`. A test that runs a file without
+  an import does not count it. An end-to-end spec that starts the program is one example. The two
+  file lists therefore have the headings "Source Files Not Imported By A Test" and "Source Files
+  Imported By A Test".
 
 ### 14.3 Output rules
 

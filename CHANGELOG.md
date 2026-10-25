@@ -23,6 +23,11 @@ All notable changes to this project are recorded in this file. The format follow
   `dependency-graph.json` and `dependency-graph.yaml` wrote the folder name before, so two checkouts of one repository
   gave two graphs. A committed `dependency-graph.json` changes once in a repository whose folder name differs from
   its package name. `tests/unit/map-project-name.test.ts` pins the rule, and `docs/design.md` section 14.4 states it.
+- The two file lists of `TEST_COVERAGE.md` have the headings `Source Files Not Imported By A Test` and
+  `Source Files Imported By A Test`. The headings said `Without Test Coverage` and `With Test Coverage`. The report
+  counts a file when a test file imports it. A file that only an end-to-end spec runs was therefore on the first list
+  under a heading that said it had no coverage. The text for an empty first list changed in the same way.
+  `docs/design.md` section 14.2 states the basis.
 
 ## [2.3.0] - 2026-10-22
 

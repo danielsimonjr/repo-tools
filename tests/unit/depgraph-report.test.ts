@@ -167,6 +167,18 @@ describe("coverage and surface reporters", () => {
     expect(cov.untestedFiles).toEqual(["src/b.ts", "src/index.ts", "src/lib/c.ts"]);
   });
 
+  test("the file lists name what the tool measures: a test import, not test coverage", () => {
+    const cov = analyzeTestCoverage(files, tests, root);
+    const md = generateTestCoverageMarkdown(cov);
+    expect(md).toContain("## Source Files Not Imported By A Test\n");
+    expect(md).toContain("## Source Files Imported By A Test\n");
+    expect(md).not.toContain("Without Test Coverage");
+    expect(md).not.toContain("With Test Coverage");
+    const all = generateTestCoverageMarkdown({ ...cov, untestedFiles: [] });
+    expect(all).toContain("**Every source file is imported by a test file.**");
+    expect(all).not.toContain("have test coverage");
+  });
+
   test("the surface reporters group names by package key", () => {
     expect(packageKeyOf("packages/core/sub")).toBe("packages/core");
     expect(packageKeyOf("core/sub")).toBe("core");

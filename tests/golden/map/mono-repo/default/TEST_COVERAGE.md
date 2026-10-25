@@ -15,7 +15,7 @@
 | Coverage (raw, direct-import) | **14.3%** |
 ---
 
-## Source Files Without Test Coverage
+## Source Files Not Imported By A Test
 
 The following 6 source files are not directly imported by any test file:
 
@@ -33,7 +33,7 @@ The following 6 source files are not directly imported by any test file:
 
 ---
 
-## Source Files With Test Coverage
+## Source Files Imported By A Test
 
 | Source File | Test Files |
 |-------------|------------|
