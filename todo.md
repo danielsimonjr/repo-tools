@@ -304,7 +304,7 @@ data. Other findings are filed here.
   (`abstract?: boolean;`) and for `export type * from './x.js';`. Both are valid TypeScript. In a scratch test
   `clones` still finds the functions that follow the error, and `map` reads the exports. Check the units inside
   the error span and check a newer grammar release. Also check the edge that `map` writes for `export type *`:
-  it holds `typeOnly: false`, and it must be type-only.
+  the edge holds `typeOnly: false`, but the edge must be type-only.
 - [x] 2026-10-25 · five-axis pass (feature `dispatchCalls`): speed — one alternation in the existing regular
   expression of a constant definer, and no extra file read; stability — 1889 tests pass, 0 fail, 1 skip, and the
   golden reports are unchanged; reliability — the smoke test passes 11 steps with Node and with Bun, and the built
