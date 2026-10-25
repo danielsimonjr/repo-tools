@@ -213,7 +213,7 @@ describe("emitTestCoverage, the basis of a C# report", () => {
     const { md } = await coverage(repo(CS));
     const table = md.indexOf("Coverage (raw, direct-import)");
     const note = md.indexOf("by namespace import");
-    const lists = md.indexOf("## Source Files Without Test Coverage");
+    const lists = md.indexOf("## Source Files Not Imported By A Test");
     expect(table).toBeGreaterThan(-1);
     expect(note).toBeGreaterThan(table);
     expect(lists).toBeGreaterThan(note);

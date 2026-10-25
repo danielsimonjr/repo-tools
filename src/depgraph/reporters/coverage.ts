@@ -92,10 +92,12 @@ export function generateTestCoverageMarkdown(
   lines.push("---");
   lines.push("");
 
-  lines.push("## Source Files Without Test Coverage");
+  // The headings state what the analyzer measures: an import from a test file. A file that only an
+  // end-to-end spec exercises, with no import, is on this list.
+  lines.push("## Source Files Not Imported By A Test");
   lines.push("");
   if (coverage.untestedFiles.length === 0) {
-    lines.push("**All source files have test coverage!** 🎉");
+    lines.push("**Every source file is imported by a test file.** 🎉");
   } else {
     lines.push(
       `The following ${coverage.untestedFiles.length} source files are not directly imported by any test file:`,
@@ -126,7 +128,7 @@ export function generateTestCoverageMarkdown(
   lines.push("---");
   lines.push("");
 
-  lines.push("## Source Files With Test Coverage");
+  lines.push("## Source Files Imported By A Test");
   lines.push("");
   lines.push("| Source File | Test Files |");
   lines.push("|-------------|------------|");

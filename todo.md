@@ -312,3 +312,14 @@ data. Other findings are filed here.
   must match an identifier pattern and is escaped before it enters the regular expression, and the change adds no
   dependency; maintainability — the default list is in `src/depgraph/duplicates.ts` only. NOT done: the two
   `clones` items above.
+- [x] 2026-10-25 · five-axis pass (change: `TEST_COVERAGE.md` list headings): speed — text change only, no extra read;
+  stability — 1890 tests pass, 0 fail, 1 skip, and the two golden reports changed by the headings only; reliability —
+  the headings now say what the analyzer measures (an import from a test file), so a repository covered by end-to-end
+  specs is no longer told that it has no coverage; security — no new input and no dependency; maintainability — one
+  test pins the headings and the empty-list text. NOT done: an end-to-end signal (no spec imports the source, so the
+  tool cannot derive one), and the two `ste` items below.
+- [ ] `repo-tools ste <dir>` passes when a document is deleted inside a folder that still exists. Add a repeatable
+  `--require=<path>` option that exits 2 with an error when a required file does not exist.
+- [ ] `repo-tools ste --since=<rev>`: report only the findings on lines added since `<rev>`, so a long document with
+  old findings can gate a new edit. The sentence-length problems carry a start line (`name:~START:`), so the option
+  needs the line span of a sentence.
