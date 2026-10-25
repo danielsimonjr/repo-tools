@@ -7,7 +7,9 @@ import {
   classifyDefiner,
   collectImportedLocalNames,
   collectOwnDefiners,
+  DEFAULT_DISPATCH_CALLS,
   DUPLICATE_SYMBOLS_NOTE,
+  describeDispatchCalls,
   detectDuplicateSymbols,
   escapeRegExpLiteral,
   finalizeDuplicateEntry,
@@ -178,5 +180,114 @@ describe("duplicate detection and report", () => {
     const json = generateDuplicateSymbolsJson(report);
     expect(JSON.parse(json)).toEqual(JSON.parse(JSON.stringify(report)));
     expect(json.endsWith("}")).toBe(true);
+  });
+});
+
+const regRoot = makeTree({
+  "src/index.ts": "export * from './p.js';\n",
+  "src/p.ts":
+    "export const op = defineTyped<X>('op', {});\nexport const sq = registry.define('sq', {});\n",
+  "src/q.ts":
+    "export const op = defineTyped('op', {});\nexport const sq = registry.define('sq', {});\n",
+});
+const regFiles = toParsedFiles(await buildGraph(regRoot), regRoot);
+
+describe("configured dispatch calls", () => {
+  const calls = ["defineTyped", "registry.define"];
+  const regSurface = computePublicSurface(regFiles, regRoot, new Map());
+  const tagsOf = (dispatchCalls?: string[]) =>
+    detectDuplicateSymbols(
+      regFiles,
+      regSurface,
+      regRoot,
+      join(regRoot, "absent.json"),
+      dispatchCalls,
+    ).runtime.map((e) => [e.name, e.tag]);
+
+  test("the default list holds mathTyped only", () => {
+    expect(DEFAULT_DISPATCH_CALLS).toEqual(["mathTyped"]);
+  });
+
+  test("isDispatchVariantBody reads the configured call names", () => {
+    const code = "export const op = defineTyped<X>('op', {})";
+    expect(isDispatchVariantBody(code, "op", calls)).toBe(true);
+    expect(isDispatchVariantBody(code, "op")).toBe(false);
+    expect(isDispatchVariantBody("export const sq = registry.define('sq')", "sq", calls)).toBe(
+      true,
+    );
+    expect(isDispatchVariantBody("export const sq = registryXdefine('sq')", "sq", calls)).toBe(
+      false,
+    );
+    expect(isDispatchVariantBody("export const op = defineTypedMore('op')", "op", calls)).toBe(
+      false,
+    );
+    expect(isDispatchVariantBody("export const op = mathTyped('op')", "op", calls)).toBe(false);
+  });
+
+  test("an empty list switches the tag off", () => {
+    expect(isDispatchVariantBody("export const op = mathTyped('op')", "op", [])).toBe(false);
+  });
+
+  test("detectDuplicateSymbols tags the registrations of the configured calls", () => {
+    expect(tagsOf(calls)).toEqual([
+      ["op", "DISPATCH_VARIANT"],
+      ["sq", "DISPATCH_VARIANT"],
+    ]);
+    expect(tagsOf()).toEqual([
+      ["op", "TRUE_DUPLICATE"],
+      ["sq", "TRUE_DUPLICATE"],
+    ]);
+  });
+
+  test("with an empty list two mathTyped registrations are a TRUE_DUPLICATE", () => {
+    const surface = computePublicSurface(files, root, new Map());
+    const empty = detectDuplicateSymbols(files, surface, root, allowPath, []);
+    expect(empty.runtime.find((e) => e.name === "op")?.tag).toBe("TRUE_DUPLICATE");
+  });
+
+  test("describeDispatchCalls joins the names", () => {
+    expect(describeDispatchCalls(["a"])).toBe("a(...)");
+    expect(describeDispatchCalls(["a", "b"])).toBe("a(...) or b(...)");
+    expect(describeDispatchCalls(["a", "b", "c"], true)).toBe("`a(...)`, `b(...)` or `c(...)`");
+  });
+
+  test("the default text is the text of every earlier version", () => {
+    const report = buildDuplicateReport({ runtime: [], types: [] });
+    expect(report.note).toBe(DUPLICATE_SYMBOLS_NOTE);
+    expect(report.note).toContain(
+      "DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct " +
+        "dispatch surfaces, not copy-paste bodies), ",
+    );
+    const md = generateDuplicateSymbolsMarkdown(report);
+    expect(md).toContain(
+      "- `DISPATCH_VARIANT`: two or more `mathTyped(...)` registrations of the same public name. " +
+        "The registrations are distinct dispatch surfaces, not copy-paste bodies.\n",
+    );
+  });
+
+  test("the report text names the configured calls", () => {
+    const report = buildDuplicateReport({ runtime: [], types: [] }, calls);
+    expect(report.note).toContain(
+      "DISPATCH_VARIANT (>=2 defineTyped(...) or registry.define(...) registrations of the same " +
+        "public name",
+    );
+    expect(report.note).not.toContain("mathTyped");
+    const md = generateDuplicateSymbolsMarkdown(report, calls);
+    expect(md).toContain(
+      "- `DISPATCH_VARIANT`: two or more `defineTyped(...)` or `registry.define(...)` " +
+        "registrations of the same public name. ",
+    );
+    expect(md).not.toContain("mathTyped");
+  });
+
+  test("an empty list says that the tag is never set", () => {
+    const report = buildDuplicateReport({ runtime: [], types: [] }, []);
+    expect(report.note).toContain("DISPATCH_VARIANT (never set: no dispatch call is configured)");
+    expect(report.note).not.toContain("mathTyped");
+    const md = generateDuplicateSymbolsMarkdown(report, []);
+    expect(md).toContain(
+      "- `DISPATCH_VARIANT`: never set, because no dispatch call is configured.\n",
+    );
+    expect(md).not.toContain("mathTyped");
   });
 });

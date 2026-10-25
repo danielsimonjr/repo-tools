@@ -665,7 +665,9 @@ export function emitDuplicateSymbols(
       surface,
       root,
       options.allowlistPath ?? join(root, "docs", "architecture", "duplicate-allowlist.json"),
+      options.dispatchCalls,
     ),
+    options.dispatchCalls,
   );
   return writeJson(path, {
     note: DUPLICATES_CLASSIFIED_NOTE,
@@ -689,6 +691,8 @@ const DUPLICATES_CLASSIFIED_NOTE =
 export interface DuplicateSymbolsOptions {
   /** The allowlist file. Default: `<root>/docs/architecture/duplicate-allowlist.json` (D9). */
   allowlistPath?: string;
+  /** The calls that register a typed-dispatch constant. Default: `DEFAULT_DISPATCH_CALLS`. */
+  dispatchCalls?: readonly string[];
 }
 
 /** Writes unused-analysis.json: the three export buckets, the notes, and the no-importer files. */

@@ -25,6 +25,8 @@ import type { Measured, MetricValue } from "./verify.ts";
 export interface MetricsOptions {
   /** The duplicate allowlist file. Default: `<root>/docs/architecture/duplicate-allowlist.json`. */
   allowlistPath?: string;
+  /** The calls that register a typed-dispatch constant. Default: `DEFAULT_DISPATCH_CALLS`. */
+  dispatchCalls?: readonly string[];
   /** The folder that holds the scratch folder. Default: the temp folder of the system. */
   scratchBase?: string;
 }
@@ -68,11 +70,10 @@ export async function collectMetrics(
     const dep = readReport(emitDependencyGraph(graph, scratch));
     const inventory = readReport(emitFileInventory(graph, scratch));
     const duplicates = readReport(
-      emitDuplicateSymbols(
-        graph,
-        scratch,
-        options.allowlistPath === undefined ? {} : { allowlistPath: options.allowlistPath },
-      ),
+      emitDuplicateSymbols(graph, scratch, {
+        ...(options.allowlistPath === undefined ? {} : { allowlistPath: options.allowlistPath }),
+        ...(options.dispatchCalls === undefined ? {} : { dispatchCalls: options.dispatchCalls }),
+      }),
     );
     const unused = readReport(emitUnusedAnalysis(graph, scratch));
     const metrics = new Map<string, MetricValue>();

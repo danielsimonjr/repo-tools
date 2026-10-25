@@ -6,6 +6,16 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- The config key `dispatchCalls` (in section `depgraph` or `map`) lists the calls that register a typed-dispatch
+  constant. The duplicate report tagged only the call `mathTyped` as `DISPATCH_VARIANT`. Repositories with other
+  registration calls received a `TRUE_DUPLICATE` for each registered name. The default list is
+  `["mathTyped"]`, and with the default the reports are byte for byte the reports of 2.3.0. An empty list switches
+  the tag off. `repo-tools map` and `repo-tools check` both read the key, so the measured counts agree. The note in
+  `duplicate-symbols.json` and the text in `duplicate-symbols.md` show the names of the listed calls.
+  `docs/design.md` section 5.1 states the rules.
+
 ### Changed
 
 - Every report of `repo-tools map` carries the `name` field of `package.json` as the project name. A report uses

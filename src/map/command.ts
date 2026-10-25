@@ -237,6 +237,7 @@ async function runPipeline(
   written.push(
     emitDuplicateSymbols(graph, outDir, {
       allowlistPath: resolveUnderRoot(root, config.duplicateAllowlist),
+      dispatchCalls: config.dispatchCalls,
     }),
   );
   written.push(emitUnusedAnalysis(graph, outDir));
@@ -244,7 +245,7 @@ async function runPipeline(
   const view = subsystemView(graph, root);
   written.push(emitDependencyLayers(graph, root, outDir, view));
   written.push(...emitSubsystemReports(graph, root, outDir, corePath, { view, banner }));
-  written.push(...emitMarkdownReports(outDir, banner));
+  written.push(...emitMarkdownReports(outDir, banner, config.dispatchCalls));
   written.push(
     ...emitTestCoverage(graph, root, outDir, {
       policyPath: resolveUnderRoot(root, config.coveragePolicy),

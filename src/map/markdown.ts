@@ -8,7 +8,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { DuplicateSymbolsReport } from "../depgraph/duplicates.ts";
+import { DEFAULT_DISPATCH_CALLS, type DuplicateSymbolsReport } from "../depgraph/duplicates.ts";
 import { type BannerOptions, withBanner } from "../depgraph/reporters/banner.ts";
 import { generateDuplicateSymbolsMarkdown } from "../depgraph/reporters/duplicates.ts";
 import { writeReport } from "../io.ts";
@@ -89,8 +89,12 @@ export function inventoryMarkdown(inv: Json, language: string): string {
 /**
  * The duplicate-symbols.md body. A TypeScript file carries depgraph's classified lists and keeps
  * depgraph's report. Another language gets the name-only grouping and its explicit note.
+ * `dispatchCalls` names the calls that register a typed-dispatch constant.
  */
-export function duplicatesMarkdown(dup: Json): string {
+export function duplicatesMarkdown(
+  dup: Json,
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
+): string {
   if (Array.isArray(dup.runtime) && Array.isArray(dup.types)) {
     const report: DuplicateSymbolsReport = {
       note: dup.classificationNote,
@@ -103,7 +107,7 @@ export function duplicatesMarkdown(dup: Json): string {
       runtime: dup.runtime,
       types: dup.types,
     };
-    return generateDuplicateSymbolsMarkdown(report);
+    return generateDuplicateSymbolsMarkdown(report, dispatchCalls);
   }
   const lines: string[] = ["# Duplicate Symbols", ""];
   lines.push(`> **Note:** ${dup.note}`, "", `> ${dup.classificationNote}`, "");
@@ -204,15 +208,20 @@ export function unusedMarkdown(unused: Json, graph: Json): string {
 
 /**
  * Reads the JSON files in `outDir` and writes FILE_INVENTORY.md, duplicate-symbols.md and
- * unused-analysis.md next to them. Returns the paths it wrote.
+ * unused-analysis.md next to them. Returns the paths it wrote. `dispatchCalls` names the calls
+ * that the duplicate report words as typed-dispatch registrations.
  */
-export function emitMarkdownReports(outDir: string, banner: BannerOptions = {}): string[] {
+export function emitMarkdownReports(
+  outDir: string,
+  banner: BannerOptions = {},
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
+): string[] {
   const read = (name: string): Json => JSON.parse(readFileSync(join(outDir, name), "utf8"));
   const graph = read("dependency-graph.json");
   const bannerOptions = { command: MAP_REGENERATE_COMMAND, ...banner };
   const reports: [string, string][] = [
     ["FILE_INVENTORY.md", inventoryMarkdown(read("file-inventory.json"), graph.metadata.language)],
-    ["duplicate-symbols.md", duplicatesMarkdown(read("duplicate-symbols.json"))],
+    ["duplicate-symbols.md", duplicatesMarkdown(read("duplicate-symbols.json"), dispatchCalls)],
     ["unused-analysis.md", unusedMarkdown(read("unused-analysis.json"), graph)],
   ];
   return reports.map(([name, body]) => {
