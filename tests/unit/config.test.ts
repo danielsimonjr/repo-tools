@@ -29,6 +29,7 @@ const DEFAULTS: DepgraphConfig = {
   exclude: ["node_modules", "dist", "build", "coverage", ".git"],
   alsoExclude: [],
   strictOrphans: false,
+  dispatchCalls: ["mathTyped"],
   duplicateAllowlist: "docs/architecture/duplicate-allowlist.json",
   duplicateBaseline: "docs/architecture/duplicate-baseline.json",
   coveragePolicy: "docs/architecture/coverage-policy.json",
@@ -51,6 +52,7 @@ const EVERY_KEY = {
     exclude: ["vendor"],
     alsoExclude: ["gen"],
     strictOrphans: true,
+    dispatchCalls: ["defineTyped", "registry.define"],
     duplicateAllowlist: "cfg/allow.json",
     duplicateBaseline: "cfg/base.json",
     coveragePolicy: "cfg/policy.json",
@@ -105,12 +107,46 @@ describe("config file: keys, defaults and types", () => {
     ["an empty list item", { depgraph: { exclude: [""] } }, /depgraph.exclude/],
     ["a null out", { depgraph: { out: null } }, /depgraph.out/],
     ["a file that is not an object", [], /JSON object/],
+    [
+      "a dispatchCalls value that is not a list",
+      { depgraph: { dispatchCalls: "mathTyped" } },
+      /'depgraph.dispatchCalls' must be a list of call names/,
+    ],
+    [
+      "an empty dispatchCalls item",
+      { depgraph: { dispatchCalls: [""] } },
+      /'depgraph.dispatchCalls' must be a list of call names/,
+    ],
+    [
+      "a dispatchCalls item that is not a call name",
+      { depgraph: { dispatchCalls: ["define typed"] } },
+      /'depgraph.dispatchCalls' must be a list of call names/,
+    ],
+    [
+      "a dispatchCalls item with a call or a backtick",
+      { depgraph: { dispatchCalls: ["f(...)", "`x`"] } },
+      /'depgraph.dispatchCalls' must be a list of call names/,
+    ],
   ];
   for (const [label, value, message] of invalid) {
     test(`${label} is an error`, () => {
       expect(() => parseConfig(value, "<root>/x.json")).toThrow(message);
     });
   }
+
+  test("an empty dispatchCalls list is valid and switches the tag off", () => {
+    const file = parseConfig({ map: { dispatchCalls: [] } }, "<root>/x.json");
+    expect(file.dispatchCalls).toEqual([]);
+    expect(mergeDepgraphConfig({}, file).dispatchCalls).toEqual([]);
+  });
+
+  test("a call name holds identifier characters joined by dots", () => {
+    const file = parseConfig(
+      { depgraph: { dispatchCalls: ["a", "_b$", "ns.reg.define", "a1.b2"] } },
+      "<root>/x.json",
+    );
+    expect(file.dispatchCalls).toEqual(["a", "_b$", "ns.reg.define", "a1.b2"]);
+  });
 
   const absolute: Array<[string, unknown]> = [
     ["out", { out: "/abs/out" }],

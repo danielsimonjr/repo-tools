@@ -450,6 +450,25 @@ describe("repo-tools check: the input files of the graph (D9)", () => {
     expect(r.code).toBe(0);
   });
 
+  test("the config key map.dispatchCalls decides which registrations are DISPATCH_VARIANT", async () => {
+    const REG = {
+      "repo/package.json": PKG,
+      "repo/src/index.ts": 'export { op } from "./a.js";\n',
+      "repo/src/a.ts": "export const op = defineTyped('op', {});\n",
+      "repo/src/b.ts": "export const op = defineTyped('op', {});\n",
+    };
+    const without = tree({ ...REG, "repo/arch/D.md": verification(["runtimeDuplicates", "1"]) });
+    expect((await cli(["check", join(without, "repo"), "--docs=arch"])).code).toBe(0);
+    const withKey = tree({
+      ...REG,
+      "repo/repo-tools.config.json": '{"map": {"dispatchCalls": ["defineTyped"]}}\n',
+      "repo/arch/D.md": verification(["runtimeDuplicates", "0"]),
+    });
+    const r = await cli(["check", join(withKey, "repo"), "--docs=arch"]);
+    expect(r.err).toBe("");
+    expect(r.code).toBe(0);
+  });
+
   test("--config=<file> names another config file", async () => {
     const base = tree({
       ...DUP,

@@ -297,3 +297,18 @@ data. Other findings are filed here.
   items below.
 - [ ] `clones` reads TypeScript and JavaScript only. The Python grammar is already bundled, so add Python units.
 - [ ] `docs/parity-clones.md` covers one repository. Add a second repository with other naming habits.
+- [ ] `clones` prints the number of files with a parse error and no file name. Print the paths, up to a limit, so
+  a reader can act on the count. Measured on the 2.3.0 build on 2026-10-25: 3 of 249 files in one repository and
+  5 of 1,188 files in another.
+- [ ] `tree-sitter-typescript` 0.23.2 reports an error for a property named `abstract` in an interface
+  (`abstract?: boolean;`) and for `export type * from './x.js';`. Both are valid TypeScript. In a scratch test
+  `clones` still finds the functions that follow the error, and `map` reads the exports. Check the units inside
+  the error span and check a newer grammar release. Also check the edge that `map` writes for `export type *`:
+  the edge holds `typeOnly: false`, but the edge must be type-only.
+- [x] 2026-10-25 · five-axis pass (feature `dispatchCalls`): speed — one alternation in the existing regular
+  expression of a constant definer, and no extra file read; stability — 1889 tests pass, 0 fail, 1 skip, and the
+  golden reports are unchanged; reliability — the smoke test passes 11 steps with Node and with Bun, and the built
+  bundle gives the expected tag for a default, a configured, an empty and an invalid list; security — a call name
+  must match an identifier pattern and is escaped before it enters the regular expression, and the change adds no
+  dependency; maintainability — the default list is in `src/depgraph/duplicates.ts` only. NOT done: the two
+  `clones` items above.

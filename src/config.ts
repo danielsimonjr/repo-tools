@@ -12,6 +12,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { posix, resolve, win32 } from "node:path";
 import { DEFAULT_STABILITY_TAGS } from "./depgraph/api-surface.ts";
+import { DEFAULT_DISPATCH_CALLS } from "./depgraph/duplicates.ts";
 import { DEFAULT_EXCLUDE, TEST_DIR_NAMES } from "./depgraph/exclude.ts";
 import { OUTPUT_SUBDIR } from "./depgraph/paths.ts";
 import { DEFAULT_REGENERATE_COMMAND, VERIFICATION_MARKER } from "./depgraph/reporters/banner.ts";
@@ -43,6 +44,12 @@ export interface DepgraphConfig {
   alsoExclude: string[];
   /** An orphaned source file fails the run. */
   strictOrphans: boolean;
+  /**
+   * The calls that register a typed-dispatch constant (`export const X = call(...)`). Two files
+   * that register the same name through these calls get the DISPATCH_VARIANT tag. An empty list
+   * switches the tag off.
+   */
+  dispatchCalls: string[];
   /** The duplicate allowlist file. */
   duplicateAllowlist: string;
   /** The duplicate baseline file (read by the duplicate gate). */
@@ -90,6 +97,7 @@ type KeyKind =
   | "paths"
   | "src"
   | "names"
+  | "calls"
   | "boolean"
   | "string"
   | "string-or-null"
@@ -104,6 +112,7 @@ const DEPGRAPH_KEYS: Readonly<Record<string, KeyKind>> = {
   exclude: "names",
   alsoExclude: "names",
   strictOrphans: "boolean",
+  dispatchCalls: "calls",
   duplicateAllowlist: "path",
   duplicateBaseline: "path",
   coveragePolicy: "path",
@@ -118,6 +127,9 @@ const API_SURFACE_KEYS: Readonly<Record<string, KeyKind>> = {
   entry: "path",
   stabilityTags: "names",
 };
+
+/** A call name as written in source: identifiers joined by dots (`defineTyped`, `registry.define`). */
+const CALL_NAME = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*$/;
 
 /** True for a plain JSON object (not `null`, not an array). */
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -170,6 +182,17 @@ function checkValue(
         value,
         (x) => text(x, "a list of non-empty strings"),
         "a list of non-empty strings",
+      );
+    case "calls":
+      return list(
+        value,
+        (x) => {
+          if (typeof x !== "string" || !CALL_NAME.test(x)) {
+            throw fail(`'${key}' must be a list of call names (identifiers joined by dots)`);
+          }
+          return x;
+        },
+        "a list of call names (identifiers joined by dots)",
       );
     case "boolean":
       if (typeof value !== "boolean") throw fail(`'${key}' must be true or false`);
@@ -425,6 +448,7 @@ export function mergeDepgraphConfig(cli: DepgraphSettings, file: DepgraphSetting
     exclude: cli.exclude ?? file.exclude ?? [...DEFAULT_EXCLUDE],
     alsoExclude: cli.alsoExclude ?? file.alsoExclude ?? [],
     strictOrphans: cli.strictOrphans ?? file.strictOrphans ?? false,
+    dispatchCalls: cli.dispatchCalls ?? file.dispatchCalls ?? [...DEFAULT_DISPATCH_CALLS],
     duplicateAllowlist:
       cli.duplicateAllowlist ?? file.duplicateAllowlist ?? inOut("duplicate-allowlist.json"),
     duplicateBaseline:

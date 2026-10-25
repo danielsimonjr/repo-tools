@@ -171,6 +171,7 @@ export async function run(argv: string[], io: Io): Promise<number> {
     const docs = readDocs(resolve(root, options.docs), label);
     const measured = await collectMetrics(root, {
       allowlistPath: resolve(root, config.duplicateAllowlist),
+      dispatchCalls: config.dispatchCalls,
     });
     const markers = [NO_VERIFICATION_MARKER];
     if (config.verificationMarker !== null && !markers.includes(config.verificationMarker)) {

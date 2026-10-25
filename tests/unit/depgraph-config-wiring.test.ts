@@ -219,6 +219,37 @@ describe("depgraph.strictOrphans, the banner keys and the file keys", () => {
     expect(dupOf(byDefault)).toEqual([expect.objectContaining({ tag: "ALLOWLISTED" })]);
   });
 
+  test("the registration calls are read from depgraph.dispatchCalls", async () => {
+    const regTree = {
+      "package.json": PKG,
+      "src/index.ts": "export { op } from './a.js';\n",
+      "src/a.ts": "/** A. */\nexport const op = defineTyped('op', {});\n",
+      "src/b.ts": "/** B. */\nexport const op = defineTyped('op', {});\n",
+    };
+    const tagOf = (root: string) =>
+      (
+        JSON.parse(readOut(root, "docs/architecture", "duplicate-symbols.json")).runtime as Array<{
+          name: string;
+          tag: string;
+        }>
+      ).map((e) => [e.name, e.tag]);
+    const plain = makeTree(regTree);
+    await runDepgraph(plain);
+    expect(tagOf(plain)).toEqual([["op", "TRUE_DUPLICATE"]]);
+    const cfg = makeTree({ ...regTree, [CONFIG_FILE]: config({ dispatchCalls: ["defineTyped"] }) });
+    await runDepgraph(cfg);
+    expect(tagOf(cfg)).toEqual([["op", "DISPATCH_VARIANT"]]);
+    const md = readOut(cfg, "docs/architecture", "duplicate-symbols.md");
+    expect(md).toContain("two or more `defineTyped(...)` registrations of the same public name.");
+    expect(md).not.toContain("mathTyped");
+    const off = makeTree({ ...regTree, [CONFIG_FILE]: config({ dispatchCalls: [] }) });
+    await runDepgraph(off);
+    expect(tagOf(off)).toEqual([["op", "TRUE_DUPLICATE"]]);
+    expect(readOut(off, "docs/architecture", "duplicate-symbols.md")).toContain(
+      "never set, because no dispatch call is configured.",
+    );
+  });
+
   test("the coverage policy is read from depgraph.coveragePolicy", async () => {
     const policy = JSON.stringify({
       categories: { gen: { label: "Generated", rationale: "r", pathPrefixes: ["src/"] } },

@@ -1,5 +1,11 @@
 /** duplicate-symbols.md and duplicate-symbols.json. */
-import type { DupEntryTag, DuplicateSymbolEntry, DuplicateSymbolsReport } from "../duplicates.ts";
+import {
+  DEFAULT_DISPATCH_CALLS,
+  type DupEntryTag,
+  type DuplicateSymbolEntry,
+  type DuplicateSymbolsReport,
+  describeDispatchCalls,
+} from "../duplicates.ts";
 
 /** The duplicate-symbols.json text (2-space JSON, no trailing newline until fix R1). */
 export function generateDuplicateSymbolsJson(report: DuplicateSymbolsReport): string {
@@ -45,16 +51,26 @@ function renderTaggedSection(
   return `### ${title}\n\n${renderTable(entries.filter((e) => e.tag === tag))}`;
 }
 
-/** The duplicate-symbols.md body (without the banner). */
-export function generateDuplicateSymbolsMarkdown(report: DuplicateSymbolsReport): string {
+/**
+ * The duplicate-symbols.md body (without the banner). `dispatchCalls` names the calls that
+ * register a typed-dispatch constant.
+ */
+export function generateDuplicateSymbolsMarkdown(
+  report: DuplicateSymbolsReport,
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
+): string {
   let md = "# Duplicate Symbols\n\n";
   md += "A name is listed here when two or more distinct files across the monorepo define it. ";
   md += "A file that only re-exports the name does not count. ";
   md += "Each name carries one tag (see `DupEntryTag`), so the actionable subset is clear:\n\n";
   md += "- `TRUE_DUPLICATE`: a real merge target.\n";
-  md +=
-    "- `DISPATCH_VARIANT`: two or more `mathTyped(...)` registrations of the same public name. ";
-  md += "The registrations are distinct dispatch surfaces, not copy-paste bodies.\n";
+  if (dispatchCalls.length === 0) {
+    md += "- `DISPATCH_VARIANT`: never set, because no dispatch call is configured.\n";
+  } else {
+    md += `- \`DISPATCH_VARIANT\`: two or more ${describeDispatchCalls(dispatchCalls, true)} `;
+    md += "registrations of the same public name. ";
+    md += "The registrations are distinct dispatch surfaces, not copy-paste bodies.\n";
+  }
   md += "- `ALIAS_DELEGATION`: a `const X = importedY` forward. ";
   md += "The entry is excluded once fewer than two real bodies remain.\n";
   md += "- `ALLOWLISTED`: the name matches `duplicate-allowlist.json`. ";

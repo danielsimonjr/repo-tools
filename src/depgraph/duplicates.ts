@@ -3,7 +3,8 @@
  * TRUE_DUPLICATE, DISPATCH_VARIANT, ALIAS_DELEGATION or ALLOWLISTED.
  *
  * The classifier does not see typed-dispatch overloads inside one registration; a person
- * triages each TRUE_DUPLICATE entry.
+ * triages each TRUE_DUPLICATE entry. The calls that register a typed-dispatch constant are
+ * `map.dispatchCalls` of the config; the default is `mathTyped`.
  *
  * The allowlist file is `depgraph.duplicateAllowlist` of the config (D10a); the default is
  * `duplicate-allowlist.json` in the output folder. The entries sort in code-unit order (fix F22).
@@ -92,18 +93,49 @@ export const TYPE_DUP_CATEGORIES: DupCategory[] = [
   { cat: "enum", key: "enums" },
 ];
 
-/** The note of duplicate-symbols.json and duplicate-symbols.md (report text, kept verbatim). */
-export const DUPLICATE_SYMBOLS_NOTE =
-  "This report groups names by OWN definition, not by call graph, then classifies each " +
-  "flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), " +
-  "DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct " +
-  "dispatch surfaces, not copy-paste bodies), " +
-  "ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — " +
-  "excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches " +
-  "duplicate-allowlist.json: for example hot-path is* guards, mirrors in another language, " +
-  "per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for " +
-  "different argument shapes within one registration — a human still triages TRUE_DUPLICATE " +
-  "entries using the defining files + public flags before merging anything.";
+/**
+ * The call names that register a typed-dispatch constant when the config does not set
+ * `dispatchCalls`. The default keeps the report of every earlier version.
+ */
+export const DEFAULT_DISPATCH_CALLS: readonly string[] = ["mathTyped"];
+
+/**
+ * The call names as the report writes them: `a(...)`, `a(...) or b(...)`, or `a(...), b(...) or
+ * c(...)`. With `code`, each call is a Markdown code span.
+ */
+export function describeDispatchCalls(calls: readonly string[], code = false): string {
+  const items = calls.map((call) => (code ? `\`${call}(...)\`` : `${call}(...)`));
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`;
+}
+
+/**
+ * The note of duplicate-symbols.json (report text, kept verbatim for the default calls). An empty
+ * list says that the DISPATCH_VARIANT tag is never set.
+ */
+export function duplicateSymbolsNote(
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
+): string {
+  const dispatch =
+    dispatchCalls.length === 0
+      ? "DISPATCH_VARIANT (never set: no dispatch call is configured), "
+      : `DISPATCH_VARIANT (>=2 ${describeDispatchCalls(dispatchCalls)} registrations of the ` +
+        "same public name — distinct dispatch surfaces, not copy-paste bodies), ";
+  return (
+    "This report groups names by OWN definition, not by call graph, then classifies each " +
+    "flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), " +
+    dispatch +
+    "ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — " +
+    "excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches " +
+    "duplicate-allowlist.json: for example hot-path is* guards, mirrors in another language, " +
+    "per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism " +
+    "for different argument shapes within one registration — a human still triages " +
+    "TRUE_DUPLICATE entries using the defining files + public flags before merging anything."
+  );
+}
+
+/** The note for the default dispatch calls. */
+export const DUPLICATE_SYMBOLS_NOTE = duplicateSymbolsNote();
 
 /** The entry order: TRUE_DUPLICATE first. */
 const DUP_ENTRY_TAG_SORT_ORDER: Record<DupEntryTag, number> = {
@@ -151,10 +183,19 @@ export function escapeRegExpLiteral(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** True for `export const NAME = mathTyped(...)`, a typed-dispatch registration. */
-export function isDispatchVariantBody(code: string, name: string): boolean {
+/**
+ * True for `export const NAME = call(...)`, a typed-dispatch registration, where `call` is one of
+ * `dispatchCalls`. An empty list never matches.
+ */
+export function isDispatchVariantBody(
+  code: string,
+  name: string,
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
+): boolean {
+  if (dispatchCalls.length === 0) return false;
+  const calls = dispatchCalls.map(escapeRegExpLiteral).join("|");
   const re = new RegExp(
-    `export\\s+const\\s+${escapeRegExpLiteral(name)}\\s*(?::[^=]+)?=\\s*mathTyped\\s*(?:<[^>]*>)?\\s*\\(`,
+    `export\\s+const\\s+${escapeRegExpLiteral(name)}\\s*(?::[^=]+)?=\\s*(?:${calls})\\s*(?:<[^>]*>)?\\s*\\(`,
   );
   return re.test(code);
 }
@@ -199,6 +240,7 @@ export function isAliasDelegationBody(
 /**
  * Classes one definer: ALLOWLISTED first. A `constant` definer can then be DISPATCH_VARIANT or
  * ALIAS_DELEGATION. Everything else is PLAIN. `readRaw` gives the raw source of a path.
+ * `dispatchCalls` names the calls that register a typed-dispatch constant.
  */
 export function classifyDefiner(
   file: ParsedFile,
@@ -206,6 +248,7 @@ export function classifyDefiner(
   category: string,
   allowlist: DuplicateAllowlistEntry[],
   readRaw: (relPath: string) => string,
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
 ): { tag: DupDefinerTag; reason?: string } {
   const allowMatch = findAllowlistMatch(allowlist, name, file.path);
   if (allowMatch) return { tag: "ALLOWLISTED", reason: allowMatch.reason };
@@ -214,7 +257,7 @@ export function classifyDefiner(
     if (raw) {
       // Fix F27: string-aware comment removal keeps a `//` inside a string.
       const code = stripComments(raw);
-      if (isDispatchVariantBody(code, name)) return { tag: "DISPATCH_VARIANT" };
+      if (isDispatchVariantBody(code, name, dispatchCalls)) return { tag: "DISPATCH_VARIANT" };
       if (isAliasDelegationBody(code, name, collectImportedLocalNames(code))) {
         return { tag: "ALIAS_DELEGATION" };
       }
@@ -269,12 +312,14 @@ export function finalizeDuplicateEntry(
  * non-alias definers gives ALIAS_DELEGATION; else fewer than 2 non-allowlisted definers gives
  * ALLOWLISTED; else 2 or more dispatch definers give DISPATCH_VARIANT; else TRUE_DUPLICATE.
  * A definer is public when its file is in the wildcard surface or its name is named-public.
+ * `dispatchCalls` names the calls that register a typed-dispatch constant.
  */
 export function buildDuplicateEntries(
   byName: Map<string, Array<{ file: ParsedFile; category: string }>>,
   publicSurface: PublicSurface,
   allowlist: DuplicateAllowlistEntry[],
   readRaw: (relPath: string) => string,
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
 ): DuplicateSymbolEntry[] {
   const isFilePublic = (file: ParsedFile, name: string): boolean =>
     publicSurface.publicWildcardFiles.has(file.path) ||
@@ -288,7 +333,14 @@ export function buildDuplicateEntries(
     const definers: DuplicateDefiner[] = [];
     for (const { file, category } of byFile.values()) {
       categories.add(category);
-      const { tag, reason } = classifyDefiner(file, name, category, allowlist, readRaw);
+      const { tag, reason } = classifyDefiner(
+        file,
+        name,
+        category,
+        allowlist,
+        readRaw,
+        dispatchCalls,
+      );
       definers.push({
         file: file.path,
         package: file.packageName ?? "unknown",
@@ -337,13 +389,14 @@ export function tallyByTag(entries: DuplicateSymbolEntry[]): Record<DupEntryTag,
 /**
  * The runtime and type duplicate entries of `files`. Reads raw sources from `root`, and the
  * allowlist from `allowlistPath` (default: `duplicate-allowlist.json` in the default output
- * folder).
+ * folder). `dispatchCalls` names the calls that register a typed-dispatch constant.
  */
 export function detectDuplicateSymbols(
   files: ParsedFile[],
   publicSurface: PublicSurface,
   root: string,
   allowlistPath: string = join(outputDirOf(root), "duplicate-allowlist.json"),
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
 ): { runtime: DuplicateSymbolEntry[]; types: DuplicateSymbolEntry[] } {
   const allowlist = loadDuplicateAllowlist(allowlistPath);
   const cache = new Map<string, string>();
@@ -365,25 +418,30 @@ export function detectDuplicateSymbols(
       publicSurface,
       allowlist,
       readRaw,
+      dispatchCalls,
     ),
     types: buildDuplicateEntries(
       collectOwnDefiners(files, TYPE_DUP_CATEGORIES),
       publicSurface,
       allowlist,
       readRaw,
+      dispatchCalls,
     ),
   };
 }
 
-/** The full report of one run. */
-export function buildDuplicateReport(dup: {
-  runtime: DuplicateSymbolEntry[];
-  types: DuplicateSymbolEntry[];
-}): DuplicateSymbolsReport {
+/** The full report of one run. `dispatchCalls` words the DISPATCH_VARIANT part of the note. */
+export function buildDuplicateReport(
+  dup: {
+    runtime: DuplicateSymbolEntry[];
+    types: DuplicateSymbolEntry[];
+  },
+  dispatchCalls: readonly string[] = DEFAULT_DISPATCH_CALLS,
+): DuplicateSymbolsReport {
   const runtimeByTag = tallyByTag(dup.runtime);
   const typeByTag = tallyByTag(dup.types);
   return {
-    note: DUPLICATE_SYMBOLS_NOTE,
+    note: duplicateSymbolsNote(dispatchCalls),
     summary: {
       runtimeDuplicates: runtimeByTag.TRUE_DUPLICATE,
       typeDuplicates: typeByTag.TRUE_DUPLICATE,

@@ -123,9 +123,26 @@ messages.
 
 | Section | Keys |
 |---|---|
-| `depgraph` | `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `duplicateAllowlist`, `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`, `extensions`, `apiSurface` (`out`, `entry`, `stabilityTags`) |
+| `depgraph` | `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `dispatchCalls`, `duplicateAllowlist`, `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`, `extensions`, `apiSurface` (`out`, `entry`, `stabilityTags`) |
 | `query` | `out`, `nodeRuntimes` |
 | `clones` | `src`, `out`, `minNodes`, `shingleLength`, `nearThreshold`, `containmentThreshold`, `containmentMinShingles`, `rareShingleLimit`, `minSharedShingles` |
+
+### 5.1 The dispatch calls
+
+`depgraph.dispatchCalls` is a list of call names. The name `map` is the new name of the section, and
+`map.dispatchCalls` has the same meaning. The duplicate report of a TypeScript repository uses the list
+to find a typed-dispatch registration: `export const NAME = call(...)`, where `call` is a name of the list.
+
+- A call name is an identifier, or identifiers joined by dots, for example `defineTyped` or
+  `registry.define`. A call can have type arguments (`call<X>(...)`).
+- The default list is `["mathTyped"]`. With the default, the reports are the same as in version 2.3.0.
+- Two or more files that register the same name through a listed call get the tag `DISPATCH_VARIANT`.
+  The tag is not a merge target. `runtimeDuplicates` and `typeDuplicates` count `TRUE_DUPLICATE` only.
+- An empty list switches the tag off. Such registrations are then `TRUE_DUPLICATE`, and the report says
+  that the tag is never set.
+- The note in `duplicate-symbols.json` and the text in `duplicate-symbols.md` show the names of the listed
+  calls. The default list gives the text of version 2.3.0 byte for byte.
+- `repo-tools check` reads the key like `repo-tools map`, so the measured counts of the two commands agree.
 
 ## 6. Extensions
 
