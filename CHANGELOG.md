@@ -6,6 +6,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- Every report of `repo-tools map` carries the `name` field of `package.json` as the project name. A report uses
+  the folder name only when `package.json` has no name, or when the name is empty or not a string.
+  `dependency-graph.json` and `dependency-graph.yaml` wrote the folder name before, so two checkouts of one repository
+  gave two graphs. A committed `dependency-graph.json` changes once in a repository whose folder name differs from
+  its package name. `tests/unit/map-project-name.test.ts` pins the rule, and `docs/design.md` section 14.4 states it.
+
 ## [2.3.0] - 2026-10-22
 
 ### Added

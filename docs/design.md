@@ -385,6 +385,7 @@ through 2.x.
 | `src/map/resolvers.ts` | One resolver per language: an import to a file of the census, a built-in, or an external package. |
 | `src/map/graph.ts` | Builds the graph: edges, entry roots, barrel expansion, reachability and cycles. |
 | `src/map/schema.ts` | The graph types and the core JSON shape (schema version 2.0.0). |
+| `src/map/package-field.ts` | Reads a string field of the root `package.json`. The graph and the subsystem view take the project name from it. |
 | `src/map/cycles.ts` | The simple cycles and the strongly connected components, for the graph and the query. |
 | `src/map/artifacts.ts` | The four core files: `dependency-graph.json`, `file-inventory.json`, `duplicate-symbols.json` and `unused-analysis.json`. |
 | `src/map/adapter.ts` | Changes the graph into the parsed-file records of depgraph, so that the depgraph analyzers run on the graph. |
@@ -424,6 +425,10 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
 ### 14.4 Deliberate differences from the Python tool
 
 - A workspace monorepo gets the entry roots of each workspace package.
+- Every report carries the same project name: the `name` field of the root `package.json`, else the name of the
+  folder that holds the checkout. The Python tool writes the folder name in `dependency-graph.json` and
+  `dependency-graph.yaml`. That name changes with the place of the checkout, so two checkouts of one repository gave
+  two graphs.
 - A package with no `src/` tree gets the files that its `package.json` entries name as entry roots.
   The Python tool maps entries into `src/` only, so such a package showed no root and every file
   as an orphan.

@@ -6,7 +6,6 @@
  * `cyclicComponents` holds the files of every area, so its counts agree with the core statistics
  * of dependency-graph.json.
  */
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { categorizeFiles } from "../depgraph/analysis.ts";
 import { detectCyclicComponents } from "../depgraph/cycles.ts";
@@ -15,6 +14,7 @@ import type { CyclicComponents, ModuleMap, ParsedFile } from "../depgraph/types.
 import { detectWorkspaces } from "../depgraph/workspaces.ts";
 import { toParsedFiles } from "./adapter.ts";
 import { writeJson } from "./artifacts.ts";
+import { packageField } from "./package-field.ts";
 import { type RepoGraph, SCHEMA_VERSION } from "./schema.ts";
 
 /** The name and version of a project: package.json's, else the folder name and "unknown". */
@@ -25,18 +25,10 @@ export interface ProjectIdentity {
 
 /** Reads the project identity of `root`. A missing or malformed package.json is no error. */
 export function projectIdentity(root: string, graph: RepoGraph): ProjectIdentity {
-  let pkg: unknown = null;
-  try {
-    pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  } catch {
-    // No readable package.json: the folder name and "unknown" stand in.
-  }
-  const field = (key: string): string | null => {
-    if (typeof pkg !== "object" || pkg === null || Array.isArray(pkg)) return null;
-    const value = (pkg as Record<string, unknown>)[key];
-    return typeof value === "string" && value.length > 0 ? value : null;
+  return {
+    name: packageField(root, "name") ?? graph.name,
+    version: packageField(root, "version") ?? "unknown",
   };
-  return { name: field("name") ?? graph.name, version: field("version") ?? "unknown" };
 }
 
 /** The subsystem view of a graph: the `src` records, their modules and the cyclic components. */

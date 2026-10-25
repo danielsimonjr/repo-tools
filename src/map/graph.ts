@@ -35,6 +35,7 @@ import {
   skippedSourceFolders,
 } from "./discovery.ts";
 import { grammarFor, loadGrammar } from "./grammars.ts";
+import { packageField } from "./package-field.ts";
 import { type ParsedModule, parseCs, parsePy, parseRs, parseTs } from "./parsing.ts";
 import { getResolver } from "./resolvers.ts";
 import { type Dependency, type FileNode, newRepoGraph, type RepoGraph } from "./schema.ts";
@@ -576,7 +577,7 @@ export async function buildGraph(root: string): Promise<RepoGraph> {
     );
   }
   const graph = newRepoGraph({
-    name: basename(resolve(root)),
+    name: packageField(root, "name") ?? basename(resolve(root)),
     files,
     roots,
     warnings,
