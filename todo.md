@@ -323,8 +323,8 @@ data. Other findings are filed here.
 - [x] 2026-10-25 `repo-tools ste --since=<rev>`: report only the findings on lines added since `<rev>`, so a long document with
   old findings can gate a new edit. The sentence-length problems carry a start line (`name:~START:`), so the option
   needs the line span of a sentence.
-- [x] 2026-10-25 · five-axis pass (feature `ste --require` and `--since`): speed — four git calls per checked file
-  (two `rev-parse`, `cat-file`, `diff -U0`), only with `--since`, and no change for a run without the options; stability
+- [x] 2026-10-25 · five-axis pass (feature `ste --require` and `--since`): speed — two git calls per checked file
+  (`cat-file`, `diff -U0`) and two per folder and revision, only with `--since`, and no change for a run without the options; stability
   — 1911 tests pass, 1 skip, 1 fail (the privacy-scan test times out at 5 s on this machine, outside this change), and 5
   mutants of the new code each fail a test; reliability — a deleted document, a document outside the paths of
   the run, an unknown revision, a folder outside a git work tree and a revision that starts with a dash each give exit
@@ -332,5 +332,3 @@ data. Other findings are filed here.
   and a value with a leading dash never reaches git; maintainability — the git calls are in `src/ste/since.ts` only,
   and `checkMarkdown` keeps its output because it maps the structured findings. NOT done: a `--since` base other than
   the working tree.
-- [ ] `repo-tools ste --since=<rev>`: check the work tree and the revision once per folder, not once per file. Today a
-  run of N files makes about 4N git calls.

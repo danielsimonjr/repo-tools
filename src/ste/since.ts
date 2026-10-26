@@ -43,7 +43,8 @@ function checkRevision(dir: string, rev: string): void {
   const key = `${dir}\0${rev}`;
   if (checked.has(key)) return;
   const tree = git(dir, ["rev-parse", "--is-inside-work-tree"]);
-  if (tree.error) throw new SinceError(`--since needs git, and git cannot run: ${tree.error.message}`);
+  if (tree.error)
+    throw new SinceError(`--since needs git, and git cannot run: ${tree.error.message}`);
   if (tree.status !== 0) throw new SinceError(`--since needs a git work tree: ${dir}`);
   const commit = git(dir, ["rev-parse", "--verify", "--quiet", `${rev}^{commit}`]);
   if (commit.status !== 0) throw new SinceError(`cannot resolve revision '${rev}' in ${dir}`);
