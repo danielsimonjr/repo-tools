@@ -870,6 +870,9 @@ other. The command reads the source and writes nothing into the repository. The 
 candidates for a refactoring audit. A person must read both bodies of a pair before any change. A
 high score is a reason to look. A high score is not proof of a copy.
 
+The command serves the owner of one repository during a refactoring. The command makes no claim that
+a count or a score compares between repositories, settings or versions of the tool.
+
 The command reads TypeScript and JavaScript. Tree-sitter parses each file with the loader of
 `repo-tools map` (section 14.1).
 
@@ -1040,3 +1043,6 @@ R3 and R4 (section 4), so the same input gives the same bytes.
   scores above it can still do different jobs.
 - The command compares the shape of the code. A pair of functions with the same job and a different
   shape is not a candidate.
+- A count of groups or pairs depends on the repository, the settings and the version. Two parsers
+  give different pair counts on the same input (`docs/parity-clones.md`). Do not rank repositories
+  by a count.

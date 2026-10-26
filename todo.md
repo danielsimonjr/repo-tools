@@ -373,3 +373,7 @@ data. Other findings are filed here.
   record holds no path outside the repository. Maintainability: one section per repository, and the same method as the
   first. NOT done: a third repository with a JavaScript majority. A Python repository waits for the open row
   that adds Python units to `clones`.
+- [x] 2026-10-25 · scope of `clones`: the command is a refactoring aid for the owner of one repository. State it in the
+  README, in `docs/design.md` section 17 and in `docs/parity-clones.md`. A score ranks the pairs of one run. A count
+  or a score does not compare between repositories, settings or versions. The parity record stays a regression
+  record for the choice of parser. No third parity repository.

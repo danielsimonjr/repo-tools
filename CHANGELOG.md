@@ -47,6 +47,11 @@ All notable changes to this project are recorded in this file. The format follow
   counts a file when a test file imports it. A file that only an end-to-end spec runs was therefore on the first list
   under a heading that said it had no coverage. The text for an empty first list changed in the same way.
   `docs/design.md` section 14.2 states the basis.
+- The README, `docs/design.md` (sections 17 and 17.8) and `docs/parity-clones.md` state the scope of `repo-tools clones`.
+  The command serves the owner of one repository during a refactoring. A score ranks the pairs of one run. A count or
+  a score does not compare between repositories, settings or tool versions. The two parsers of the parity record
+  already give different pair counts on the same input. The parity record is a regression record for the choice
+  of parser. No code changed.
 
 ### Fixed
 
