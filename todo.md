@@ -332,3 +332,15 @@ data. Other findings are filed here.
   and a value with a leading dash never reaches git; maintainability — the git calls are in `src/ste/since.ts` only,
   and `checkMarkdown` keeps its output because it maps the structured findings. NOT done: a `--since` base other than
   the working tree.
+- [x] 2026-10-25 · five-axis pass (privacy check speed). Speed: a bounded memo keeps the hashes of each word. The scan of
+  423 files and 249 commit messages took 4.5 s and takes about 1.5 s. Before the change, SHA-256 took 2.1 s and
+  `tokenCandidates` took 1.5 s. Stability: the test "this repository scans clean" no longer sits at the 5 s default of
+  `bun test`. Reliability: a differential run of the old and the new scanner gave 0 mismatches. The run covered 672 files
+  and commit messages under a denylist of 304 common words. Four mutants of the memo each fail a test. Security: the memo
+  holds hashes of word tokens in memory only, at most 20,000 words. Maintainability: one exported function,
+  `memoByToken`, with 6 tests. NOT done: the git calls of the scan (`spawnSync` in the profile) still take about 1.2 s.
+- [ ] 2026-10-25 tests that sit near the 5 s default of `bun test` time out when the machine is busy. Two cases were
+  measured on a Windows machine. The privacy scan test took 5.2 s. The memo fixed it, and it takes about 2 s now. The test
+  "D4: a tracked folder link in a git repo is listed" is in `tests/unit/map-artifacts.test.ts`. It took 7.5 s in a full
+  run with other work on the machine. It takes 0.7 s alone. Decide whether the git-heavy tests get a per-test timeout,
+  and give the reason for the number.
