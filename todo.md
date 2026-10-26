@@ -377,3 +377,7 @@ data. Other findings are filed here.
   README, in `docs/design.md` section 17 and in `docs/parity-clones.md`. A score ranks the pairs of one run. A count
   or a score does not compare between repositories, settings or versions. The parity record stays a regression
   record for the choice of parser. No third parity repository.
+- [ ] 2026-10-25 · limit of `clones`: a decorator before a top-level function (AssemblyScript `@inline`) is a parse error
+  in tree-sitter-typescript, and the summary lists the file. State in `docs/design.md` section 17.8 that the
+  functions of the file still give units. Measured on the AssemblyScript sources of MathTS: 26 files, 1 file with the
+  error, and all 16 functions of that file give units at `--min-nodes=1`.
