@@ -297,9 +297,9 @@ data. Other findings are filed here.
   items below.
 - [ ] `clones` reads TypeScript and JavaScript only. The Python grammar is already bundled, so add Python units.
 - [ ] `docs/parity-clones.md` covers one repository. Add a second repository with other naming habits.
-- [ ] `clones` prints the number of files with a parse error and no file name. Print the paths, up to a limit, so
-  a reader can act on the count. Measured on the 2.3.0 build on 2026-10-25: 3 of 249 files in one repository and
-  5 of 1,188 files in another.
+- [x] 2026-10-25 `clones` prints the number of files with a parse error and no file name. Print the paths, up to a limit, so
+  a reader can act on the count. The 2.3.0 build on 2026-10-25 gave 3 of 249 files in one repository and 5 of 1,188
+  in another.
 - [ ] `tree-sitter-typescript` 0.23.2 reports an error for a property named `abstract` in an interface
   (`abstract?: boolean;`) and for `export type * from './x.js';`. Both are valid TypeScript. In a scratch test
   `clones` still finds the functions that follow the error, and `map` reads the exports. Check the units inside
@@ -344,3 +344,9 @@ data. Other findings are filed here.
   "D4: a tracked folder link in a git repo is listed" is in `tests/unit/map-artifacts.test.ts`. It took 7.5 s in a full
   run with other work on the machine. It takes 0.7 s alone. Decide whether the git-heavy tests get a per-test timeout,
   and give the reason for the number.
+- [x] 2026-10-25 · five-axis pass (clones parse-error paths). Speed: one sort of the paths of the failed files, and no
+  extra file read. Stability: the clones tests pass (66 in the two files), and five mutants of the list each fail a test.
+  Reliability: a file that gives no tree is in the list too. A run without parse errors gives the output of before.
+  Security: the paths are relative to the root, so the summary holds no absolute path. Maintainability: the limit is a
+  setting with one default in `src/clones/settings.ts`, and `clones.json` leaves the display setting out. NOT done: the
+  units inside an error span, and the `typeOnly` edge of `export type *` (open rows above).

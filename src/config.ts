@@ -266,6 +266,8 @@ export interface ClonesSettings {
   rareShingleLimit?: number;
   /** The rare shingles that a candidate pair must share. */
   minSharedShingles?: number;
+  /** The most paths of files with a parse error that the summary lists. */
+  parseErrorList?: number;
 }
 
 /** The checked sections of one config file. An absent section is `{}`. */
@@ -292,6 +294,7 @@ const CLONES_KEYS: Readonly<Record<string, KeyKind>> = {
   containmentMinShingles: "count",
   rareShingleLimit: "count",
   minSharedShingles: "count",
+  parseErrorList: "count",
 };
 
 /**
