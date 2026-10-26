@@ -5,7 +5,7 @@
     "language": "typescript",
     "totalFiles": 288,
     "totalModules": 4,
-    "totalExports": 713
+    "totalExports": 716
   },
   "modules": {
     "tools": {
@@ -446,6 +446,7 @@
           {
             "file": "src/io.ts",
             "imports": [
+              "realPath",
               "writeLf"
             ],
             "typeOnly": false
@@ -1433,6 +1434,7 @@
           {
             "file": "src/io.ts",
             "imports": [
+              "realPath",
               "writeReport"
             ],
             "typeOnly": false
@@ -1640,6 +1642,7 @@
           "EXPORT_LIST_WRAP_WIDTH",
           "renderExportList",
           "SummaryRow",
+          "SummaryLabels",
           "summaryRowsOf",
           "generateMarkdown",
           "generatePackageDependencySection",
@@ -2275,7 +2278,8 @@
           "writeLf",
           "withOneLf",
           "writeReport",
-          "toJson"
+          "toJson",
+          "realPath"
         ]
       },
       "src/map/adapter.ts": {
@@ -2406,8 +2410,8 @@
           {
             "file": "src/map/discovery.ts",
             "imports": [
-              "isReparsePoint",
-              "readSource"
+              "readSource",
+              "rglobParts"
             ],
             "typeOnly": false
           },
@@ -2747,6 +2751,7 @@
           "UnsupportedRepoLanguage",
           "suffixOf",
           "isReparsePoint",
+          "rglobParts",
           "countLanguages",
           "gitTracked",
           "gitTrackedLinks",
@@ -2788,13 +2793,6 @@
           "node:path"
         ],
         "internalDependencies": [
-          {
-            "file": "src/depgraph/dirlist.ts",
-            "imports": [
-              "readdirHook"
-            ],
-            "typeOnly": false
-          },
           {
             "file": "src/depgraph/resolver.ts",
             "imports": [
@@ -2862,9 +2860,9 @@
               "detectLanguage",
               "discover",
               "dispositionForArea",
-              "isReparsePoint",
               "Language",
               "readSource",
+              "rglobParts",
               "skippedSourceFolders"
             ],
             "typeOnly": false
@@ -3206,7 +3204,8 @@
             "file": "src/depgraph/reporters/markdown.ts",
             "imports": [
               "generateMarkdown",
-              "SummaryRow"
+              "SummaryLabels",
+              "summaryRowsOf"
             ],
             "typeOnly": false
           },
@@ -8740,8 +8739,8 @@
     "totalTypeScriptFiles": 288,
     "totalSourceFiles": 288,
     "totalModules": 4,
-    "totalLinesOfCode": 44464,
-    "totalExports": 713,
+    "totalLinesOfCode": 44423,
+    "totalExports": 716,
     "entryRoots": 1,
     "reachableFiles": 83,
     "dormantFiles": 2,
@@ -8751,15 +8750,15 @@
     "typeOnlyCircularDeps": 4,
     "totalTypeOnlyImports": 62,
     "noImporterFileCount": 2,
-    "unusedExportsCount": 119,
+    "unusedExportsCount": 120,
     "circularDepsTruncated": false,
     "runtimeCyclicComponents": 1,
     "typeOnlyCyclicComponents": 4,
     "runtimeFilesInCycles": 2,
     "typeOnlyFilesInCycles": 8,
     "totalClasses": 13,
-    "totalInterfaces": 139,
-    "totalFunctions": 408,
+    "totalInterfaces": 140,
+    "totalFunctions": 410,
     "totalTypeGuards": 19,
     "totalEnums": 4,
     "totalConstants": 99,

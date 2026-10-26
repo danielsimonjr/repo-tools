@@ -187,14 +187,29 @@ function fileSection(lines: string[], path: string, file: ParsedFile): void {
 /** One row of the Summary Statistics table: a label and a count. */
 export type SummaryRow = readonly [string, number];
 
+/** The two labels of the Summary Statistics table that differ between the depgraph 1.x and the 2.0.0 Markdown. */
+export interface SummaryLabels {
+  files: string;
+  modules: string;
+}
+
+/** The labels of depgraph 1.x. */
+const DEPGRAPH_LABELS: SummaryLabels = {
+  files: "Total TypeScript Files",
+  modules: "Total Modules",
+};
+
 /**
- * The Summary Statistics rows of depgraph 1.x. A per-kind count that `stats` does not hold gives
- * no row.
+ * The Summary Statistics rows. A per-kind count that `stats` does not hold gives no row. The
+ * default labels are those of depgraph 1.x.
  */
-export function summaryRowsOf(stats: Statistics): SummaryRow[] {
+export function summaryRowsOf(
+  stats: Statistics,
+  labels: SummaryLabels = DEPGRAPH_LABELS,
+): SummaryRow[] {
   const rows: [string, number | undefined][] = [
-    ["Total TypeScript Files", stats.totalTypeScriptFiles],
-    ["Total Modules", stats.totalModules],
+    [labels.files, stats.totalTypeScriptFiles],
+    [labels.modules, stats.totalModules],
     ["Total Lines of Code", stats.totalLinesOfCode],
     ["Total Exports", stats.totalExports],
     ["Total Re-exports", stats.totalReExports],

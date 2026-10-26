@@ -12,7 +12,11 @@ import { MAP_REGENERATE_COMMAND } from "../config.ts";
 import { buildDependencyMatrix } from "../depgraph/analysis.ts";
 import { type BannerOptions, withBanner } from "../depgraph/reporters/banner.ts";
 import { generateCompactSummary } from "../depgraph/reporters/json.ts";
-import { generateMarkdown, type SummaryRow } from "../depgraph/reporters/markdown.ts";
+import {
+  generateMarkdown,
+  type SummaryLabels,
+  summaryRowsOf,
+} from "../depgraph/reporters/markdown.ts";
 import { generateYaml } from "../depgraph/reporters/yaml.ts";
 import type { Statistics } from "../depgraph/types.ts";
 import { writeReport } from "../io.ts";
@@ -54,27 +58,8 @@ function statisticsFromCore(core: CoreStatistics, subsystems: number): Statistic
   };
 }
 
-/** The Summary Statistics rows of the 2.0.0 Markdown: language-neutral names. */
-function summaryRows(stats: Statistics): SummaryRow[] {
-  const rows: [string, number | undefined][] = [
-    ["Total Source Files", stats.totalTypeScriptFiles],
-    ["Subsystems", stats.totalModules],
-    ["Total Lines of Code", stats.totalLinesOfCode],
-    ["Total Exports", stats.totalExports],
-    ["Total Re-exports", stats.totalReExports],
-    ["Total Classes", stats.totalClasses],
-    ["Total Interfaces", stats.totalInterfaces],
-    ["Total Functions", stats.totalFunctions],
-    ["Total Type Guards", stats.totalTypeGuards],
-    ["Total Enums", stats.totalEnums],
-    ["Type-only Imports", stats.totalTypeOnlyImports],
-    ["Runtime Cyclic Components", stats.runtimeCyclicComponents],
-    ["Type-only Cyclic Components", stats.typeOnlyCyclicComponents],
-    ["Files in Runtime Cycles", stats.runtimeFilesInCycles],
-    ["Files in Type-only Cycles", stats.typeOnlyFilesInCycles],
-  ];
-  return rows.filter((r): r is [string, number] => r[1] !== undefined);
-}
+/** The labels of the 2.0.0 Markdown: language-neutral names. */
+const SUMMARY_LABELS: SummaryLabels = { files: "Total Source Files", modules: "Subsystems" };
 
 /** The options of `emitSubsystemReports`. */
 export interface SubsystemReportOptions {
@@ -106,7 +91,7 @@ export function emitSubsystemReports(
     view.cycles,
     buildDependencyMatrix(view.records),
     identity,
-    summaryRows(stats),
+    summaryRowsOf(stats, SUMMARY_LABELS),
   );
   const written: [string, string][] = [
     ["DEPENDENCY_GRAPH.md", withBanner(markdown, banner)],

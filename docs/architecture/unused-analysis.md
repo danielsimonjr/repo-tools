@@ -10,9 +10,9 @@
 - **Dormant files**: 2
   - **Orphaned (reachable from nothing)**: 2
   - **Test-only (only a test reaches them)**: 0
-- **Potentially unused exports**: 119
+- **Potentially unused exports**: 120
   - **Unreferenced anywhere**: 3
-  - **Referenced in their own module**: 116
+  - **Referenced in their own module**: 117
   - **Not classified**: 0
 
 ## Caveats
@@ -82,7 +82,7 @@ No other file imports these names, but their own module uses them.
 - `src/depgraph/duplicates.ts`: `BaselineNames`, `DUPLICATE_BASELINE_NOTE`, `DupCategory`, `DupDefinerTag`, `DupExportKey`, `DuplicateAllowlistEntry`, `DuplicateBaseline`, `DuplicateDefiner`, `DuplicateNames`, `NewDuplicate`, `duplicateSymbolsNote`
 - `src/depgraph/extensions.ts`: `DepgraphExtension`, `ExtensionMask`, `PreflightContext`, `ReportContext`, `readOnlyCopy`
 - `src/depgraph/reporters/coverage.ts`: `CoverageBasisOptions`, `NAMESPACE_IMPORT_BASIS`
-- `src/depgraph/reporters/markdown.ts`: `summaryRowsOf`
+- `src/depgraph/reporters/markdown.ts`: `SummaryRow`
 - `src/depgraph/reporters/surfaces.ts`: `SurfaceFilter`
 - `src/depgraph/resolver.ts`: `KnownFiles`
 - `src/depgraph/roots.ts`: `PackageRootFields`
@@ -97,7 +97,7 @@ No other file imports these names, but their own module uses them.
 - `src/map/artifacts.ts`: `DependencyGraphOptions`, `DuplicateSymbolsOptions`, `pyJsonDumps`
 - `src/map/coverage.ts`: `TestCoverageOptions`, `isTestFile`
 - `src/map/cycles.ts`: `sccContaining`
-- `src/map/discovery.ts`: `CSHARP_SKIP_DIRS`, `CSHARP_SUFFIXES`, `DiscoveredFile`, `LANGUAGE_SCANS`, `PYTHON_SUFFIXES`, `RUST_SUFFIXES`, `ReachFlags`, `SKIP_DIRS`, `SOURCE_SUFFIXES`, `candidateFiles`, `gitTracked`, `gitTrackedLinks`
+- `src/map/discovery.ts`: `CSHARP_SKIP_DIRS`, `CSHARP_SUFFIXES`, `DiscoveredFile`, `LANGUAGE_SCANS`, `PYTHON_SUFFIXES`, `RUST_SUFFIXES`, `ReachFlags`, `SKIP_DIRS`, `SOURCE_SUFFIXES`, `candidateFiles`, `gitTracked`, `gitTrackedLinks`, `isReparsePoint`
 - `src/map/grammars.ts`: `GrammarName`
 - `src/map/graph.ts`: `mapDistToSrc`
 - `src/map/layers.ts`: `ProjectIdentity`

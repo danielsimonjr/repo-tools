@@ -33,6 +33,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The five duplicate functions that `repo-tools clones` found in this repository are merged. `realPath` is in
+  `src/io.ts` (it was in `src/chunk/index.ts` and `src/depgraph/extensions.ts`). `rglobParts` is in
+  `src/map/discovery.ts`, and `csprojParts` calls it. `summaryRowsOf` takes the two labels that differ, so the
+  2.0.0 Markdown no longer has a second copy of the row list. The two type-only checks of `src/map/parsing.ts` share
+  one helper. The output of every command is unchanged. The source has 41 lines fewer. `clones` now finds 0
+  exact groups (it found 2) and 1 near pair (it found 8).
 - The repository now has its own `docs/architecture/` folder. `repo-tools map . --out=docs/architecture` writes it:
   the dependency graph, the file inventory, the duplicate and unused reports, and the test coverage. `repo-tools check`
   passes against it. Biome skips this folder, because the generator owns the format of its files.
