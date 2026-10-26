@@ -1046,3 +1046,7 @@ R3 and R4 (section 4), so the same input gives the same bytes.
 - A count of groups or pairs depends on the repository, the settings and the version. Two parsers
   give different pair counts on the same input (`docs/parity-clones.md`). Do not rank repositories
   by a count.
+- A decorator before a top-level function, such as the AssemblyScript `@inline`, is a parse error in
+  tree-sitter-typescript. The summary lists the file as a file with a parse error. The functions of the
+  file still give units. On the AssemblyScript sources of MathTS, one of 26 files has the error, and
+  all 16 functions of that file give units with `--min-nodes=1`.
