@@ -52,6 +52,10 @@ All notable changes to this project are recorded in this file. The format follow
   a score does not compare between repositories, settings or tool versions. The two parsers of the parity record
   already give different pair counts on the same input. The parity record is a regression record for the choice
   of parser. No code changed.
+- `docs/design.md` section 17.8 states that a decorator before a top-level function (the AssemblyScript `@inline`) is a
+  parse error in tree-sitter-typescript. The summary lists the file, and the functions of the file still give units.
+  The AssemblyScript sources of MathTS have one such file in 26. All 16 functions of that file give units with
+  `--min-nodes=1`. No code changed.
 
 ### Fixed
 
