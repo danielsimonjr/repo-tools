@@ -1,0 +1,18 @@
+{
+  "surfaces": {
+    "check": [],
+    "chunk": [],
+    "clones": [],
+    "compress": [],
+    "depgraph": [],
+    "docs": [],
+    "map": [],
+    "query": [],
+    "root": [
+      "Io",
+      "SUBCOMMANDS",
+      "main"
+    ],
+    "ste": []
+  }
+}

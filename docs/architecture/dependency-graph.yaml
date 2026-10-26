@@ -1,0 +1,5880 @@
+metadata:
+  name: repo-tools
+  schemaVersion: 2.0.0
+  language: typescript
+  totalFiles: 288
+  totalModules: 4
+  totalExports: 713
+modules:
+  tools:
+    scripts/build.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/lockcheck.ts
+          imports:
+            - assertInstalledTree
+          typeOnly: false
+      exports:
+        - TARGETS
+        - Target
+        - BuildArgs
+        - parseBuildArgs
+        - executableName
+        - hostTarget
+    scripts/design-refs.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - DesignReference
+        - SourceFile
+        - headingsOf
+        - findReferences
+        - danglingReferences
+        - scanRepository
+        - main
+    scripts/fix-ledger-audit.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - bannerFor
+          typeOnly: false
+        - file: scripts/fix-ledger-mutations.ts
+          imports:
+            - MUTATIONS
+          typeOnly: false
+      exports:
+        - Edit
+        - Mutation
+        - Verdict
+        - TestSummary
+        - StageResult
+        - Decision
+        - AuditRow
+        - AuditOptions
+        - AuditError
+        - compareFix
+        - ownTests
+        - applyEdit
+        - parseTestOutput
+        - decide
+        - parseLedger
+        - renderReport
+        - copyRepository
+        - assertParses
+        - auditMutations
+        - CheckResult
+        - checkMutations
+        - main
+    scripts/fix-ledger-mutations.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: scripts/fix-ledger-audit.ts
+          imports:
+            - Edit
+            - Mutation
+          typeOnly: true
+      exports:
+        - MUTATIONS
+    scripts/lockcheck.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - lockPackageDir
+        - checkInstalledTree
+        - assertInstalledTree
+    scripts/privacy-check.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:crypto
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - Category
+        - Denylist
+        - Rule
+        - Finding
+        - DENYLIST_FLOOR
+        - tokenCandidates
+        - hashToken
+        - parseDenylist
+        - assertDenylistFloor
+        - memoByToken
+        - scanText
+        - scanCommitMessage
+        - ACCEPTED_FILE
+        - Accepted
+        - AcceptedFinding
+        - findingKind
+        - parseAccepted
+        - applyAccepted
+        - scanTrackedFile
+        - formatFinding
+        - selfTest
+        - decodeForScan
+        - CheckResult
+        - collect
+        - runCheck
+    scripts/privacy-hash.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+      internalDependencies:
+        - file: scripts/privacy-check.ts
+          imports:
+            - hashToken
+          typeOnly: false
+      exports:
+        - denylistLines
+    scripts/smoke.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: scripts/update-depgraph-goldens.ts
+          imports:
+            - API_SURFACE_FILE
+            - GOLDEN_FLAGS
+            - maskGolden
+          typeOnly: false
+      exports:
+        - STEP_COUNT
+        - smoke
+    scripts/update-depgraph-goldens.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - GOLDEN_FLAGS
+        - API_SURFACE_FILE
+        - maskGolden
+    scripts/update-map-goldens.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: scripts/update-depgraph-goldens.ts
+          imports:
+            - API_SURFACE_FILE
+            - GOLDEN_FLAGS
+            - maskGolden
+          typeOnly: false
+      exports:
+        - MAP_GOLDEN_SETS
+  src:
+    src/assets.d.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    src/bin.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+      exports: []
+    src/check/claims.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - VERIFICATION_MARKER
+          typeOnly: false
+      exports:
+        - NO_VERIFICATION_MARKER
+        - Claim
+        - Scan
+        - scanVerification
+        - parseClaims
+        - hasVerificationSection
+    src/check/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - ABSOLUTE_PATH_TEXT
+            - isAbsolutePath
+            - loadConfigFile
+            - mergeMapConfig
+          typeOnly: false
+        - file: src/depgraph/args.ts
+          imports:
+            - wantsHelp
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - maskRoot
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/map/command.ts
+          imports:
+            - isDirectory
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/check/claims.ts
+          imports:
+            - NO_VERIFICATION_MARKER
+          typeOnly: false
+        - file: src/check/metrics.ts
+          imports:
+            - collectMetrics
+          typeOnly: false
+        - file: src/check/verify.ts
+          imports:
+            - DocFile
+            - Verdict
+            - verifyDocs
+          typeOnly: false
+      exports:
+        - CHECK_HELP
+        - run
+    src/check/metrics.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+            - emitDuplicateSymbols
+            - emitFileInventory
+            - emitUnusedAnalysis
+          typeOnly: false
+        - file: src/map/command.ts
+          imports:
+            - graphOf
+          typeOnly: false
+        - file: src/check/verify.ts
+          imports:
+            - Measured
+            - MetricValue
+          typeOnly: true
+      exports:
+        - MetricsOptions
+        - collectMetrics
+    src/check/verify.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/check/claims.ts
+          imports:
+            - NO_VERIFICATION_MARKER
+            - parseClaims
+            - scanVerification
+          typeOnly: false
+      exports:
+        - MetricValue
+        - Measured
+        - DocFile
+        - Verdict
+        - verifyDocs
+    src/chunk/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/io.ts
+          imports:
+            - writeLf
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/chunk/manifest.ts
+          imports:
+            - ChunkInfo
+            - contentHash
+            - FileType
+            - hashFor
+            - isAbsoluteAnywhere
+            - MANIFEST_NAME
+            - MANIFEST_VERSION
+            - Manifest
+            - readManifest
+            - relativeSource
+            - resolveSource
+            - writeManifest
+          typeOnly: false
+        - file: src/chunk/splitters.ts
+          imports:
+            - chunkFilename
+            - detectFileType
+            - detectLineEnding
+            - JsonSplit
+            - lineBreakRuns
+            - mergeJson
+            - mergeJsonLayout
+            - normalizeLineEndings
+            - restoreLineBreaks
+            - splitJson
+            - splitMarkdown
+            - splitTypeScript
+          typeOnly: false
+      exports:
+        - CHUNK_HELP
+        - run
+    src/chunk/manifest.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:crypto
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/io.ts
+          imports:
+            - toJson
+            - writeLf
+          typeOnly: false
+        - file: src/chunk/splitters.ts
+          imports:
+            - JsonLayout
+            - LINE_BREAK_RUNS
+          typeOnly: false
+      exports:
+        - FileType
+        - ChunkInfo
+        - Manifest
+        - MANIFEST_VERSION
+        - MANIFEST_NAME
+        - contentHash
+        - legacyHash
+        - hashFor
+        - relativeSource
+        - resolveSource
+        - readManifest
+        - isPlainFileName
+        - isAbsoluteAnywhere
+        - validateManifest
+        - writeManifest
+    src/chunk/splitters.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/chunk/manifest.ts
+          imports:
+            - FileType
+          typeOnly: true
+      exports:
+        - Section
+        - normalizeLineEndings
+        - detectLineEnding
+        - LINE_BREAK_RUNS
+        - lineBreakRuns
+        - restoreLineBreaks
+        - detectFileType
+        - chunkExtension
+        - chunkFilename
+        - splitMarkdown
+        - JsonLayout
+        - JsonSplit
+        - splitJson
+        - mergeJsonLayout
+        - mergeJson
+        - splitTypeScript
+    src/cli.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/check/index.ts
+          imports:
+            - CHECK_HELP
+            - run
+          typeOnly: false
+        - file: src/chunk/index.ts
+          imports:
+            - CHUNK_HELP
+            - run
+          typeOnly: false
+        - file: src/clones/index.ts
+          imports:
+            - CLONES_HELP
+            - run
+          typeOnly: false
+        - file: src/compress/index.ts
+          imports:
+            - HELP
+            - run
+          typeOnly: false
+        - file: src/docs/index.ts
+          imports:
+            - DOCS_HELP
+            - run
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/map/command.ts
+          imports:
+            - DEPGRAPH_DEPRECATION
+            - MAP_HELP
+            - runMap
+          typeOnly: false
+        - file: src/query/index.ts
+          imports:
+            - QUERY_HELP
+            - run
+          typeOnly: false
+        - file: src/ste/index.ts
+          imports:
+            - run
+            - STE_HELP
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+      exports:
+        - Io
+        - SubcommandName
+        - SUBCOMMANDS
+        - main
+    src/clones/detect.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/clones/units.ts
+          imports:
+            - Unit
+          typeOnly: true
+      exports:
+        - DetectParams
+        - NearPair
+        - Detection
+        - detect
+    src/clones/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - ClonesSettings
+            - checkClonesFlag
+            - loadConfigSections
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - maskRoot
+          typeOnly: false
+        - file: src/io.ts
+          imports:
+            - writeLf
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/map/command.ts
+          imports:
+            - isDirectory
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - discover
+            - readSource
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - grammarFor
+            - loadGrammar
+            - parserFor
+          typeOnly: false
+        - file: src/clones/detect.ts
+          imports:
+            - detect
+          typeOnly: false
+        - file: src/clones/report.ts
+          imports:
+            - clonesJson
+            - inventoryJsonl
+            - summaryText
+          typeOnly: false
+        - file: src/clones/settings.ts
+          imports:
+            - ClonesConfig
+            - mergeClonesConfig
+          typeOnly: false
+        - file: src/clones/units.ts
+          imports:
+            - Unit
+            - unitsOf
+          typeOnly: false
+      exports:
+        - CLONES_HELP
+        - run
+    src/clones/normalise.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Normal
+        - normalise
+    src/clones/report.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/clones/detect.ts
+          imports:
+            - Detection
+          typeOnly: true
+        - file: src/clones/settings.ts
+          imports:
+            - ClonesConfig
+          typeOnly: true
+        - file: src/clones/units.ts
+          imports:
+            - Unit
+          typeOnly: true
+      exports:
+        - RunStats
+        - inventoryJsonl
+        - clonesJson
+        - summaryText
+    src/clones/settings.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - ClonesSettings
+          typeOnly: true
+      exports:
+        - ClonesConfig
+        - CLONES_DEFAULTS
+        - mergeClonesConfig
+    src/clones/units.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies:
+        - node:crypto
+      internalDependencies:
+        - file: src/clones/normalise.ts
+          imports:
+            - normalise
+          typeOnly: false
+      exports:
+        - UnitKind
+        - Unit
+        - DOC_LIMIT
+        - unitsOf
+    src/compress/formats.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/compress/legend.ts
+          imports:
+            - applySubstringCompression
+            - findRepeatedSubstrings
+            - generateAbbreviation
+            - isRawNumber
+            - parseLossless
+            - renameKeys
+          typeOnly: false
+      exports:
+        - FORMATS
+        - LEVELS
+        - FileFormat
+        - CompressionLevel
+        - CompressionStats
+        - CompressionResult
+        - Compressor
+        - estimateTokens
+        - calculateStats
+        - detectFormat
+        - getCompressor
+    src/compress/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/compress/formats.ts
+          imports:
+            - CompressionLevel
+            - CompressionStats
+            - calculateStats
+            - detectFormat
+            - FileFormat
+            - FORMATS
+            - getCompressor
+            - LEVELS
+          typeOnly: false
+        - file: src/compress/legend.ts
+          imports:
+            - decompress
+            - JSON_ONLY_MESSAGE
+          typeOnly: false
+      exports:
+        - HELP
+        - CompressDeps
+        - findFiles
+        - run
+    src/compress/legend.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/compress/formats.ts
+          imports:
+            - FileFormat
+          typeOnly: true
+      exports:
+        - SubstringCandidate
+        - generateAbbreviation
+        - findRepeatedSubstrings
+        - applySubstringCompression
+        - isRawNumber
+        - parseLossless
+        - assertNumbersKept
+        - renameKeys
+        - JSON_ONLY_MESSAGE
+        - decompress
+    src/config.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/api-surface.ts
+          imports:
+            - DEFAULT_STABILITY_TAGS
+          typeOnly: false
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - DEFAULT_DISPATCH_CALLS
+          typeOnly: false
+        - file: src/depgraph/exclude.ts
+          imports:
+            - DEFAULT_EXCLUDE
+            - TEST_DIR_NAMES
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - OUTPUT_SUBDIR
+          typeOnly: false
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - DEFAULT_REGENERATE_COMMAND
+            - VERIFICATION_MARKER
+          typeOnly: false
+      exports:
+        - CONFIG_FILE
+        - ApiSurfaceConfig
+        - DepgraphConfig
+        - DepgraphSettings
+        - DEFAULT_API_ENTRY
+        - ABSOLUTE_PATH_TEXT
+        - isAbsolutePath
+        - resolveUnderRoot
+        - QuerySettings
+        - QueryConfig
+        - ClonesSettings
+        - ConfigSections
+        - checkClonesFlag
+        - parseConfigSections
+        - parseConfig
+        - loadConfigSections
+        - loadConfigFile
+        - mergeQueryConfig
+        - MAP_REGENERATE_COMMAND
+        - mergeMapConfig
+        - mergeDepgraphConfig
+    src/depgraph/analysis.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - stripComments
+          typeOnly: false
+        - file: src/depgraph/cycles.ts
+          imports:
+            - filesInCycles
+          typeOnly: false
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - escapeRegExpLiteral
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - isSrcIndex
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - targetOf
+            - workspaceTarget
+          typeOnly: false
+        - file: src/depgraph/roots.ts
+          imports:
+            - configReferencedEntries
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - CyclicComponents
+            - DependencyMatrix
+            - ModuleMap
+            - ParsedFile
+            - PublicSurface
+            - Statistics
+            - UnusedAnalysis
+            - UnusedExport
+            - WorkspacePackage
+          typeOnly: true
+      exports:
+        - categorizeFiles
+        - buildDependencyMatrix
+        - findReachableFiles
+        - computePublicSurface
+        - detectUnused
+        - generateStatistics
+        - DormantSplit
+        - splitDormant
+    src/depgraph/api-surface.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - DEFAULT_STABILITY_TAGS
+        - ExportKind
+        - ExportDetail
+        - ReExport
+        - SurfaceOptions
+        - SurfaceSymbol
+        - Surface
+        - maskNonCode
+        - extractExportDetails
+        - extractReExports
+        - resolveSurface
+        - createTsResolver
+        - buildApiSurfaceReport
+    src/depgraph/args.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - ABSOLUTE_PATH_TEXT
+            - DepgraphSettings
+            - isAbsolutePath
+          typeOnly: false
+      exports:
+        - DepgraphOptions
+        - MapCommand
+        - SCAN_SCOPE_FLAGS
+        - scanScopeText
+        - parseDepgraphArgs
+        - wantsHelp
+    src/depgraph/coverage.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/paths.ts
+          imports:
+            - outputDirOf
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - targetOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+          typeOnly: true
+      exports:
+        - CoveragePolicyCategory
+        - CoveragePolicy
+        - ClassifiedUntested
+        - CategoryBreakdown
+        - TestCoverageAnalysis
+        - ReExportMap
+        - loadCoveragePolicy
+        - classifyAgainstPolicy
+        - buildCategoryBreakdown
+        - buildReExportMap
+        - traceReExports
+        - analyzeTestCoverage
+    src/depgraph/cycles.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/cycles.ts
+          imports:
+            - stronglyConnectedComponents
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - targetOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - CyclicComponent
+            - CyclicComponents
+            - ParsedFile
+          typeOnly: true
+      exports:
+        - shortestCycleThrough
+        - detectCyclicComponents
+        - filesInCycles
+    src/depgraph/description.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - stripComments
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - withoutTsExtension
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+          typeOnly: true
+      exports:
+        - extractDescription
+        - cleanExportName
+        - generateFallbackDescription
+    src/depgraph/dirlist.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+            - sortCodeUnits
+          typeOnly: false
+      exports:
+        - readdirHook
+        - listNames
+        - listEntries
+        - linkLog
+        - isLink
+        - isLinkEntry
+        - isWalkable
+    src/depgraph/duplicates.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - stripComments
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - outputDirOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+            - PublicSurface
+          typeOnly: true
+      exports:
+        - DupExportKey
+        - DupDefinerTag
+        - DupEntryTag
+        - DuplicateDefiner
+        - DuplicateSymbolEntry
+        - DuplicateSymbolsReport
+        - DuplicateAllowlistEntry
+        - DupCategory
+        - RUNTIME_DUP_CATEGORIES
+        - TYPE_DUP_CATEGORIES
+        - DEFAULT_DISPATCH_CALLS
+        - describeDispatchCalls
+        - duplicateSymbolsNote
+        - DUPLICATE_SYMBOLS_NOTE
+        - loadDuplicateAllowlist
+        - globMatchSingle
+        - findAllowlistMatch
+        - escapeRegExpLiteral
+        - isDispatchVariantBody
+        - collectImportedLocalNames
+        - isAliasDelegationBody
+        - classifyDefiner
+        - collectOwnDefiners
+        - finalizeDuplicateEntry
+        - buildDuplicateEntries
+        - tallyByTag
+        - detectDuplicateSymbols
+        - buildDuplicateReport
+        - DuplicateNames
+        - DuplicateBaseline
+        - NewDuplicate
+        - DuplicateEntries
+        - BaselineNames
+        - DUPLICATE_BASELINE_NOTE
+        - trueDuplicateNames
+        - buildDuplicateBaseline
+        - findNewDuplicates
+        - asDuplicateEntries
+        - asBaselineNames
+    src/depgraph/exclude.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - isLink
+            - isWalkable
+            - listNames
+          typeOnly: false
+      exports:
+        - DEFAULT_EXCLUDE
+        - TEST_DIR_NAMES
+        - sourceTsFilesUnder
+    src/depgraph/extensions.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+        - node:url
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - DepgraphConfig
+            - isAbsolutePath
+            - resolveUnderRoot
+          typeOnly: false
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/mask.ts
+          imports:
+            - blankCommentsAndStrings
+            - stripComments
+          typeOnly: false
+      exports:
+        - ExtensionMask
+        - PreflightContext
+        - ReportContext
+        - DepgraphExtension
+        - readOnlyCopy
+        - loadExtensions
+        - runHook
+        - preflightContext
+        - reportContext
+        - outputPath
+    src/depgraph/paths.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies: []
+      exports:
+        - OUTPUT_SUBDIR
+        - withoutTsExtension
+        - toPosix
+        - isSrcIndex
+        - relativePosix
+        - maskRoot
+        - srcDirOf
+        - outputDirOf
+    src/depgraph/reporters/banner.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - VERIFICATION_MARKER
+        - DEFAULT_REGENERATE_COMMAND
+        - BannerOptions
+        - bannerFor
+        - withBanner
+    src/depgraph/reporters/coverage.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/depgraph/coverage.ts
+          imports:
+            - TestCoverageAnalysis
+          typeOnly: true
+      exports:
+        - NAMESPACE_IMPORT_BASIS
+        - NAMESPACE_IMPORT_COVERAGE_CAVEAT
+        - CoverageBasisOptions
+        - generateTestCoverageMarkdown
+        - generateTestCoverageJson
+    src/depgraph/reporters/duplicates.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - DEFAULT_DISPATCH_CALLS
+            - DupEntryTag
+            - DuplicateSymbolEntry
+            - DuplicateSymbolsReport
+            - describeDispatchCalls
+          typeOnly: false
+      exports:
+        - generateDuplicateSymbolsJson
+        - generateDuplicateSymbolsMarkdown
+    src/depgraph/reporters/json.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/description.ts
+          imports:
+            - cleanExportName
+            - generateFallbackDescription
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - isSrcIndex
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - targetOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - CyclicComponents
+            - ModuleMap
+            - PackageJson
+            - ParsedFile
+            - Statistics
+          typeOnly: true
+      exports:
+        - modulesJsonOf
+        - layersOf
+        - entryPointsOf
+        - generateJSON
+        - dependencyGraphJsonText
+        - generateCompactSummary
+    src/depgraph/reporters/markdown.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/cycles.ts
+          imports:
+            - filesInCycles
+          typeOnly: false
+        - file: src/depgraph/description.ts
+          imports:
+            - generateFallbackDescription
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - withoutTsExtension
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - targetOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - CyclicComponent
+            - CyclicComponents
+            - DependencyMatrix
+            - ModuleMap
+            - PackageJson
+            - ParsedFile
+            - Statistics
+            - WorkspacePackage
+          typeOnly: true
+      exports:
+        - generateMermaidDiagram
+        - LONG_EXPORT_LIST_THRESHOLD
+        - EXPORT_LIST_WRAP_WIDTH
+        - renderExportList
+        - SummaryRow
+        - summaryRowsOf
+        - generateMarkdown
+        - generatePackageDependencySection
+        - insertPackageSection
+    src/depgraph/reporters/surfaces.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ModuleMap
+            - PublicSurface
+          typeOnly: true
+      exports:
+        - packageKeyOf
+        - SurfaceFilter
+        - buildPackageExportSurfaces
+        - generateSurfacesJson
+    src/depgraph/reporters/yaml.ts:
+      externalDependencies:
+        - js-yaml
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - probeQuoteStyle
+        - generateYaml
+    src/depgraph/resolver.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/paths.ts
+          imports:
+            - toPosix
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - WorkspacePackage
+          typeOnly: true
+      exports:
+        - distToSrc
+        - KnownFiles
+        - resolveCandidates
+        - resolvePath
+        - targetOf
+        - workspaceEntryPath
+        - workspaceTarget
+        - resolveWorkspaceSource
+    src/depgraph/roots.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - listNames
+          typeOnly: false
+        - file: src/depgraph/exclude.ts
+          imports:
+            - DEFAULT_EXCLUDE
+            - sourceTsFilesUnder
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - relativePosix
+            - toPosix
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - distToSrc
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+            - WorkspacePackage
+          typeOnly: true
+      exports:
+        - PackageRootFields
+        - Warn
+        - isJsonObject
+        - tsupConfigEntries
+        - stripJsonc
+        - seedTsconfigEntries
+        - exportsSubpathEntries
+        - packageEntryFiles
+        - rootPackageEntries
+        - selfPackage
+        - configReferencedEntries
+        - htmlReferencedEntries
+        - runtimeLaunchedEntries
+        - collectEntryPoints
+    src/depgraph/types.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Dependency
+        - ExternalDependency
+        - NodeDependency
+        - FileExports
+        - WorkspaceDependency
+        - ParsedFile
+        - DependencyMatrix
+        - Statistics
+        - UnusedExport
+        - UnusedAnalysis
+        - ModuleMap
+        - PackageJson
+        - WorkspacePackage
+        - CyclicComponent
+        - CyclicComponents
+        - PublicSurface
+        - RunContext
+    src/depgraph/workspaces.ts:
+      externalDependencies:
+        - js-yaml
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - isLink
+            - isLinkEntry
+            - listEntries
+            - listNames
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - toPosix
+          typeOnly: false
+        - file: src/depgraph/roots.ts
+          imports:
+            - exportsSubpathEntries
+            - isJsonObject
+            - packageEntryFiles
+            - Warn
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - WorkspacePackage
+          typeOnly: true
+      exports:
+        - readWorkspacePatterns
+        - matchesWorkspaceGlob
+        - negatedWorkspaceFolders
+        - detectWorkspaces
+    src/docs/analyse.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/docs/discovery.ts
+          imports:
+            - discover
+            - languageOf
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - newReport
+          typeOnly: false
+        - file: src/docs/python.ts
+          imports:
+            - analysePython
+          typeOnly: false
+        - file: src/docs/typescript.ts
+          imports:
+            - analyseTypeScript
+          typeOnly: false
+      exports:
+        - readSourceText
+        - analyseFile
+        - RepoAnalysis
+        - analyseRepo
+    src/docs/discovery.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:child_process
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/discovery.ts
+          imports:
+            - countLanguages
+            - suffixOf
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+      exports:
+        - SKIP_DIRS
+        - CONFIG_NAME
+        - ConfigError
+        - UnreadableRepoLanguage
+        - assertReadableLanguage
+        - Discovery
+        - languageOf
+        - discover
+    src/docs/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/args.ts
+          imports:
+            - wantsHelp
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - maskRoot
+            - toPosix
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/map/command.ts
+          imports:
+            - isDirectory
+          typeOnly: false
+        - file: src/docs/analyse.ts
+          imports:
+            - analyseRepo
+          typeOnly: false
+        - file: src/docs/discovery.ts
+          imports:
+            - assertReadableLanguage
+            - CONFIG_NAME
+            - languageOf
+            - UnreadableRepoLanguage
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - isParsed
+          typeOnly: false
+        - file: src/docs/python.ts
+          imports:
+            - parsesAsPython
+          typeOnly: false
+        - file: src/docs/report.ts
+          imports:
+            - pctText
+            - summarise
+            - writeOutputs
+          typeOnly: false
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planPython
+            - planTypeScript
+            - splitLines
+            - startsItsLine
+          typeOnly: false
+        - file: src/docs/typescript.ts
+          imports:
+            - parsesAsTypeScript
+          typeOnly: false
+      exports:
+        - DOCS_HELP
+        - unquoteGitPath
+        - run
+    src/docs/model.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Kind
+        - STUB_MARKER
+        - Tier
+        - Issue
+        - DocSymbol
+        - FileReport
+        - isParsed
+        - newReport
+        - Stats
+    src/docs/python.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - loadGrammar
+            - parserFor
+          typeOnly: false
+        - file: src/py.ts
+          imports:
+            - NON_SPACE
+            - pySplitlines
+            - pyStrip
+            - S
+            - W
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - FileReport
+            - newReport
+          typeOnly: false
+        - file: src/docs/rules.ts
+          imports:
+            - applyRules
+          typeOnly: false
+      exports:
+        - detectDialect
+        - documentedParams
+        - cleandoc
+        - parsesAsPython
+        - analysePython
+    src/docs/report.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/io.ts
+          imports:
+            - toJson
+            - writeReport
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - FileReport
+            - isParsed
+            - Stats
+          typeOnly: false
+      exports:
+        - percent
+        - summarise
+        - pctText
+        - renderMarkdown
+        - writeOutputs
+    src/docs/rules.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/ste/prose.ts
+          imports:
+            - checkProse
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - STUB_MARKER
+          typeOnly: false
+      exports:
+        - isTestFile
+        - RuleOptions
+        - applyRules
+    src/docs/stub.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - pyLstrip
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - STUB_MARKER
+          typeOnly: false
+      exports:
+        - Insertion
+        - Applied
+        - splitLines
+        - planPython
+        - startsItsLine
+        - planTypeScript
+        - applyInsertions
+    src/docs/typescript.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - grammarFor
+            - loadGrammar
+            - parserFor
+          typeOnly: false
+        - file: src/py.ts
+          imports:
+            - B
+            - NON_SPACE
+            - pySplitlines
+            - pyStrip
+            - S
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - FileReport
+            - Kind
+            - newReport
+          typeOnly: false
+        - file: src/docs/rules.ts
+          imports:
+            - applyRules
+          typeOnly: false
+      exports:
+        - sanitise
+        - parsesAsTypeScript
+        - analyseTypeScript
+    src/io-types.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Io
+    src/io.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - writeLf
+        - withOneLf
+        - writeReport
+        - toJson
+    src/map/adapter.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/description.ts
+          imports:
+            - extractDescription
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - Dependency
+            - ParsedFile
+            - WorkspacePackage
+          typeOnly: true
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - FileNode
+            - RepoGraph
+          typeOnly: true
+      exports:
+        - toParsedFiles
+    src/map/artifacts.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/analysis.ts
+          imports:
+            - computePublicSurface
+          typeOnly: false
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - readdirHook
+          typeOnly: false
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - buildDuplicateReport
+            - detectDuplicateSymbols
+          typeOnly: false
+        - file: src/depgraph/roots.ts
+          imports:
+            - rootPackageEntries
+          typeOnly: false
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: src/mask.ts
+          imports:
+            - stripComments
+          typeOnly: false
+        - file: src/py.ts
+          imports:
+            - B
+            - reEscape
+            - S
+            - SPACE_BODY
+            - W
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/cycles.ts
+          imports:
+            - stronglyConnectedComponents
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - isReparsePoint
+            - readSource
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - CycleLimits
+            - findCycles
+          typeOnly: false
+        - file: src/map/resolvers.ts
+          imports:
+            - getResolver
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - FileNode
+            - RepoGraph
+            - toJson
+          typeOnly: false
+      exports:
+        - pyJsonDumps
+        - writeJson
+        - DependencyGraphOptions
+        - emitDependencyGraph
+        - emitFileInventory
+        - importsNameSymbols
+        - emitDuplicateSymbols
+        - DuplicateSymbolsOptions
+        - emitUnusedAnalysis
+        - artifactName
+    src/map/command.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - DepgraphConfig
+            - loadConfigFile
+            - mergeMapConfig
+            - resolveUnderRoot
+          typeOnly: false
+        - file: src/depgraph/args.ts
+          imports:
+            - DepgraphOptions
+            - MapCommand
+            - parseDepgraphArgs
+            - scanScopeText
+            - wantsHelp
+          typeOnly: false
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - asBaselineNames
+            - asDuplicateEntries
+            - buildDuplicateBaseline
+            - DuplicateEntries
+            - findNewDuplicates
+            - trueDuplicateNames
+          typeOnly: false
+        - file: src/depgraph/extensions.ts
+          imports:
+            - loadExtensions
+            - preflightContext
+            - reportContext
+            - runHook
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - maskRoot
+            - OUTPUT_SUBDIR
+            - relativePosix
+          typeOnly: false
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+            - emitDuplicateSymbols
+            - emitFileInventory
+            - emitUnusedAnalysis
+          typeOnly: false
+        - file: src/map/coverage.ts
+          imports:
+            - emitTestCoverage
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - discover
+            - Language
+            - UnsupportedRepoLanguage
+            - walkedSourceFiles
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: src/map/layers.ts
+          imports:
+            - emitDependencyLayers
+            - subsystemView
+          typeOnly: false
+        - file: src/map/markdown.ts
+          imports:
+            - emitMarkdownReports
+          typeOnly: false
+        - file: src/map/reports.ts
+          imports:
+            - emitSubsystemReports
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - RepoGraph
+          typeOnly: true
+        - file: src/map/surfaces.ts
+          imports:
+            - emitApiSurface
+            - emitExportSurfaces
+            - NO_SURFACE_REASON
+          typeOnly: false
+      exports:
+        - MAP_HELP
+        - DEPGRAPH_DEPRECATION
+        - isDirectory
+        - runMap
+        - graphOf
+    src/map/coverage.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/coverage.ts
+          imports:
+            - analyzeTestCoverage
+          typeOnly: false
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - BannerOptions
+            - withBanner
+          typeOnly: false
+        - file: src/depgraph/reporters/coverage.ts
+          imports:
+            - generateTestCoverageJson
+            - generateTestCoverageMarkdown
+          typeOnly: false
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/artifacts.ts
+          imports:
+            - importsNameSymbols
+          typeOnly: false
+        - file: src/map/reports.ts
+          imports:
+            - MAP_REGENERATE_COMMAND
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - RepoGraph
+          typeOnly: true
+      exports:
+        - isTestFile
+        - TestCoverageOptions
+        - emitTestCoverage
+    src/map/cycles.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+      exports:
+        - CycleLimits
+        - CycleResult
+        - sccContaining
+        - simpleCycles
+        - stronglyConnectedComponents
+    src/map/discovery.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:child_process
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - readdirHook
+          typeOnly: false
+        - file: src/py.ts
+          imports:
+            - pySplitlines
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+      exports:
+        - SOURCE_SUFFIXES
+        - PYTHON_SUFFIXES
+        - CSHARP_SUFFIXES
+        - RUST_SUFFIXES
+        - SKIP_DIRS
+        - CSHARP_SKIP_DIRS
+        - Language
+        - DiscoveredFile
+        - classifyArea
+        - ReachFlags
+        - dispositionForArea
+        - LANGUAGE_SCANS
+        - UnsupportedRepoLanguage
+        - suffixOf
+        - isReparsePoint
+        - countLanguages
+        - gitTracked
+        - gitTrackedLinks
+        - candidateFiles
+        - walkedSourceFiles
+        - detectLanguage
+        - readSource
+        - skippedSourceFolders
+        - discover
+    src/map/grammars.ts:
+      externalDependencies:
+        - tree-sitter-python/tree-sitter-python.wasm
+        - tree-sitter-typescript/tree-sitter-tsx.wasm
+        - tree-sitter-typescript/tree-sitter-typescript.wasm
+        - web-tree-sitter
+        - web-tree-sitter/web-tree-sitter.wasm
+      nodeDependencies:
+        - node:fs
+        - node:path
+        - node:url
+      internalDependencies: []
+      exports:
+        - GrammarName
+        - loadGrammar
+        - grammarFor
+        - parserFor
+    src/map/graph.ts:
+      externalDependencies:
+        - smol-toml
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - readdirHook
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - resolveWorkspaceSource
+            - workspaceTarget
+          typeOnly: false
+        - file: src/depgraph/roots.ts
+          imports:
+            - configReferencedEntries
+            - htmlReferencedEntries
+            - rootPackageEntries
+            - runtimeLaunchedEntries
+            - selfPackage
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+            - WorkspacePackage
+          typeOnly: true
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: src/py.ts
+          imports:
+            - B
+            - pyRepr
+            - S
+            - SPACE_BODY
+            - W
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/map/cycles.ts
+          imports:
+            - CycleLimits
+            - CycleResult
+            - simpleCycles
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - detectLanguage
+            - discover
+            - dispositionForArea
+            - isReparsePoint
+            - Language
+            - readSource
+            - skippedSourceFolders
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - grammarFor
+            - loadGrammar
+          typeOnly: false
+        - file: src/map/package-field.ts
+          imports:
+            - packageField
+          typeOnly: false
+        - file: src/map/parsing.ts
+          imports:
+            - ParsedModule
+            - parseCs
+            - parsePy
+            - parseRs
+            - parseTs
+          typeOnly: false
+        - file: src/map/resolvers.ts
+          imports:
+            - getResolver
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - Dependency
+            - FileNode
+            - newRepoGraph
+            - RepoGraph
+          typeOnly: false
+        - file: src/map/cycles.ts
+          imports:
+            - CycleLimits
+            - CycleResult
+          typeOnly: true
+      exports:
+        - mapDistToSrc
+        - buildGraph
+        - reachableFrom
+        - CycleLimits
+        - CycleResult
+        - findCycles
+    src/map/layers.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/analysis.ts
+          imports:
+            - categorizeFiles
+          typeOnly: false
+        - file: src/depgraph/cycles.ts
+          imports:
+            - detectCyclicComponents
+          typeOnly: false
+        - file: src/depgraph/reporters/json.ts
+          imports:
+            - entryPointsOf
+            - layersOf
+            - modulesJsonOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - CyclicComponents
+            - ModuleMap
+            - ParsedFile
+          typeOnly: true
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/artifacts.ts
+          imports:
+            - writeJson
+          typeOnly: false
+        - file: src/map/package-field.ts
+          imports:
+            - packageField
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - RepoGraph
+            - SCHEMA_VERSION
+          typeOnly: false
+      exports:
+        - ProjectIdentity
+        - projectIdentity
+        - SubsystemView
+        - subsystemView
+        - emitDependencyLayers
+    src/map/markdown.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - DEFAULT_DISPATCH_CALLS
+            - DuplicateSymbolsReport
+          typeOnly: false
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - BannerOptions
+            - withBanner
+          typeOnly: false
+        - file: src/depgraph/reporters/duplicates.ts
+          imports:
+            - generateDuplicateSymbolsMarkdown
+          typeOnly: false
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/map/reports.ts
+          imports:
+            - MAP_REGENERATE_COMMAND
+          typeOnly: false
+      exports:
+        - inventoryMarkdown
+        - duplicatesMarkdown
+        - unusedMarkdown
+        - emitMarkdownReports
+    src/map/package-field.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - packageField
+    src/map/parsing.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - S
+            - W
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - grammarFor
+            - parserFor
+          typeOnly: false
+      exports:
+        - RawImport
+        - ParsedModule
+        - emptyModule
+        - parseTs
+        - parseCs
+        - pubUseNames
+        - expandUsePath
+        - parseRs
+        - parsePy
+    src/map/python-stdlib.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - PYTHON_STDLIB_MODULES
+    src/map/query.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/map/cycles.ts
+          imports:
+            - CycleLimits
+            - CycleResult
+            - simpleCycles
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - SCHEMA_VERSION
+          typeOnly: false
+      exports:
+        - GraphDocument
+        - LoadedGraph
+        - loadGraph
+        - dependents
+        - symbolUsers
+        - QueryCycleResult
+        - cycles
+    src/map/reports.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - MAP_REGENERATE_COMMAND
+          typeOnly: false
+        - file: src/depgraph/analysis.ts
+          imports:
+            - buildDependencyMatrix
+          typeOnly: false
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - BannerOptions
+            - withBanner
+          typeOnly: false
+        - file: src/depgraph/reporters/json.ts
+          imports:
+            - generateCompactSummary
+          typeOnly: false
+        - file: src/depgraph/reporters/markdown.ts
+          imports:
+            - generateMarkdown
+            - SummaryRow
+          typeOnly: false
+        - file: src/depgraph/reporters/yaml.ts
+          imports:
+            - generateYaml
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - Statistics
+          typeOnly: true
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/map/layers.ts
+          imports:
+            - projectIdentity
+            - SubsystemView
+            - subsystemView
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - RepoGraph
+          typeOnly: true
+      exports:
+        - MAP_REGENERATE_COMMAND
+        - SubsystemReportOptions
+        - emitSubsystemReports
+    src/map/resolvers.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - pyDirname
+            - pyJoin
+            - pyNormpath
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/map/parsing.ts
+          imports:
+            - ParsedModule
+          typeOnly: true
+        - file: src/map/python-stdlib.ts
+          imports:
+            - PYTHON_STDLIB_MODULES
+          typeOnly: false
+      exports:
+        - Resolver
+        - NODE_BUILTINS
+        - TypeScriptResolver
+        - PythonResolver
+        - CSharpResolver
+        - RustResolver
+        - getResolver
+    src/map/schema.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - SCHEMA_VERSION
+        - Dependency
+        - FileNode
+        - RepoGraph
+        - newRepoGraph
+        - ModuleEntry
+        - GraphJson
+        - toJson
+    src/map/surfaces.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/analysis.ts
+          imports:
+            - categorizeFiles
+            - computePublicSurface
+          typeOnly: false
+        - file: src/depgraph/api-surface.ts
+          imports:
+            - buildApiSurfaceReport
+            - createTsResolver
+            - extractExportDetails
+            - resolveSurface
+          typeOnly: false
+        - file: src/depgraph/reporters/surfaces.ts
+          imports:
+            - generateSurfacesJson
+          typeOnly: false
+        - file: src/depgraph/roots.ts
+          imports:
+            - rootPackageEntries
+          typeOnly: false
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - RepoGraph
+          typeOnly: true
+      exports:
+        - emitApiSurface
+        - NO_SURFACE_REASON
+        - emitExportSurfaces
+    src/mask.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - blankCommentsAndStrings
+        - stripComments
+    src/py.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - SPACE_BODY
+        - S
+        - NON_SPACE
+        - W
+        - B
+        - D
+        - ci
+        - pyStrip
+        - pyLstrip
+        - pySplit
+        - pySplitlines
+        - isAlnum
+        - headCodePoints
+        - codePointLength
+        - pyRepr
+        - reEscape
+        - pyDirname
+        - pyJoin
+        - pyNormpath
+    src/query/args.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - ABSOLUTE_PATH_TEXT
+            - isAbsolutePath
+          typeOnly: false
+      exports:
+        - QueryCommand
+        - QueryOptions
+        - parseQueryArgs
+    src/query/commands.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - isAbsolutePath
+            - resolveUnderRoot
+          typeOnly: false
+        - file: src/depgraph/cycles.ts
+          imports:
+            - detectCyclicComponents
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - CyclicComponent
+            - ParsedFile
+          typeOnly: true
+        - file: src/io.ts
+          imports:
+            - writeReport
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/map/query.ts
+          imports:
+            - dependents
+            - GraphDocument
+            - cycles
+            - symbolUsers
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/query/graph.ts
+          imports:
+            - buildForward
+            - fileEntriesOf
+            - invert
+          typeOnly: false
+        - file: src/query/load.ts
+          imports:
+            - loadSurfaces
+            - QueryInput
+          typeOnly: false
+        - file: src/query/safety.ts
+          imports:
+            - browserSafePackages
+            - computeTaint
+            - findLeaks
+            - packagesOf
+          typeOnly: false
+      exports:
+        - dependents
+        - symbolUsersCommand
+        - isPublic
+        - cycles
+        - nodeSafety
+        - emit
+        - checkBrowserSafety
+    src/query/graph.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/query/load.ts
+          imports:
+            - GraphFileEntry
+            - QueryGraph
+          typeOnly: true
+      exports:
+        - FilePair
+        - fileEntriesOf
+        - buildForward
+        - invert
+    src/query/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - loadConfigSections
+            - mergeQueryConfig
+          typeOnly: false
+        - file: src/depgraph/paths.ts
+          imports:
+            - maskRoot
+            - OUTPUT_SUBDIR
+          typeOnly: false
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/query/args.ts
+          imports:
+            - parseQueryArgs
+          typeOnly: false
+        - file: src/query/commands.ts
+          imports:
+            - checkBrowserSafety
+            - cycles
+            - dependents
+            - emit
+            - isPublic
+            - nodeSafety
+            - symbolUsersCommand
+          typeOnly: false
+        - file: src/query/load.ts
+          imports:
+            - loadQueryInput
+          typeOnly: false
+      exports:
+        - QUERY_HELP
+        - run
+    src/query/load.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - resolveUnderRoot
+          typeOnly: false
+        - file: src/map/query.ts
+          imports:
+            - GraphDocument
+            - loadGraph
+          typeOnly: false
+      exports:
+        - GraphEdge
+        - GraphFileEntry
+        - QueryGraph
+        - QueryInput
+        - loadQueryInput
+        - loadSurfaces
+    src/query/safety.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/query/graph.ts
+          imports:
+            - FilePair
+          typeOnly: true
+      exports:
+        - ROOT_PACKAGE
+        - entryOf
+        - packagesOf
+        - browserSafePackages
+        - computeTaint
+        - reachableFrom
+        - findLeaks
+    src/sort.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - compareCodeUnits
+        - sortCodeUnits
+    src/ste/index.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: src/ste/markdown.ts
+          imports:
+            - checkMarkdownFindings
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - checkProse
+            - proseOf
+          typeOnly: false
+        - file: src/ste/since.ts
+          imports:
+            - addedLinesSince
+            - SinceError
+            - touchesAdded
+          typeOnly: false
+      exports:
+        - STE_HELP
+        - HISTORICAL_MARKER
+        - run
+    src/ste/markdown.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - B
+            - D
+            - headCodePoints
+            - isAlnum
+            - pyLstrip
+            - pyRepr
+            - pySplit
+            - pySplitlines
+            - pyStrip
+            - reEscape
+            - S
+          typeOnly: false
+        - file: src/ste/rules.ts
+          imports:
+            - AMBIGUOUS_SOURCE
+            - IDENTIFIER_SOURCE
+            - MAX_WORDS_DESCRIPTIVE
+            - MAX_WORDS_PROCEDURAL
+            - PASSIVE_SOURCE
+            - rule
+            - WORDY
+          typeOnly: false
+      exports:
+        - Finding
+        - checkMarkdownFindings
+        - checkMarkdown
+    src/ste/prose.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - B
+            - ci
+            - codePointLength
+            - headCodePoints
+            - pySplit
+            - pySplitlines
+            - pyStrip
+            - reEscape
+            - S
+          typeOnly: false
+        - file: src/ste/rules.ts
+          imports:
+            - AMBIGUOUS_SOURCE
+            - MAX_WORDS_PROCEDURAL
+            - PASSIVE_SOURCE
+            - rule
+            - stripIdentifiers
+            - WORDY
+          typeOnly: false
+      exports:
+        - ProseFinding
+        - checkProse
+        - proseOf
+    src/ste/rules.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - B
+            - ci
+            - S
+            - W
+          typeOnly: false
+      exports:
+        - IRREGULAR_PARTICIPLES
+        - DETERMINERS
+        - PASSIVE_SOURCE
+        - AMBIGUOUS_SOURCE
+        - WORDY
+        - IDENTIFIER_SOURCE
+        - MAX_WORDS_PROCEDURAL
+        - MAX_WORDS_DESCRIPTIVE
+        - rule
+        - stripIdentifiers
+    src/ste/since.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:child_process
+        - node:path
+      internalDependencies: []
+      exports:
+        - AddedLines
+        - SinceError
+        - addedLinesSince
+        - touchesAdded
+  tests:
+    tests/fixtures/chunk/module.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Mode
+        - after
+    tests/fixtures/chunk/parser.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - render
+        - QUOTE_RE
+        - escaped
+        - Box
+        - Shape
+        - Pair
+        - Color
+        - LIMIT
+    tests/fixtures/compress/sample.js:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/fixtures/compress/sample.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Item
+        - total
+        - names
+    tests/fixtures/depgraph/mini-repo/src/B.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/a.ts
+          imports:
+            - AlphaOptions
+          typeOnly: true
+        - file: tests/fixtures/depgraph/mini-repo/src/dyn.ts
+          imports:
+            - '*'
+          typeOnly: false
+      exports:
+        - Bravo
+    tests/fixtures/depgraph/mini-repo/src/Z/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/Z/zed.ts
+          imports:
+            - zed
+            - ZedShape
+          typeOnly: false
+      exports:
+        - zed
+        - ZedShape
+    tests/fixtures/depgraph/mini-repo/src/Z/loop.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/Z/zed.ts
+          imports:
+            - ZedShape
+          typeOnly: true
+      exports:
+        - Loop
+    tests/fixtures/depgraph/mini-repo/src/Z/zed.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/Z/loop.ts
+          imports:
+            - Loop
+          typeOnly: true
+      exports:
+        - ZedShape
+        - zed
+    tests/fixtures/depgraph/mini-repo/src/_x.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - helper
+    tests/fixtures/depgraph/mini-repo/src/a.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/_x.ts
+          imports:
+            - helper
+          typeOnly: false
+      exports:
+        - AlphaOptions
+        - alpha
+        - unusedConstant
+    tests/fixtures/depgraph/mini-repo/src/ambient.d.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/fixtures/depgraph/mini-repo/src/cli.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/a.ts
+          imports:
+            - alpha
+          typeOnly: false
+        - file: tests/fixtures/depgraph/mini-repo/src/ping.ts
+          imports:
+            - ping
+          typeOnly: false
+        - file: tests/fixtures/depgraph/mini-repo/src/register.ts
+          imports: []
+          typeOnly: false
+      exports: []
+    tests/fixtures/depgraph/mini-repo/src/dyn.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - dynamicValue
+    tests/fixtures/depgraph/mini-repo/src/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/a.ts
+          imports:
+            - alpha
+            - AlphaOptions
+          typeOnly: false
+        - file: tests/fixtures/depgraph/mini-repo/src/B.ts
+          imports:
+            - Bravo
+          typeOnly: false
+        - file: tests/fixtures/depgraph/mini-repo/src/Z/index.ts
+          imports:
+            - ZedShape
+            - zed
+          typeOnly: false
+        - file: tests/fixtures/depgraph/mini-repo/src/view.tsx
+          imports:
+            - render
+          typeOnly: false
+      exports:
+        - alpha
+        - AlphaOptions
+        - Bravo
+        - render
+    tests/fixtures/depgraph/mini-repo/src/orphan.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - forgotten
+    tests/fixtures/depgraph/mini-repo/src/ping.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/pong.ts
+          imports:
+            - pong
+          typeOnly: false
+      exports:
+        - ping
+    tests/fixtures/depgraph/mini-repo/src/pong.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/ping.ts
+          imports:
+            - ping
+          typeOnly: false
+      exports:
+        - pong
+    tests/fixtures/depgraph/mini-repo/src/register.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/fixtures/depgraph/mini-repo/src/util/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - clamp
+    tests/fixtures/depgraph/mini-repo/src/view.tsx:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - render
+    tests/fixtures/depgraph/mini-repo/tests/a.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/a.ts
+          imports:
+            - alpha
+          typeOnly: false
+      exports: []
+    tests/fixtures/depgraph/mini-repo/tests/barrel.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mini-repo/src/index.ts
+          imports:
+            - zed
+          typeOnly: false
+      exports: []
+    tests/fixtures/depgraph/mono-repo/packages/cli/src/format.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - format
+    tests/fixtures/depgraph/mono-repo/packages/cli/src/main.ts:
+      externalDependencies:
+        - '@scope/core'
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mono-repo/packages/cli/src/format.ts
+          imports:
+            - format
+          typeOnly: false
+      exports: []
+    tests/fixtures/depgraph/mono-repo/packages/core/src/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mono-repo/packages/core/src/math.ts
+          imports:
+            - add
+          typeOnly: false
+        - file: tests/fixtures/depgraph/mono-repo/packages/core/src/types.ts
+          imports:
+            - Pair
+          typeOnly: true
+      exports:
+        - add
+        - Pair
+    tests/fixtures/depgraph/mono-repo/packages/core/src/internal.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - INTERNAL_FLAG
+    tests/fixtures/depgraph/mono-repo/packages/core/src/math.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mono-repo/packages/core/src/types.ts
+          imports:
+            - Pair
+          typeOnly: true
+      exports:
+        - add
+        - double
+    tests/fixtures/depgraph/mono-repo/packages/core/src/types.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Pair
+    tests/fixtures/depgraph/mono-repo/packages/core/src/worker.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mono-repo/packages/core/src/math.ts
+          imports:
+            - double
+          typeOnly: false
+      exports:
+        - workerResult
+    tests/fixtures/depgraph/mono-repo/packages/core/tests/math.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/mono-repo/packages/core/src/math.ts
+          imports:
+            - add
+          typeOnly: false
+      exports: []
+    tests/fixtures/depgraph/pnpm-repo/apps/web/src/index.ts:
+      externalDependencies:
+        - '@pn/core'
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - title
+    tests/fixtures/depgraph/pnpm-repo/apps/web/tests/index.test.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/fixtures/depgraph/pnpm-repo/apps/web/src/index.ts
+          imports:
+            - title
+          typeOnly: false
+      exports: []
+    tests/fixtures/depgraph/pnpm-repo/packages/core/src/index.ts:
+      externalDependencies:
+        - '@pn/util'
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - label
+    tests/fixtures/depgraph/pnpm-repo/packages/util/src/index.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - pad
+    tests/fixtures/extension/probe.mjs:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports: []
+    tests/golden/chunk/typescript/chunks/001-imports.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports: []
+    tests/golden/chunk/typescript/chunks/002-function-render.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - render
+    tests/golden/chunk/typescript/chunks/003-const-quote-re.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - QUOTE_RE
+    tests/golden/chunk/typescript/chunks/004-function-escaped.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - escaped
+    tests/golden/chunk/typescript/chunks/005-class-box.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Box
+    tests/golden/chunk/typescript/chunks/006-interface-shape.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Shape
+    tests/golden/chunk/typescript/chunks/007-type-pair.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Pair
+    tests/golden/chunk/typescript/chunks/008-enum-color.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Color
+    tests/golden/chunk/typescript/chunks/009-function-helper.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/golden/chunk/typescript/chunks/010-const-limit.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - LIMIT
+    tests/golden/chunk/typescript/merged.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports:
+        - render
+        - QUOTE_RE
+        - escaped
+        - Box
+        - Shape
+        - Pair
+        - Color
+        - LIMIT
+    tests/golden/compress/js.aggressive.compact.js:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/golden/compress/js.light.compact.js:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/golden/compress/js.medium.compact.js:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+    tests/golden/compress/ts.aggressive.compact.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Item
+        - total
+        - names
+    tests/golden/compress/ts.light.compact.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Item
+        - total
+        - names
+    tests/golden/compress/ts.medium.compact.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Item
+        - total
+        - names
+    tests/unit/api-surface.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/api-surface.ts
+          imports:
+            - DEFAULT_STABILITY_TAGS
+            - ExportDetail
+            - extractExportDetails
+            - extractReExports
+            - ReExport
+            - resolveSurface
+            - SurfaceSymbol
+          typeOnly: false
+      exports: []
+    tests/unit/build.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/privacy-check.ts
+          imports:
+            - scanText
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+        - file: scripts/build.ts
+          imports:
+            - '*'
+          typeOnly: false
+      exports: []
+    tests/unit/check-claims.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/check/claims.ts
+          imports:
+            - hasVerificationSection
+            - parseClaims
+          typeOnly: false
+      exports: []
+    tests/unit/check-command.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/check/claims.ts
+          imports:
+            - NO_VERIFICATION_MARKER
+          typeOnly: false
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - withBanner
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/check-metrics.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/check/metrics.ts
+          imports:
+            - collectMetrics
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/check-verify.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/check/claims.ts
+          imports:
+            - NO_VERIFICATION_MARKER
+          typeOnly: false
+        - file: src/check/verify.ts
+          imports:
+            - Measured
+            - MetricValue
+            - verifyDocs
+          typeOnly: false
+      exports: []
+    tests/unit/chunk-golden.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+      exports:
+        - FIXTURES
+        - GOLDEN
+        - GoldenCase
+        - CASES
+        - stageFixture
+        - maskOutput
+        - maskManifest
+        - chunkFiles
+        - readText
+    tests/unit/chunk-review-2.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/chunk/index.ts
+          imports:
+            - run
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/chunk-review.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/chunk/index.ts
+          imports:
+            - run
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/chunk.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/chunk/index.ts
+          imports:
+            - run
+          typeOnly: false
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/chunk-golden.ts
+          imports:
+            - CASES
+            - chunkFiles
+            - FIXTURES
+            - GOLDEN
+            - GoldenCase
+            - maskManifest
+            - maskOutput
+            - readText
+            - stageFixture
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/cli.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+            - SUBCOMMANDS
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/clones-command.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+      internalDependencies:
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - cli
+            - read
+            - removeTrees
+            - trackAll
+            - tree
+          typeOnly: false
+      exports: []
+    tests/unit/clones-detect.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:crypto
+      internalDependencies:
+        - file: src/clones/detect.ts
+          imports:
+            - DetectParams
+            - detect
+          typeOnly: false
+        - file: src/clones/units.ts
+          imports:
+            - Unit
+          typeOnly: true
+      exports: []
+    tests/unit/clones-settings.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/clones/settings.ts
+          imports:
+            - CLONES_DEFAULTS
+            - mergeClonesConfig
+          typeOnly: false
+        - file: src/config.ts
+          imports:
+            - parseConfigSections
+          typeOnly: false
+      exports: []
+    tests/unit/clones-units.test.ts:
+      externalDependencies:
+        - bun:test
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/clones/normalise.ts
+          imports:
+            - normalise
+          typeOnly: false
+        - file: src/clones/units.ts
+          imports:
+            - Unit
+            - unitsOf
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - grammarFor
+            - loadGrammar
+            - parserFor
+          typeOnly: false
+      exports: []
+    tests/unit/compress-golden.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/compress/formats.ts
+          imports:
+            - detectFormat
+            - getCompressor
+            - LEVELS
+          typeOnly: false
+        - file: src/compress/index.ts
+          imports:
+            - run
+          typeOnly: false
+        - file: src/compress/legend.ts
+          imports:
+            - decompress
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/compress.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/compress/formats.ts
+          imports:
+            - detectFormat
+            - getCompressor
+            - LEVELS
+          typeOnly: false
+        - file: src/compress/index.ts
+          imports:
+            - CompressDeps
+            - findFiles
+            - run
+          typeOnly: false
+        - file: src/compress/legend.ts
+          imports:
+            - assertNumbersKept
+            - decompress
+            - renameKeys
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/config.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+            - DepgraphConfig
+            - loadConfigFile
+            - loadConfigSections
+            - mergeDepgraphConfig
+            - mergeQueryConfig
+            - parseConfig
+            - parseConfigSections
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-analysis.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/analysis.ts
+          imports:
+            - buildDependencyMatrix
+            - categorizeFiles
+            - computePublicSurface
+            - detectUnused
+            - findReachableFiles
+            - generateStatistics
+            - splitDormant
+          typeOnly: false
+        - file: src/depgraph/cycles.ts
+          imports:
+            - detectCyclicComponents
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+            - WorkspacePackage
+          typeOnly: true
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-api-surface.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/update-depgraph-goldens.ts
+          imports:
+            - maskGolden
+          typeOnly: false
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: src/depgraph/args.ts
+          imports:
+            - parseDepgraphArgs
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-args.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/args.ts
+          imports:
+            - parseDepgraphArgs
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-config-wiring.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: src/depgraph/args.ts
+          imports:
+            - parseDepgraphArgs
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-duplicate-gate.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: src/depgraph/args.ts
+          imports:
+            - parseDepgraphArgs
+          typeOnly: false
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - asBaselineNames
+            - DupEntryTag
+            - DuplicateSymbolEntry
+            - findNewDuplicates
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-duplicates.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/analysis.ts
+          imports:
+            - computePublicSurface
+          typeOnly: false
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - buildDuplicateEntries
+            - buildDuplicateReport
+            - classifyDefiner
+            - collectImportedLocalNames
+            - collectOwnDefiners
+            - DEFAULT_DISPATCH_CALLS
+            - DUPLICATE_SYMBOLS_NOTE
+            - describeDispatchCalls
+            - detectDuplicateSymbols
+            - escapeRegExpLiteral
+            - finalizeDuplicateEntry
+            - findAllowlistMatch
+            - globMatchSingle
+            - isAliasDelegationBody
+            - isDispatchVariantBody
+            - loadDuplicateAllowlist
+            - RUNTIME_DUP_CATEGORIES
+            - TYPE_DUP_CATEGORIES
+            - tallyByTag
+          typeOnly: false
+        - file: src/depgraph/reporters/duplicates.ts
+          imports:
+            - generateDuplicateSymbolsJson
+            - generateDuplicateSymbolsMarkdown
+          typeOnly: false
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-exit.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-extensions.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: src/depgraph/extensions.ts
+          imports:
+            - outputPath
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f1.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f10.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f11.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f12.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f13.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f14.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f15.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f16.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f17.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f18.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f19.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f2.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - readdirHook
+          typeOnly: false
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f20.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/privacy-check.ts
+          imports:
+            - runCheck
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f21.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/reporters/markdown.ts
+          imports:
+            - EXPORT_LIST_WRAP_WIDTH
+            - LONG_EXPORT_LIST_THRESHOLD
+            - renderExportList
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f22.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/reporters/surfaces.ts
+          imports:
+            - buildPackageExportSurfaces
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ModuleMap
+          typeOnly: true
+      exports: []
+    tests/unit/depgraph-f23.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f24.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f25.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f26.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/cycles.ts
+          imports:
+            - detectCyclicComponents
+          typeOnly: false
+        - file: src/depgraph/dirlist.ts
+          imports:
+            - readdirHook
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+          typeOnly: true
+        - file: tests/unit/dynamic-imports.ts
+          imports:
+            - RUNTIME_IMPORTS
+            - TYPE_IMPORTS
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f27.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/duplicates.ts
+          imports:
+            - classifyDefiner
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+          typeOnly: true
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f28.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f29.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f3.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - bannerFor
+            - VERIFICATION_MARKER
+          typeOnly: false
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: src/map/reports.ts
+          imports:
+            - MAP_REGENERATE_COMMAND
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f30.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/resolver.ts
+          imports:
+            - resolveCandidates
+            - resolvePath
+          typeOnly: false
+        - file: src/map/resolvers.ts
+          imports:
+            - TypeScriptResolver
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f31.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/paths.ts
+          imports:
+            - isSrcIndex
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f32.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f33.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f34.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f35.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f36.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f37.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/roots.ts
+          imports:
+            - tsupConfigEntries
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f38.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/parsing.ts
+          imports:
+            - parseTs
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f39.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - blankCommentsAndStrings
+            - stripComments
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f4.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies: []
+      exports: []
+    tests/unit/depgraph-f40.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/parsing.ts
+          imports:
+            - parseTs
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f41.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f42.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:child_process
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f43.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f44.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f5.test.ts:
+      externalDependencies:
+        - bun:test
+        - js-yaml
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/reporters/yaml.ts
+          imports:
+            - generateYaml
+            - probeQuoteStyle
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f6.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f7.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/resolver.ts
+          imports:
+            - distToSrc
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f8.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-f9.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-inventory-coverage.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/coverage.ts
+          imports:
+            - analyzeTestCoverage
+            - buildCategoryBreakdown
+            - buildReExportMap
+            - CoveragePolicy
+            - classifyAgainstPolicy
+            - loadCoveragePolicy
+            - traceReExports
+          typeOnly: false
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - classifyArea
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-m1.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-parse.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/description.ts
+          imports:
+            - cleanExportName
+            - extractDescription
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - resolvePath
+            - resolveWorkspaceSource
+            - workspaceEntryPath
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - WorkspacePackage
+          typeOnly: true
+        - file: src/map/resolvers.ts
+          imports:
+            - NODE_BUILTINS
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-paths.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/paths.ts
+          imports:
+            - OUTPUT_SUBDIR
+            - outputDirOf
+            - relativePosix
+            - srcDirOf
+            - toPosix
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-r1.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-report.test.ts:
+      externalDependencies:
+        - bun:test
+        - js-yaml
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/analysis.ts
+          imports:
+            - buildDependencyMatrix
+            - categorizeFiles
+            - computePublicSurface
+            - detectUnused
+            - generateStatistics
+          typeOnly: false
+        - file: src/depgraph/args.ts
+          imports:
+            - parseDepgraphArgs
+          typeOnly: false
+        - file: src/depgraph/coverage.ts
+          imports:
+            - analyzeTestCoverage
+          typeOnly: false
+        - file: src/depgraph/cycles.ts
+          imports:
+            - detectCyclicComponents
+          typeOnly: false
+        - file: src/depgraph/extensions.ts
+          imports:
+            - loadExtensions
+          typeOnly: false
+        - file: src/depgraph/reporters/banner.ts
+          imports:
+            - bannerFor
+            - VERIFICATION_MARKER
+            - withBanner
+          typeOnly: false
+        - file: src/depgraph/reporters/coverage.ts
+          imports:
+            - generateTestCoverageJson
+            - generateTestCoverageMarkdown
+          typeOnly: false
+        - file: src/depgraph/reporters/json.ts
+          imports:
+            - dependencyGraphJsonText
+            - generateCompactSummary
+            - generateJSON
+          typeOnly: false
+        - file: src/depgraph/reporters/markdown.ts
+          imports:
+            - generateMarkdown
+            - generateMermaidDiagram
+            - generatePackageDependencySection
+            - insertPackageSection
+          typeOnly: false
+        - file: src/depgraph/reporters/surfaces.ts
+          imports:
+            - buildPackageExportSurfaces
+            - generateSurfacesJson
+            - packageKeyOf
+          typeOnly: false
+        - file: src/depgraph/reporters/yaml.ts
+          imports:
+            - generateYaml
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - WorkspacePackage
+          typeOnly: true
+        - file: src/io-types.ts
+          imports:
+            - Io
+          typeOnly: true
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/command.ts
+          imports:
+            - MAP_HELP
+            - runMap
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-scan.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/roots.ts
+          imports:
+            - collectEntryPoints
+            - configReferencedEntries
+            - exportsSubpathEntries
+            - runtimeLaunchedEntries
+            - seedTsconfigEntries
+            - tsupConfigEntries
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+            - WorkspacePackage
+          typeOnly: true
+        - file: src/depgraph/workspaces.ts
+          imports:
+            - detectWorkspaces
+            - readWorkspacePatterns
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/depgraph-tsx.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/design-refs.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/design-refs.ts
+          imports:
+            - danglingReferences
+            - findReferences
+            - headingsOf
+            - scanRepository
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/docs-command.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/docs/model.ts
+          imports:
+            - STUB_MARKER
+          typeOnly: false
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - cli
+            - read
+            - removeTrees
+            - trackAll
+            - tree
+          typeOnly: false
+      exports: []
+    tests/unit/docs-discovery.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/docs/analyse.ts
+          imports:
+            - analyseFile
+            - analyseRepo
+            - readSourceText
+          typeOnly: false
+        - file: src/docs/discovery.ts
+          imports:
+            - ConfigError
+            - discover
+            - languageOf
+          typeOnly: false
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - git
+            - removeTrees
+            - trackAll
+            - tree
+          typeOnly: false
+      exports: []
+    tests/unit/docs-helpers.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:child_process
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports:
+        - only
+        - tree
+        - removeTrees
+        - git
+        - trackAll
+        - CliRun
+        - cli
+        - read
+    tests/unit/docs-python.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/model.ts
+          imports:
+            - STUB_MARKER
+          typeOnly: false
+        - file: src/docs/python.ts
+          imports:
+            - analysePython
+            - cleandoc
+            - detectDialect
+            - documentedParams
+            - parsesAsPython
+          typeOnly: false
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - only
+          typeOnly: false
+      exports: []
+    tests/unit/docs-report.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - FileReport
+            - newReport
+          typeOnly: false
+        - file: src/docs/report.ts
+          imports:
+            - percent
+            - renderMarkdown
+            - summarise
+          typeOnly: false
+      exports: []
+    tests/unit/docs-review.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/docs/python.ts
+          imports:
+            - analysePython
+          typeOnly: false
+        - file: src/docs/typescript.ts
+          imports:
+            - analyseTypeScript
+          typeOnly: false
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - cli
+            - only
+            - read
+            - removeTrees
+            - trackAll
+            - tree
+          typeOnly: false
+      exports: []
+    tests/unit/docs-stub.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/model.ts
+          imports:
+            - STUB_MARKER
+          typeOnly: false
+        - file: src/docs/python.ts
+          imports:
+            - analysePython
+            - parsesAsPython
+          typeOnly: false
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planPython
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+        - file: src/docs/typescript.ts
+          imports:
+            - analyseTypeScript
+            - parsesAsTypeScript
+          typeOnly: false
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - only
+          typeOnly: false
+      exports: []
+    tests/unit/docs-typescript.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/model.ts
+          imports:
+            - STUB_MARKER
+          typeOnly: false
+        - file: src/docs/typescript.ts
+          imports:
+            - analyseTypeScript
+            - parsesAsTypeScript
+            - sanitise
+          typeOnly: false
+        - file: tests/unit/docs-helpers.ts
+          imports:
+            - only
+          typeOnly: false
+      exports: []
+    tests/unit/dynamic-imports.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - RUNTIME_IMPORTS
+        - TYPE_IMPORTS
+    tests/unit/entry-roots-build-configs.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/depgraph/roots.ts
+          imports:
+            - configReferencedEntries
+            - htmlReferencedEntries
+            - seedTsconfigEntries
+            - stripJsonc
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/fix-ledger-audit.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/fix-ledger-audit.ts
+          imports:
+            - AuditRow
+            - applyEdit
+            - assertParses
+            - auditMutations
+            - compareFix
+            - copyRepository
+            - decide
+            - Mutation
+            - ownTests
+            - parseLedger
+            - parseTestOutput
+            - renderReport
+            - StageResult
+          typeOnly: false
+        - file: scripts/fix-ledger-mutations.ts
+          imports:
+            - MUTATIONS
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/golden-depgraph.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+      exports: []
+    tests/unit/io.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/io.ts
+          imports:
+            - toJson
+            - withOneLf
+            - writeLf
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/lockcheck.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/lockcheck.ts
+          imports:
+            - checkInstalledTree
+            - lockPackageDir
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-adapter.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/cycles.ts
+          imports:
+            - detectCyclicComponents
+          typeOnly: false
+        - file: src/depgraph/resolver.ts
+          imports:
+            - targetOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - ParsedFile
+          typeOnly: true
+        - file: src/map/adapter.ts
+          imports:
+            - toParsedFiles
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-artifacts-e2e.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+            - emitFileInventory
+            - emitUnusedAnalysis
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - detectLanguage
+            - discover
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-artifacts.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+            - emitDuplicateSymbols
+            - emitFileInventory
+            - emitUnusedAnalysis
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - discover
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+            - reachableFrom
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - Dependency
+            - FileNode
+            - newRepoGraph
+            - RepoGraph
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-command.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-coverage.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/reporters/coverage.ts
+          imports:
+            - NAMESPACE_IMPORT_COVERAGE_CAVEAT
+          typeOnly: false
+        - file: src/map/coverage.ts
+          imports:
+            - emitTestCoverage
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-discovery.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/discovery.ts
+          imports:
+            - classifyArea
+            - countLanguages
+            - detectLanguage
+            - discover
+            - dispositionForArea
+            - UnsupportedRepoLanguage
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-golden.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/update-depgraph-goldens.ts
+          imports:
+            - maskGolden
+          typeOnly: false
+        - file: scripts/update-map-goldens.ts
+          imports:
+            - MAP_GOLDEN_SETS
+          typeOnly: false
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-graph-e2e.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/discovery.ts
+          imports:
+            - detectLanguage
+            - discover
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-graph.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+            - findCycles
+            - reachableFrom
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - FileNode
+            - newRepoGraph
+            - RepoGraph
+            - SCHEMA_VERSION
+            - toJson
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-layers.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: src/map/layers.ts
+          imports:
+            - emitDependencyLayers
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-markdown.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+            - emitDuplicateSymbols
+            - emitFileInventory
+            - emitUnusedAnalysis
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: src/map/markdown.ts
+          imports:
+            - emitMarkdownReports
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-open-items.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/map-parsing-py.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - loadGrammar
+          typeOnly: false
+        - file: src/map/parsing.ts
+          imports:
+            - parsePy
+          typeOnly: false
+      exports: []
+    tests/unit/map-parsing-regex.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/parsing.ts
+          imports:
+            - parseCs
+            - parseRs
+          typeOnly: false
+      exports: []
+    tests/unit/map-parsing-ts.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - loadGrammar
+          typeOnly: false
+        - file: src/map/parsing.ts
+          imports:
+            - parseTs
+          typeOnly: false
+        - file: tests/unit/dynamic-imports.ts
+          imports:
+            - RUNTIME_IMPORTS
+            - TYPE_IMPORTS
+          typeOnly: false
+      exports: []
+    tests/unit/map-parsing-tsx.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - grammarFor
+            - loadGrammar
+          typeOnly: false
+        - file: src/map/parsing.ts
+          imports:
+            - parseTs
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - graphFile
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/map-project-name.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:path
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
+    tests/unit/map-query.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/graph.ts
+          imports:
+            - findCycles
+          typeOnly: false
+        - file: src/map/query.ts
+          imports:
+            - cycles
+            - dependents
+            - loadGraph
+            - symbolUsers
+          typeOnly: false
+        - file: src/map/schema.ts
+          imports:
+            - Dependency
+            - FileNode
+            - newRepoGraph
+            - toJson
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-reports-ste.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: src/ste/markdown.ts
+          imports:
+            - checkMarkdown
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-reports.test.ts:
+      externalDependencies:
+        - bun:test
+        - js-yaml
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/artifacts.ts
+          imports:
+            - emitDependencyGraph
+          typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: src/map/reports.ts
+          imports:
+            - emitSubsystemReports
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/map-resolvers.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/parsing.ts
+          imports:
+            - emptyModule
+          typeOnly: false
+        - file: src/map/resolvers.ts
+          imports:
+            - CSharpResolver
+            - getResolver
+            - RustResolver
+          typeOnly: false
+      exports: []
+    tests/unit/map-surfaces.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: src/map/surfaces.ts
+          imports:
+            - emitExportSurfaces
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/mask.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - blankCommentsAndStrings
+            - stripComments
+          typeOnly: false
+      exports: []
+    tests/unit/no-literal-bom.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/node-compat.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - stripComments
+          typeOnly: false
+        - file: src/py.ts
+          imports:
+            - ci
+          typeOnly: false
+      exports: []
+    tests/unit/offline.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/offline.ts
+          imports:
+            - networkUses
+          typeOnly: false
+      exports: []
+    tests/unit/offline.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/mask.ts
+          imports:
+            - blankCommentsAndStrings
+          typeOnly: false
+      exports:
+        - networkUses
+    tests/unit/privacy-accepted.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/privacy-check.ts
+          imports:
+            - '*'
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/privacy-check.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/privacy-check.ts
+          imports:
+            - assertDenylistFloor
+            - Denylist
+            - Finding
+            - formatFinding
+            - hashToken
+            - memoByToken
+            - parseDenylist
+            - runCheck
+            - scanCommitMessage
+            - scanText
+            - scanTrackedFile
+            - selfTest
+            - '*'
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/query-args.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: src/query/args.ts
+          imports:
+            - parseQueryArgs
+          typeOnly: false
+      exports: []
+    tests/unit/query-commands.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: tests/unit/query-fixture.ts
+          imports:
+            - queryTree
+            - runMapOn
+            - runQuery
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/query-config.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/query/args.ts
+          imports:
+            - parseQueryArgs
+          typeOnly: false
+        - file: tests/unit/query-fixture.ts
+          imports:
+            - queryTree
+            - runQuery
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/query-emit.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/query-fixture.ts
+          imports:
+            - queryTree
+            - runQuery
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/query-fixture.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+          typeOnly: false
+      exports:
+        - QUERY_TREE
+        - queryTree
+        - runMapOn
+        - QueryRun
+        - runQuery
+    tests/unit/query-load.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: src/query/load.ts
+          imports:
+            - loadQueryInput
+          typeOnly: false
+        - file: tests/unit/query-fixture.ts
+          imports:
+            - runMapOn
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/query-node-safety.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: tests/unit/query-fixture.ts
+          imports:
+            - QUERY_TREE
+            - queryTree
+            - runMapOn
+            - runQuery
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/query-port.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/config.ts
+          imports:
+            - CONFIG_FILE
+          typeOnly: false
+        - file: src/query/args.ts
+          imports:
+            - parseQueryArgs
+          typeOnly: false
+        - file: src/query/graph.ts
+          imports:
+            - buildForward
+            - FilePair
+            - invert
+          typeOnly: false
+        - file: src/query/safety.ts
+          imports:
+            - browserSafePackages
+            - computeTaint
+            - findLeaks
+            - reachableFrom
+          typeOnly: false
+        - file: tests/unit/query-fixture.ts
+          imports:
+            - runQuery
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/query-safety.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/query/graph.ts
+          imports:
+            - FilePair
+          typeOnly: true
+        - file: src/query/graph.ts
+          imports:
+            - buildForward
+          typeOnly: false
+        - file: src/query/safety.ts
+          imports:
+            - computeTaint
+          typeOnly: false
+      exports: []
+    tests/unit/sort.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/sort.ts
+          imports:
+            - compareCodeUnits
+            - sortCodeUnits
+          typeOnly: false
+      exports: []
+    tests/unit/ste-cli.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/ste-markdown.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/ste/markdown.ts
+          imports:
+            - checkMarkdown
+          typeOnly: false
+      exports: []
+    tests/unit/ste-options.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
+    tests/unit/ste-prose.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/ste/prose.ts
+          imports:
+            - checkProse
+            - proseOf
+          typeOnly: false
+      exports: []
+    tests/unit/ste-py.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/py.ts
+          imports:
+            - pyRepr
+            - pySplit
+            - pySplitlines
+            - pyStrip
+          typeOnly: false
+      exports: []
+    tests/unit/temp.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: tests/unit/temp.ts
+          imports:
+            - isPidAlive
+            - makeTempDir
+            - sweepStaleTempDirs
+          typeOnly: false
+      exports: []
+    tests/unit/temp.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies: []
+      exports:
+        - isPidAlive
+        - sweepStaleTempDirs
+        - makeTempDir
+    tests/unit/tree.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/map/command.ts
+          imports:
+            - runMap
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports:
+        - makeTree
+        - DepgraphRun
+        - DependencyGraphJson
+        - GraphFile
+        - graphFile
+        - runDepgraph
+        - removeTrees
+  config:
+    tests/fixtures/depgraph/mono-repo/packages/core/tsup.config.ts:
+      externalDependencies:
+        - tsup
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+statistics:
+  totalTypeScriptFiles: 288
+  totalSourceFiles: 288
+  totalModules: 4
+  totalLinesOfCode: 44464
+  totalExports: 713
+  entryRoots: 1
+  reachableFiles: 83
+  dormantFiles: 2
+  orphanedFiles: 2
+  testOnlyFiles: 0
+  runtimeCircularDeps: 1
+  typeOnlyCircularDeps: 4
+  totalTypeOnlyImports: 62
+  noImporterFileCount: 2
+  unusedExportsCount: 119
+  circularDepsTruncated: false
+  runtimeCyclicComponents: 1
+  typeOnlyCyclicComponents: 4
+  runtimeFilesInCycles: 2
+  typeOnlyFilesInCycles: 8
+  totalClasses: 13
+  totalInterfaces: 139
+  totalFunctions: 408
+  totalTypeGuards: 19
+  totalEnums: 4
+  totalConstants: 99
+  totalReExports: 12
+reachability:
+  roots:
+    - src/cli.ts
+  reachableCount: 83
+  dormantCount: 2
+  orphaned:
+    - src/assets.d.ts
+    - src/bin.ts
+  testOnly: []
+warnings: []

@@ -1,0 +1,999 @@
+{
+  "metadata": {
+    "totalSourceFiles": 84,
+    "totalTestFiles": 137,
+    "testedCount": 68,
+    "untestedCount": 16,
+    "coveragePercent": "81.0",
+    "effectiveCoverage": {
+      "policyLoaded": false,
+      "activeFiles": 84,
+      "testedActive": 68,
+      "activeUntested": 16,
+      "excludedTotal": 0,
+      "percent": "81.0",
+      "breakdown": {
+        "active_untested": 16
+      }
+    }
+  },
+  "untestedFiles": [
+    "src/bin.ts",
+    "src/check/index.ts",
+    "src/chunk/manifest.ts",
+    "src/chunk/splitters.ts",
+    "src/clones/index.ts",
+    "src/clones/report.ts",
+    "src/depgraph/exclude.ts",
+    "src/docs/index.ts",
+    "src/docs/rules.ts",
+    "src/map/package-field.ts",
+    "src/map/python-stdlib.ts",
+    "src/query/commands.ts",
+    "src/query/index.ts",
+    "src/ste/index.ts",
+    "src/ste/rules.ts",
+    "src/ste/since.ts"
+  ],
+  "testedFiles": [
+    "src/check/claims.ts",
+    "src/check/metrics.ts",
+    "src/check/verify.ts",
+    "src/chunk/index.ts",
+    "src/cli.ts",
+    "src/clones/detect.ts",
+    "src/clones/normalise.ts",
+    "src/clones/settings.ts",
+    "src/clones/units.ts",
+    "src/compress/formats.ts",
+    "src/compress/index.ts",
+    "src/compress/legend.ts",
+    "src/config.ts",
+    "src/depgraph/analysis.ts",
+    "src/depgraph/api-surface.ts",
+    "src/depgraph/args.ts",
+    "src/depgraph/coverage.ts",
+    "src/depgraph/cycles.ts",
+    "src/depgraph/description.ts",
+    "src/depgraph/dirlist.ts",
+    "src/depgraph/duplicates.ts",
+    "src/depgraph/extensions.ts",
+    "src/depgraph/paths.ts",
+    "src/depgraph/reporters/banner.ts",
+    "src/depgraph/reporters/coverage.ts",
+    "src/depgraph/reporters/duplicates.ts",
+    "src/depgraph/reporters/json.ts",
+    "src/depgraph/reporters/markdown.ts",
+    "src/depgraph/reporters/surfaces.ts",
+    "src/depgraph/reporters/yaml.ts",
+    "src/depgraph/resolver.ts",
+    "src/depgraph/roots.ts",
+    "src/depgraph/types.ts",
+    "src/depgraph/workspaces.ts",
+    "src/docs/analyse.ts",
+    "src/docs/discovery.ts",
+    "src/docs/model.ts",
+    "src/docs/python.ts",
+    "src/docs/report.ts",
+    "src/docs/stub.ts",
+    "src/docs/typescript.ts",
+    "src/io-types.ts",
+    "src/io.ts",
+    "src/map/adapter.ts",
+    "src/map/artifacts.ts",
+    "src/map/command.ts",
+    "src/map/coverage.ts",
+    "src/map/cycles.ts",
+    "src/map/discovery.ts",
+    "src/map/grammars.ts",
+    "src/map/graph.ts",
+    "src/map/layers.ts",
+    "src/map/markdown.ts",
+    "src/map/parsing.ts",
+    "src/map/query.ts",
+    "src/map/reports.ts",
+    "src/map/resolvers.ts",
+    "src/map/schema.ts",
+    "src/map/surfaces.ts",
+    "src/mask.ts",
+    "src/py.ts",
+    "src/query/args.ts",
+    "src/query/graph.ts",
+    "src/query/load.ts",
+    "src/query/safety.ts",
+    "src/sort.ts",
+    "src/ste/markdown.ts",
+    "src/ste/prose.ts"
+  ],
+  "coverageMap": {
+    "src/bin.ts": [],
+    "src/check/claims.ts": [
+      "tests/unit/check-claims.test.ts",
+      "tests/unit/check-command.test.ts",
+      "tests/unit/check-verify.test.ts"
+    ],
+    "src/check/index.ts": [],
+    "src/check/metrics.ts": [
+      "tests/unit/check-metrics.test.ts"
+    ],
+    "src/check/verify.ts": [
+      "tests/unit/check-verify.test.ts"
+    ],
+    "src/chunk/index.ts": [
+      "tests/unit/chunk-review-2.test.ts",
+      "tests/unit/chunk-review.test.ts",
+      "tests/unit/chunk.test.ts"
+    ],
+    "src/chunk/manifest.ts": [],
+    "src/chunk/splitters.ts": [],
+    "src/cli.ts": [
+      "tests/unit/check-command.test.ts",
+      "tests/unit/chunk.test.ts",
+      "tests/unit/cli.test.ts",
+      "tests/unit/map-command.test.ts",
+      "tests/unit/query-args.test.ts",
+      "tests/unit/query-load.test.ts",
+      "tests/unit/ste-cli.test.ts",
+      "tests/unit/ste-options.test.ts"
+    ],
+    "src/clones/detect.ts": [
+      "tests/unit/clones-detect.test.ts"
+    ],
+    "src/clones/index.ts": [],
+    "src/clones/normalise.ts": [
+      "tests/unit/clones-units.test.ts"
+    ],
+    "src/clones/report.ts": [],
+    "src/clones/settings.ts": [
+      "tests/unit/clones-settings.test.ts"
+    ],
+    "src/clones/units.ts": [
+      "tests/unit/clones-detect.test.ts",
+      "tests/unit/clones-units.test.ts"
+    ],
+    "src/compress/formats.ts": [
+      "tests/unit/compress-golden.test.ts",
+      "tests/unit/compress.test.ts"
+    ],
+    "src/compress/index.ts": [
+      "tests/unit/compress-golden.test.ts",
+      "tests/unit/compress.test.ts"
+    ],
+    "src/compress/legend.ts": [
+      "tests/unit/compress-golden.test.ts",
+      "tests/unit/compress.test.ts"
+    ],
+    "src/config.ts": [
+      "tests/unit/clones-settings.test.ts",
+      "tests/unit/config.test.ts",
+      "tests/unit/depgraph-api-surface.test.ts",
+      "tests/unit/depgraph-config-wiring.test.ts",
+      "tests/unit/depgraph-duplicate-gate.test.ts",
+      "tests/unit/depgraph-extensions.test.ts",
+      "tests/unit/query-commands.test.ts",
+      "tests/unit/query-node-safety.test.ts",
+      "tests/unit/query-port.test.ts"
+    ],
+    "src/depgraph/analysis.ts": [
+      "tests/unit/depgraph-analysis.test.ts",
+      "tests/unit/depgraph-duplicates.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/api-surface.ts": [
+      "tests/unit/api-surface.test.ts"
+    ],
+    "src/depgraph/args.ts": [
+      "tests/unit/depgraph-api-surface.test.ts",
+      "tests/unit/depgraph-args.test.ts",
+      "tests/unit/depgraph-config-wiring.test.ts",
+      "tests/unit/depgraph-duplicate-gate.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/coverage.ts": [
+      "tests/unit/depgraph-inventory-coverage.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/cycles.ts": [
+      "tests/unit/depgraph-analysis.test.ts",
+      "tests/unit/depgraph-f26.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/map-adapter.test.ts"
+    ],
+    "src/depgraph/description.ts": [
+      "tests/unit/depgraph-parse.test.ts"
+    ],
+    "src/depgraph/dirlist.ts": [
+      "tests/unit/depgraph-f2.test.ts",
+      "tests/unit/depgraph-f26.test.ts"
+    ],
+    "src/depgraph/duplicates.ts": [
+      "tests/unit/depgraph-duplicate-gate.test.ts",
+      "tests/unit/depgraph-duplicates.test.ts",
+      "tests/unit/depgraph-f27.test.ts"
+    ],
+    "src/depgraph/exclude.ts": [],
+    "src/depgraph/extensions.ts": [
+      "tests/unit/depgraph-extensions.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/paths.ts": [
+      "tests/unit/depgraph-f31.test.ts",
+      "tests/unit/depgraph-paths.test.ts"
+    ],
+    "src/depgraph/reporters/banner.ts": [
+      "tests/unit/check-command.test.ts",
+      "tests/unit/depgraph-f3.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/reporters/coverage.ts": [
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/map-coverage.test.ts"
+    ],
+    "src/depgraph/reporters/duplicates.ts": [
+      "tests/unit/depgraph-duplicates.test.ts"
+    ],
+    "src/depgraph/reporters/json.ts": [
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/reporters/markdown.ts": [
+      "tests/unit/depgraph-f21.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/reporters/surfaces.ts": [
+      "tests/unit/depgraph-f22.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/reporters/yaml.ts": [
+      "tests/unit/depgraph-f5.test.ts",
+      "tests/unit/depgraph-report.test.ts"
+    ],
+    "src/depgraph/resolver.ts": [
+      "tests/unit/depgraph-f30.test.ts",
+      "tests/unit/depgraph-f7.test.ts",
+      "tests/unit/depgraph-parse.test.ts",
+      "tests/unit/map-adapter.test.ts"
+    ],
+    "src/depgraph/roots.ts": [
+      "tests/unit/depgraph-f37.test.ts",
+      "tests/unit/depgraph-scan.test.ts",
+      "tests/unit/entry-roots-build-configs.test.ts"
+    ],
+    "src/depgraph/types.ts": [
+      "tests/unit/depgraph-analysis.test.ts",
+      "tests/unit/depgraph-f22.test.ts",
+      "tests/unit/depgraph-f26.test.ts",
+      "tests/unit/depgraph-f27.test.ts",
+      "tests/unit/depgraph-parse.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/depgraph-scan.test.ts",
+      "tests/unit/map-adapter.test.ts"
+    ],
+    "src/depgraph/workspaces.ts": [
+      "tests/unit/depgraph-f13.test.ts",
+      "tests/unit/depgraph-f34.test.ts",
+      "tests/unit/depgraph-f36.test.ts",
+      "tests/unit/depgraph-scan.test.ts"
+    ],
+    "src/docs/analyse.ts": [
+      "tests/unit/docs-discovery.test.ts"
+    ],
+    "src/docs/discovery.ts": [
+      "tests/unit/docs-discovery.test.ts"
+    ],
+    "src/docs/index.ts": [],
+    "src/docs/model.ts": [
+      "tests/unit/docs-command.test.ts",
+      "tests/unit/docs-python.test.ts",
+      "tests/unit/docs-report.test.ts",
+      "tests/unit/docs-stub.test.ts",
+      "tests/unit/docs-typescript.test.ts"
+    ],
+    "src/docs/python.ts": [
+      "tests/unit/docs-python.test.ts",
+      "tests/unit/docs-review.test.ts",
+      "tests/unit/docs-stub.test.ts"
+    ],
+    "src/docs/report.ts": [
+      "tests/unit/docs-report.test.ts"
+    ],
+    "src/docs/rules.ts": [],
+    "src/docs/stub.ts": [
+      "tests/unit/docs-stub.test.ts"
+    ],
+    "src/docs/typescript.ts": [
+      "tests/unit/docs-review.test.ts",
+      "tests/unit/docs-stub.test.ts",
+      "tests/unit/docs-typescript.test.ts"
+    ],
+    "src/io-types.ts": [
+      "tests/unit/check-command.test.ts",
+      "tests/unit/chunk.test.ts",
+      "tests/unit/cli.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/map-command.test.ts",
+      "tests/unit/query-args.test.ts",
+      "tests/unit/query-load.test.ts",
+      "tests/unit/ste-cli.test.ts",
+      "tests/unit/ste-options.test.ts"
+    ],
+    "src/io.ts": [
+      "tests/unit/io.test.ts"
+    ],
+    "src/map/adapter.ts": [
+      "tests/unit/depgraph-analysis.test.ts",
+      "tests/unit/depgraph-duplicates.test.ts",
+      "tests/unit/depgraph-inventory-coverage.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/map-adapter.test.ts"
+    ],
+    "src/map/artifacts.ts": [
+      "tests/unit/map-artifacts-e2e.test.ts",
+      "tests/unit/map-artifacts.test.ts",
+      "tests/unit/map-layers.test.ts",
+      "tests/unit/map-markdown.test.ts",
+      "tests/unit/map-reports.test.ts"
+    ],
+    "src/map/command.ts": [
+      "tests/unit/depgraph-exit.test.ts",
+      "tests/unit/depgraph-f1.test.ts",
+      "tests/unit/depgraph-f2.test.ts",
+      "tests/unit/depgraph-f3.test.ts",
+      "tests/unit/depgraph-r1.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/map-golden.test.ts",
+      "tests/unit/map-reports-ste.test.ts"
+    ],
+    "src/map/coverage.ts": [
+      "tests/unit/map-coverage.test.ts"
+    ],
+    "src/map/cycles.ts": [
+      "tests/unit/depgraph-analysis.test.ts",
+      "tests/unit/depgraph-duplicates.test.ts",
+      "tests/unit/depgraph-inventory-coverage.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/entry-roots-build-configs.test.ts",
+      "tests/unit/map-adapter.test.ts",
+      "tests/unit/map-artifacts-e2e.test.ts",
+      "tests/unit/map-artifacts.test.ts",
+      "tests/unit/map-coverage.test.ts",
+      "tests/unit/map-graph-e2e.test.ts",
+      "tests/unit/map-graph.test.ts",
+      "tests/unit/map-layers.test.ts",
+      "tests/unit/map-markdown.test.ts",
+      "tests/unit/map-query.test.ts",
+      "tests/unit/map-reports.test.ts",
+      "tests/unit/map-surfaces.test.ts"
+    ],
+    "src/map/discovery.ts": [
+      "tests/unit/depgraph-inventory-coverage.test.ts",
+      "tests/unit/map-artifacts-e2e.test.ts",
+      "tests/unit/map-artifacts.test.ts",
+      "tests/unit/map-discovery.test.ts",
+      "tests/unit/map-graph-e2e.test.ts"
+    ],
+    "src/map/grammars.ts": [
+      "tests/unit/clones-units.test.ts",
+      "tests/unit/map-parsing-py.test.ts",
+      "tests/unit/map-parsing-ts.test.ts",
+      "tests/unit/map-parsing-tsx.test.ts"
+    ],
+    "src/map/graph.ts": [
+      "tests/unit/depgraph-analysis.test.ts",
+      "tests/unit/depgraph-duplicates.test.ts",
+      "tests/unit/depgraph-inventory-coverage.test.ts",
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/entry-roots-build-configs.test.ts",
+      "tests/unit/map-adapter.test.ts",
+      "tests/unit/map-artifacts-e2e.test.ts",
+      "tests/unit/map-artifacts.test.ts",
+      "tests/unit/map-coverage.test.ts",
+      "tests/unit/map-graph-e2e.test.ts",
+      "tests/unit/map-graph.test.ts",
+      "tests/unit/map-layers.test.ts",
+      "tests/unit/map-markdown.test.ts",
+      "tests/unit/map-query.test.ts",
+      "tests/unit/map-reports.test.ts",
+      "tests/unit/map-surfaces.test.ts"
+    ],
+    "src/map/layers.ts": [
+      "tests/unit/map-layers.test.ts"
+    ],
+    "src/map/markdown.ts": [
+      "tests/unit/map-markdown.test.ts"
+    ],
+    "src/map/package-field.ts": [],
+    "src/map/parsing.ts": [
+      "tests/unit/depgraph-f38.test.ts",
+      "tests/unit/depgraph-f40.test.ts",
+      "tests/unit/map-parsing-py.test.ts",
+      "tests/unit/map-parsing-regex.test.ts",
+      "tests/unit/map-parsing-ts.test.ts",
+      "tests/unit/map-parsing-tsx.test.ts",
+      "tests/unit/map-resolvers.test.ts"
+    ],
+    "src/map/python-stdlib.ts": [],
+    "src/map/query.ts": [
+      "tests/unit/map-query.test.ts"
+    ],
+    "src/map/reports.ts": [
+      "tests/unit/depgraph-f3.test.ts",
+      "tests/unit/map-reports.test.ts"
+    ],
+    "src/map/resolvers.ts": [
+      "tests/unit/depgraph-f30.test.ts",
+      "tests/unit/depgraph-parse.test.ts",
+      "tests/unit/map-resolvers.test.ts"
+    ],
+    "src/map/schema.ts": [
+      "tests/unit/map-artifacts.test.ts",
+      "tests/unit/map-graph.test.ts",
+      "tests/unit/map-query.test.ts"
+    ],
+    "src/map/surfaces.ts": [
+      "tests/unit/map-surfaces.test.ts"
+    ],
+    "src/mask.ts": [
+      "tests/unit/depgraph-f39.test.ts",
+      "tests/unit/mask.test.ts",
+      "tests/unit/node-compat.test.ts"
+    ],
+    "src/py.ts": [
+      "tests/unit/node-compat.test.ts",
+      "tests/unit/ste-py.test.ts"
+    ],
+    "src/query/args.ts": [
+      "tests/unit/query-args.test.ts",
+      "tests/unit/query-config.test.ts",
+      "tests/unit/query-port.test.ts"
+    ],
+    "src/query/commands.ts": [],
+    "src/query/graph.ts": [
+      "tests/unit/query-port.test.ts",
+      "tests/unit/query-safety.test.ts"
+    ],
+    "src/query/index.ts": [],
+    "src/query/load.ts": [
+      "tests/unit/query-load.test.ts"
+    ],
+    "src/query/safety.ts": [
+      "tests/unit/query-port.test.ts",
+      "tests/unit/query-safety.test.ts"
+    ],
+    "src/sort.ts": [
+      "tests/unit/compress-golden.test.ts",
+      "tests/unit/compress.test.ts",
+      "tests/unit/depgraph-api-surface.test.ts",
+      "tests/unit/depgraph-scan.test.ts",
+      "tests/unit/golden-depgraph.test.ts",
+      "tests/unit/map-golden.test.ts",
+      "tests/unit/sort.test.ts"
+    ],
+    "src/ste/index.ts": [],
+    "src/ste/markdown.ts": [
+      "tests/unit/map-reports-ste.test.ts",
+      "tests/unit/ste-markdown.test.ts"
+    ],
+    "src/ste/prose.ts": [
+      "tests/unit/ste-prose.test.ts"
+    ],
+    "src/ste/rules.ts": [],
+    "src/ste/since.ts": []
+  },
+  "testToSourceMap": {
+    "tests/fixtures/depgraph/mini-repo/tests/a.test.ts": [],
+    "tests/fixtures/depgraph/mini-repo/tests/barrel.test.ts": [],
+    "tests/fixtures/depgraph/mono-repo/packages/core/tests/math.test.ts": [],
+    "tests/fixtures/depgraph/pnpm-repo/apps/web/tests/index.test.ts": [],
+    "tests/unit/api-surface.test.ts": [
+      "src/depgraph/api-surface.ts"
+    ],
+    "tests/unit/build.test.ts": [],
+    "tests/unit/check-claims.test.ts": [
+      "src/check/claims.ts"
+    ],
+    "tests/unit/check-command.test.ts": [
+      "src/check/claims.ts",
+      "src/cli.ts",
+      "src/io-types.ts",
+      "src/depgraph/reporters/banner.ts"
+    ],
+    "tests/unit/check-metrics.test.ts": [
+      "src/check/metrics.ts"
+    ],
+    "tests/unit/check-verify.test.ts": [
+      "src/check/claims.ts",
+      "src/check/verify.ts"
+    ],
+    "tests/unit/chunk-review-2.test.ts": [
+      "src/chunk/index.ts"
+    ],
+    "tests/unit/chunk-review.test.ts": [
+      "src/chunk/index.ts"
+    ],
+    "tests/unit/chunk.test.ts": [
+      "src/chunk/index.ts",
+      "src/cli.ts",
+      "src/io-types.ts"
+    ],
+    "tests/unit/cli.test.ts": [
+      "src/cli.ts",
+      "src/io-types.ts"
+    ],
+    "tests/unit/clones-command.test.ts": [],
+    "tests/unit/clones-detect.test.ts": [
+      "src/clones/detect.ts",
+      "src/clones/units.ts"
+    ],
+    "tests/unit/clones-settings.test.ts": [
+      "src/clones/settings.ts",
+      "src/config.ts"
+    ],
+    "tests/unit/clones-units.test.ts": [
+      "src/clones/normalise.ts",
+      "src/clones/units.ts",
+      "src/map/grammars.ts"
+    ],
+    "tests/unit/compress-golden.test.ts": [
+      "src/compress/formats.ts",
+      "src/compress/index.ts",
+      "src/compress/legend.ts",
+      "src/sort.ts"
+    ],
+    "tests/unit/compress.test.ts": [
+      "src/compress/formats.ts",
+      "src/compress/index.ts",
+      "src/compress/legend.ts",
+      "src/sort.ts"
+    ],
+    "tests/unit/config.test.ts": [
+      "src/config.ts"
+    ],
+    "tests/unit/depgraph-analysis.test.ts": [
+      "src/depgraph/analysis.ts",
+      "src/depgraph/cycles.ts",
+      "src/depgraph/types.ts",
+      "src/map/adapter.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/depgraph-api-surface.test.ts": [
+      "src/config.ts",
+      "src/depgraph/args.ts",
+      "src/sort.ts"
+    ],
+    "tests/unit/depgraph-args.test.ts": [
+      "src/depgraph/args.ts"
+    ],
+    "tests/unit/depgraph-config-wiring.test.ts": [
+      "src/config.ts",
+      "src/depgraph/args.ts"
+    ],
+    "tests/unit/depgraph-duplicate-gate.test.ts": [
+      "src/config.ts",
+      "src/depgraph/args.ts",
+      "src/depgraph/duplicates.ts"
+    ],
+    "tests/unit/depgraph-duplicates.test.ts": [
+      "src/depgraph/analysis.ts",
+      "src/depgraph/duplicates.ts",
+      "src/depgraph/reporters/duplicates.ts",
+      "src/map/adapter.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/depgraph-exit.test.ts": [
+      "src/map/command.ts"
+    ],
+    "tests/unit/depgraph-extensions.test.ts": [
+      "src/config.ts",
+      "src/depgraph/extensions.ts"
+    ],
+    "tests/unit/depgraph-f1.test.ts": [
+      "src/map/command.ts"
+    ],
+    "tests/unit/depgraph-f10.test.ts": [],
+    "tests/unit/depgraph-f11.test.ts": [],
+    "tests/unit/depgraph-f12.test.ts": [],
+    "tests/unit/depgraph-f13.test.ts": [
+      "src/depgraph/workspaces.ts"
+    ],
+    "tests/unit/depgraph-f14.test.ts": [],
+    "tests/unit/depgraph-f15.test.ts": [],
+    "tests/unit/depgraph-f16.test.ts": [],
+    "tests/unit/depgraph-f17.test.ts": [],
+    "tests/unit/depgraph-f18.test.ts": [],
+    "tests/unit/depgraph-f19.test.ts": [],
+    "tests/unit/depgraph-f2.test.ts": [
+      "src/depgraph/dirlist.ts",
+      "src/map/command.ts"
+    ],
+    "tests/unit/depgraph-f20.test.ts": [],
+    "tests/unit/depgraph-f21.test.ts": [
+      "src/depgraph/reporters/markdown.ts"
+    ],
+    "tests/unit/depgraph-f22.test.ts": [
+      "src/depgraph/reporters/surfaces.ts",
+      "src/depgraph/types.ts"
+    ],
+    "tests/unit/depgraph-f23.test.ts": [],
+    "tests/unit/depgraph-f24.test.ts": [],
+    "tests/unit/depgraph-f25.test.ts": [],
+    "tests/unit/depgraph-f26.test.ts": [
+      "src/depgraph/cycles.ts",
+      "src/depgraph/dirlist.ts",
+      "src/depgraph/types.ts"
+    ],
+    "tests/unit/depgraph-f27.test.ts": [
+      "src/depgraph/duplicates.ts",
+      "src/depgraph/types.ts"
+    ],
+    "tests/unit/depgraph-f28.test.ts": [],
+    "tests/unit/depgraph-f29.test.ts": [],
+    "tests/unit/depgraph-f3.test.ts": [
+      "src/depgraph/reporters/banner.ts",
+      "src/map/command.ts",
+      "src/map/reports.ts"
+    ],
+    "tests/unit/depgraph-f30.test.ts": [
+      "src/depgraph/resolver.ts",
+      "src/map/resolvers.ts"
+    ],
+    "tests/unit/depgraph-f31.test.ts": [
+      "src/depgraph/paths.ts"
+    ],
+    "tests/unit/depgraph-f32.test.ts": [],
+    "tests/unit/depgraph-f33.test.ts": [],
+    "tests/unit/depgraph-f34.test.ts": [
+      "src/depgraph/workspaces.ts"
+    ],
+    "tests/unit/depgraph-f35.test.ts": [],
+    "tests/unit/depgraph-f36.test.ts": [
+      "src/depgraph/workspaces.ts"
+    ],
+    "tests/unit/depgraph-f37.test.ts": [
+      "src/depgraph/roots.ts"
+    ],
+    "tests/unit/depgraph-f38.test.ts": [
+      "src/map/parsing.ts"
+    ],
+    "tests/unit/depgraph-f39.test.ts": [
+      "src/mask.ts"
+    ],
+    "tests/unit/depgraph-f4.test.ts": [],
+    "tests/unit/depgraph-f40.test.ts": [
+      "src/map/parsing.ts"
+    ],
+    "tests/unit/depgraph-f41.test.ts": [],
+    "tests/unit/depgraph-f42.test.ts": [],
+    "tests/unit/depgraph-f43.test.ts": [],
+    "tests/unit/depgraph-f44.test.ts": [],
+    "tests/unit/depgraph-f5.test.ts": [
+      "src/depgraph/reporters/yaml.ts"
+    ],
+    "tests/unit/depgraph-f6.test.ts": [],
+    "tests/unit/depgraph-f7.test.ts": [
+      "src/depgraph/resolver.ts"
+    ],
+    "tests/unit/depgraph-f8.test.ts": [],
+    "tests/unit/depgraph-f9.test.ts": [],
+    "tests/unit/depgraph-inventory-coverage.test.ts": [
+      "src/depgraph/coverage.ts",
+      "src/map/adapter.ts",
+      "src/map/discovery.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/depgraph-m1.test.ts": [],
+    "tests/unit/depgraph-parse.test.ts": [
+      "src/depgraph/description.ts",
+      "src/depgraph/resolver.ts",
+      "src/depgraph/types.ts",
+      "src/map/resolvers.ts"
+    ],
+    "tests/unit/depgraph-paths.test.ts": [
+      "src/depgraph/paths.ts"
+    ],
+    "tests/unit/depgraph-r1.test.ts": [
+      "src/map/command.ts"
+    ],
+    "tests/unit/depgraph-report.test.ts": [
+      "src/depgraph/analysis.ts",
+      "src/depgraph/args.ts",
+      "src/depgraph/coverage.ts",
+      "src/depgraph/cycles.ts",
+      "src/depgraph/extensions.ts",
+      "src/depgraph/reporters/banner.ts",
+      "src/depgraph/reporters/coverage.ts",
+      "src/depgraph/reporters/json.ts",
+      "src/depgraph/reporters/markdown.ts",
+      "src/depgraph/reporters/surfaces.ts",
+      "src/depgraph/reporters/yaml.ts",
+      "src/depgraph/types.ts",
+      "src/io-types.ts",
+      "src/map/adapter.ts",
+      "src/map/command.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/depgraph-scan.test.ts": [
+      "src/depgraph/roots.ts",
+      "src/depgraph/types.ts",
+      "src/depgraph/workspaces.ts",
+      "src/sort.ts"
+    ],
+    "tests/unit/depgraph-tsx.test.ts": [],
+    "tests/unit/design-refs.test.ts": [],
+    "tests/unit/docs-command.test.ts": [
+      "src/docs/model.ts"
+    ],
+    "tests/unit/docs-discovery.test.ts": [
+      "src/docs/analyse.ts",
+      "src/docs/discovery.ts"
+    ],
+    "tests/unit/docs-python.test.ts": [
+      "src/docs/model.ts",
+      "src/docs/python.ts"
+    ],
+    "tests/unit/docs-report.test.ts": [
+      "src/docs/model.ts",
+      "src/docs/report.ts"
+    ],
+    "tests/unit/docs-review.test.ts": [
+      "src/docs/python.ts",
+      "src/docs/typescript.ts"
+    ],
+    "tests/unit/docs-stub.test.ts": [
+      "src/docs/model.ts",
+      "src/docs/python.ts",
+      "src/docs/stub.ts",
+      "src/docs/typescript.ts"
+    ],
+    "tests/unit/docs-typescript.test.ts": [
+      "src/docs/model.ts",
+      "src/docs/typescript.ts"
+    ],
+    "tests/unit/entry-roots-build-configs.test.ts": [
+      "src/depgraph/roots.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/fix-ledger-audit.test.ts": [],
+    "tests/unit/golden-depgraph.test.ts": [
+      "src/sort.ts"
+    ],
+    "tests/unit/io.test.ts": [
+      "src/io.ts"
+    ],
+    "tests/unit/lockcheck.test.ts": [],
+    "tests/unit/map-adapter.test.ts": [
+      "src/depgraph/cycles.ts",
+      "src/depgraph/resolver.ts",
+      "src/depgraph/types.ts",
+      "src/map/adapter.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/map-artifacts-e2e.test.ts": [
+      "src/map/artifacts.ts",
+      "src/map/discovery.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/map-artifacts.test.ts": [
+      "src/map/artifacts.ts",
+      "src/map/discovery.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/schema.ts"
+    ],
+    "tests/unit/map-command.test.ts": [
+      "src/cli.ts",
+      "src/io-types.ts"
+    ],
+    "tests/unit/map-coverage.test.ts": [
+      "src/depgraph/reporters/coverage.ts",
+      "src/map/coverage.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/map-discovery.test.ts": [
+      "src/map/discovery.ts"
+    ],
+    "tests/unit/map-golden.test.ts": [
+      "src/map/command.ts",
+      "src/sort.ts"
+    ],
+    "tests/unit/map-graph-e2e.test.ts": [
+      "src/map/discovery.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/map-graph.test.ts": [
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/schema.ts"
+    ],
+    "tests/unit/map-layers.test.ts": [
+      "src/map/artifacts.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/layers.ts"
+    ],
+    "tests/unit/map-markdown.test.ts": [
+      "src/map/artifacts.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/markdown.ts"
+    ],
+    "tests/unit/map-open-items.test.ts": [],
+    "tests/unit/map-parsing-py.test.ts": [
+      "src/map/grammars.ts",
+      "src/map/parsing.ts"
+    ],
+    "tests/unit/map-parsing-regex.test.ts": [
+      "src/map/parsing.ts"
+    ],
+    "tests/unit/map-parsing-ts.test.ts": [
+      "src/map/grammars.ts",
+      "src/map/parsing.ts"
+    ],
+    "tests/unit/map-parsing-tsx.test.ts": [
+      "src/map/grammars.ts",
+      "src/map/parsing.ts"
+    ],
+    "tests/unit/map-project-name.test.ts": [],
+    "tests/unit/map-query.test.ts": [
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/query.ts",
+      "src/map/schema.ts"
+    ],
+    "tests/unit/map-reports-ste.test.ts": [
+      "src/map/command.ts",
+      "src/ste/markdown.ts"
+    ],
+    "tests/unit/map-reports.test.ts": [
+      "src/map/artifacts.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/reports.ts"
+    ],
+    "tests/unit/map-resolvers.test.ts": [
+      "src/map/parsing.ts",
+      "src/map/resolvers.ts"
+    ],
+    "tests/unit/map-surfaces.test.ts": [
+      "src/map/graph.ts",
+      "src/map/cycles.ts",
+      "src/map/surfaces.ts"
+    ],
+    "tests/unit/mask.test.ts": [
+      "src/mask.ts"
+    ],
+    "tests/unit/no-literal-bom.test.ts": [],
+    "tests/unit/node-compat.test.ts": [
+      "src/mask.ts",
+      "src/py.ts"
+    ],
+    "tests/unit/offline.test.ts": [],
+    "tests/unit/privacy-accepted.test.ts": [],
+    "tests/unit/privacy-check.test.ts": [],
+    "tests/unit/query-args.test.ts": [
+      "src/cli.ts",
+      "src/io-types.ts",
+      "src/query/args.ts"
+    ],
+    "tests/unit/query-commands.test.ts": [
+      "src/config.ts"
+    ],
+    "tests/unit/query-config.test.ts": [
+      "src/query/args.ts"
+    ],
+    "tests/unit/query-emit.test.ts": [],
+    "tests/unit/query-load.test.ts": [
+      "src/cli.ts",
+      "src/io-types.ts",
+      "src/query/load.ts"
+    ],
+    "tests/unit/query-node-safety.test.ts": [
+      "src/config.ts"
+    ],
+    "tests/unit/query-port.test.ts": [
+      "src/config.ts",
+      "src/query/args.ts",
+      "src/query/graph.ts",
+      "src/query/safety.ts"
+    ],
+    "tests/unit/query-safety.test.ts": [
+      "src/query/graph.ts",
+      "src/query/safety.ts"
+    ],
+    "tests/unit/sort.test.ts": [
+      "src/sort.ts"
+    ],
+    "tests/unit/ste-cli.test.ts": [
+      "src/cli.ts",
+      "src/io-types.ts"
+    ],
+    "tests/unit/ste-markdown.test.ts": [
+      "src/ste/markdown.ts"
+    ],
+    "tests/unit/ste-options.test.ts": [
+      "src/cli.ts",
+      "src/io-types.ts"
+    ],
+    "tests/unit/ste-prose.test.ts": [
+      "src/ste/prose.ts"
+    ],
+    "tests/unit/ste-py.test.ts": [
+      "src/py.ts"
+    ],
+    "tests/unit/temp.test.ts": []
+  },
+  "classifiedUntested": [
+    {
+      "file": "src/bin.ts",
+      "category": null
+    },
+    {
+      "file": "src/check/index.ts",
+      "category": null
+    },
+    {
+      "file": "src/chunk/manifest.ts",
+      "category": null
+    },
+    {
+      "file": "src/chunk/splitters.ts",
+      "category": null
+    },
+    {
+      "file": "src/clones/index.ts",
+      "category": null
+    },
+    {
+      "file": "src/clones/report.ts",
+      "category": null
+    },
+    {
+      "file": "src/depgraph/exclude.ts",
+      "category": null
+    },
+    {
+      "file": "src/docs/index.ts",
+      "category": null
+    },
+    {
+      "file": "src/docs/rules.ts",
+      "category": null
+    },
+    {
+      "file": "src/map/package-field.ts",
+      "category": null
+    },
+    {
+      "file": "src/map/python-stdlib.ts",
+      "category": null
+    },
+    {
+      "file": "src/query/commands.ts",
+      "category": null
+    },
+    {
+      "file": "src/query/index.ts",
+      "category": null
+    },
+    {
+      "file": "src/ste/index.ts",
+      "category": null
+    },
+    {
+      "file": "src/ste/rules.ts",
+      "category": null
+    },
+    {
+      "file": "src/ste/since.ts",
+      "category": null
+    }
+  ]
+}

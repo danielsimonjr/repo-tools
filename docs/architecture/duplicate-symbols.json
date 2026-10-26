@@ -1,0 +1,271 @@
+{
+  "note": "`duplicates` groups the names OWN-exported by >=2 'src' files, by name only, with no classification. `runtime` and `types` hold depgraph's classified lists of the same kind of names (see classificationNote); only TRUE_DUPLICATE entries there are merge targets.",
+  "classificationNote": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name \u2014 distinct dispatch surfaces, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body \u2014 excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: for example hot-path is* guards, mirrors in another language, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration \u2014 a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
+  "summary": {
+    "duplicateCount": 7,
+    "totalSymbols": 520,
+    "runtimeDuplicates": 8,
+    "typeDuplicates": 1,
+    "runtimeByTag": {
+      "TRUE_DUPLICATE": 8,
+      "DISPATCH_VARIANT": 0,
+      "ALIAS_DELEGATION": 0,
+      "ALLOWLISTED": 0
+    },
+    "typeByTag": {
+      "TRUE_DUPLICATE": 1,
+      "DISPATCH_VARIANT": 0,
+      "ALIAS_DELEGATION": 0,
+      "ALLOWLISTED": 0
+    }
+  },
+  "duplicates": {
+    "Dependency": [
+      "src/depgraph/types.ts",
+      "src/map/schema.ts"
+    ],
+    "SKIP_DIRS": [
+      "src/docs/discovery.ts",
+      "src/map/discovery.ts"
+    ],
+    "discover": [
+      "src/docs/discovery.ts",
+      "src/map/discovery.ts"
+    ],
+    "isTestFile": [
+      "src/docs/rules.ts",
+      "src/map/coverage.ts"
+    ],
+    "reachableFrom": [
+      "src/map/graph.ts",
+      "src/query/safety.ts"
+    ],
+    "run": [
+      "src/check/index.ts",
+      "src/chunk/index.ts",
+      "src/clones/index.ts",
+      "src/compress/index.ts",
+      "src/docs/index.ts",
+      "src/query/index.ts",
+      "src/ste/index.ts"
+    ],
+    "toJson": [
+      "src/io.ts",
+      "src/map/schema.ts"
+    ]
+  },
+  "runtime": [
+    {
+      "name": "run",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/check/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/chunk/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/clones/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/compress/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/docs/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/query/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/ste/index.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "SKIP_DIRS",
+      "category": "constant",
+      "definers": [
+        {
+          "file": "src/docs/discovery.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/map/discovery.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "cycles",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/map/query.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/query/commands.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "dependents",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/map/query.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/query/commands.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "discover",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/docs/discovery.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/map/discovery.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "isTestFile",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/docs/rules.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/map/coverage.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "reachableFrom",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/map/graph.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/query/safety.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    },
+    {
+      "name": "toJson",
+      "category": "function",
+      "definers": [
+        {
+          "file": "src/io.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/map/schema.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    }
+  ],
+  "types": [
+    {
+      "name": "Dependency",
+      "category": "interface",
+      "definers": [
+        {
+          "file": "src/depgraph/types.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "src/map/schema.ts",
+          "package": "unknown",
+          "public": false,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "internal-only",
+      "tag": "TRUE_DUPLICATE"
+    }
+  ]
+}

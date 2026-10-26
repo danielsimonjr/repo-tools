@@ -1,0 +1,2044 @@
+{
+  "totalFiles": 288,
+  "byDisposition": {
+    "reachable": 82,
+    "build-entry": 1,
+    "test-only": 0,
+    "orphan": 2,
+    "test": 192,
+    "tool": 10,
+    "config": 1,
+    "bench": 0,
+    "example": 0
+  },
+  "byArea": {
+    "tools": 10,
+    "src": 85,
+    "tests": 192,
+    "config": 1
+  },
+  "byPackage": {
+    "(root)": 203,
+    "@danielsimonjr/repo-tools": 85
+  },
+  "files": [
+    {
+      "file": "scripts/build.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 118
+    },
+    {
+      "file": "scripts/design-refs.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 125
+    },
+    {
+      "file": "scripts/fix-ledger-audit.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 657
+    },
+    {
+      "file": "scripts/fix-ledger-mutations.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 660
+    },
+    {
+      "file": "scripts/lockcheck.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 128
+    },
+    {
+      "file": "scripts/privacy-check.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 562
+    },
+    {
+      "file": "scripts/privacy-hash.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 53
+    },
+    {
+      "file": "scripts/smoke.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 390
+    },
+    {
+      "file": "scripts/update-depgraph-goldens.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 19
+    },
+    {
+      "file": "scripts/update-map-goldens.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 79
+    },
+    {
+      "file": "src/assets.d.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 5
+    },
+    {
+      "file": "src/bin.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "orphan",
+      "loc": 8
+    },
+    {
+      "file": "src/check/claims.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 79
+    },
+    {
+      "file": "src/check/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 191
+    },
+    {
+      "file": "src/check/metrics.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 89
+    },
+    {
+      "file": "src/check/verify.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 177
+    },
+    {
+      "file": "src/chunk/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 726
+    },
+    {
+      "file": "src/chunk/manifest.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 203
+    },
+    {
+      "file": "src/chunk/splitters.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 780
+    },
+    {
+      "file": "src/cli.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 137
+    },
+    {
+      "file": "src/clones/detect.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 137
+    },
+    {
+      "file": "src/clones/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 254
+    },
+    {
+      "file": "src/clones/normalise.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 113
+    },
+    {
+      "file": "src/clones/report.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 132
+    },
+    {
+      "file": "src/clones/settings.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 68
+    },
+    {
+      "file": "src/clones/units.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 226
+    },
+    {
+      "file": "src/compress/formats.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 455
+    },
+    {
+      "file": "src/compress/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 506
+    },
+    {
+      "file": "src/compress/legend.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 351
+    },
+    {
+      "file": "src/config.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 481
+    },
+    {
+      "file": "src/depgraph/analysis.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 385
+    },
+    {
+      "file": "src/depgraph/api-surface.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 800
+    },
+    {
+      "file": "src/depgraph/args.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 243
+    },
+    {
+      "file": "src/depgraph/coverage.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 280
+    },
+    {
+      "file": "src/depgraph/cycles.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 114
+    },
+    {
+      "file": "src/depgraph/description.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 76
+    },
+    {
+      "file": "src/depgraph/dirlist.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 54
+    },
+    {
+      "file": "src/depgraph/duplicates.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 555
+    },
+    {
+      "file": "src/depgraph/exclude.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 48
+    },
+    {
+      "file": "src/depgraph/extensions.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 217
+    },
+    {
+      "file": "src/depgraph/paths.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 50
+    },
+    {
+      "file": "src/depgraph/reporters/banner.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 31
+    },
+    {
+      "file": "src/depgraph/reporters/coverage.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 198
+    },
+    {
+      "file": "src/depgraph/reporters/duplicates.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 111
+    },
+    {
+      "file": "src/depgraph/reporters/json.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 180
+    },
+    {
+      "file": "src/depgraph/reporters/markdown.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 427
+    },
+    {
+      "file": "src/depgraph/reporters/surfaces.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 55
+    },
+    {
+      "file": "src/depgraph/reporters/yaml.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 44
+    },
+    {
+      "file": "src/depgraph/resolver.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 130
+    },
+    {
+      "file": "src/depgraph/roots.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 446
+    },
+    {
+      "file": "src/depgraph/types.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 210
+    },
+    {
+      "file": "src/depgraph/workspaces.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 174
+    },
+    {
+      "file": "src/docs/analyse.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 58
+    },
+    {
+      "file": "src/docs/discovery.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 242
+    },
+    {
+      "file": "src/docs/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 494
+    },
+    {
+      "file": "src/docs/model.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 100
+    },
+    {
+      "file": "src/docs/python.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 460
+    },
+    {
+      "file": "src/docs/report.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 197
+    },
+    {
+      "file": "src/docs/rules.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 79
+    },
+    {
+      "file": "src/docs/stub.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 193
+    },
+    {
+      "file": "src/docs/typescript.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 404
+    },
+    {
+      "file": "src/io-types.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 10
+    },
+    {
+      "file": "src/io.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 27
+    },
+    {
+      "file": "src/map/adapter.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 166
+    },
+    {
+      "file": "src/map/artifacts.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 722
+    },
+    {
+      "file": "src/map/command.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 421
+    },
+    {
+      "file": "src/map/coverage.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 85
+    },
+    {
+      "file": "src/map/cycles.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 178
+    },
+    {
+      "file": "src/map/discovery.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 443
+    },
+    {
+      "file": "src/map/grammars.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 84
+    },
+    {
+      "file": "src/map/graph.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 680
+    },
+    {
+      "file": "src/map/layers.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 76
+    },
+    {
+      "file": "src/map/markdown.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 232
+    },
+    {
+      "file": "src/map/package-field.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 19
+    },
+    {
+      "file": "src/map/parsing.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 894
+    },
+    {
+      "file": "src/map/python-stdlib.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 300
+    },
+    {
+      "file": "src/map/query.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 139
+    },
+    {
+      "file": "src/map/reports.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 124
+    },
+    {
+      "file": "src/map/resolvers.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 325
+    },
+    {
+      "file": "src/map/schema.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 182
+    },
+    {
+      "file": "src/map/surfaces.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 173
+    },
+    {
+      "file": "src/mask.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 267
+    },
+    {
+      "file": "src/py.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 183
+    },
+    {
+      "file": "src/query/args.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 179
+    },
+    {
+      "file": "src/query/commands.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 255
+    },
+    {
+      "file": "src/query/graph.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 57
+    },
+    {
+      "file": "src/query/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 120
+    },
+    {
+      "file": "src/query/load.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 120
+    },
+    {
+      "file": "src/query/safety.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 100
+    },
+    {
+      "file": "src/sort.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 18
+    },
+    {
+      "file": "src/ste/index.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 255
+    },
+    {
+      "file": "src/ste/markdown.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 220
+    },
+    {
+      "file": "src/ste/prose.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 104
+    },
+    {
+      "file": "src/ste/rules.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 96
+    },
+    {
+      "file": "src/ste/since.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 95
+    },
+    {
+      "file": "tests/fixtures/chunk/module.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 51
+    },
+    {
+      "file": "tests/fixtures/chunk/parser.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
+    },
+    {
+      "file": "tests/fixtures/compress/sample.js",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 21
+    },
+    {
+      "file": "tests/fixtures/compress/sample.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/B.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 13
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/Z/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 1
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/Z/loop.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 6
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/Z/zed.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 10
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/_x.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/a.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 17
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/ambient.d.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 1
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/cli.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 6
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/dyn.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 2
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 7
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/orphan.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 2
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/ping.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 6
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/pong.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 5
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/register.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 2
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/util/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/src/view.tsx",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/tests/a.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/fixtures/depgraph/mini-repo/tests/barrel.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/cli/src/format.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/cli/src/main.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 5
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/src/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/src/internal.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 2
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/src/math.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 11
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/src/types.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 2
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/src/worker.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/tests/math.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/fixtures/depgraph/mono-repo/packages/core/tsup.config.ts",
+      "package": "(root)",
+      "area": "config",
+      "disposition": "config",
+      "loc": 6
+    },
+    {
+      "file": "tests/fixtures/depgraph/pnpm-repo/apps/web/src/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/depgraph/pnpm-repo/apps/web/tests/index.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/fixtures/depgraph/pnpm-repo/packages/core/src/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 6
+    },
+    {
+      "file": "tests/fixtures/depgraph/pnpm-repo/packages/util/src/index.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/fixtures/extension/probe.mjs",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 15
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/001-imports.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 8
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/002-function-render.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 9
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/003-const-quote-re.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 2
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/004-function-escaped.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 5
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/005-class-box.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 14
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/006-interface-shape.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/007-type-pair.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 1
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/008-enum-color.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 4
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/009-function-helper.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 3
+    },
+    {
+      "file": "tests/golden/chunk/typescript/chunks/010-const-limit.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 1
+    },
+    {
+      "file": "tests/golden/chunk/typescript/merged.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
+    },
+    {
+      "file": "tests/golden/compress/js.aggressive.compact.js",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 1
+    },
+    {
+      "file": "tests/golden/compress/js.light.compact.js",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 21
+    },
+    {
+      "file": "tests/golden/compress/js.medium.compact.js",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 15
+    },
+    {
+      "file": "tests/golden/compress/ts.aggressive.compact.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 1
+    },
+    {
+      "file": "tests/golden/compress/ts.light.compact.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
+    },
+    {
+      "file": "tests/golden/compress/ts.medium.compact.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 17
+    },
+    {
+      "file": "tests/unit/api-surface.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 297
+    },
+    {
+      "file": "tests/unit/build.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 241
+    },
+    {
+      "file": "tests/unit/check-claims.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 120
+    },
+    {
+      "file": "tests/unit/check-command.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 536
+    },
+    {
+      "file": "tests/unit/check-metrics.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 125
+    },
+    {
+      "file": "tests/unit/check-verify.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 357
+    },
+    {
+      "file": "tests/unit/chunk-golden.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
+      "file": "tests/unit/chunk-review-2.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 348
+    },
+    {
+      "file": "tests/unit/chunk-review.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 376
+    },
+    {
+      "file": "tests/unit/chunk.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 322
+    },
+    {
+      "file": "tests/unit/cli.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 93
+    },
+    {
+      "file": "tests/unit/clones-command.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 493
+    },
+    {
+      "file": "tests/unit/clones-detect.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 211
+    },
+    {
+      "file": "tests/unit/clones-settings.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 150
+    },
+    {
+      "file": "tests/unit/clones-units.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 237
+    },
+    {
+      "file": "tests/unit/compress-golden.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 134
+    },
+    {
+      "file": "tests/unit/compress.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 696
+    },
+    {
+      "file": "tests/unit/config.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 323
+    },
+    {
+      "file": "tests/unit/depgraph-analysis.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 187
+    },
+    {
+      "file": "tests/unit/depgraph-api-surface.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 142
+    },
+    {
+      "file": "tests/unit/depgraph-args.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 65
+    },
+    {
+      "file": "tests/unit/depgraph-config-wiring.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 266
+    },
+    {
+      "file": "tests/unit/depgraph-duplicate-gate.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 246
+    },
+    {
+      "file": "tests/unit/depgraph-duplicates.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 293
+    },
+    {
+      "file": "tests/unit/depgraph-exit.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 91
+    },
+    {
+      "file": "tests/unit/depgraph-extensions.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 241
+    },
+    {
+      "file": "tests/unit/depgraph-f1.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 50
+    },
+    {
+      "file": "tests/unit/depgraph-f10.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 46
+    },
+    {
+      "file": "tests/unit/depgraph-f11.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
+      "file": "tests/unit/depgraph-f12.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
+    },
+    {
+      "file": "tests/unit/depgraph-f13.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
+    },
+    {
+      "file": "tests/unit/depgraph-f14.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 69
+    },
+    {
+      "file": "tests/unit/depgraph-f15.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/depgraph-f16.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 42
+    },
+    {
+      "file": "tests/unit/depgraph-f17.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 126
+    },
+    {
+      "file": "tests/unit/depgraph-f18.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
+      "file": "tests/unit/depgraph-f19.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
+    },
+    {
+      "file": "tests/unit/depgraph-f2.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 60
+    },
+    {
+      "file": "tests/unit/depgraph-f20.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
+    },
+    {
+      "file": "tests/unit/depgraph-f21.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 98
+    },
+    {
+      "file": "tests/unit/depgraph-f22.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 47
+    },
+    {
+      "file": "tests/unit/depgraph-f23.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 28
+    },
+    {
+      "file": "tests/unit/depgraph-f24.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
+    },
+    {
+      "file": "tests/unit/depgraph-f25.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 33
+    },
+    {
+      "file": "tests/unit/depgraph-f26.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 267
+    },
+    {
+      "file": "tests/unit/depgraph-f27.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 41
+    },
+    {
+      "file": "tests/unit/depgraph-f28.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
+      "file": "tests/unit/depgraph-f29.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 32
+    },
+    {
+      "file": "tests/unit/depgraph-f3.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 48
+    },
+    {
+      "file": "tests/unit/depgraph-f30.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 62
+    },
+    {
+      "file": "tests/unit/depgraph-f31.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
+    },
+    {
+      "file": "tests/unit/depgraph-f32.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/depgraph-f33.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/depgraph-f34.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 129
+    },
+    {
+      "file": "tests/unit/depgraph-f35.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 74
+    },
+    {
+      "file": "tests/unit/depgraph-f36.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 61
+    },
+    {
+      "file": "tests/unit/depgraph-f37.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
+    },
+    {
+      "file": "tests/unit/depgraph-f38.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 46
+    },
+    {
+      "file": "tests/unit/depgraph-f39.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
+      "file": "tests/unit/depgraph-f4.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/depgraph-f40.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 47
+    },
+    {
+      "file": "tests/unit/depgraph-f41.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
+    },
+    {
+      "file": "tests/unit/depgraph-f42.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
+      "file": "tests/unit/depgraph-f43.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 173
+    },
+    {
+      "file": "tests/unit/depgraph-f44.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/depgraph-f5.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
+      "file": "tests/unit/depgraph-f6.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 68
+    },
+    {
+      "file": "tests/unit/depgraph-f7.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 72
+    },
+    {
+      "file": "tests/unit/depgraph-f8.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/depgraph-f9.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 41
+    },
+    {
+      "file": "tests/unit/depgraph-inventory-coverage.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 115
+    },
+    {
+      "file": "tests/unit/depgraph-m1.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 126
+    },
+    {
+      "file": "tests/unit/depgraph-parse.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 64
+    },
+    {
+      "file": "tests/unit/depgraph-paths.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
+    },
+    {
+      "file": "tests/unit/depgraph-r1.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 51
+    },
+    {
+      "file": "tests/unit/depgraph-report.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 256
+    },
+    {
+      "file": "tests/unit/depgraph-scan.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 177
+    },
+    {
+      "file": "tests/unit/depgraph-tsx.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 52
+    },
+    {
+      "file": "tests/unit/design-refs.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 148
+    },
+    {
+      "file": "tests/unit/docs-command.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 459
+    },
+    {
+      "file": "tests/unit/docs-discovery.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 213
+    },
+    {
+      "file": "tests/unit/docs-helpers.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 88
+    },
+    {
+      "file": "tests/unit/docs-python.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 369
+    },
+    {
+      "file": "tests/unit/docs-report.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 158
+    },
+    {
+      "file": "tests/unit/docs-review.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 249
+    },
+    {
+      "file": "tests/unit/docs-stub.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 264
+    },
+    {
+      "file": "tests/unit/docs-typescript.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 606
+    },
+    {
+      "file": "tests/unit/dynamic-imports.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 25
+    },
+    {
+      "file": "tests/unit/entry-roots-build-configs.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 115
+    },
+    {
+      "file": "tests/unit/fix-ledger-audit.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 382
+    },
+    {
+      "file": "tests/unit/golden-depgraph.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 20
+    },
+    {
+      "file": "tests/unit/io.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 32
+    },
+    {
+      "file": "tests/unit/lockcheck.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 112
+    },
+    {
+      "file": "tests/unit/map-adapter.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 179
+    },
+    {
+      "file": "tests/unit/map-artifacts-e2e.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 228
+    },
+    {
+      "file": "tests/unit/map-artifacts.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 826
+    },
+    {
+      "file": "tests/unit/map-command.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 274
+    },
+    {
+      "file": "tests/unit/map-coverage.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 298
+    },
+    {
+      "file": "tests/unit/map-discovery.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 374
+    },
+    {
+      "file": "tests/unit/map-golden.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 48
+    },
+    {
+      "file": "tests/unit/map-graph-e2e.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 243
+    },
+    {
+      "file": "tests/unit/map-graph.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 601
+    },
+    {
+      "file": "tests/unit/map-layers.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 142
+    },
+    {
+      "file": "tests/unit/map-markdown.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 152
+    },
+    {
+      "file": "tests/unit/map-open-items.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 139
+    },
+    {
+      "file": "tests/unit/map-parsing-py.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 160
+    },
+    {
+      "file": "tests/unit/map-parsing-regex.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 168
+    },
+    {
+      "file": "tests/unit/map-parsing-ts.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 274
+    },
+    {
+      "file": "tests/unit/map-parsing-tsx.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 182
+    },
+    {
+      "file": "tests/unit/map-project-name.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
+    },
+    {
+      "file": "tests/unit/map-query.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 310
+    },
+    {
+      "file": "tests/unit/map-reports-ste.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 104
+    },
+    {
+      "file": "tests/unit/map-reports.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 139
+    },
+    {
+      "file": "tests/unit/map-resolvers.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 187
+    },
+    {
+      "file": "tests/unit/map-surfaces.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 115
+    },
+    {
+      "file": "tests/unit/mask.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 33
+    },
+    {
+      "file": "tests/unit/no-literal-bom.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 61
+    },
+    {
+      "file": "tests/unit/node-compat.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 95
+    },
+    {
+      "file": "tests/unit/offline.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 71
+    },
+    {
+      "file": "tests/unit/offline.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
+      "file": "tests/unit/privacy-accepted.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 279
+    },
+    {
+      "file": "tests/unit/privacy-check.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 463
+    },
+    {
+      "file": "tests/unit/query-args.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 106
+    },
+    {
+      "file": "tests/unit/query-commands.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 208
+    },
+    {
+      "file": "tests/unit/query-config.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 64
+    },
+    {
+      "file": "tests/unit/query-emit.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 94
+    },
+    {
+      "file": "tests/unit/query-fixture.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 99
+    },
+    {
+      "file": "tests/unit/query-load.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 148
+    },
+    {
+      "file": "tests/unit/query-node-safety.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 145
+    },
+    {
+      "file": "tests/unit/query-port.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 139
+    },
+    {
+      "file": "tests/unit/query-safety.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 25
+    },
+    {
+      "file": "tests/unit/sort.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 34
+    },
+    {
+      "file": "tests/unit/ste-cli.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 161
+    },
+    {
+      "file": "tests/unit/ste-markdown.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 106
+    },
+    {
+      "file": "tests/unit/ste-options.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 307
+    },
+    {
+      "file": "tests/unit/ste-prose.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 132
+    },
+    {
+      "file": "tests/unit/ste-py.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 49
+    },
+    {
+      "file": "tests/unit/temp.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
+    },
+    {
+      "file": "tests/unit/temp.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 71
+    },
+    {
+      "file": "tests/unit/tree.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 79
+    }
+  ],
+  "skippedLinks": [],
+  "warnings": []
+}
