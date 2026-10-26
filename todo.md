@@ -371,4 +371,5 @@ data. Other findings are filed here.
   Stability: the numbers come from one fresh clone at a fixed commit. Reliability: a copy with the three invalid lines
   rewritten gives the same output. Security: the
   record holds no path outside the repository. Maintainability: one section per repository, and the same method as the
-  first. NOT done: a third repository with a Python or JavaScript majority.
+  first. NOT done: a third repository with a JavaScript majority. A Python repository waits for the open row
+  that adds Python units to `clones`.

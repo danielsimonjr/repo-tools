@@ -191,6 +191,7 @@ runs from the source files with Bun, without an output folder, on one Windows co
 - The record shows that two parsers agree, not that every pair is a copy that should merge. Read both
   bodies of a pair before you change anything.
 - The record covers two repositories, and both are TypeScript with a library layout. A repository with
-  more generated code, other syntax or a Python or JavaScript majority can differ.
+  more generated code, other syntax or a JavaScript majority can differ. The command does not read
+  Python files, so no Python repository can be compared.
 - The prototype is not published. For memoryjs the record cites its published report. For
   deepthinking-mcp no report exists, so a reader cannot repeat the prototype run from this record.
