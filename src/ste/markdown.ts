@@ -159,46 +159,62 @@ function paragraphs(text: string): Block[] {
   return blocks;
 }
 
+/** One finding: the text that the gate prints, and the first and last source line that it covers. */
+export interface Finding {
+  text: string;
+  first: number;
+  last: number;
+}
+
 /**
  * Returns the STE findings of the Markdown document `text`, in this order: the sentence lengths
  * of all paragraphs, then per paragraph the wordy forms, the ambiguous references and the
- * passive voice. `name` is the file name that each finding starts with.
+ * passive voice. `name` is the file name that each finding starts with. A sentence-length finding
+ * covers its whole paragraph. Another finding covers the one line of its match.
  */
-export function checkMarkdown(name: string, text: string): string[] {
-  const problems: string[] = [];
+export function checkMarkdownFindings(name: string, text: string): Finding[] {
+  const found: Finding[] = [];
   const blocks = paragraphs(text);
-  for (const [start, block] of blocks) {
+  for (const [start, block, lineMap] of blocks) {
     const procedural = PROCEDURAL_STARTS.some((p) => pyLstrip(block).startsWith(p));
     const limit = procedural ? MAX_WORDS_PROCEDURAL : MAX_WORDS_DESCRIPTIVE;
+    const last = lineMap.length > 0 ? (lineMap[lineMap.length - 1] as number) : start;
     for (const sentence of sentences(block)) {
       const n = wordCount(sentence);
       if (n > limit) {
         const tier = procedural ? "procedural" : "descriptive";
-        problems.push(
-          `${name}:~${start}: ${n} words (>${limit} ${tier}): ${headCodePoints(pyStrip(sentence), 90)}`,
-        );
+        found.push({
+          text: `${name}:~${start}: ${n} words (>${limit} ${tier}): ${headCodePoints(pyStrip(sentence), 90)}`,
+          first: start,
+          last,
+        });
       }
     }
   }
   // The rules scan the joined paragraph, not one line: a wrapped line is not a clause start.
   for (const [, block, lineMap] of blocks) {
     const bare = proseOnly(block);
+    const at = (index: number, rest: string): Finding => {
+      const line = lineAt(index, lineMap);
+      return { text: `${name}:${line}: ${rest}`, first: line, last: line };
+    };
     for (const [phrase, better, re] of WORDY_RULES) {
       // Lower case only: a capitalised form is how a technical name looks.
       for (const m of bare.matchAll(re)) {
-        problems.push(
-          `${name}:${lineAt(m.index, lineMap)}: wordy: ${pyRepr(phrase)} - prefer ${pyRepr(better)}`,
-        );
+        found.push(at(m.index, `wordy: ${pyRepr(phrase)} - prefer ${pyRepr(better)}`));
       }
     }
     for (const m of bare.matchAll(AMBIGUOUS)) {
-      problems.push(
-        `${name}:${lineAt(m.index, lineMap)}: ambiguous reference: ${pyRepr(pyStrip(m[0]))}`,
-      );
+      found.push(at(m.index, `ambiguous reference: ${pyRepr(pyStrip(m[0]))}`));
     }
     for (const m of bare.matchAll(PASSIVE)) {
-      problems.push(`${name}:${lineAt(m.index, lineMap)}: passive voice: ${pyRepr(pyStrip(m[0]))}`);
+      found.push(at(m.index, `passive voice: ${pyRepr(pyStrip(m[0]))}`));
     }
   }
-  return problems;
+  return found;
+}
+
+/** The text of each finding of `checkMarkdownFindings`, in the same order. */
+export function checkMarkdown(name: string, text: string): string[] {
+  return checkMarkdownFindings(name, text).map((f) => f.text);
 }

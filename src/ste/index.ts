@@ -6,14 +6,15 @@
  * findings). Both modes use one rule module (`rules.ts`).
  */
 import { type Dirent, existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, resolve } from "node:path";
 import type { Io } from "../io-types.ts";
 import { compareCodeUnits } from "../sort.ts";
-import { checkMarkdown } from "./markdown.ts";
+import { checkMarkdownFindings } from "./markdown.ts";
 import { checkProse, proseOf } from "./prose.ts";
+import { addedLinesSince, SinceError, touchesAdded } from "./since.ts";
 
 /** The help text of `repo-tools ste`. */
-export const STE_HELP = `Usage: repo-tools ste <file-or-directory> [...]
+export const STE_HELP = `Usage: repo-tools ste <file-or-directory> [...] [--require=<path>] [--since=<rev>]
        repo-tools ste --prose <file>
 
 Check prose against the mechanically decidable part of ASD-STE100 Simplified
@@ -28,6 +29,17 @@ fences, tables, headings, quotes, comments, frontmatter, inline code and
 identifiers are not checked. A file whose first five lines hold
 "<!-- ste:historical-record -->" is skipped, and the skip is counted.
 
+  --require=<path>  The file must exist, and the run must examine it. Repeat the
+                  option for more files. A document that someone deletes inside
+                  a folder gives no finding, so this option makes the deletion
+                  an error. A file that the run skips as a historical record
+                  counts as examined.
+  --since=<rev>   Report only the findings on the lines that the working tree
+                  adds or changes since the git revision <rev> (committed,
+                  staged and unstaged edits). A sentence-length finding counts
+                  when any line of its paragraph changed. A file that is not in
+                  <rev> counts in full. The totals line gives the number of
+                  older findings that the option hides.
   --prose <file>  Check the file as one docstring. Tag lines (@param), section
                   headers, doctest lines and code fences are removed first. Each
                   finding prints as "RULE<TAB>detail". The findings are advice:
@@ -36,7 +48,9 @@ identifiers are not checked. A file whose first five lines hold
 
 Exit codes: 0 when no finding (Markdown mode) or always (--prose mode). 1 when a
 Markdown finding exists. 2 on a usage error, when a path does not exist, when no
-Markdown file was examined, or when a file is not UTF-8.
+Markdown file was examined, when a required file does not exist or was not
+examined, when --since cannot use the revision or the work tree, or when a file
+is not UTF-8.
 `;
 
 /** The marker that opts a dated record out of the check. */
@@ -118,21 +132,65 @@ function runProse(args: string[], io: Io): number {
   return 0;
 }
 
+/** The paths and the options of the Markdown mode. */
+interface MarkdownArgs {
+  paths: string[];
+  required: string[];
+  since: string | null;
+}
+
+/** Splits `argv` into paths and options. Returns a message when an option has no usable value. */
+function parseMarkdownArgs(argv: string[]): MarkdownArgs | string {
+  const args: MarkdownArgs = { paths: [], required: [], since: null };
+  for (const arg of argv) {
+    if (arg === "--require" || arg.startsWith("--require=")) {
+      const value = arg.slice("--require=".length);
+      if (arg === "--require" || value === "") return "--require needs a path (--require=<path>)";
+      args.required.push(value);
+    } else if (arg === "--since" || arg.startsWith("--since=")) {
+      const value = arg.slice("--since=".length);
+      // A value that starts with a dash would be an option of git, not a revision.
+      if (arg === "--since" || value === "" || value.startsWith("-")) {
+        return "--since needs a revision (--since=<rev>)";
+      }
+      args.since = value;
+    } else {
+      args.paths.push(arg);
+    }
+  }
+  return args;
+}
+
+/** The key that compares two paths: absolute, and without case on Windows. */
+function pathKey(path: string): string {
+  const full = resolve(path);
+  return process.platform === "win32" ? full.toLowerCase() : full;
+}
+
 /** Runs `repo-tools ste` and returns the exit code. */
 export async function run(argv: string[], io: Io): Promise<number> {
   if (argv[0] === "--prose") return runProse(argv.slice(1), io);
-  if (argv.length === 0) {
+  const parsed = parseMarkdownArgs(argv);
+  if (typeof parsed === "string") {
+    io.stderr(`repo-tools ste: ${parsed}\n`);
+    return 2;
+  }
+  const { paths, required, since } = parsed;
+  if (paths.length === 0) {
     io.stdout("usage: repo-tools ste <file-or-directory> [...]\n");
     return 2;
   }
   let total = 0;
   let checked = 0;
   let skipped = 0;
+  let hidden = 0;
   const missing: string[] = [];
-  for (const arg of argv) {
+  const examined = new Set<string>();
+  for (const arg of paths) {
     if (!existsSync(arg)) missing.push(arg);
     for (const target of targetsFor(arg)) {
       const name = basename(target);
+      examined.add(pathKey(target));
       if (isHistoricalRecord(target)) {
         skipped += 1;
         io.stdout(`\n=== ${name}: SKIPPED (historical record) ===\n`);
@@ -145,24 +203,53 @@ export async function run(argv: string[], io: Io): Promise<number> {
         io.stderr(`repo-tools ste: cannot read ${name} as UTF-8 text\n`);
         return 2;
       }
-      const problems = checkMarkdown(name, text);
+      let findings = checkMarkdownFindings(name, text);
+      if (since !== null) {
+        try {
+          const added = addedLinesSince(target, since);
+          const shown = findings.filter((f) => touchesAdded(added, f.first, f.last));
+          hidden += findings.length - shown.length;
+          findings = shown;
+        } catch (error) {
+          if (!(error instanceof SinceError)) throw error;
+          io.stderr(`repo-tools ste: ${error.message}\n`);
+          return 2;
+        }
+      }
       checked += 1;
-      total += problems.length;
-      const status = problems.length === 0 ? "OK" : `${problems.length} problem(s)`;
+      total += findings.length;
+      const status = findings.length === 0 ? "OK" : `${findings.length} problem(s)`;
       io.stdout(`\n=== ${name}: ${status} ===\n`);
-      for (const p of problems) io.stdout(`  ${p}\n`);
+      for (const f of findings) io.stdout(`  ${f.text}\n`);
     }
   }
-  const tail = skipped > 0 ? `; ${skipped} skipped as historical record(s)` : "";
+  const notes: string[] = [];
+  if (skipped > 0) notes.push(`${skipped} skipped as historical record(s)`);
+  if (since !== null && hidden > 0) {
+    notes.push(`${hidden} older finding(s) hidden by --since=${since}`);
+  }
+  const tail = notes.length > 0 ? `; ${notes.join("; ")}` : "";
   io.stdout(`\nTOTAL: ${total} problem(s) in ${checked} file(s)${tail}\n`);
   // A mistyped path must not look like a clean run, even when other paths were checked.
   for (const path of missing) io.stderr(`ERROR: path does not exist: ${path}\n`);
+  // A required file is a promise that the gate covers it. A deleted file, or a file outside the
+  // paths of the run, breaks the promise.
+  let requiredFailed = false;
+  for (const path of required) {
+    if (!existsSync(path) || !statSync(path).isFile()) {
+      io.stderr(`ERROR: required file does not exist: ${path}\n`);
+      requiredFailed = true;
+    } else if (!examined.has(pathKey(path))) {
+      io.stderr(`ERROR: required file was not examined: ${path}\n`);
+      requiredFailed = true;
+    }
+  }
   // Checking nothing is not passing: a mistyped path must not look like a clean run.
   if (checked === 0) {
     io.stderr(
       "ERROR: no Markdown file was examined. This is a failure, not a clean result -- check the path(s) given.\n",
     );
   }
-  if (missing.length > 0 || checked === 0) return 2;
+  if (missing.length > 0 || checked === 0 || requiredFailed) return 2;
   return total > 0 ? 1 : 0;
 }
