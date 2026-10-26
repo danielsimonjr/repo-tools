@@ -174,13 +174,38 @@ function attributionLines(file: string, text: string): Set<number> {
 }
 
 /**
+ * Wraps `compute` so that a token is computed once. Words repeat across the files of a
+ * repository, and the SHA-256 of every candidate costs more than a lookup. The memo holds at most
+ * `max` tokens: it is emptied when full, so a long run keeps a bounded size.
+ */
+export function memoByToken<T>(compute: (token: string) => T, max: number): (token: string) => T {
+  const seen = new Map<string, T>();
+  return (token) => {
+    const known = seen.get(token);
+    if (known !== undefined) return known;
+    const fresh = compute(token);
+    if (seen.size >= max) seen.clear();
+    seen.set(token, fresh);
+    return fresh;
+  };
+}
+
+/** The most tokens that the memo of candidate hashes holds. */
+const CANDIDATE_MEMO_MAX = 20_000;
+
+/** The denylist hashes of the candidates of one token, in the order of `tokenCandidates`. */
+const candidateHashes = memoByToken(
+  (token) => tokenCandidates(token).map(hashToken),
+  CANDIDATE_MEMO_MAX,
+);
+
+/**
  * Returns the hash of the first denylisted token candidate on a line, or undefined. `exempt`
  * applies only to `person` candidates; `private` candidates are never exempt.
  */
 function denylistHit(line: string, deny: Denylist, exempt: boolean): string | undefined {
   for (const [token] of line.matchAll(TOKEN)) {
-    for (const candidate of tokenCandidates(token)) {
-      const hash = hashToken(candidate);
+    for (const hash of candidateHashes(token)) {
       const category = deny.get(hash);
       if (!category) continue;
       if (category === "person" && exempt) continue;

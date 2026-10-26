@@ -7,6 +7,7 @@ import {
   type Finding,
   formatFinding,
   hashToken,
+  memoByToken,
   parseDenylist,
   runCheck,
   scanCommitMessage,
@@ -177,6 +178,55 @@ describe("reporting", () => {
     for (const plant of [WIN_PATH, HOME_PATH, EMAIL, SESSION, "someone", "zorblatt"]) {
       expect(report.toLowerCase()).not.toContain(plant.toLowerCase());
     }
+  });
+});
+
+describe("the memo of candidate hashes", () => {
+  test("a token is computed once and the result is returned again", () => {
+    const calls: string[] = [];
+    const memo = memoByToken((t) => {
+      calls.push(t);
+      return [t.toUpperCase()];
+    }, 10);
+    expect(memo("a")).toEqual(["A"]);
+    expect(memo("a")).toEqual(["A"]);
+    expect(calls).toEqual(["a"]);
+  });
+
+  test("a falsy result is kept, not computed again", () => {
+    let calls = 0;
+    const memo = memoByToken(() => {
+      calls++;
+      return 0;
+    }, 10);
+    memo("a");
+    memo("a");
+    expect(calls).toBe(1);
+  });
+
+  test("a full memo is emptied, so its size stays bounded", () => {
+    const calls: string[] = [];
+    const memo = memoByToken((t) => {
+      calls.push(t);
+      return t;
+    }, 2);
+    for (const t of ["a", "b", "c", "c", "a", "b"]) memo(t);
+    // "c" empties the memo of "a" and "b" and stays. The later "a" and "b" are computed again.
+    expect(calls).toEqual(["a", "b", "c", "a", "b"]);
+  });
+
+  test("a scan with one denylist does not hide a hit under another denylist", () => {
+    const other: Denylist = new Map([[hashToken("another"), "person"]]);
+    expect(scanText("README.md", "Written by Zorblatt.\n", other)).toEqual([]);
+    expect(rules(scanText("README.md", "Written by Zorblatt.\n", DENY))).toEqual(["denylist"]);
+    expect(scanText("README.md", "Written by Zorblatt.\n", other)).toEqual([]);
+  });
+
+  test("the first hit of a line is the same on every scan", () => {
+    const text = "x-zorblatt and quuxwiki\n";
+    const first = scanText("README.md", text, DENY);
+    expect(first).toHaveLength(1);
+    expect(scanText("README.md", text, DENY)).toEqual(first);
   });
 });
 
