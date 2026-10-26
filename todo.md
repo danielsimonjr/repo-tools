@@ -339,3 +339,7 @@ data. Other findings are filed here.
   and commit messages under a denylist of 304 common words. Four mutants of the memo each fail a test. Security: the memo
   holds hashes of word tokens in memory only, at most 20,000 words. Maintainability: one exported function,
   `memoByToken`, with 6 tests. NOT done: the git calls of the scan (`spawnSync` in the profile) still take about 1.2 s.
+- [ ] 2026-10-25 tests that sit near the 5 s default of `bun test` time out when the machine is busy. Measured on a Windows
+  machine: the privacy scan test took 5.2 s (fixed by the memo, now about 2 s), and the test "D4: a tracked folder link in a
+  git repo is listed" in `tests/unit/map-artifacts.test.ts` took 7.5 s in a full run with other work on the machine and
+  0.7 s alone. Decide whether the git-heavy tests get a per-test timeout, and give the reason for the number.
