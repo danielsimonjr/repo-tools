@@ -204,6 +204,16 @@ describe("the memo of candidate hashes", () => {
     expect(calls).toBe(1);
   });
 
+  test("a memo holds as many tokens as its limit before it is emptied", () => {
+    const calls: string[] = [];
+    const memo = memoByToken((t) => {
+      calls.push(t);
+      return t;
+    }, 2);
+    for (const t of ["a", "b", "a", "b"]) memo(t);
+    expect(calls).toEqual(["a", "b"]);
+  });
+
   test("a full memo is emptied, so its size stays bounded", () => {
     const calls: string[] = [];
     const memo = memoByToken((t) => {

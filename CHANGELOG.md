@@ -25,6 +25,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The privacy check (`scripts/privacy-check.ts`) keeps the hashes of the candidates of each word, so it hashes a word
+  once. The scan of this repository took about 4.5 s on a Windows machine and takes about 1.5 s now, and the findings
+  are the same. The test "this repository scans clean" timed out at the 5 s default of `bun test` on that machine.
+  A memo of at most 20,000 words keeps the memory bounded.
 - Every report of `repo-tools map` carries the `name` field of `package.json` as the project name. A report uses
   the folder name only when `package.json` has no name, or when the name is empty or not a string.
   `dependency-graph.json` and `dependency-graph.yaml` wrote the folder name before, so two checkouts of one repository
