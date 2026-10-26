@@ -26,6 +26,10 @@ All notable changes to this project are recorded in this file. The format follow
   The summary gave only the number before, so a reader could not act on it. The new setting `parseErrorList` (flag
   `--list-errors`, default 20) sets the most paths in the list. `clones.json` does not hold the setting. A run
   without parse errors gives the same output as before. `docs/design.md` section 17.7 states the format.
+- `docs/parity-clones.md` has a second repository, deepthinking-mcp (243 files). 1,172 units are the same, and the
+  command finds all 12 exact groups of the prototype. The 29 units that only one side reports lie at the cutoff of
+  50 labels, except two functions that are mostly template strings. Tree-sitter makes a node for each escape
+  sequence of a template string, and the prototype makes one node for each template element.
 
 ### Changed
 

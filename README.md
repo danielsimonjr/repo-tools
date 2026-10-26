@@ -344,7 +344,7 @@ to read. 2 on a usage error, a bad config file or a root that is not a folder.
 
 The result is a list of candidates. Read both bodies of a pair before you change anything.
 `docs/design.md` (section 17) gives the rules. `docs/parity-clones.md` records the comparison with the
-prototype of the memoryjs audit.
+prototype of the memoryjs audit, on memoryjs and on deepthinking-mcp.
 
 ## Develop
 
