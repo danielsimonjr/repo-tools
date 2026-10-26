@@ -484,6 +484,9 @@ with `schemaVersion` 2.0.0 and no `generated` date. The 2.0.0 additions are list
 - A namespace import (`import * as ns`, `export * as ns`) is a namespace use. It counts every
   export of the target file as used, as a runtime `import()` does. The Python tool lists those
   exports as unused. The parity record gives the verdict `repo_map-wrong`.
+- `export type * from 'm'` and `export type * as ns from 'm'` are type-only edges, so a cycle through one is a
+  type-only cycle. Grammar 0.23.2 does not know this syntax and puts the word `type` inside an error node. The
+  reader tests the text of the statement, and the statement and its source stay in the tree.
 - A name that a file mentions only in a comment is not an in-module reference. The count reads
   the source with the comments removed. The Python tool counts the comment, so the name is
   "referenced in module" there and "unreferenced anywhere" here.

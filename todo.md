@@ -302,9 +302,17 @@ data. Other findings are filed here.
   in another.
 - [ ] `tree-sitter-typescript` 0.23.2 reports an error for a property named `abstract` in an interface
   (`abstract?: boolean;`) and for `export type * from './x.js';`. Both are valid TypeScript. In a scratch test
-  `clones` still finds the functions that follow the error, and `map` reads the exports. Check the units inside
-  the error span and check a newer grammar release. Also check the edge that `map` writes for `export type *`:
-  the edge holds `typeOnly: false`, but the edge must be type-only.
+  `clones` still finds the functions that follow the error, and `map` reads the exports. Measured on 2026-10-25
+  with the build of PR 48: neither form removes a unit. The `abstract?:` form is in 3 files of one repository. The
+  `export type *` form is in 4 files of another. Rewrite the invalid form in a copy of each source tree. The copy gives
+  the same `inventory.jsonl` and `clones.json` byte for byte (1,199 units and 2,691 units). Version 0.23.2 is the newest
+  release on npm. Open: two upstream issues with a minimal repro each, one for the property `abstract` and one for
+  `export type *`.
+- [x] 2026-10-25 `map` wrote `typeOnly: false` for the edge of `export type * from 'm'` and `export type * as ns from
+  'm'`. The grammar puts the word `type` inside an error node. The edge is type-only now, because the reader tests the
+  text of the statement. A cycle through the edge is a type-only cycle. Tests: 6 in `tests/unit/map-parsing-ts.test.ts`
+  and 1 end-to-end in `tests/unit/map-artifacts.test.ts`. Six of seven mutants fail a test. The seventh is equivalent.
+  A line comment between `export` and `type` gives no export statement in the tree. The tool reads no edge there.
 - [x] 2026-10-25 · five-axis pass (feature `dispatchCalls`): speed — one alternation in the existing regular
   expression of a constant definer, and no extra file read; stability — 1889 tests pass, 0 fail, 1 skip, and the
   golden reports are unchanged; reliability — the smoke test passes 11 steps with Node and with Bun, and the built
@@ -350,3 +358,8 @@ data. Other findings are filed here.
   Security: the paths are relative to the root, so the summary holds no absolute path. Maintainability: the limit is a
   setting with one default in `src/clones/settings.ts`, and `clones.json` leaves the display setting out. NOT done: the
   units inside an error span, and the `typeOnly` edge of `export type *` (open rows above).
+- [x] 2026-10-25 · five-axis pass (map `export type *`). Speed: one anchored test on the text of each re-export
+  statement, and no extra parse. Stability: 1932 tests pass, 0 fail, 1 skip in a full run, and the new tests use no
+  clock. Reliability: the edge flag now matches `tsc`, which erases a type-only star re-export. Security: the code reads
+  text only. Maintainability: one pattern in `src/map/parsing.ts`, and `docs/design.md` section 14.4 states the rule.
+  NOT done: the two upstream issues.

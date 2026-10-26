@@ -44,6 +44,14 @@ All notable changes to this project are recorded in this file. The format follow
   under a heading that said it had no coverage. The text for an empty first list changed in the same way.
   `docs/design.md` section 14.2 states the basis.
 
+### Fixed
+
+- `repo-tools map` writes `typeOnly: true` for the edge of `export type * from 'm'` and `export type * as ns from
+  'm'`. The grammar (`tree-sitter-typescript` 0.23.2) does not know this syntax and puts the word `type` inside an
+  error node, so the edge held `typeOnly: false`. A cycle through such an edge counted as a runtime cycle. A
+  committed `dependency-graph.json` changes in a repository that uses the syntax. `docs/design.md` section 14.4
+  states the rule.
+
 ## [2.3.0] - 2026-10-22
 
 ### Added
