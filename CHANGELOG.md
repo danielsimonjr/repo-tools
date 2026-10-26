@@ -15,6 +15,13 @@ All notable changes to this project are recorded in this file. The format follow
   the tag off. `repo-tools map` and `repo-tools check` both read the key, so the measured counts agree. The note in
   `duplicate-symbols.json` and the text in `duplicate-symbols.md` show the names of the listed calls.
   `docs/design.md` section 5.1 states the rules.
+- `repo-tools ste --require=<path>` states that the gate must cover a file. The option repeats. The run exits 2 when
+  the file does not exist, or when the run did not examine it. A document that someone deletes inside a folder that
+  still exists gave no finding before.
+- `repo-tools ste --since=<rev>` keeps only the findings on the lines that the working tree adds or changes since the
+  git revision `<rev>`. A long document with old findings can now gate a new edit. A sentence-length finding counts
+  when any line of its paragraph changed. The totals line gives the number of hidden findings. `docs/design.md`
+  section 9.1 states the rules. A run without the two options gives the same output as before.
 
 ### Changed
 

@@ -254,6 +254,26 @@ same findings, byte for byte. The CHANGELOG records the measurement. The port di
 - **File selection.** The port reads a file whose name ends in `.md` on every operating system. A
   folder with a `.md` name is not a file, so the port does not read it.
 - **The usage text** names `repo-tools ste`.
+- **Two options.** `--require=<path>` and `--since=<rev>` do not exist in `ste_check.py`. A run
+  without them gives the output of the Python tool.
+
+### 9.1 The options of the Markdown mode
+
+- `--require=<path>` states that the gate must cover a file. The option repeats. The run exits 2 when
+  the file does not exist. The run also exits 2 when it did not examine the file, for example
+  because the paths of the run do not include it. A file that the run skips as a historical record
+  counts as examined. A document that someone deletes inside a folder that still exists gives no
+  finding. A gate that lists its required documents catches that deletion.
+- `--since=<rev>` keeps only the findings on the lines that the working tree adds or changes since
+  the commit `<rev>`. The module `src/ste/since.ts` reads these lines from `git diff -U0 <rev>`, so
+  committed, staged and unstaged edits all count. A file that is not in `<rev>` counts in full.
+- A sentence-length finding names the first line of its paragraph. It counts when any line of the
+  paragraph is in the set. A deletion inside a paragraph also counts for that paragraph, because
+  the remaining text can form a longer sentence. A deletion between two paragraphs counts for
+  neither paragraph.
+- The totals line gives the number of findings that `--since` hides. A folder outside a git work
+  tree gives exit 2. A revision that git cannot resolve gives exit 2. A value that starts with a
+  dash is not a revision.
 
 ## 10. Privacy check
 

@@ -318,8 +318,17 @@ data. Other findings are filed here.
   specs is no longer told that it has no coverage; security — no new input and no dependency; maintainability — one
   test pins the headings and the empty-list text. NOT done: an end-to-end signal (no spec imports the source, so the
   tool cannot derive one), and the two `ste` items below.
-- [ ] `repo-tools ste <dir>` passes when a document is deleted inside a folder that still exists. Add a repeatable
+- [x] 2026-10-25 `repo-tools ste <dir>` passes when a document is deleted inside a folder that still exists. Add a repeatable
   `--require=<path>` option that exits 2 with an error when a required file does not exist.
-- [ ] `repo-tools ste --since=<rev>`: report only the findings on lines added since `<rev>`, so a long document with
+- [x] 2026-10-25 `repo-tools ste --since=<rev>`: report only the findings on lines added since `<rev>`, so a long document with
   old findings can gate a new edit. The sentence-length problems carry a start line (`name:~START:`), so the option
   needs the line span of a sentence.
+- [x] 2026-10-25 · five-axis pass (feature `ste --require` and `--since`): speed — two git calls per checked file
+  (`cat-file`, `diff -U0`) and two per folder and revision, only with `--since`, and no change for a run without the options; stability
+  — 1911 tests pass, 1 skip, 1 fail (the privacy-scan test times out at 5 s on this machine, outside this change), and 5
+  mutants of the new code each fail a test; reliability — a deleted document, a document outside the paths of
+  the run, an unknown revision, a folder outside a git work tree and a revision that starts with a dash each give exit
+  2 with a message; security — git receives the revision only after `git rev-parse --verify` accepts it as a commit,
+  and a value with a leading dash never reaches git; maintainability — the git calls are in `src/ste/since.ts` only,
+  and `checkMarkdown` keeps its output because it maps the structured findings. NOT done: a `--since` base other than
+  the working tree.
