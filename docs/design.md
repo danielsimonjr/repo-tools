@@ -125,7 +125,7 @@ messages.
 |---|---|
 | `depgraph` | `src`, `tests`, `out`, `exclude`, `alsoExclude`, `strictOrphans`, `dispatchCalls`, `duplicateAllowlist`, `duplicateBaseline`, `coveragePolicy`, `regenerateCommand`, `verificationMarker`, `extensions`, `apiSurface` (`out`, `entry`, `stabilityTags`) |
 | `query` | `out`, `nodeRuntimes` |
-| `clones` | `src`, `out`, `minNodes`, `shingleLength`, `nearThreshold`, `containmentThreshold`, `containmentMinShingles`, `rareShingleLimit`, `minSharedShingles` |
+| `clones` | `src`, `out`, `minNodes`, `shingleLength`, `nearThreshold`, `containmentThreshold`, `containmentMinShingles`, `rareShingleLimit`, `minSharedShingles`, `parseErrorList` |
 
 ### 5.1 The dispatch calls
 
@@ -876,7 +876,7 @@ The command reads TypeScript and JavaScript. Tree-sitter parses each file with t
 repo-tools clones [root] [--out=<dir>] [--config=<path>] [--src=<path>...]
                   [--min-nodes=<n>] [--shingle=<n>] [--near=<f>]
                   [--containment=<f>] [--containment-min=<n>]
-                  [--rare=<n>] [--min-shared=<n>]
+                  [--rare=<n>] [--min-shared=<n>] [--list-errors=<n>]
 ```
 
 - The root is the first argument that is not a flag, or `--root=<path>`. The default is the
@@ -974,6 +974,7 @@ is the `textHash`.
 | `containmentMinShingles` | `--containment-min` | 20 | The smallest shingle count of the smaller unit, for the containment rule. |
 | `rareShingleLimit` | `--rare` | 60 | A shingle in more units than this number does not pick candidate pairs. |
 | `minSharedShingles` | `--min-shared` | 3 | The rare shingles that a candidate pair must share. |
+| `parseErrorList` | `--list-errors` | 20 | The most paths of files with a parse error that the summary lists. |
 
 The defaults are in `src/clones/settings.ts` only. A count must be an integer of 1 or more. A
 threshold must be a number from 0 to 1.
@@ -1003,6 +1004,7 @@ A pair from an exact group is also a near pair with `jStruct` 1.
 The summary on standard output has five lines:
 
 - The file count, the parse-error count and the unit count.
+  When the parse-error count is not 0, a list of the files follows this line (see below).
 - The 50th, 90th and 99th percentile and the maximum of the label counts.
 - The exact groups, the units in them, and the text groups.
 - The near pairs, in five bands of `jStruct`.
@@ -1011,6 +1013,11 @@ The summary on standard output has five lines:
 
 A file with parse errors still gives the units that tree-sitter recovered. The summary counts such
 files, and a count of 0 is the clean result.
+
+The list has the line `files with a parse error (N of M):` and one indented path on each following line.
+The paths are in code-unit order. The list holds at most `parseErrorList` paths. The line reads
+`(first N of M)` when M is larger. A file that gives no tree appears in the list. `clones.json` does
+not hold `parseErrorList`. The setting changes only the display.
 
 With an output folder, the command writes two files:
 

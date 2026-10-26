@@ -22,6 +22,10 @@ All notable changes to this project are recorded in this file. The format follow
   git revision `<rev>`. A long document with old findings can now gate a new edit. A sentence-length finding counts
   when any line of its paragraph changed. The totals line gives the number of hidden findings. `docs/design.md`
   section 9.1 states the rules. A run without the two options gives the same output as before.
+- The summary of `repo-tools clones` lists the files with a parse error, one path on each line, in code-unit order.
+  The summary gave only the number before, so a reader could not act on it. The new setting `parseErrorList` (flag
+  `--list-errors`, default 20) sets the most paths in the list. `clones.json` does not hold the setting. A run
+  without parse errors gives the same output as before. `docs/design.md` section 17.7 states the format.
 
 ### Changed
 
