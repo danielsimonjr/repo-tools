@@ -296,7 +296,10 @@ data. Other findings are filed here.
   the defaults are in `src/clones/settings.ts` only, and the feature adds no dependency. NOT done: the two open
   items below.
 - [ ] `clones` reads TypeScript and JavaScript only. The Python grammar is already bundled, so add Python units.
-- [ ] `docs/parity-clones.md` covers one repository. Add a second repository with other naming habits.
+- [x] 2026-10-25 `docs/parity-clones.md` covers one repository. Add a second repository with other naming habits.
+  Done: deepthinking-mcp at `9e04da7` (243 files). 1,172 of 1,201 units are the same. The 29 other units lie at the
+  cutoff, except 2 functions that are mostly template strings. The prototype is not published, so a reader cannot
+  repeat its run (the record says so).
 - [x] 2026-10-25 `clones` prints the number of files with a parse error and no file name. Print the paths, up to a limit, so
   a reader can act on the count. The 2.3.0 build on 2026-10-25 gave 3 of 249 files in one repository and 5 of 1,188
   in another.
@@ -306,8 +309,9 @@ data. Other findings are filed here.
   with the build of PR 48: neither form removes a unit. The `abstract?:` form is in 3 files of one repository. The
   `export type *` form is in 4 files of another. Rewrite the invalid form in a copy of each source tree. The copy gives
   the same `inventory.jsonl` and `clones.json` byte for byte (1,199 units and 2,691 units). Version 0.23.2 is the newest
-  release on npm. Open: two upstream issues with a minimal repro each, one for the property `abstract` and one for
-  `export type *`.
+  release on npm. Upstream: issue `tree-sitter/tree-sitter-typescript#348` already covers `export type *` and holds a
+  patch from a third party. Thus no new issue is needed for it. I filed `#377` for the property `abstract`. Open: watch
+  both issues, and move to a grammar release that fixes them.
 - [x] 2026-10-25 `map` wrote `typeOnly: false` for the edge of `export type * from 'm'` and `export type * as ns from
   'm'`. The grammar puts the word `type` inside an error node. The edge is type-only now, because the reader tests the
   text of the statement. A cycle through the edge is a type-only cycle. Tests: 6 in `tests/unit/map-parsing-ts.test.ts`
@@ -362,4 +366,9 @@ data. Other findings are filed here.
   statement, and no extra parse. Stability: 1932 tests pass, 0 fail, 1 skip in a full run, and the new tests use no
   clock. Reliability: the edge flag now matches `tsc`, which erases a type-only star re-export. Security: the code reads
   text only. Maintainability: one pattern in `src/map/parsing.ts`, and `docs/design.md` section 14.4 states the rule.
-  NOT done: the two upstream issues.
+  Upstream: see the row above.
+- [x] 2026-10-25 · five-axis pass (parity record, second repository). Speed: the record states 4.0 to 4.2 s for 243 files.
+  Stability: the numbers come from one fresh clone at a fixed commit. Reliability: a copy with the three invalid lines
+  rewritten gives the same output. Security: the
+  record holds no path outside the repository. Maintainability: one section per repository, and the same method as the
+  first. NOT done: a third repository with a Python or JavaScript majority.
