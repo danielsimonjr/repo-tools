@@ -20,7 +20,7 @@ import { type Unit, unitsOf } from "./units.ts";
 export const CLONES_HELP = `Usage: repo-tools clones [root] [--out=<dir>] [--config=<path>] [--src=<path>...]
                          [--min-nodes=<n>] [--shingle=<n>] [--near=<f>]
                          [--containment=<f>] [--containment-min=<n>]
-                         [--rare=<n>] [--min-shared=<n>]
+                         [--rare=<n>] [--min-shared=<n>] [--list-errors=<n>]
 
 List the functions of a TypeScript or JavaScript repository and find the functions
 that copy each other. The command only reads the repository. The result is a list
@@ -48,6 +48,8 @@ shingles (runs of --shingle labels) overlap enough are a near pair.
                         pairs. Default 60.
   --min-shared=<n>      The rare shingles that a candidate pair must share.
                         Default 3.
+  --list-errors=<n>     The most paths of files with a parse error that the
+                        summary lists. Default 20.
   --root=<path>         The root. The default is the current folder.
   --help, -h            Show this help.
 
@@ -70,6 +72,7 @@ const VALUE_FLAGS: Readonly<Record<string, keyof ClonesSettings>> = {
   "--containment-min": "containmentMinShingles",
   "--rare": "rareShingleLimit",
   "--min-shared": "minSharedShingles",
+  "--list-errors": "parseErrorList",
 };
 
 /** The settings that hold a whole number or a fraction: the flag text must be a plain number. */
@@ -81,6 +84,7 @@ const NUMERIC = new Set<keyof ClonesSettings>([
   "containmentMinShingles",
   "rareShingleLimit",
   "minSharedShingles",
+  "parseErrorList",
 ]);
 
 /** The parsed arguments. */
@@ -178,31 +182,31 @@ function selectFiles(root: string, src: ClonesConfig["src"]): string[] {
     .map((f) => f.path);
 }
 
-/** Reads and parses every file and returns the units and the count of files with parse errors. */
+/** Reads and parses every file and returns the units and the files with parse errors. */
 async function readUnits(
   root: string,
   files: readonly string[],
   minNodes: number,
-): Promise<{ units: Unit[]; parseErrors: number }> {
+): Promise<{ units: Unit[]; parseErrorFiles: string[] }> {
   const units: Unit[] = [];
-  let parseErrors = 0;
+  const parseErrorFiles: string[] = [];
   for (const file of files) {
     const source = readSource(join(root, file)).replace(/^\uFEFF/, "");
     const grammar = grammarFor(file);
     await loadGrammar(grammar);
     const tree = parserFor(grammar).parse(source);
     if (!tree) {
-      parseErrors += 1;
+      parseErrorFiles.push(file);
       continue;
     }
     try {
-      if (tree.rootNode.hasError) parseErrors += 1;
+      if (tree.rootNode.hasError) parseErrorFiles.push(file);
       units.push(...unitsOf(tree.rootNode, source, file, minNodes));
     } finally {
       tree.delete();
     }
   }
-  return { units, parseErrors };
+  return { units, parseErrorFiles };
 }
 
 /** Runs the command for a root and the merged settings; returns the exit code. */
@@ -215,9 +219,9 @@ async function execute(root: string, config: ClonesConfig, io: Io): Promise<numb
         : "no TypeScript or JavaScript file below the listed folders",
     );
   }
-  const { units, parseErrors } = await readUnits(root, files, config.minNodes);
+  const { units, parseErrorFiles } = await readUnits(root, files, config.minNodes);
   const detection = detect(units, config);
-  io.stdout(summaryText(config, { files: files.length, parseErrors }, units, detection));
+  io.stdout(summaryText(config, { files: files.length, parseErrorFiles }, units, detection));
   if (config.out !== null) {
     const out = resolve(root, config.out);
     try {

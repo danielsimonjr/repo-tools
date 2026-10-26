@@ -360,6 +360,55 @@ describe("clones: a file that does not parse", () => {
     expect(result.out).toContain("files=6 parseErrors=1");
     expect(result.out).toContain("units(minNodes=50)=4");
   });
+
+  const BROKEN = "export function oops( { return ;;; ]\n";
+
+  test("is named in the summary, one path on each line", async () => {
+    const root = repo({ "src/broken.ts": BROKEN });
+    const { out } = await cli(["clones", root]);
+    const lines = out.split("\n");
+    expect(lines[0]).toContain("parseErrors=1");
+    expect(lines[1]).toBe("files with a parse error (1 of 1):");
+    expect(lines[2]).toBe("  src/broken.ts");
+    expect(lines[3]).toMatch(/^nodes p50=/);
+  });
+
+  test("a list longer than --list-errors is cut, and the line says so", async () => {
+    const root = repo({ "src/b.ts": BROKEN, "src/a.ts": BROKEN, "src/c.ts": BROKEN });
+    const { out } = await cli(["clones", root, "--list-errors=2"]);
+    expect(out).toContain("files with a parse error (first 2 of 3):\n  src/a.ts\n  src/b.ts\n");
+    expect(out).not.toContain("  src/c.ts");
+    expect(out).toContain("parseErrors=3");
+  });
+
+  test("the paths are in code-unit order, whatever the order of the files", async () => {
+    const root = repo({ "src/Z.ts": BROKEN, "src/a.ts": BROKEN, "src/B.ts": BROKEN });
+    const { out } = await cli(["clones", root]);
+    expect(out).toContain("  src/B.ts\n  src/Z.ts\n  src/a.ts\n");
+  });
+
+  test("the config file sets the limit, and the flag wins over it", async () => {
+    const root = repo({
+      "src/a.ts": BROKEN,
+      "src/b.ts": BROKEN,
+      "repo-tools.config.json": JSON.stringify({ clones: { parseErrorList: 1 } }),
+    });
+    expect((await cli(["clones", root])).out).toContain("(first 1 of 2):");
+    expect((await cli(["clones", root, "--list-errors=2"])).out).toContain("(2 of 2):");
+  });
+
+  test("a clean run has no list", async () => {
+    const { out } = await cli(["clones", repo()]);
+    expect(out).not.toContain("files with a parse error");
+  });
+
+  test("clones.json does not hold the display limit", async () => {
+    const root = repo({ "src/broken.ts": BROKEN });
+    await cli(["clones", root, "--out=reports", "--list-errors=3"]);
+    const params = JSON.parse(read(root, "reports/clones.json")).params as Record<string, unknown>;
+    expect(Object.keys(params)).not.toContain("parseErrorList");
+    expect(params.minNodes).toBe(50);
+  });
 });
 
 describe("clones: failures", () => {
@@ -368,6 +417,12 @@ describe("clones: failures", () => {
     ["a flag without a value", ["--out"], 2, /flag --out needs a value/],
     ["a repeated flag", ["--near=0.5", "--near=0.6"], 2, /flag --near is set twice/],
     ["a count of 0", ["--min-nodes=0"], 2, /'--min-nodes' must be a whole number of 1 or more/],
+    [
+      "a list limit of 0",
+      ["--list-errors=0"],
+      2,
+      /'--list-errors' must be a whole number of 1 or more/,
+    ],
     ["a count as text", ["--shingle=six"], 2, /'--shingle' must be a whole number/],
     ["a hex count", ["--shingle=0x10"], 2, /'--shingle' must be a whole number/],
     ["a fraction above 1", ["--near=1.5"], 2, /'--near' must be a number from 0 to 1/],

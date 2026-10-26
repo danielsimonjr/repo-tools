@@ -21,6 +21,7 @@ describe("clones section: accepted values", () => {
       containmentMinShingles: 10,
       rareShingleLimit: 40,
       minSharedShingles: 2,
+      parseErrorList: 5,
     };
     expect(parseConfigSections({ clones }, LABEL).clones).toEqual(clones);
   });
@@ -73,6 +74,11 @@ describe("clones section: rejected values", () => {
       /'clones.minSharedShingles' must be a whole number/,
     ],
     [
+      "a list limit of 0",
+      { clones: { parseErrorList: 0 } },
+      /'clones.parseErrorList' must be a whole number of 1 or more/,
+    ],
+    [
       "a fraction above 1",
       { clones: { nearThreshold: 1.5 } },
       /'clones.nearThreshold' must be a number from 0 to 1/,
@@ -107,6 +113,7 @@ describe("clones settings: precedence", () => {
       containmentMinShingles: 20,
       rareShingleLimit: 60,
       minSharedShingles: 3,
+      parseErrorList: 20,
     });
     expect(mergeClonesConfig({}, {})).toEqual(CLONES_DEFAULTS);
   });
@@ -121,6 +128,12 @@ describe("clones settings: precedence", () => {
     expect(merged.shingleLength).toBe(4);
     expect(merged.src).toEqual(["lib"]);
     expect(merged.nearThreshold).toBe(CLONES_DEFAULTS.nearThreshold);
+  });
+
+  test("parseErrorList follows the same precedence", () => {
+    expect(mergeClonesConfig({ parseErrorList: 3 }, { parseErrorList: 9 }).parseErrorList).toBe(3);
+    expect(mergeClonesConfig({}, { parseErrorList: 9 }).parseErrorList).toBe(9);
+    expect(mergeClonesConfig({}, {}).parseErrorList).toBe(20);
   });
 
   test("an out of null in the config file stays null, and a flag still overrides it", () => {

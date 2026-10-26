@@ -25,6 +25,8 @@ export interface ClonesConfig {
   rareShingleLimit: number;
   /** The rare shingles that a candidate pair must share. */
   minSharedShingles: number;
+  /** The most paths of files with a parse error that the summary lists. */
+  parseErrorList: number;
 }
 
 /** The default of each setting. A caller never changes this object. */
@@ -38,6 +40,7 @@ export const CLONES_DEFAULTS: Readonly<ClonesConfig> = Object.freeze({
   containmentMinShingles: 20,
   rareShingleLimit: 60,
   minSharedShingles: 3,
+  parseErrorList: 20,
 });
 
 /**
@@ -60,5 +63,6 @@ export function mergeClonesConfig(cli: ClonesSettings, file: ClonesSettings): Cl
       cli.containmentMinShingles ?? file.containmentMinShingles ?? d.containmentMinShingles,
     rareShingleLimit: cli.rareShingleLimit ?? file.rareShingleLimit ?? d.rareShingleLimit,
     minSharedShingles: cli.minSharedShingles ?? file.minSharedShingles ?? d.minSharedShingles,
+    parseErrorList: cli.parseErrorList ?? file.parseErrorList ?? d.parseErrorList,
   };
 }

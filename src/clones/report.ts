@@ -11,8 +11,8 @@ import type { Unit } from "./units.ts";
 export interface RunStats {
   /** The source files that the run read. */
   files: number;
-  /** The files whose tree holds an error node. */
-  parseErrors: number;
+  /** The files whose tree holds an error node, or that gave no tree. */
+  parseErrorFiles: readonly string[];
 }
 
 /** The fields of a unit that the inventory shows, in output order. */
@@ -47,9 +47,12 @@ function listJson(items: readonly unknown[]): string {
   return `[\n${items.map((item) => `    ${JSON.stringify(item)}`).join(",\n")}\n  ]`;
 }
 
-/** `clones.json`: the settings of the run and the three result lists. */
+/**
+ * `clones.json`: the settings of the run and the three result lists. `out` and `parseErrorList`
+ * are not parameters of the detection, so the file leaves them out.
+ */
 export function clonesJson(config: ClonesConfig, detection: Detection): string {
-  const { out: _out, ...params } = config;
+  const { out: _out, parseErrorList: _list, ...params } = config;
   return [
     "{",
     `  "params": ${JSON.stringify(params)},`,
@@ -106,8 +109,20 @@ export function summaryText(
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([key, count]) => `${key}=${count}`)
     .join(" ");
+  const failed = stats.parseErrorFiles.length;
+  const paths = [...stats.parseErrorFiles]
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .slice(0, config.parseErrorList);
+  const errorList =
+    failed === 0
+      ? []
+      : [
+          `files with a parse error (${paths.length < failed ? "first " : ""}${paths.length} of ${failed}):`,
+          ...paths.map((path) => `  ${path}`),
+        ];
   const lines = [
-    `files=${stats.files} parseErrors=${stats.parseErrors} units(minNodes=${config.minNodes})=${units.length}`,
+    `files=${stats.files} parseErrors=${failed} units(minNodes=${config.minNodes})=${units.length}`,
+    ...errorList,
     `nodes p50=${percentile(sizes, 0.5)} p90=${percentile(sizes, 0.9)} p99=${percentile(sizes, 0.99)} max=${sizes[sizes.length - 1] ?? 0}`,
     `exact groups=${detection.exactGroups.length} (units in them=${inGroups}) text-identical groups=${detection.textGroups.length}`,
     `near pairs=${detection.near.length} by jStruct: ${bands.join(", ")}`,
