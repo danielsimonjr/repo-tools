@@ -9,7 +9,7 @@
  * folders are listed in code-unit order. The JSON text otherwise matches `json.dumps(indent=2)`:
  * every character above U+007F is written as a `\uXXXX` escape (`ensure_ascii`).
  */
-import { type Dirent, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { computePublicSurface } from "../depgraph/analysis.ts";
 import { readdirHook } from "../depgraph/dirlist.ts";
@@ -21,7 +21,7 @@ import { B, reEscape, S, SPACE_BODY, W } from "../py.ts";
 import { compareCodeUnits } from "../sort.ts";
 import { toParsedFiles } from "./adapter.ts";
 import { stronglyConnectedComponents } from "./cycles.ts";
-import { isReparsePoint, readSource } from "./discovery.ts";
+import { readSource, rglobParts } from "./discovery.ts";
 import { type CycleLimits, findCycles } from "./graph.ts";
 import { getResolver } from "./resolvers.ts";
 import { type FileNode, type RepoGraph, toJson } from "./schema.ts";
@@ -233,30 +233,10 @@ function normalizeWorkspacePatterns(raw: unknown): [string[] | null, string[]] {
   ];
 }
 
-/** Every `.csproj` below `root` as path parts, in code-unit order; linked folders are not followed. */
-function csprojParts(root: string): string[][] {
-  const found: string[][] = [];
-  const go = (dir: string, parts: string[]): void => {
-    let entries: Dirent[];
-    try {
-      entries = readdirHook.entries(dir);
-    } catch {
-      return;
-    }
-    for (const e of entries) {
-      const full = join(dir, e.name);
-      if (e.isDirectory() && !isReparsePoint(full)) go(full, [...parts, e.name]);
-      else if (e.name.endsWith(".csproj")) found.push([...parts, e.name]);
-    }
-  };
-  go(root, []);
-  return found.sort((a, b) => compareCodeUnits(a.join("/"), b.join("/")));
-}
-
 /** C#: project name -> project folder. */
 function csprojMap(root: string): [Map<string, string>, string[]] {
   const projects = new Map<string, string>();
-  for (const parts of csprojParts(root)) {
+  for (const parts of rglobParts(root, ".csproj")) {
     if (parts.some((p) => p === "obj" || p === "bin")) continue;
     const name = parts.at(-1) as string;
     projects.set(name.slice(0, name.length - ".csproj".length), parts.slice(0, -1).join("/"));

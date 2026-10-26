@@ -241,14 +241,19 @@
           {
             "module": "fs",
             "imports": [
+              "lstatSync",
               "mkdirSync",
+              "realpathSync",
               "writeFileSync"
             ]
           },
           {
             "module": "path",
             "imports": [
-              "dirname"
+              "basename",
+              "dirname",
+              "join",
+              "resolve"
             ]
           }
         ],
@@ -258,13 +263,15 @@
           "writeLf",
           "withOneLf",
           "writeReport",
-          "toJson"
+          "toJson",
+          "realPath"
         ],
         "functions": [
           "writeLf",
           "withOneLf",
           "writeReport",
-          "toJson"
+          "toJson",
+          "realPath"
         ]
       },
       "src/mask.ts": {
@@ -599,6 +606,7 @@
           {
             "file": "../io.ts",
             "imports": [
+              "realPath",
               "writeLf"
             ]
           },
@@ -1756,18 +1764,13 @@
             "module": "fs",
             "imports": [
               "existsSync",
-              "lstatSync",
-              "realpathSync",
               "statSync"
             ]
           },
           {
             "module": "path",
             "imports": [
-              "basename",
-              "dirname",
               "isAbsolute",
-              "join",
               "relative",
               "resolve",
               "sep"
@@ -1792,6 +1795,7 @@
           {
             "file": "../io.ts",
             "imports": [
+              "realPath",
               "writeReport"
             ]
           },
@@ -2074,6 +2078,9 @@
           "generateMarkdown",
           "generatePackageDependencySection",
           "insertPackageSection"
+        ],
+        "interfaces": [
+          "SummaryLabels"
         ],
         "functions": [
           "generateMermaidDiagram",
@@ -2971,7 +2978,6 @@
           {
             "module": "fs",
             "imports": [
-              "Dirent",
               "mkdirSync",
               "readFileSync",
               "statSync",
@@ -3056,8 +3062,8 @@
           {
             "file": "./discovery.ts",
             "imports": [
-              "isReparsePoint",
-              "readSource"
+              "readSource",
+              "rglobParts"
             ]
           },
           {
@@ -3445,6 +3451,7 @@
           "UnsupportedRepoLanguage",
           "suffixOf",
           "isReparsePoint",
+          "rglobParts",
           "countLanguages",
           "gitTracked",
           "gitTrackedLinks",
@@ -3467,6 +3474,7 @@
           "dispositionForArea",
           "suffixOf",
           "isReparsePoint",
+          "rglobParts",
           "countLanguages",
           "gitTracked",
           "gitTrackedLinks",
@@ -3569,7 +3577,6 @@
           {
             "module": "fs",
             "imports": [
-              "Dirent",
               "readFileSync",
               "statSync"
             ]
@@ -3584,12 +3591,6 @@
           }
         ],
         "internalDependencies": [
-          {
-            "file": "../depgraph/dirlist.ts",
-            "imports": [
-              "readdirHook"
-            ]
-          },
           {
             "file": "../depgraph/resolver.ts",
             "imports": [
@@ -3651,9 +3652,9 @@
               "detectLanguage",
               "discover",
               "dispositionForArea",
-              "isReparsePoint",
               "Language",
               "readSource",
+              "rglobParts",
               "skippedSourceFolders"
             ]
           },
@@ -4074,7 +4075,8 @@
             "file": "../depgraph/reporters/markdown.ts",
             "imports": [
               "generateMarkdown",
-              "SummaryRow"
+              "SummaryLabels",
+              "summaryRowsOf"
             ]
           },
           {

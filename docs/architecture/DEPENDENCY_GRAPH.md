@@ -136,11 +136,11 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `mkdirSync, writeFileSync` |
-| `path` | `dirname` |
+| `fs` | `lstatSync, mkdirSync, realpathSync, writeFileSync` |
+| `path` | `basename, dirname, join, resolve` |
 
 **Exports:**
-- Functions: `writeLf`, `withOneLf`, `writeReport`, `toJson`
+- Functions: `writeLf`, `withOneLf`, `writeReport`, `toJson`, `realPath`
 
 ---
 
@@ -268,7 +268,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../io.ts` | `writeLf` | Import |
+| `../io.ts` | `realPath, writeLf` | Import |
 | `../io-types.ts` | `Io` | Import (type-only) |
 | `./manifest.ts` | `ChunkInfo, contentHash, FileType, hashFor, isAbsoluteAnywhere, MANIFEST_NAME, MANIFEST_VERSION, Manifest, readManifest, relativeSource, resolveSource, writeManifest` | Import |
 | `./splitters.ts` | `chunkFilename, detectFileType, detectLineEnding, JsonSplit, lineBreakRuns, mergeJson, mergeJsonLayout, normalizeLineEndings, restoreLineBreaks, splitJson, splitMarkdown, splitTypeScript` | Import |
@@ -692,15 +692,15 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `existsSync, lstatSync, realpathSync, statSync` |
-| `path` | `basename, dirname, isAbsolute, join, relative, resolve, sep` |
+| `fs` | `existsSync, statSync` |
+| `path` | `isAbsolute, relative, resolve, sep` |
 | `url` | `pathToFileURL` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `../config.ts` | `DepgraphConfig, isAbsolutePath, resolveUnderRoot` | Import |
-| `../io.ts` | `writeReport` | Import |
+| `../io.ts` | `realPath, writeReport` | Import |
 | `../mask.ts` | `blankCommentsAndStrings, stripComments` | Import |
 
 **Exports:**
@@ -795,6 +795,7 @@ The codebase is organized into the following modules:
 | `../types.ts` | `CyclicComponent, CyclicComponents, DependencyMatrix, ModuleMap, PackageJson, ParsedFile, Statistics, WorkspacePackage` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SummaryLabels`
 - Types: `SummaryRow`
 - Functions: `generateMermaidDiagram`, `renderExportList`, `summaryRowsOf`, `generateMarkdown`, `generatePackageDependencySection`, `insertPackageSection`
 - Constants: `LONG_EXPORT_LIST_THRESHOLD`, `EXPORT_LIST_WRAP_WIDTH`
@@ -1124,7 +1125,7 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `Dirent, mkdirSync, readFileSync, statSync, writeFileSync` |
+| `fs` | `mkdirSync, readFileSync, statSync, writeFileSync` |
 | `path` | `basename, dirname, join` |
 
 **Internal Dependencies:**
@@ -1140,7 +1141,7 @@ The codebase is organized into the following modules:
 | `../sort.ts` | `compareCodeUnits` | Import |
 | `./adapter.ts` | `toParsedFiles` | Import |
 | `./cycles.ts` | `stronglyConnectedComponents` | Import |
-| `./discovery.ts` | `isReparsePoint, readSource` | Import |
+| `./discovery.ts` | `readSource, rglobParts` | Import |
 | `./graph.ts` | `CycleLimits, findCycles` | Import |
 | `./resolvers.ts` | `getResolver` | Import |
 | `./schema.ts` | `FileNode, RepoGraph, toJson` | Import |
@@ -1248,7 +1249,7 @@ The codebase is organized into the following modules:
 - Functions:
 
   ```text
-  classifyArea, dispositionForArea, suffixOf, isReparsePoint, countLanguages, gitTracked,
+  classifyArea, dispositionForArea, suffixOf, isReparsePoint, rglobParts, countLanguages, gitTracked,
   gitTrackedLinks, candidateFiles, walkedSourceFiles, detectLanguage, readSource,
   skippedSourceFolders, discover
   ```
@@ -1291,13 +1292,12 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `Dirent, readFileSync, statSync` |
+| `fs` | `readFileSync, statSync` |
 | `path` | `basename, join, resolve` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../depgraph/dirlist.ts` | `readdirHook` | Import |
 | `../depgraph/resolver.ts` | `resolveWorkspaceSource, workspaceTarget` | Import |
 | `../depgraph/roots.ts` | `configReferencedEntries, htmlReferencedEntries, rootPackageEntries, runtimeLaunchedEntries, selfPackage` | Import |
 | `../depgraph/types.ts` | `ParsedFile, WorkspacePackage` | Import (type-only) |
@@ -1305,7 +1305,7 @@ The codebase is organized into the following modules:
 | `../py.ts` | `B, pyRepr, S, SPACE_BODY, W` | Import |
 | `../sort.ts` | `compareCodeUnits` | Import |
 | `./cycles.ts` | `CycleLimits, CycleResult, simpleCycles` | Import |
-| `./discovery.ts` | `detectLanguage, discover, dispositionForArea, isReparsePoint, Language, readSource, skippedSourceFolders` | Import |
+| `./discovery.ts` | `detectLanguage, discover, dispositionForArea, Language, readSource, rglobParts, skippedSourceFolders` | Import |
 | `./grammars.ts` | `grammarFor, loadGrammar` | Import |
 | `./package-field.ts` | `packageField` | Import |
 | `./parsing.ts` | `ParsedModule, parseCs, parsePy, parseRs, parseTs` | Import |
@@ -1442,7 +1442,7 @@ The codebase is organized into the following modules:
 | `../depgraph/analysis.ts` | `buildDependencyMatrix` | Import |
 | `../depgraph/reporters/banner.ts` | `BannerOptions, withBanner` | Import |
 | `../depgraph/reporters/json.ts` | `generateCompactSummary` | Import |
-| `../depgraph/reporters/markdown.ts` | `generateMarkdown, SummaryRow` | Import |
+| `../depgraph/reporters/markdown.ts` | `generateMarkdown, SummaryLabels, summaryRowsOf` | Import |
 | `../depgraph/reporters/yaml.ts` | `generateYaml` | Import |
 | `../depgraph/types.ts` | `Statistics` | Import (type-only) |
 | `../io.ts` | `writeReport` | Import |
@@ -1714,8 +1714,8 @@ The codebase is organized into the following modules:
 | `src/map/artifacts` | 14 files | 4 files |
 | `src/config` | 5 files | 11 files |
 | `src/depgraph/types` | 0 files | 16 files |
-| `src/map/graph` | 14 files | 2 files |
 | `src/depgraph/paths` | 0 files | 15 files |
+| `src/map/graph` | 13 files | 2 files |
 | `src/map/reports` | 10 files | 3 files |
 | `src/clones/index` | 11 files | 1 file |
 | `src/docs/index` | 11 files | 1 file |
@@ -1737,13 +1737,13 @@ The codebase is organized into the following modules:
 | `src/depgraph/cycles` | 4 files | 4 files |
 | `src/map/adapter` | 4 files | 4 files |
 | `src/map/discovery` | 3 files | 5 files |
-| `src/depgraph/dirlist` | 1 file | 6 files |
 | `src/docs/model` | 0 files | 7 files |
 | `src/docs/python` | 5 files | 2 files |
 | `src/docs/typescript` | 5 files | 2 files |
 | `src/map/markdown` | 6 files | 1 file |
 | `src/query/index` | 6 files | 1 file |
 | `src/depgraph/description` | 3 files | 3 files |
+| `src/depgraph/dirlist` | 1 file | 5 files |
 | `src/depgraph/reporters/json` | 4 files | 2 files |
 | `src/depgraph/reporters/markdown` | 5 files | 1 file |
 | `src/map/resolvers` | 4 files | 2 files |
@@ -1970,12 +1970,12 @@ graph TD
 |----------|-------|
 | Total Source Files | 288 |
 | Subsystems | 10 |
-| Total Lines of Code | 44464 |
-| Total Exports | 713 |
+| Total Lines of Code | 44423 |
+| Total Exports | 716 |
 | Total Re-exports | 12 |
 | Total Classes | 13 |
-| Total Interfaces | 139 |
-| Total Functions | 408 |
+| Total Interfaces | 140 |
+| Total Functions | 410 |
 | Total Type Guards | 19 |
 | Total Enums | 4 |
 | Type-only Imports | 62 |

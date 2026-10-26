@@ -8,10 +8,9 @@
  * rule R4); `.csproj` files are found in code-unit order; a TOML parse-error message has the words
  * of the TOML parser in use.
  */
-import { type Dirent, readFileSync, statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { parse as parseToml } from "smol-toml";
-import { readdirHook } from "../depgraph/dirlist.ts";
 import { resolveWorkspaceSource, workspaceTarget } from "../depgraph/resolver.ts";
 import {
   configReferencedEntries,
@@ -29,9 +28,9 @@ import {
   detectLanguage,
   discover,
   dispositionForArea,
-  isReparsePoint,
   type Language,
   readSource,
+  rglobParts,
   skippedSourceFolders,
 } from "./discovery.ts";
 import { grammarFor, loadGrammar } from "./grammars.ts";
@@ -268,26 +267,6 @@ const CSHARP_MAIN = new RegExp(
   "u",
 );
 const CSPROJ_EXE = new RegExp(`<OutputType>${S}*(Exe|WinExe)${S}*</OutputType>`, "iu");
-
-/** Every file whose name ends in `suffix` below `root`, as path parts; linked folders are not followed. */
-function rglobParts(root: string, suffix: string): string[][] {
-  const found: string[][] = [];
-  const go = (dir: string, parts: string[]): void => {
-    let entries: Dirent[];
-    try {
-      entries = readdirHook.entries(dir);
-    } catch {
-      return;
-    }
-    for (const e of entries) {
-      const full = join(dir, e.name);
-      if (e.isDirectory() && !isReparsePoint(full)) go(full, [...parts, e.name]);
-      else if (e.name.endsWith(suffix)) found.push([...parts, e.name]);
-    }
-  };
-  go(root, []);
-  return found.sort((a, b) => compareCodeUnits(a.join("/"), b.join("/")));
-}
 
 /** C#: the Main files of each project with an Exe OutputType; loose Main files without one. */
 function csharpRoots(root: string, known: ReadonlySet<string>): [string[], string[]] {

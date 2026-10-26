@@ -159,6 +159,26 @@ export function isReparsePoint(path: string): boolean {
   }
 }
 
+/** Every file whose name ends in `suffix` below `root`, as path parts; linked folders are not followed. */
+export function rglobParts(root: string, suffix: string): string[][] {
+  const found: string[][] = [];
+  const go = (dir: string, parts: string[]): void => {
+    let entries: Dirent[];
+    try {
+      entries = readdirHook.entries(dir);
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const full = join(dir, e.name);
+      if (e.isDirectory() && !isReparsePoint(full)) go(full, [...parts, e.name]);
+      else if (e.name.endsWith(suffix)) found.push([...parts, e.name]);
+    }
+  };
+  go(root, []);
+  return found.sort((a, b) => compareCodeUnits(a.join("/"), b.join("/")));
+}
+
 /** The folders and files of `dir`; empty when the folder cannot be read. */
 function entries(dir: string): Dirent[] {
   try {

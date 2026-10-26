@@ -9,11 +9,11 @@
  * WebGPU and parallel pairing reports and the WASM build gate of the pre-port generator are an
  * extension in the consumer repo.
  */
-import { existsSync, lstatSync, realpathSync, statSync } from "node:fs";
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { existsSync, statSync } from "node:fs";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { type DepgraphConfig, isAbsolutePath, resolveUnderRoot } from "../config.ts";
-import { writeReport } from "../io.ts";
+import { realPath, writeReport } from "../io.ts";
 import { blankCommentsAndStrings, stripComments } from "../mask.ts";
 
 /** The masking functions of `src/mask.ts`. An extension uses these and keeps no copy. */
@@ -173,26 +173,6 @@ function outsideText(folder: string, path: string): boolean {
     rel.startsWith("../") ||
     isAbsolute(rel)
   );
-}
-
-/**
- * The real path of `path`: the real path of its nearest existing ancestor, with the remaining
- * names added. Undefined when that ancestor is a link that does not resolve.
- */
-function realPath(path: string): string | undefined {
-  let existing = resolve(path);
-  const rest: string[] = [];
-  while (!lstatSync(existing, { throwIfNoEntry: false })) {
-    const up = dirname(existing);
-    if (up === existing) return undefined;
-    rest.unshift(basename(existing));
-    existing = up;
-  }
-  try {
-    return join(realpathSync.native(existing), ...rest);
-  } catch {
-    return undefined;
-  }
 }
 
 /**

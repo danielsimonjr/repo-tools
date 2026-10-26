@@ -7,9 +7,9 @@
     "`unreferencedAnywhereNotes`'s dynamic-import check (`_dynamic_import_referrers`) only sees `import(...)` calls with a LITERAL string specifier. A dynamic import built from a variable or template literal (e.g. `import(`./cmds/${name}.js`)`, a command-dispatcher pattern) is invisible to it -- 'found none' in a note means no LITERAL match was found, NOT that nothing imports the file."
   ],
   "summary": {
-    "unusedExportCount": 119,
+    "unusedExportCount": 120,
     "unreferencedAnywhereCount": 3,
-    "referencedInModuleCount": 116,
+    "referencedInModuleCount": 117,
     "unclassifiedExportCount": 0,
     "noImporterFileCount": 2
   },
@@ -132,7 +132,7 @@
       "NAMESPACE_IMPORT_BASIS"
     ],
     "src/depgraph/reporters/markdown.ts": [
-      "summaryRowsOf"
+      "SummaryRow"
     ],
     "src/depgraph/reporters/surfaces.ts": [
       "SurfaceFilter"
@@ -197,7 +197,8 @@
       "SOURCE_SUFFIXES",
       "candidateFiles",
       "gitTracked",
-      "gitTrackedLinks"
+      "gitTrackedLinks",
+      "isReparsePoint"
     ],
     "src/map/grammars.ts": [
       "GrammarName"

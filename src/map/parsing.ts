@@ -121,15 +121,17 @@ function importClauseNames(clause: Node): string[] {
 /** True when a child of `node` has the type `type`. */
 const hasChild = (node: Node, type: string): boolean => node.children.some((c) => c.type === type);
 
+/** True when there is at least one specifier and every one of them is typed inline. */
+const allInlineTyped = (specifiers: Node[]): boolean =>
+  specifiers.length > 0 && specifiers.every((s) => hasChild(s, "type"));
+
 /** True when the whole import produces no runtime code. */
 function isTypeOnlyImport(stmt: Node, clause: Node | undefined): boolean {
   if (hasChild(stmt, "type")) return true;
   if (!clause) return false;
   const kids = clause.children.filter((c) => c.type !== ",");
   if (kids.length !== 1 || kids[0]?.type !== "named_imports") return false;
-  const specifiers = kids[0].children.filter((c) => c.type === "import_specifier");
-  if (specifiers.length === 0) return false;
-  return specifiers.every((s) => hasChild(s, "type"));
+  return allInlineTyped(kids[0].children.filter((c) => c.type === "import_specifier"));
 }
 
 /** The kind and the local name of an `export default` statement. */
@@ -194,9 +196,7 @@ function exportClauseSourceNames(clause: Node): string[] {
 /** True for `export type { ... } from`, or when every specifier is inline-typed. */
 function isTypeOnlyExport(stmt: Node, clause: Node): boolean {
   if (hasChild(stmt, "type")) return true;
-  const specifiers = clause.children.filter((c) => c.type === "export_specifier");
-  if (specifiers.length === 0) return false;
-  return specifiers.every((s) => hasChild(s, "type"));
+  return allInlineTyped(clause.children.filter((c) => c.type === "export_specifier"));
 }
 
 /** White space or a block comment: what can stand between the words of a statement. */

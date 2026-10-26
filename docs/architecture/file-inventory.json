@@ -139,7 +139,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 726
+      "loc": 706
     },
     {
       "file": "src/chunk/manifest.ts",
@@ -300,7 +300,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 217
+      "loc": 197
     },
     {
       "file": "src/depgraph/paths.ts",
@@ -342,7 +342,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 427
+      "loc": 442
     },
     {
       "file": "src/depgraph/reporters/surfaces.ts",
@@ -461,7 +461,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 27
+      "loc": 47
     },
     {
       "file": "src/map/adapter.ts",
@@ -475,7 +475,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 722
+      "loc": 702
     },
     {
       "file": "src/map/command.ts",
@@ -503,7 +503,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 443
+      "loc": 463
     },
     {
       "file": "src/map/grammars.ts",
@@ -517,7 +517,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 680
+      "loc": 659
     },
     {
       "file": "src/map/layers.ts",
@@ -566,7 +566,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 124
+      "loc": 109
     },
     {
       "file": "src/map/resolvers.ts",

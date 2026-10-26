@@ -14,7 +14,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { writeLf } from "../io.ts";
+import { realPath, writeLf } from "../io.ts";
 import type { Io } from "../io-types.ts";
 import {
   type ChunkInfo,
@@ -234,26 +234,6 @@ function directoryError(path: string): string | undefined {
 function isOutsideText(folder: string, path: string): boolean {
   const rel = relative(folder, path);
   return rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel);
-}
-
-/**
- * Returns the real path of `path`: the real path of its nearest existing ancestor, with the
- * remaining names added. Returns undefined when that ancestor is a link that does not resolve.
- */
-function realPath(path: string): string | undefined {
-  let existing = resolve(path);
-  const rest: string[] = [];
-  while (!lstatSync(existing, { throwIfNoEntry: false })) {
-    const up = dirname(existing);
-    if (up === existing) return undefined;
-    rest.unshift(basename(existing));
-    existing = up;
-  }
-  try {
-    return join(realpathSync.native(existing), ...rest);
-  } catch {
-    return undefined;
-  }
 }
 
 /**

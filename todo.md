@@ -381,3 +381,9 @@ data. Other findings are filed here.
   in tree-sitter-typescript. The summary lists the file. State in `docs/design.md` section 17.8 that the
   functions of the file still give units. Measured on the AssemblyScript sources of MathTS: 26 files, 1 file with the
   error. All 16 functions of that file give units at `--min-nodes=1`.
+- [x] 2026-10-26 · five-axis pass (refactor, `clones` findings): speed — no hot path changed, and the helpers keep
+  the same algorithm; stability — 1941 tests (6 new for the shared helpers), 0 fail, 1 skip; reliability — the
+  reports under `docs/architecture` are regenerated and `repo-tools check` passes; security — no new dependency and no
+  new input; maintainability — 2 exact groups and 7 of 8 near pairs of `clones` are gone. NOT done: `statsJson` and
+  `symbolJson` in `src/docs/report.ts` stay, because they map different fields to snake_case keys and a merge would
+  hide the mapping.
