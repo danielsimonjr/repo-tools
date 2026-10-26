@@ -1,11 +1,11 @@
 {
-  "totalFiles": 288,
+  "totalFiles": 289,
   "byDisposition": {
     "reachable": 82,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 192,
+    "test": 193,
     "tool": 10,
     "config": 1,
     "bench": 0,
@@ -14,11 +14,11 @@
   "byArea": {
     "tools": 10,
     "src": 85,
-    "tests": 192,
+    "tests": 193,
     "config": 1
   },
   "byPackage": {
-    "(root)": 203,
+    "(root)": 204,
     "@danielsimonjr/repo-tools": 85
   },
   "files": [
@@ -1974,6 +1974,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 25
+    },
+    {
+      "file": "tests/unit/shared-helpers.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 71
     },
     {
       "file": "tests/unit/sort.test.ts",

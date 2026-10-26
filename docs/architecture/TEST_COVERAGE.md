@@ -9,7 +9,7 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 84 |
-| Total Test Files | 137 |
+| Total Test Files | 138 |
 | Source Files with Tests | 68 |
 | Source Files without Tests | 16 |
 | Coverage (raw, direct-import) | **81.0%** |
@@ -95,12 +95,12 @@ The following 16 source files are not directly imported by any test file:
 | `reporters/coverage.ts` | `depgraph-report.test.ts`, `map-coverage.test.ts` |
 | `reporters/duplicates.ts` | `depgraph-duplicates.test.ts` |
 | `reporters/json.ts` | `depgraph-report.test.ts` |
-| `reporters/markdown.ts` | `depgraph-f21.test.ts`, `depgraph-report.test.ts` |
+| `reporters/markdown.ts` | `depgraph-f21.test.ts`, `depgraph-report.test.ts`, `shared-helpers.test.ts` |
 | `reporters/surfaces.ts` | `depgraph-f22.test.ts`, `depgraph-report.test.ts` |
 | `reporters/yaml.ts` | `depgraph-f5.test.ts`, `depgraph-report.test.ts` |
 | `depgraph/resolver.ts` | `depgraph-f30.test.ts`, `depgraph-f7.test.ts`, `depgraph-parse.test.ts`, `map-adapter.test.ts` |
 | `depgraph/roots.ts` | `depgraph-f37.test.ts`, `depgraph-scan.test.ts`, `entry-roots-build-configs.test.ts` |
-| `depgraph/types.ts` | `depgraph-analysis.test.ts`, `depgraph-f22.test.ts`, `depgraph-f26.test.ts`, `depgraph-f27.test.ts`, `depgraph-parse.test.ts`, `depgraph-report.test.ts`, `depgraph-scan.test.ts`, `map-adapter.test.ts` |
+| `depgraph/types.ts` | `depgraph-analysis.test.ts`, `depgraph-f22.test.ts`, `depgraph-f26.test.ts`, `depgraph-f27.test.ts`, `depgraph-parse.test.ts`, `depgraph-report.test.ts`, `depgraph-scan.test.ts`, `map-adapter.test.ts`, `shared-helpers.test.ts` |
 | `depgraph/workspaces.ts` | `depgraph-f13.test.ts`, `depgraph-f34.test.ts`, `depgraph-f36.test.ts`, `depgraph-scan.test.ts` |
 | `docs/analyse.ts` | `docs-discovery.test.ts` |
 | `docs/discovery.ts` | `docs-discovery.test.ts` |
@@ -110,13 +110,13 @@ The following 16 source files are not directly imported by any test file:
 | `docs/stub.ts` | `docs-stub.test.ts` |
 | `docs/typescript.ts` | `docs-review.test.ts`, `docs-stub.test.ts`, `docs-typescript.test.ts` |
 | `src/io-types.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `depgraph-report.test.ts`, `map-command.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
-| `src/io.ts` | `io.test.ts` |
+| `src/io.ts` | `io.test.ts`, `shared-helpers.test.ts` |
 | `map/adapter.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `map-adapter.test.ts` |
 | `map/artifacts.ts` | `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-reports.test.ts` |
 | `map/command.ts` | `depgraph-exit.test.ts`, `depgraph-f1.test.ts`, `depgraph-f2.test.ts`, `depgraph-f3.test.ts`, `depgraph-r1.test.ts`, `depgraph-report.test.ts`, `map-golden.test.ts`, `map-reports-ste.test.ts` |
 | `map/coverage.ts` | `map-coverage.test.ts` |
 | `map/cycles.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
-| `map/discovery.ts` | `depgraph-inventory-coverage.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-discovery.test.ts`, `map-graph-e2e.test.ts` |
+| `map/discovery.ts` | `depgraph-inventory-coverage.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-discovery.test.ts`, `map-graph-e2e.test.ts`, `shared-helpers.test.ts` |
 | `map/grammars.ts` | `clones-units.test.ts`, `map-parsing-py.test.ts`, `map-parsing-ts.test.ts`, `map-parsing-tsx.test.ts` |
 | `map/graph.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
 | `map/layers.ts` | `map-layers.test.ts` |
@@ -273,6 +273,7 @@ The following 16 source files are not directly imported by any test file:
 | `unit/query-node-safety.test.ts` | 1 files |
 | `unit/query-port.test.ts` | 4 files |
 | `unit/query-safety.test.ts` | 2 files |
+| `unit/shared-helpers.test.ts` | 4 files |
 | `unit/sort.test.ts` | 1 files |
 | `unit/ste-cli.test.ts` | 2 files |
 | `unit/ste-markdown.test.ts` | 1 files |

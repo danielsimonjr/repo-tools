@@ -2,7 +2,7 @@ metadata:
   name: repo-tools
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 288
+  totalFiles: 289
   totalModules: 4
   totalExports: 716
 modules:
@@ -5710,6 +5710,34 @@ modules:
             - computeTaint
           typeOnly: false
       exports: []
+    tests/unit/shared-helpers.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/reporters/markdown.ts
+          imports:
+            - summaryRowsOf
+          typeOnly: false
+        - file: src/depgraph/types.ts
+          imports:
+            - Statistics
+          typeOnly: true
+        - file: src/io.ts
+          imports:
+            - realPath
+          typeOnly: false
+        - file: src/map/discovery.ts
+          imports:
+            - rglobParts
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
     tests/unit/sort.test.ts:
       externalDependencies:
         - bun:test
@@ -5843,10 +5871,10 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 288
-  totalSourceFiles: 288
+  totalTypeScriptFiles: 289
+  totalSourceFiles: 289
   totalModules: 4
-  totalLinesOfCode: 44423
+  totalLinesOfCode: 44494
   totalExports: 716
   entryRoots: 1
   reachableFiles: 83
@@ -5855,7 +5883,7 @@ statistics:
   testOnlyFiles: 0
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
-  totalTypeOnlyImports: 62
+  totalTypeOnlyImports: 63
   noImporterFileCount: 2
   unusedExportsCount: 120
   circularDepsTruncated: false

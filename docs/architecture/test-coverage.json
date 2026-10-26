@@ -1,7 +1,7 @@
 {
   "metadata": {
     "totalSourceFiles": 84,
-    "totalTestFiles": 137,
+    "totalTestFiles": 138,
     "testedCount": 68,
     "untestedCount": 16,
     "coveragePercent": "81.0",
@@ -237,7 +237,8 @@
     ],
     "src/depgraph/reporters/markdown.ts": [
       "tests/unit/depgraph-f21.test.ts",
-      "tests/unit/depgraph-report.test.ts"
+      "tests/unit/depgraph-report.test.ts",
+      "tests/unit/shared-helpers.test.ts"
     ],
     "src/depgraph/reporters/surfaces.ts": [
       "tests/unit/depgraph-f22.test.ts",
@@ -266,7 +267,8 @@
       "tests/unit/depgraph-parse.test.ts",
       "tests/unit/depgraph-report.test.ts",
       "tests/unit/depgraph-scan.test.ts",
-      "tests/unit/map-adapter.test.ts"
+      "tests/unit/map-adapter.test.ts",
+      "tests/unit/shared-helpers.test.ts"
     ],
     "src/depgraph/workspaces.ts": [
       "tests/unit/depgraph-f13.test.ts",
@@ -317,7 +319,8 @@
       "tests/unit/ste-options.test.ts"
     ],
     "src/io.ts": [
-      "tests/unit/io.test.ts"
+      "tests/unit/io.test.ts",
+      "tests/unit/shared-helpers.test.ts"
     ],
     "src/map/adapter.ts": [
       "tests/unit/depgraph-analysis.test.ts",
@@ -369,7 +372,8 @@
       "tests/unit/map-artifacts-e2e.test.ts",
       "tests/unit/map-artifacts.test.ts",
       "tests/unit/map-discovery.test.ts",
-      "tests/unit/map-graph-e2e.test.ts"
+      "tests/unit/map-graph-e2e.test.ts",
+      "tests/unit/shared-helpers.test.ts"
     ],
     "src/map/grammars.ts": [
       "tests/unit/clones-units.test.ts",
@@ -907,6 +911,12 @@
     "tests/unit/query-safety.test.ts": [
       "src/query/graph.ts",
       "src/query/safety.ts"
+    ],
+    "tests/unit/shared-helpers.test.ts": [
+      "src/depgraph/reporters/markdown.ts",
+      "src/depgraph/types.ts",
+      "src/io.ts",
+      "src/map/discovery.ts"
     ],
     "tests/unit/sort.test.ts": [
       "src/sort.ts"
