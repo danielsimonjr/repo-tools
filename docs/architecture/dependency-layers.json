@@ -1,0 +1,5062 @@
+{
+  "metadata": {
+    "name": "@danielsimonjr/repo-tools",
+    "version": "2.3.0",
+    "schemaVersion": "2.0.0",
+    "language": "typescript"
+  },
+  "entryPoints": [],
+  "modules": {
+    "root": {
+      "src/assets.d.ts": {
+        "description": "assets.d module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/bin.ts": {
+        "description": "bin module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./cli.ts",
+            "imports": [
+              "main"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/cli.ts": {
+        "description": "Command-line dispatch for `repo-tools` (design section 3).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./check/index.ts",
+            "imports": [
+              "CHECK_HELP",
+              "run"
+            ]
+          },
+          {
+            "file": "./chunk/index.ts",
+            "imports": [
+              "CHUNK_HELP",
+              "run"
+            ]
+          },
+          {
+            "file": "./clones/index.ts",
+            "imports": [
+              "CLONES_HELP",
+              "run"
+            ]
+          },
+          {
+            "file": "./compress/index.ts",
+            "imports": [
+              "HELP",
+              "run"
+            ]
+          },
+          {
+            "file": "./docs/index.ts",
+            "imports": [
+              "DOCS_HELP",
+              "run"
+            ]
+          },
+          {
+            "file": "./io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./map/command.ts",
+            "imports": [
+              "DEPGRAPH_DEPRECATION",
+              "MAP_HELP",
+              "runMap"
+            ]
+          },
+          {
+            "file": "./query/index.ts",
+            "imports": [
+              "QUERY_HELP",
+              "run"
+            ]
+          },
+          {
+            "file": "./ste/index.ts",
+            "imports": [
+              "run",
+              "STE_HELP"
+            ]
+          },
+          {
+            "file": "./io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "Io",
+          "SUBCOMMANDS",
+          "main"
+        ],
+        "reExported": [
+          "Io"
+        ],
+        "functions": [
+          "main"
+        ],
+        "constants": [
+          "SUBCOMMANDS"
+        ]
+      },
+      "src/config.ts": {
+        "description": "The config file `repo-tools.config.json` (design section 5) and the merge of the command-line",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "posix",
+              "resolve",
+              "win32"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./depgraph/api-surface.ts",
+            "imports": [
+              "DEFAULT_STABILITY_TAGS"
+            ]
+          },
+          {
+            "file": "./depgraph/duplicates.ts",
+            "imports": [
+              "DEFAULT_DISPATCH_CALLS"
+            ]
+          },
+          {
+            "file": "./depgraph/exclude.ts",
+            "imports": [
+              "DEFAULT_EXCLUDE",
+              "TEST_DIR_NAMES"
+            ]
+          },
+          {
+            "file": "./depgraph/paths.ts",
+            "imports": [
+              "OUTPUT_SUBDIR"
+            ]
+          },
+          {
+            "file": "./depgraph/reporters/banner.ts",
+            "imports": [
+              "DEFAULT_REGENERATE_COMMAND",
+              "VERIFICATION_MARKER"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "CONFIG_FILE",
+          "DEFAULT_API_ENTRY",
+          "ABSOLUTE_PATH_TEXT",
+          "isAbsolutePath",
+          "resolveUnderRoot",
+          "checkClonesFlag",
+          "parseConfigSections",
+          "parseConfig",
+          "loadConfigSections",
+          "loadConfigFile",
+          "mergeQueryConfig",
+          "MAP_REGENERATE_COMMAND",
+          "mergeMapConfig",
+          "mergeDepgraphConfig"
+        ],
+        "interfaces": [
+          "ApiSurfaceConfig",
+          "DepgraphConfig",
+          "QuerySettings",
+          "QueryConfig",
+          "ClonesSettings",
+          "ConfigSections"
+        ],
+        "functions": [
+          "isAbsolutePath",
+          "resolveUnderRoot",
+          "checkClonesFlag",
+          "parseConfigSections",
+          "parseConfig",
+          "loadConfigSections",
+          "loadConfigFile",
+          "mergeQueryConfig",
+          "mergeMapConfig",
+          "mergeDepgraphConfig"
+        ],
+        "constants": [
+          "CONFIG_FILE",
+          "DEFAULT_API_ENTRY",
+          "ABSOLUTE_PATH_TEXT",
+          "MAP_REGENERATE_COMMAND"
+        ]
+      },
+      "src/io-types.ts": {
+        "description": "Shared types for command output. Subcommand modules import `Io` from here, so they do not",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "Io"
+        ]
+      },
+      "src/io.ts": {
+        "description": "Deterministic file output. Every file that repo-tools writes has LF line endings, so two",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "mkdirSync",
+              "writeFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "dirname"
+            ]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "writeLf",
+          "withOneLf",
+          "writeReport",
+          "toJson"
+        ],
+        "functions": [
+          "writeLf",
+          "withOneLf",
+          "writeReport",
+          "toJson"
+        ]
+      },
+      "src/mask.ts": {
+        "description": "The one comment and string masking module of repo-tools.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "blankCommentsAndStrings",
+          "stripComments"
+        ],
+        "functions": [
+          "blankCommentsAndStrings",
+          "stripComments"
+        ]
+      },
+      "src/py.ts": {
+        "description": "The Python string behaviour that the ported Python tools (STE, map) depend on.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "SPACE_BODY",
+          "S",
+          "NON_SPACE",
+          "W",
+          "B",
+          "D",
+          "ci",
+          "pyStrip",
+          "pyLstrip",
+          "pySplit",
+          "pySplitlines",
+          "isAlnum",
+          "headCodePoints",
+          "codePointLength",
+          "pyRepr",
+          "reEscape",
+          "pyDirname",
+          "pyJoin",
+          "pyNormpath"
+        ],
+        "functions": [
+          "ci",
+          "pyStrip",
+          "pyLstrip",
+          "pySplit",
+          "pySplitlines",
+          "isAlnum",
+          "headCodePoints",
+          "codePointLength",
+          "pyRepr",
+          "reEscape",
+          "pyDirname",
+          "pyJoin",
+          "pyNormpath"
+        ],
+        "constants": [
+          "SPACE_BODY",
+          "S",
+          "NON_SPACE",
+          "W",
+          "B",
+          "D"
+        ]
+      },
+      "src/sort.ts": {
+        "description": "Code-unit ordering (design fix F22).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "compareCodeUnits",
+          "sortCodeUnits"
+        ],
+        "functions": [
+          "compareCodeUnits",
+          "sortCodeUnits"
+        ]
+      }
+    },
+    "check": {
+      "src/check/claims.ts": {
+        "description": "The claims of a document (design section 15): the rows of its `## Verification` table.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/reporters/banner.ts",
+            "imports": [
+              "VERIFICATION_MARKER"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "NO_VERIFICATION_MARKER",
+          "scanVerification",
+          "parseClaims",
+          "hasVerificationSection"
+        ],
+        "interfaces": [
+          "Claim",
+          "Scan"
+        ],
+        "functions": [
+          "scanVerification",
+          "parseClaims",
+          "hasVerificationSection"
+        ],
+        "constants": [
+          "NO_VERIFICATION_MARKER"
+        ]
+      },
+      "src/check/index.ts": {
+        "description": "`repo-tools check` (design section 15): the drift gate. It reads the Verification tables of",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readdirSync",
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join",
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "ABSOLUTE_PATH_TEXT",
+              "isAbsolutePath",
+              "loadConfigFile",
+              "mergeMapConfig"
+            ]
+          },
+          {
+            "file": "../depgraph/args.ts",
+            "imports": [
+              "wantsHelp"
+            ]
+          },
+          {
+            "file": "../depgraph/paths.ts",
+            "imports": [
+              "maskRoot"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../map/command.ts",
+            "imports": [
+              "isDirectory"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./claims.ts",
+            "imports": [
+              "NO_VERIFICATION_MARKER"
+            ]
+          },
+          {
+            "file": "./metrics.ts",
+            "imports": [
+              "collectMetrics"
+            ]
+          },
+          {
+            "file": "./verify.ts",
+            "imports": [
+              "DocFile",
+              "Verdict",
+              "verifyDocs"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "CHECK_HELP",
+          "run"
+        ],
+        "functions": [
+          "run"
+        ],
+        "constants": [
+          "CHECK_HELP"
+        ]
+      },
+      "src/check/metrics.ts": {
+        "description": "The metrics of `repo-tools check` (design section 15): the claim names that a document can",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "mkdtempSync",
+              "readFileSync",
+              "rmSync"
+            ]
+          },
+          {
+            "module": "os",
+            "imports": [
+              "tmpdir"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../map/artifacts.ts",
+            "imports": [
+              "emitDependencyGraph",
+              "emitDuplicateSymbols",
+              "emitFileInventory",
+              "emitUnusedAnalysis"
+            ]
+          },
+          {
+            "file": "../map/command.ts",
+            "imports": [
+              "graphOf"
+            ]
+          },
+          {
+            "file": "./verify.ts",
+            "imports": [
+              "Measured",
+              "MetricValue"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "collectMetrics"
+        ],
+        "interfaces": [
+          "MetricsOptions"
+        ],
+        "functions": [
+          "collectMetrics"
+        ]
+      },
+      "src/check/verify.ts": {
+        "description": "The verdict of `repo-tools check` (design section 15): each claim of each document against",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./claims.ts",
+            "imports": [
+              "NO_VERIFICATION_MARKER",
+              "parseClaims",
+              "scanVerification"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "verifyDocs"
+        ],
+        "interfaces": [
+          "Measured",
+          "DocFile",
+          "Verdict"
+        ],
+        "functions": [
+          "verifyDocs"
+        ]
+      }
+    },
+    "chunk": {
+      "src/chunk/index.ts": {
+        "description": "`repo-tools chunk` (design section 8): split a large file into chunk files, merge",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "copyFileSync",
+              "existsSync",
+              "lstatSync",
+              "readFileSync",
+              "realpathSync",
+              "statSync",
+              "writeFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "dirname",
+              "extname",
+              "isAbsolute",
+              "join",
+              "relative",
+              "resolve",
+              "sep"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeLf"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./manifest.ts",
+            "imports": [
+              "ChunkInfo",
+              "contentHash",
+              "FileType",
+              "hashFor",
+              "isAbsoluteAnywhere",
+              "MANIFEST_NAME",
+              "MANIFEST_VERSION",
+              "Manifest",
+              "readManifest",
+              "relativeSource",
+              "resolveSource",
+              "writeManifest"
+            ]
+          },
+          {
+            "file": "./splitters.ts",
+            "imports": [
+              "chunkFilename",
+              "detectFileType",
+              "detectLineEnding",
+              "JsonSplit",
+              "lineBreakRuns",
+              "mergeJson",
+              "mergeJsonLayout",
+              "normalizeLineEndings",
+              "restoreLineBreaks",
+              "splitJson",
+              "splitMarkdown",
+              "splitTypeScript"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "CHUNK_HELP",
+          "run"
+        ],
+        "functions": [
+          "run"
+        ],
+        "constants": [
+          "CHUNK_HELP"
+        ]
+      },
+      "src/chunk/manifest.ts": {
+        "description": "The chunk manifest: its types, its hash and its file I/O (design section 8).",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "crypto",
+            "imports": [
+              "createHash"
+            ]
+          },
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "posix",
+              "relative",
+              "resolve",
+              "sep",
+              "win32"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../io.ts",
+            "imports": [
+              "toJson",
+              "writeLf"
+            ]
+          },
+          {
+            "file": "./splitters.ts",
+            "imports": [
+              "JsonLayout",
+              "LINE_BREAK_RUNS"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "MANIFEST_VERSION",
+          "MANIFEST_NAME",
+          "contentHash",
+          "legacyHash",
+          "hashFor",
+          "relativeSource",
+          "resolveSource",
+          "readManifest",
+          "isPlainFileName",
+          "isAbsoluteAnywhere",
+          "validateManifest",
+          "writeManifest"
+        ],
+        "interfaces": [
+          "ChunkInfo",
+          "Manifest"
+        ],
+        "functions": [
+          "contentHash",
+          "legacyHash",
+          "hashFor",
+          "relativeSource",
+          "resolveSource",
+          "readManifest",
+          "isPlainFileName",
+          "isAbsoluteAnywhere",
+          "validateManifest",
+          "writeManifest"
+        ],
+        "constants": [
+          "MANIFEST_VERSION",
+          "MANIFEST_NAME"
+        ]
+      },
+      "src/chunk/splitters.ts": {
+        "description": "Splitters for the `chunk` subcommand (design section 8): Markdown, JSON and TypeScript.",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "extname"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./manifest.ts",
+            "imports": [
+              "FileType"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "normalizeLineEndings",
+          "detectLineEnding",
+          "LINE_BREAK_RUNS",
+          "lineBreakRuns",
+          "restoreLineBreaks",
+          "detectFileType",
+          "chunkExtension",
+          "chunkFilename",
+          "splitMarkdown",
+          "splitJson",
+          "mergeJsonLayout",
+          "mergeJson",
+          "splitTypeScript"
+        ],
+        "interfaces": [
+          "Section",
+          "JsonLayout",
+          "JsonSplit"
+        ],
+        "functions": [
+          "normalizeLineEndings",
+          "detectLineEnding",
+          "lineBreakRuns",
+          "restoreLineBreaks",
+          "detectFileType",
+          "chunkExtension",
+          "chunkFilename",
+          "splitMarkdown",
+          "splitJson",
+          "mergeJsonLayout",
+          "mergeJson",
+          "splitTypeScript"
+        ],
+        "constants": [
+          "LINE_BREAK_RUNS"
+        ]
+      }
+    },
+    "clones": {
+      "src/clones/detect.ts": {
+        "description": "The clone detector (design section 17.6) finds exact groups.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./units.ts",
+            "imports": [
+              "Unit"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "detect"
+        ],
+        "interfaces": [
+          "DetectParams",
+          "NearPair",
+          "Detection"
+        ],
+        "functions": [
+          "detect"
+        ]
+      },
+      "src/clones/index.ts": {
+        "description": "`repo-tools clones` (design section 17): lists the functions of a repository and finds the",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "join",
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "ClonesSettings",
+              "checkClonesFlag",
+              "loadConfigSections"
+            ]
+          },
+          {
+            "file": "../depgraph/paths.ts",
+            "imports": [
+              "maskRoot"
+            ]
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeLf"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../map/command.ts",
+            "imports": [
+              "isDirectory"
+            ]
+          },
+          {
+            "file": "../map/discovery.ts",
+            "imports": [
+              "discover",
+              "readSource"
+            ]
+          },
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "grammarFor",
+              "loadGrammar",
+              "parserFor"
+            ]
+          },
+          {
+            "file": "./detect.ts",
+            "imports": [
+              "detect"
+            ]
+          },
+          {
+            "file": "./report.ts",
+            "imports": [
+              "clonesJson",
+              "inventoryJsonl",
+              "summaryText"
+            ]
+          },
+          {
+            "file": "./settings.ts",
+            "imports": [
+              "ClonesConfig",
+              "mergeClonesConfig"
+            ]
+          },
+          {
+            "file": "./units.ts",
+            "imports": [
+              "Unit",
+              "unitsOf"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "CLONES_HELP",
+          "run"
+        ],
+        "functions": [
+          "run"
+        ],
+        "constants": [
+          "CLONES_HELP"
+        ]
+      },
+      "src/clones/normalise.ts": {
+        "description": "The normal form of a function body (design section 17.4) is a pre-order sequence of node labels.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "normalise"
+        ],
+        "interfaces": [
+          "Normal"
+        ],
+        "functions": [
+          "normalise"
+        ]
+      },
+      "src/clones/report.ts": {
+        "description": "The output of `repo-tools clones` (design section 17.7): the summary text, `inventory.jsonl` and",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./detect.ts",
+            "imports": [
+              "Detection"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./settings.ts",
+            "imports": [
+              "ClonesConfig"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./units.ts",
+            "imports": [
+              "Unit"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "inventoryJsonl",
+          "clonesJson",
+          "summaryText"
+        ],
+        "interfaces": [
+          "RunStats"
+        ],
+        "functions": [
+          "inventoryJsonl",
+          "clonesJson",
+          "summaryText"
+        ]
+      },
+      "src/clones/settings.ts": {
+        "description": "The settings of `repo-tools clones` (design section 17.5).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "ClonesSettings"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "CLONES_DEFAULTS",
+          "mergeClonesConfig"
+        ],
+        "interfaces": [
+          "ClonesConfig"
+        ],
+        "functions": [
+          "mergeClonesConfig"
+        ],
+        "constants": [
+          "CLONES_DEFAULTS"
+        ]
+      },
+      "src/clones/units.ts": {
+        "description": "The function units of one parsed file (design section 17.3). A unit is a function with a name",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [
+          {
+            "module": "crypto",
+            "imports": [
+              "createHash"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./normalise.ts",
+            "imports": [
+              "normalise"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "DOC_LIMIT",
+          "unitsOf"
+        ],
+        "interfaces": [
+          "Unit"
+        ],
+        "functions": [
+          "unitsOf"
+        ],
+        "constants": [
+          "DOC_LIMIT"
+        ]
+      }
+    },
+    "compress": {
+      "src/compress/formats.ts": {
+        "description": "One compressor per file format for `repo-tools compress` (design section 8).",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "extname"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./legend.ts",
+            "imports": [
+              "applySubstringCompression",
+              "findRepeatedSubstrings",
+              "generateAbbreviation",
+              "isRawNumber",
+              "parseLossless",
+              "renameKeys"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "FORMATS",
+          "LEVELS",
+          "estimateTokens",
+          "calculateStats",
+          "detectFormat",
+          "getCompressor"
+        ],
+        "interfaces": [
+          "CompressionStats",
+          "CompressionResult"
+        ],
+        "functions": [
+          "estimateTokens",
+          "calculateStats",
+          "detectFormat",
+          "getCompressor"
+        ],
+        "constants": [
+          "FORMATS",
+          "LEVELS"
+        ]
+      },
+      "src/compress/index.ts": {
+        "description": "`repo-tools compress` (design section 8).",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "readdirSync",
+              "readFileSync",
+              "statSync",
+              "writeFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "dirname",
+              "extname",
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./formats.ts",
+            "imports": [
+              "CompressionLevel",
+              "CompressionStats",
+              "calculateStats",
+              "detectFormat",
+              "FileFormat",
+              "FORMATS",
+              "getCompressor",
+              "LEVELS"
+            ]
+          },
+          {
+            "file": "./legend.ts",
+            "imports": [
+              "decompress",
+              "JSON_ONLY_MESSAGE"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "HELP",
+          "findFiles",
+          "run"
+        ],
+        "interfaces": [
+          "CompressDeps"
+        ],
+        "functions": [
+          "findFiles",
+          "run"
+        ],
+        "constants": [
+          "HELP"
+        ]
+      },
+      "src/compress/legend.ts": {
+        "description": "Legend build and parse for `repo-tools compress` (design section 8).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./formats.ts",
+            "imports": [
+              "FileFormat"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "generateAbbreviation",
+          "findRepeatedSubstrings",
+          "applySubstringCompression",
+          "isRawNumber",
+          "parseLossless",
+          "assertNumbersKept",
+          "renameKeys",
+          "JSON_ONLY_MESSAGE",
+          "decompress"
+        ],
+        "interfaces": [
+          "SubstringCandidate"
+        ],
+        "functions": [
+          "generateAbbreviation",
+          "findRepeatedSubstrings",
+          "applySubstringCompression",
+          "isRawNumber",
+          "parseLossless",
+          "assertNumbersKept",
+          "renameKeys",
+          "decompress"
+        ],
+        "constants": [
+          "JSON_ONLY_MESSAGE"
+        ]
+      }
+    },
+    "depgraph": {
+      "src/depgraph/analysis.ts": {
+        "description": "Graph analysis: modules, the dependency matrix, reachability, the public surface, unused files",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../mask.ts",
+            "imports": [
+              "stripComments"
+            ]
+          },
+          {
+            "file": "./cycles.ts",
+            "imports": [
+              "filesInCycles"
+            ]
+          },
+          {
+            "file": "./duplicates.ts",
+            "imports": [
+              "escapeRegExpLiteral"
+            ]
+          },
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "isSrcIndex"
+            ]
+          },
+          {
+            "file": "./resolver.ts",
+            "imports": [
+              "targetOf",
+              "workspaceTarget"
+            ]
+          },
+          {
+            "file": "./roots.ts",
+            "imports": [
+              "configReferencedEntries"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "CyclicComponents",
+              "DependencyMatrix",
+              "ModuleMap",
+              "ParsedFile",
+              "PublicSurface",
+              "Statistics",
+              "UnusedAnalysis",
+              "UnusedExport",
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "categorizeFiles",
+          "buildDependencyMatrix",
+          "findReachableFiles",
+          "computePublicSurface",
+          "detectUnused",
+          "generateStatistics",
+          "splitDormant"
+        ],
+        "interfaces": [
+          "DormantSplit"
+        ],
+        "functions": [
+          "categorizeFiles",
+          "buildDependencyMatrix",
+          "findReachableFiles",
+          "computePublicSurface",
+          "detectUnused",
+          "generateStatistics",
+          "splitDormant"
+        ]
+      },
+      "src/depgraph/api-surface.ts": {
+        "description": "API-surface extraction for a TypeScript/ESM codebase.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "DEFAULT_STABILITY_TAGS",
+          "maskNonCode",
+          "extractExportDetails",
+          "extractReExports",
+          "resolveSurface",
+          "createTsResolver",
+          "buildApiSurfaceReport"
+        ],
+        "interfaces": [
+          "ExportDetail",
+          "ReExport",
+          "SurfaceOptions",
+          "SurfaceSymbol",
+          "Surface"
+        ],
+        "functions": [
+          "maskNonCode",
+          "extractExportDetails",
+          "extractReExports",
+          "resolveSurface",
+          "createTsResolver",
+          "buildApiSurfaceReport"
+        ],
+        "constants": [
+          "DEFAULT_STABILITY_TAGS"
+        ]
+      },
+      "src/depgraph/args.ts": {
+        "description": "The command line of `repo-tools depgraph` (design section 14.2).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "ABSOLUTE_PATH_TEXT",
+              "DepgraphSettings",
+              "isAbsolutePath"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "SCAN_SCOPE_FLAGS",
+          "scanScopeText",
+          "parseDepgraphArgs",
+          "wantsHelp"
+        ],
+        "interfaces": [
+          "DepgraphOptions"
+        ],
+        "functions": [
+          "scanScopeText",
+          "parseDepgraphArgs",
+          "wantsHelp"
+        ],
+        "constants": [
+          "SCAN_SCOPE_FLAGS"
+        ]
+      },
+      "src/depgraph/coverage.ts": {
+        "description": "Test coverage by direct import: which source files the test files import, directly or through",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "outputDirOf"
+            ]
+          },
+          {
+            "file": "./resolver.ts",
+            "imports": [
+              "targetOf"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "ParsedFile"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "loadCoveragePolicy",
+          "classifyAgainstPolicy",
+          "buildCategoryBreakdown",
+          "buildReExportMap",
+          "traceReExports",
+          "analyzeTestCoverage"
+        ],
+        "interfaces": [
+          "CoveragePolicyCategory",
+          "CoveragePolicy",
+          "CategoryBreakdown",
+          "TestCoverageAnalysis"
+        ],
+        "functions": [
+          "loadCoveragePolicy",
+          "classifyAgainstPolicy",
+          "buildCategoryBreakdown",
+          "buildReExportMap",
+          "traceReExports",
+          "analyzeTestCoverage"
+        ]
+      },
+      "src/depgraph/cycles.ts": {
+        "description": "Cycles of the relative-import graph, by strongly connected component (fix F26).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/cycles.ts",
+            "imports": [
+              "stronglyConnectedComponents"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./resolver.ts",
+            "imports": [
+              "targetOf"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "CyclicComponent",
+              "CyclicComponents",
+              "ParsedFile"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "shortestCycleThrough",
+          "detectCyclicComponents",
+          "filesInCycles"
+        ],
+        "functions": [
+          "shortestCycleThrough",
+          "detectCyclicComponents",
+          "filesInCycles"
+        ]
+      },
+      "src/depgraph/description.ts": {
+        "description": "The file description that the subsystem reports show: the first line of a JSDoc block or of a",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "dirname"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../mask.ts",
+            "imports": [
+              "stripComments"
+            ]
+          },
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "withoutTsExtension"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "ParsedFile"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "extractDescription",
+          "cleanExportName",
+          "generateFallbackDescription"
+        ],
+        "functions": [
+          "extractDescription",
+          "cleanExportName",
+          "generateFallbackDescription"
+        ]
+      },
+      "src/depgraph/dirlist.ts": {
+        "description": "Directory listing for every depgraph walk. All walks read folders through this module, so one",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "Dirent",
+              "existsSync",
+              "lstatSync",
+              "readdirSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits",
+              "sortCodeUnits"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "readdirHook",
+          "listNames",
+          "listEntries",
+          "linkLog",
+          "isLink",
+          "isLinkEntry",
+          "isWalkable"
+        ],
+        "functions": [
+          "listNames",
+          "listEntries",
+          "isLink",
+          "isLinkEntry",
+          "isWalkable"
+        ],
+        "constants": [
+          "readdirHook",
+          "linkLog"
+        ]
+      },
+      "src/depgraph/duplicates.ts": {
+        "description": "Duplicate symbols: names that two or more files define (not only re-export), classed as",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../mask.ts",
+            "imports": [
+              "stripComments"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "outputDirOf"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "ParsedFile",
+              "PublicSurface"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "RUNTIME_DUP_CATEGORIES",
+          "TYPE_DUP_CATEGORIES",
+          "DEFAULT_DISPATCH_CALLS",
+          "describeDispatchCalls",
+          "duplicateSymbolsNote",
+          "DUPLICATE_SYMBOLS_NOTE",
+          "loadDuplicateAllowlist",
+          "globMatchSingle",
+          "findAllowlistMatch",
+          "escapeRegExpLiteral",
+          "isDispatchVariantBody",
+          "collectImportedLocalNames",
+          "isAliasDelegationBody",
+          "classifyDefiner",
+          "collectOwnDefiners",
+          "finalizeDuplicateEntry",
+          "buildDuplicateEntries",
+          "tallyByTag",
+          "detectDuplicateSymbols",
+          "buildDuplicateReport",
+          "DUPLICATE_BASELINE_NOTE",
+          "trueDuplicateNames",
+          "buildDuplicateBaseline",
+          "findNewDuplicates",
+          "asDuplicateEntries",
+          "asBaselineNames"
+        ],
+        "interfaces": [
+          "DuplicateDefiner",
+          "DuplicateSymbolEntry",
+          "DuplicateSymbolsReport",
+          "DuplicateAllowlistEntry",
+          "DupCategory",
+          "DuplicateBaseline",
+          "NewDuplicate"
+        ],
+        "functions": [
+          "describeDispatchCalls",
+          "duplicateSymbolsNote",
+          "loadDuplicateAllowlist",
+          "globMatchSingle",
+          "findAllowlistMatch",
+          "escapeRegExpLiteral",
+          "isDispatchVariantBody",
+          "collectImportedLocalNames",
+          "isAliasDelegationBody",
+          "classifyDefiner",
+          "collectOwnDefiners",
+          "finalizeDuplicateEntry",
+          "buildDuplicateEntries",
+          "tallyByTag",
+          "detectDuplicateSymbols",
+          "buildDuplicateReport",
+          "trueDuplicateNames",
+          "buildDuplicateBaseline",
+          "findNewDuplicates",
+          "asDuplicateEntries",
+          "asBaselineNames"
+        ],
+        "constants": [
+          "RUNTIME_DUP_CATEGORIES",
+          "TYPE_DUP_CATEGORIES",
+          "DEFAULT_DISPATCH_CALLS",
+          "DUPLICATE_SYMBOLS_NOTE",
+          "DUPLICATE_BASELINE_NOTE"
+        ]
+      },
+      "src/depgraph/exclude.ts": {
+        "description": "The skip list of a source walk, as a value the caller passes. Nothing here is module state:",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./dirlist.ts",
+            "imports": [
+              "isLink",
+              "isWalkable",
+              "listNames"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "DEFAULT_EXCLUDE",
+          "TEST_DIR_NAMES",
+          "sourceTsFilesUnder"
+        ],
+        "functions": [
+          "sourceTsFilesUnder"
+        ],
+        "constants": [
+          "DEFAULT_EXCLUDE",
+          "TEST_DIR_NAMES"
+        ]
+      },
+      "src/depgraph/extensions.ts": {
+        "description": "Repo-local extensions of depgraph (design section 6).",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "lstatSync",
+              "realpathSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "dirname",
+              "isAbsolute",
+              "join",
+              "relative",
+              "resolve",
+              "sep"
+            ]
+          },
+          {
+            "module": "url",
+            "imports": [
+              "pathToFileURL"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "DepgraphConfig",
+              "isAbsolutePath",
+              "resolveUnderRoot"
+            ]
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "../mask.ts",
+            "imports": [
+              "blankCommentsAndStrings",
+              "stripComments"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "readOnlyCopy",
+          "loadExtensions",
+          "runHook",
+          "preflightContext",
+          "reportContext",
+          "outputPath"
+        ],
+        "interfaces": [
+          "ExtensionMask",
+          "PreflightContext",
+          "ReportContext",
+          "DepgraphExtension"
+        ],
+        "functions": [
+          "readOnlyCopy",
+          "loadExtensions",
+          "runHook",
+          "preflightContext",
+          "reportContext",
+          "outputPath"
+        ]
+      },
+      "src/depgraph/paths.ts": {
+        "description": "Root, source, test and output paths. Every path that leaves this module for a report is POSIX",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "join",
+              "relative"
+            ]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "OUTPUT_SUBDIR",
+          "withoutTsExtension",
+          "toPosix",
+          "isSrcIndex",
+          "relativePosix",
+          "maskRoot",
+          "srcDirOf",
+          "outputDirOf"
+        ],
+        "functions": [
+          "withoutTsExtension",
+          "toPosix",
+          "isSrcIndex",
+          "relativePosix",
+          "maskRoot",
+          "srcDirOf",
+          "outputDirOf"
+        ],
+        "constants": [
+          "OUTPUT_SUBDIR"
+        ]
+      },
+      "src/depgraph/reporters/banner.ts": {
+        "description": "The generated-file banner of every Markdown report (fix F3): the verification marker line,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "VERIFICATION_MARKER",
+          "DEFAULT_REGENERATE_COMMAND",
+          "bannerFor",
+          "withBanner"
+        ],
+        "interfaces": [
+          "BannerOptions"
+        ],
+        "functions": [
+          "bannerFor",
+          "withBanner"
+        ],
+        "constants": [
+          "VERIFICATION_MARKER",
+          "DEFAULT_REGENERATE_COMMAND"
+        ]
+      },
+      "src/depgraph/reporters/coverage.ts": {
+        "description": "TEST_COVERAGE.md and test-coverage.json.",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "basename"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "../coverage.ts",
+            "imports": [
+              "TestCoverageAnalysis"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "NAMESPACE_IMPORT_BASIS",
+          "NAMESPACE_IMPORT_COVERAGE_CAVEAT",
+          "generateTestCoverageMarkdown",
+          "generateTestCoverageJson"
+        ],
+        "interfaces": [
+          "CoverageBasisOptions"
+        ],
+        "functions": [
+          "generateTestCoverageMarkdown",
+          "generateTestCoverageJson"
+        ],
+        "constants": [
+          "NAMESPACE_IMPORT_BASIS",
+          "NAMESPACE_IMPORT_COVERAGE_CAVEAT"
+        ]
+      },
+      "src/depgraph/reporters/duplicates.ts": {
+        "description": "The duplicate-symbols.md body (without the banner). `dispatchCalls` names the calls that",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../duplicates.ts",
+            "imports": [
+              "DEFAULT_DISPATCH_CALLS",
+              "DupEntryTag",
+              "DuplicateSymbolEntry",
+              "DuplicateSymbolsReport",
+              "describeDispatchCalls"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "generateDuplicateSymbolsJson",
+          "generateDuplicateSymbolsMarkdown"
+        ],
+        "functions": [
+          "generateDuplicateSymbolsJson",
+          "generateDuplicateSymbolsMarkdown"
+        ]
+      },
+      "src/depgraph/reporters/json.ts": {
+        "description": "dependency-graph.json and dependency-summary.compact.json.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../description.ts",
+            "imports": [
+              "cleanExportName",
+              "generateFallbackDescription"
+            ]
+          },
+          {
+            "file": "../paths.ts",
+            "imports": [
+              "isSrcIndex"
+            ]
+          },
+          {
+            "file": "../resolver.ts",
+            "imports": [
+              "targetOf"
+            ]
+          },
+          {
+            "file": "../types.ts",
+            "imports": [
+              "CyclicComponents",
+              "ModuleMap",
+              "PackageJson",
+              "ParsedFile",
+              "Statistics"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "modulesJsonOf",
+          "layersOf",
+          "entryPointsOf",
+          "generateJSON",
+          "dependencyGraphJsonText",
+          "generateCompactSummary"
+        ],
+        "functions": [
+          "modulesJsonOf",
+          "layersOf",
+          "entryPointsOf",
+          "generateJSON",
+          "dependencyGraphJsonText",
+          "generateCompactSummary"
+        ]
+      },
+      "src/depgraph/reporters/markdown.ts": {
+        "description": "DEPENDENCY_GRAPH.md: the module sections, the dependency matrix, the cycles, the Mermaid",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "basename"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../cycles.ts",
+            "imports": [
+              "filesInCycles"
+            ]
+          },
+          {
+            "file": "../description.ts",
+            "imports": [
+              "generateFallbackDescription"
+            ]
+          },
+          {
+            "file": "../paths.ts",
+            "imports": [
+              "withoutTsExtension"
+            ]
+          },
+          {
+            "file": "../resolver.ts",
+            "imports": [
+              "targetOf"
+            ]
+          },
+          {
+            "file": "../types.ts",
+            "imports": [
+              "CyclicComponent",
+              "CyclicComponents",
+              "DependencyMatrix",
+              "ModuleMap",
+              "PackageJson",
+              "ParsedFile",
+              "Statistics",
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "generateMermaidDiagram",
+          "LONG_EXPORT_LIST_THRESHOLD",
+          "EXPORT_LIST_WRAP_WIDTH",
+          "renderExportList",
+          "summaryRowsOf",
+          "generateMarkdown",
+          "generatePackageDependencySection",
+          "insertPackageSection"
+        ],
+        "functions": [
+          "generateMermaidDiagram",
+          "renderExportList",
+          "summaryRowsOf",
+          "generateMarkdown",
+          "generatePackageDependencySection",
+          "insertPackageSection"
+        ],
+        "constants": [
+          "LONG_EXPORT_LIST_THRESHOLD",
+          "EXPORT_LIST_WRAP_WIDTH"
+        ]
+      },
+      "src/depgraph/reporters/surfaces.ts": {
+        "description": "package-export-surfaces.json: per package, the union of the public export names of its module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "../types.ts",
+            "imports": [
+              "ModuleMap",
+              "PublicSurface"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "packageKeyOf",
+          "buildPackageExportSurfaces",
+          "generateSurfacesJson"
+        ],
+        "functions": [
+          "packageKeyOf",
+          "buildPackageExportSurfaces",
+          "generateSurfacesJson"
+        ]
+      },
+      "src/depgraph/reporters/yaml.ts": {
+        "description": "dependency-graph.yaml: the dependency-graph.json object as YAML.",
+        "externalDependencies": [
+          {
+            "package": "js-yaml",
+            "imports": [
+              "dump"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "probeQuoteStyle",
+          "generateYaml"
+        ],
+        "functions": [
+          "probeQuoteStyle",
+          "generateYaml"
+        ]
+      },
+      "src/depgraph/resolver.ts": {
+        "description": "Specifier resolution: a relative specifier to a root-relative source path, and a package",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "dirname",
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "toPosix"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "distToSrc",
+          "resolveCandidates",
+          "resolvePath",
+          "targetOf",
+          "workspaceEntryPath",
+          "workspaceTarget",
+          "resolveWorkspaceSource"
+        ],
+        "interfaces": [
+          "KnownFiles"
+        ],
+        "functions": [
+          "distToSrc",
+          "resolveCandidates",
+          "resolvePath",
+          "targetOf",
+          "workspaceEntryPath",
+          "workspaceTarget",
+          "resolveWorkspaceSource"
+        ]
+      },
+      "src/depgraph/roots.ts": {
+        "description": "Reachability roots: the files that nothing imports but that ship or run. Sources are the",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "dirname",
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./dirlist.ts",
+            "imports": [
+              "listNames"
+            ]
+          },
+          {
+            "file": "./exclude.ts",
+            "imports": [
+              "DEFAULT_EXCLUDE",
+              "sourceTsFilesUnder"
+            ]
+          },
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "relativePosix",
+              "toPosix"
+            ]
+          },
+          {
+            "file": "./resolver.ts",
+            "imports": [
+              "distToSrc"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "ParsedFile",
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isJsonObject",
+          "tsupConfigEntries",
+          "stripJsonc",
+          "seedTsconfigEntries",
+          "exportsSubpathEntries",
+          "packageEntryFiles",
+          "rootPackageEntries",
+          "selfPackage",
+          "configReferencedEntries",
+          "htmlReferencedEntries",
+          "runtimeLaunchedEntries",
+          "collectEntryPoints"
+        ],
+        "interfaces": [
+          "PackageRootFields"
+        ],
+        "functions": [
+          "isJsonObject",
+          "tsupConfigEntries",
+          "stripJsonc",
+          "seedTsconfigEntries",
+          "exportsSubpathEntries",
+          "packageEntryFiles",
+          "rootPackageEntries",
+          "selfPackage",
+          "configReferencedEntries",
+          "htmlReferencedEntries",
+          "runtimeLaunchedEntries",
+          "collectEntryPoints"
+        ]
+      },
+      "src/depgraph/types.ts": {
+        "description": "Shared types of the depgraph pipeline: the parsed-file record, the edges, the exports, the",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [],
+        "interfaces": [
+          "Dependency",
+          "ExternalDependency",
+          "NodeDependency",
+          "FileExports",
+          "WorkspaceDependency",
+          "ParsedFile",
+          "DependencyMatrix",
+          "Statistics",
+          "UnusedExport",
+          "UnusedAnalysis",
+          "ModuleMap",
+          "PackageJson",
+          "WorkspacePackage",
+          "CyclicComponent",
+          "CyclicComponents",
+          "PublicSurface",
+          "RunContext"
+        ]
+      },
+      "src/depgraph/workspaces.ts": {
+        "description": "Workspace detection: npm and Yarn `workspaces`, `pnpm-workspace.yaml`, and the structural",
+        "externalDependencies": [
+          {
+            "package": "js-yaml",
+            "imports": [
+              "load"
+            ]
+          }
+        ],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./dirlist.ts",
+            "imports": [
+              "isLink",
+              "isLinkEntry",
+              "listEntries",
+              "listNames"
+            ]
+          },
+          {
+            "file": "./paths.ts",
+            "imports": [
+              "toPosix"
+            ]
+          },
+          {
+            "file": "./roots.ts",
+            "imports": [
+              "exportsSubpathEntries",
+              "isJsonObject",
+              "packageEntryFiles",
+              "Warn"
+            ]
+          },
+          {
+            "file": "./types.ts",
+            "imports": [
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "readWorkspacePatterns",
+          "matchesWorkspaceGlob",
+          "negatedWorkspaceFolders",
+          "detectWorkspaces"
+        ],
+        "functions": [
+          "readWorkspacePatterns",
+          "matchesWorkspaceGlob",
+          "negatedWorkspaceFolders",
+          "detectWorkspaces"
+        ]
+      }
+    },
+    "docs": {
+      "src/docs/analyse.ts": {
+        "description": "Reads the discovered files and runs the analyser of each language.",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./discovery.ts",
+            "imports": [
+              "discover",
+              "languageOf"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "newReport"
+            ]
+          },
+          {
+            "file": "./python.ts",
+            "imports": [
+              "analysePython"
+            ]
+          },
+          {
+            "file": "./typescript.ts",
+            "imports": [
+              "analyseTypeScript"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "readSourceText",
+          "analyseFile",
+          "analyseRepo"
+        ],
+        "interfaces": [
+          "RepoAnalysis"
+        ],
+        "functions": [
+          "readSourceText",
+          "analyseFile",
+          "analyseRepo"
+        ]
+      },
+      "src/docs/discovery.ts": {
+        "description": "Source discovery for `repo-tools docs`.",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "child_process",
+            "imports": [
+              "spawnSync"
+            ]
+          },
+          {
+            "module": "fs",
+            "imports": [
+              "Dirent",
+              "existsSync",
+              "readdirSync",
+              "readFileSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../map/discovery.ts",
+            "imports": [
+              "countLanguages",
+              "suffixOf"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "SKIP_DIRS",
+          "CONFIG_NAME",
+          "ConfigError",
+          "UnreadableRepoLanguage",
+          "assertReadableLanguage",
+          "languageOf",
+          "discover"
+        ],
+        "classes": [
+          "ConfigError",
+          "UnreadableRepoLanguage"
+        ],
+        "interfaces": [
+          "Discovery"
+        ],
+        "functions": [
+          "assertReadableLanguage",
+          "languageOf",
+          "discover"
+        ],
+        "constants": [
+          "SKIP_DIRS",
+          "CONFIG_NAME"
+        ]
+      },
+      "src/docs/index.ts": {
+        "description": "`repo-tools docs` (design section 16): measure, stub and gate the documentation comments of the",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "lstatSync",
+              "readFileSync",
+              "realpathSync",
+              "writeFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "isAbsolute",
+              "join",
+              "relative",
+              "resolve",
+              "sep"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/args.ts",
+            "imports": [
+              "wantsHelp"
+            ]
+          },
+          {
+            "file": "../depgraph/paths.ts",
+            "imports": [
+              "maskRoot",
+              "toPosix"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../map/command.ts",
+            "imports": [
+              "isDirectory"
+            ]
+          },
+          {
+            "file": "./analyse.ts",
+            "imports": [
+              "analyseRepo"
+            ]
+          },
+          {
+            "file": "./discovery.ts",
+            "imports": [
+              "assertReadableLanguage",
+              "CONFIG_NAME",
+              "languageOf",
+              "UnreadableRepoLanguage"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "isParsed"
+            ]
+          },
+          {
+            "file": "./python.ts",
+            "imports": [
+              "parsesAsPython"
+            ]
+          },
+          {
+            "file": "./report.ts",
+            "imports": [
+              "pctText",
+              "summarise",
+              "writeOutputs"
+            ]
+          },
+          {
+            "file": "./stub.ts",
+            "imports": [
+              "applyInsertions",
+              "Insertion",
+              "planPython",
+              "planTypeScript",
+              "splitLines",
+              "startsItsLine"
+            ]
+          },
+          {
+            "file": "./typescript.ts",
+            "imports": [
+              "parsesAsTypeScript"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "DOCS_HELP",
+          "unquoteGitPath",
+          "run"
+        ],
+        "functions": [
+          "unquoteGitPath",
+          "run"
+        ],
+        "constants": [
+          "DOCS_HELP"
+        ]
+      },
+      "src/docs/model.ts": {
+        "description": "The data model of `repo-tools docs`. One `DocSymbol` per documentable declaration. Both language",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "STUB_MARKER",
+          "isParsed",
+          "newReport"
+        ],
+        "interfaces": [
+          "Issue",
+          "DocSymbol",
+          "FileReport",
+          "Stats"
+        ],
+        "functions": [
+          "isParsed",
+          "newReport"
+        ],
+        "constants": [
+          "STUB_MARKER"
+        ]
+      },
+      "src/docs/python.ts": {
+        "description": "The Python analyser of `repo-tools docs`, built on the tree-sitter Python grammar.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "loadGrammar",
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../py.ts",
+            "imports": [
+              "NON_SPACE",
+              "pySplitlines",
+              "pyStrip",
+              "S",
+              "W"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "FileReport",
+              "newReport"
+            ]
+          },
+          {
+            "file": "./rules.ts",
+            "imports": [
+              "applyRules"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "detectDialect",
+          "documentedParams",
+          "cleandoc",
+          "parsesAsPython",
+          "analysePython"
+        ],
+        "functions": [
+          "detectDialect",
+          "documentedParams",
+          "cleandoc",
+          "parsesAsPython",
+          "analysePython"
+        ]
+      },
+      "src/docs/report.ts": {
+        "description": "The aggregate counts and the coverage report.",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../io.ts",
+            "imports": [
+              "toJson",
+              "writeReport"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "FileReport",
+              "isParsed",
+              "Stats"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "percent",
+          "summarise",
+          "pctText",
+          "renderMarkdown",
+          "writeOutputs"
+        ],
+        "functions": [
+          "percent",
+          "summarise",
+          "renderMarkdown",
+          "writeOutputs"
+        ],
+        "constants": [
+          "pctText"
+        ]
+      },
+      "src/docs/rules.ts": {
+        "description": "The rules of the docstring spec that both language analysers apply, in one place.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "checkProse"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "STUB_MARKER"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isTestFile",
+          "applyRules"
+        ],
+        "interfaces": [
+          "RuleOptions"
+        ],
+        "functions": [
+          "isTestFile",
+          "applyRules"
+        ]
+      },
+      "src/docs/stub.ts": {
+        "description": "The stub writer: the only part of `repo-tools docs` that changes source files.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../py.ts",
+            "imports": [
+              "pyLstrip"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "STUB_MARKER"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "splitLines",
+          "planPython",
+          "startsItsLine",
+          "planTypeScript",
+          "applyInsertions"
+        ],
+        "interfaces": [
+          "Insertion",
+          "Applied"
+        ],
+        "functions": [
+          "splitLines",
+          "planPython",
+          "startsItsLine",
+          "planTypeScript",
+          "applyInsertions"
+        ]
+      },
+      "src/docs/typescript.ts": {
+        "description": "The TypeScript and JavaScript analyser of `repo-tools docs`, built on tree-sitter.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node",
+              "Parser",
+              "Tree"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "grammarFor",
+              "loadGrammar",
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../py.ts",
+            "imports": [
+              "B",
+              "NON_SPACE",
+              "pySplitlines",
+              "pyStrip",
+              "S"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "FileReport",
+              "Kind",
+              "newReport"
+            ]
+          },
+          {
+            "file": "./rules.ts",
+            "imports": [
+              "applyRules"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "sanitise",
+          "parsesAsTypeScript",
+          "analyseTypeScript"
+        ],
+        "functions": [
+          "sanitise",
+          "parsesAsTypeScript",
+          "analyseTypeScript"
+        ]
+      }
+    },
+    "map": {
+      "src/map/adapter.ts": {
+        "description": "The map engine's graph as depgraph's parsed-file records, so that depgraph's analyzers (layers,",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join",
+              "posix"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/description.ts",
+            "imports": [
+              "extractDescription"
+            ]
+          },
+          {
+            "file": "../depgraph/types.ts",
+            "imports": [
+              "Dependency",
+              "ParsedFile",
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../depgraph/workspaces.ts",
+            "imports": [
+              "detectWorkspaces"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "FileNode",
+              "RepoGraph"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "toParsedFiles"
+        ],
+        "functions": [
+          "toParsedFiles"
+        ]
+      },
+      "src/map/artifacts.ts": {
+        "description": "The four core artifacts of the map engine: dependency-graph.json, file-inventory.json,",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "Dirent",
+              "mkdirSync",
+              "readFileSync",
+              "statSync",
+              "writeFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "dirname",
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/analysis.ts",
+            "imports": [
+              "computePublicSurface"
+            ]
+          },
+          {
+            "file": "../depgraph/dirlist.ts",
+            "imports": [
+              "readdirHook"
+            ]
+          },
+          {
+            "file": "../depgraph/duplicates.ts",
+            "imports": [
+              "buildDuplicateReport",
+              "detectDuplicateSymbols"
+            ]
+          },
+          {
+            "file": "../depgraph/roots.ts",
+            "imports": [
+              "rootPackageEntries"
+            ]
+          },
+          {
+            "file": "../depgraph/workspaces.ts",
+            "imports": [
+              "detectWorkspaces"
+            ]
+          },
+          {
+            "file": "../mask.ts",
+            "imports": [
+              "stripComments"
+            ]
+          },
+          {
+            "file": "../py.ts",
+            "imports": [
+              "B",
+              "reEscape",
+              "S",
+              "SPACE_BODY",
+              "W"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./adapter.ts",
+            "imports": [
+              "toParsedFiles"
+            ]
+          },
+          {
+            "file": "./cycles.ts",
+            "imports": [
+              "stronglyConnectedComponents"
+            ]
+          },
+          {
+            "file": "./discovery.ts",
+            "imports": [
+              "isReparsePoint",
+              "readSource"
+            ]
+          },
+          {
+            "file": "./graph.ts",
+            "imports": [
+              "CycleLimits",
+              "findCycles"
+            ]
+          },
+          {
+            "file": "./resolvers.ts",
+            "imports": [
+              "getResolver"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "FileNode",
+              "RepoGraph",
+              "toJson"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "pyJsonDumps",
+          "writeJson",
+          "emitDependencyGraph",
+          "emitFileInventory",
+          "importsNameSymbols",
+          "emitDuplicateSymbols",
+          "emitUnusedAnalysis",
+          "artifactName"
+        ],
+        "interfaces": [
+          "DependencyGraphOptions",
+          "DuplicateSymbolsOptions"
+        ],
+        "functions": [
+          "pyJsonDumps",
+          "writeJson",
+          "emitDependencyGraph",
+          "emitFileInventory",
+          "importsNameSymbols",
+          "emitDuplicateSymbols",
+          "emitUnusedAnalysis"
+        ],
+        "constants": [
+          "artifactName"
+        ]
+      },
+      "src/map/command.ts": {
+        "description": "`repo-tools map` (design decision D8): the command of the 2.0.0 engine. It builds the graph of",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "mkdirSync",
+              "readFileSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "DepgraphConfig",
+              "loadConfigFile",
+              "mergeMapConfig",
+              "resolveUnderRoot"
+            ]
+          },
+          {
+            "file": "../depgraph/args.ts",
+            "imports": [
+              "DepgraphOptions",
+              "MapCommand",
+              "parseDepgraphArgs",
+              "scanScopeText",
+              "wantsHelp"
+            ]
+          },
+          {
+            "file": "../depgraph/duplicates.ts",
+            "imports": [
+              "asBaselineNames",
+              "asDuplicateEntries",
+              "buildDuplicateBaseline",
+              "DuplicateEntries",
+              "findNewDuplicates",
+              "trueDuplicateNames"
+            ]
+          },
+          {
+            "file": "../depgraph/extensions.ts",
+            "imports": [
+              "loadExtensions",
+              "preflightContext",
+              "reportContext",
+              "runHook"
+            ]
+          },
+          {
+            "file": "../depgraph/paths.ts",
+            "imports": [
+              "maskRoot",
+              "OUTPUT_SUBDIR",
+              "relativePosix"
+            ]
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./artifacts.ts",
+            "imports": [
+              "emitDependencyGraph",
+              "emitDuplicateSymbols",
+              "emitFileInventory",
+              "emitUnusedAnalysis"
+            ]
+          },
+          {
+            "file": "./coverage.ts",
+            "imports": [
+              "emitTestCoverage"
+            ]
+          },
+          {
+            "file": "./discovery.ts",
+            "imports": [
+              "discover",
+              "Language",
+              "UnsupportedRepoLanguage",
+              "walkedSourceFiles"
+            ]
+          },
+          {
+            "file": "./graph.ts",
+            "imports": [
+              "buildGraph"
+            ]
+          },
+          {
+            "file": "./layers.ts",
+            "imports": [
+              "emitDependencyLayers",
+              "subsystemView"
+            ]
+          },
+          {
+            "file": "./markdown.ts",
+            "imports": [
+              "emitMarkdownReports"
+            ]
+          },
+          {
+            "file": "./reports.ts",
+            "imports": [
+              "emitSubsystemReports"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "RepoGraph"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./surfaces.ts",
+            "imports": [
+              "emitApiSurface",
+              "emitExportSurfaces",
+              "NO_SURFACE_REASON"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "MAP_HELP",
+          "DEPGRAPH_DEPRECATION",
+          "isDirectory",
+          "runMap",
+          "graphOf"
+        ],
+        "functions": [
+          "isDirectory",
+          "runMap",
+          "graphOf"
+        ],
+        "constants": [
+          "MAP_HELP",
+          "DEPGRAPH_DEPRECATION"
+        ]
+      },
+      "src/map/coverage.ts": {
+        "description": "Test coverage on the map engine's graph (design decision D5), for every language:",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/coverage.ts",
+            "imports": [
+              "analyzeTestCoverage"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/banner.ts",
+            "imports": [
+              "BannerOptions",
+              "withBanner"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/coverage.ts",
+            "imports": [
+              "generateTestCoverageJson",
+              "generateTestCoverageMarkdown"
+            ]
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "./adapter.ts",
+            "imports": [
+              "toParsedFiles"
+            ]
+          },
+          {
+            "file": "./artifacts.ts",
+            "imports": [
+              "importsNameSymbols"
+            ]
+          },
+          {
+            "file": "./reports.ts",
+            "imports": [
+              "MAP_REGENERATE_COMMAND"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "RepoGraph"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isTestFile",
+          "emitTestCoverage"
+        ],
+        "interfaces": [
+          "TestCoverageOptions"
+        ],
+        "functions": [
+          "isTestFile",
+          "emitTestCoverage"
+        ]
+      },
+      "src/map/cycles.ts": {
+        "description": "Simple-cycle enumeration over a plain edge map, shared by the graph (`findCycles`) and the",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "sccContaining",
+          "simpleCycles",
+          "stronglyConnectedComponents"
+        ],
+        "interfaces": [
+          "CycleLimits",
+          "CycleResult"
+        ],
+        "functions": [
+          "sccContaining",
+          "simpleCycles",
+          "stronglyConnectedComponents"
+        ]
+      },
+      "src/map/discovery.ts": {
+        "description": "Discovery for the map engine: which language a repository is, which files it holds, and the",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "child_process",
+            "imports": [
+              "spawnSync"
+            ]
+          },
+          {
+            "module": "fs",
+            "imports": [
+              "Dirent",
+              "lstatSync",
+              "readFileSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/dirlist.ts",
+            "imports": [
+              "readdirHook"
+            ]
+          },
+          {
+            "file": "../py.ts",
+            "imports": [
+              "pySplitlines"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "SOURCE_SUFFIXES",
+          "PYTHON_SUFFIXES",
+          "CSHARP_SUFFIXES",
+          "RUST_SUFFIXES",
+          "SKIP_DIRS",
+          "CSHARP_SKIP_DIRS",
+          "classifyArea",
+          "dispositionForArea",
+          "LANGUAGE_SCANS",
+          "UnsupportedRepoLanguage",
+          "suffixOf",
+          "isReparsePoint",
+          "countLanguages",
+          "gitTracked",
+          "gitTrackedLinks",
+          "candidateFiles",
+          "walkedSourceFiles",
+          "detectLanguage",
+          "readSource",
+          "skippedSourceFolders",
+          "discover"
+        ],
+        "classes": [
+          "UnsupportedRepoLanguage"
+        ],
+        "interfaces": [
+          "DiscoveredFile",
+          "ReachFlags"
+        ],
+        "functions": [
+          "classifyArea",
+          "dispositionForArea",
+          "suffixOf",
+          "isReparsePoint",
+          "countLanguages",
+          "gitTracked",
+          "gitTrackedLinks",
+          "candidateFiles",
+          "walkedSourceFiles",
+          "detectLanguage",
+          "readSource",
+          "skippedSourceFolders",
+          "discover"
+        ],
+        "constants": [
+          "SOURCE_SUFFIXES",
+          "PYTHON_SUFFIXES",
+          "CSHARP_SUFFIXES",
+          "RUST_SUFFIXES",
+          "SKIP_DIRS",
+          "CSHARP_SKIP_DIRS",
+          "LANGUAGE_SCANS"
+        ]
+      },
+      "src/map/grammars.ts": {
+        "description": "The tree-sitter grammars of the map engine: loaded lazily, once each, from the `.wasm` files",
+        "externalDependencies": [
+          {
+            "package": "tree-sitter-python/tree-sitter-python.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-typescript/tree-sitter-tsx.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-typescript/tree-sitter-typescript.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Language",
+              "Parser"
+            ]
+          },
+          {
+            "package": "web-tree-sitter/web-tree-sitter.wasm",
+            "imports": [
+              "default"
+            ]
+          }
+        ],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "isAbsolute"
+            ]
+          },
+          {
+            "module": "url",
+            "imports": [
+              "fileURLToPath"
+            ]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "loadGrammar",
+          "grammarFor",
+          "parserFor"
+        ],
+        "functions": [
+          "loadGrammar",
+          "grammarFor",
+          "parserFor"
+        ]
+      },
+      "src/map/graph.ts": {
+        "description": "Graph assembly for the map engine: discovery, reading and resolution joined into a `RepoGraph`,",
+        "externalDependencies": [
+          {
+            "package": "smol-toml",
+            "imports": [
+              "parse"
+            ]
+          }
+        ],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "Dirent",
+              "readFileSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "join",
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/dirlist.ts",
+            "imports": [
+              "readdirHook"
+            ]
+          },
+          {
+            "file": "../depgraph/resolver.ts",
+            "imports": [
+              "resolveWorkspaceSource",
+              "workspaceTarget"
+            ]
+          },
+          {
+            "file": "../depgraph/roots.ts",
+            "imports": [
+              "configReferencedEntries",
+              "htmlReferencedEntries",
+              "rootPackageEntries",
+              "runtimeLaunchedEntries",
+              "selfPackage"
+            ]
+          },
+          {
+            "file": "../depgraph/types.ts",
+            "imports": [
+              "ParsedFile",
+              "WorkspacePackage"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../depgraph/workspaces.ts",
+            "imports": [
+              "detectWorkspaces"
+            ]
+          },
+          {
+            "file": "../py.ts",
+            "imports": [
+              "B",
+              "pyRepr",
+              "S",
+              "SPACE_BODY",
+              "W"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./cycles.ts",
+            "imports": [
+              "CycleLimits",
+              "CycleResult",
+              "simpleCycles"
+            ]
+          },
+          {
+            "file": "./discovery.ts",
+            "imports": [
+              "detectLanguage",
+              "discover",
+              "dispositionForArea",
+              "isReparsePoint",
+              "Language",
+              "readSource",
+              "skippedSourceFolders"
+            ]
+          },
+          {
+            "file": "./grammars.ts",
+            "imports": [
+              "grammarFor",
+              "loadGrammar"
+            ]
+          },
+          {
+            "file": "./package-field.ts",
+            "imports": [
+              "packageField"
+            ]
+          },
+          {
+            "file": "./parsing.ts",
+            "imports": [
+              "ParsedModule",
+              "parseCs",
+              "parsePy",
+              "parseRs",
+              "parseTs"
+            ]
+          },
+          {
+            "file": "./resolvers.ts",
+            "imports": [
+              "getResolver"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "Dependency",
+              "FileNode",
+              "newRepoGraph",
+              "RepoGraph"
+            ]
+          },
+          {
+            "file": "./cycles.ts",
+            "imports": [
+              "CycleLimits",
+              "CycleResult"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "mapDistToSrc",
+          "buildGraph",
+          "reachableFrom",
+          "CycleLimits",
+          "CycleResult",
+          "findCycles"
+        ],
+        "reExported": [
+          "CycleLimits",
+          "CycleResult"
+        ],
+        "functions": [
+          "mapDistToSrc",
+          "buildGraph",
+          "reachableFrom",
+          "findCycles"
+        ]
+      },
+      "src/map/layers.ts": {
+        "description": "dependency-layers.json (design decision D3): depgraph's subsystem view, built on the map engine's",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/analysis.ts",
+            "imports": [
+              "categorizeFiles"
+            ]
+          },
+          {
+            "file": "../depgraph/cycles.ts",
+            "imports": [
+              "detectCyclicComponents"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/json.ts",
+            "imports": [
+              "entryPointsOf",
+              "layersOf",
+              "modulesJsonOf"
+            ]
+          },
+          {
+            "file": "../depgraph/types.ts",
+            "imports": [
+              "CyclicComponents",
+              "ModuleMap",
+              "ParsedFile"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../depgraph/workspaces.ts",
+            "imports": [
+              "detectWorkspaces"
+            ]
+          },
+          {
+            "file": "./adapter.ts",
+            "imports": [
+              "toParsedFiles"
+            ]
+          },
+          {
+            "file": "./artifacts.ts",
+            "imports": [
+              "writeJson"
+            ]
+          },
+          {
+            "file": "./package-field.ts",
+            "imports": [
+              "packageField"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "RepoGraph",
+              "SCHEMA_VERSION"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "projectIdentity",
+          "subsystemView",
+          "emitDependencyLayers"
+        ],
+        "interfaces": [
+          "ProjectIdentity",
+          "SubsystemView"
+        ],
+        "functions": [
+          "projectIdentity",
+          "subsystemView",
+          "emitDependencyLayers"
+        ]
+      },
+      "src/map/markdown.ts": {
+        "description": "The Markdown reports of the map engine (design decisions D4 and D5), for every language:",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/duplicates.ts",
+            "imports": [
+              "DEFAULT_DISPATCH_CALLS",
+              "DuplicateSymbolsReport"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/banner.ts",
+            "imports": [
+              "BannerOptions",
+              "withBanner"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/duplicates.ts",
+            "imports": [
+              "generateDuplicateSymbolsMarkdown"
+            ]
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./reports.ts",
+            "imports": [
+              "MAP_REGENERATE_COMMAND"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "inventoryMarkdown",
+          "duplicatesMarkdown",
+          "unusedMarkdown",
+          "emitMarkdownReports"
+        ],
+        "functions": [
+          "inventoryMarkdown",
+          "duplicatesMarkdown",
+          "unusedMarkdown",
+          "emitMarkdownReports"
+        ]
+      },
+      "src/map/package-field.ts": {
+        "description": "A string field of the package.json in `root`, or null. A missing, malformed or non-object",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "packageField"
+        ],
+        "functions": [
+          "packageField"
+        ]
+      },
+      "src/map/parsing.ts": {
+        "description": "The source readers of the map engine: one per language, each giving the same language-neutral",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../py.ts",
+            "imports": [
+              "S",
+              "W"
+            ]
+          },
+          {
+            "file": "./grammars.ts",
+            "imports": [
+              "grammarFor",
+              "parserFor"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "emptyModule",
+          "parseTs",
+          "parseCs",
+          "pubUseNames",
+          "expandUsePath",
+          "parseRs",
+          "parsePy"
+        ],
+        "interfaces": [
+          "RawImport",
+          "ParsedModule"
+        ],
+        "functions": [
+          "emptyModule",
+          "parseTs",
+          "parseCs",
+          "pubUseNames",
+          "expandUsePath",
+          "parseRs",
+          "parsePy"
+        ]
+      },
+      "src/map/python-stdlib.ts": {
+        "description": "The top-level module names of the Python standard library: `sys.stdlib_module_names` of",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "PYTHON_STDLIB_MODULES"
+        ],
+        "constants": [
+          "PYTHON_STDLIB_MODULES"
+        ]
+      },
+      "src/map/query.ts": {
+        "description": "Read-only queries over a written `dependency-graph.json`. The module reads the graph JSON and",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./cycles.ts",
+            "imports": [
+              "CycleLimits",
+              "CycleResult",
+              "simpleCycles"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "SCHEMA_VERSION"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "loadGraph",
+          "dependents",
+          "symbolUsers",
+          "cycles"
+        ],
+        "interfaces": [
+          "GraphDocument",
+          "LoadedGraph",
+          "QueryCycleResult"
+        ],
+        "functions": [
+          "loadGraph",
+          "dependents",
+          "symbolUsers",
+          "cycles"
+        ]
+      },
+      "src/map/reports.ts": {
+        "description": "The subsystem reports of the map engine (design decisions D3 and D5), for every language:",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "MAP_REGENERATE_COMMAND"
+            ]
+          },
+          {
+            "file": "../depgraph/analysis.ts",
+            "imports": [
+              "buildDependencyMatrix"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/banner.ts",
+            "imports": [
+              "BannerOptions",
+              "withBanner"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/json.ts",
+            "imports": [
+              "generateCompactSummary"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/markdown.ts",
+            "imports": [
+              "generateMarkdown",
+              "SummaryRow"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/yaml.ts",
+            "imports": [
+              "generateYaml"
+            ]
+          },
+          {
+            "file": "../depgraph/types.ts",
+            "imports": [
+              "Statistics"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "./layers.ts",
+            "imports": [
+              "projectIdentity",
+              "SubsystemView",
+              "subsystemView"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "RepoGraph"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "MAP_REGENERATE_COMMAND",
+          "emitSubsystemReports"
+        ],
+        "interfaces": [
+          "SubsystemReportOptions"
+        ],
+        "functions": [
+          "emitSubsystemReports"
+        ]
+      },
+      "src/map/resolvers.ts": {
+        "description": "The resolvers of the map engine: one per language, each mapping an import specifier to a file of",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../py.ts",
+            "imports": [
+              "pyDirname",
+              "pyJoin",
+              "pyNormpath"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./parsing.ts",
+            "imports": [
+              "ParsedModule"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./python-stdlib.ts",
+            "imports": [
+              "PYTHON_STDLIB_MODULES"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "NODE_BUILTINS",
+          "TypeScriptResolver",
+          "PythonResolver",
+          "CSharpResolver",
+          "RustResolver",
+          "getResolver"
+        ],
+        "classes": [
+          "TypeScriptResolver",
+          "PythonResolver",
+          "CSharpResolver",
+          "RustResolver"
+        ],
+        "interfaces": [
+          "Resolver"
+        ],
+        "functions": [
+          "getResolver"
+        ],
+        "constants": [
+          "NODE_BUILTINS"
+        ]
+      },
+      "src/map/schema.ts": {
+        "description": "The graph schema of the map engine: the contract that every reader feeds and every report reads.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "SCHEMA_VERSION",
+          "newRepoGraph",
+          "toJson"
+        ],
+        "interfaces": [
+          "Dependency",
+          "FileNode",
+          "RepoGraph",
+          "ModuleEntry",
+          "GraphJson"
+        ],
+        "functions": [
+          "newRepoGraph",
+          "toJson"
+        ],
+        "constants": [
+          "SCHEMA_VERSION"
+        ]
+      },
+      "src/map/surfaces.ts": {
+        "description": "package-export-surfaces.json on the map engine's graph (design decision D5): per package, the",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/analysis.ts",
+            "imports": [
+              "categorizeFiles",
+              "computePublicSurface"
+            ]
+          },
+          {
+            "file": "../depgraph/api-surface.ts",
+            "imports": [
+              "buildApiSurfaceReport",
+              "createTsResolver",
+              "extractExportDetails",
+              "resolveSurface"
+            ]
+          },
+          {
+            "file": "../depgraph/reporters/surfaces.ts",
+            "imports": [
+              "generateSurfacesJson"
+            ]
+          },
+          {
+            "file": "../depgraph/roots.ts",
+            "imports": [
+              "rootPackageEntries"
+            ]
+          },
+          {
+            "file": "../depgraph/workspaces.ts",
+            "imports": [
+              "detectWorkspaces"
+            ]
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./adapter.ts",
+            "imports": [
+              "toParsedFiles"
+            ]
+          },
+          {
+            "file": "./schema.ts",
+            "imports": [
+              "RepoGraph"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "emitApiSurface",
+          "NO_SURFACE_REASON",
+          "emitExportSurfaces"
+        ],
+        "functions": [
+          "emitApiSurface",
+          "emitExportSurfaces"
+        ],
+        "constants": [
+          "NO_SURFACE_REASON"
+        ]
+      }
+    },
+    "query": {
+      "src/query/args.ts": {
+        "description": "The command line of `repo-tools query` (design section 7).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "ABSOLUTE_PATH_TEXT",
+              "isAbsolutePath"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "parseQueryArgs"
+        ],
+        "interfaces": [
+          "QueryOptions"
+        ],
+        "functions": [
+          "parseQueryArgs"
+        ]
+      },
+      "src/query/commands.ts": {
+        "description": "The commands of `repo-tools query` on the core graph (design decision D8). Each command writes",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "isAbsolutePath",
+              "resolveUnderRoot"
+            ]
+          },
+          {
+            "file": "../depgraph/cycles.ts",
+            "imports": [
+              "detectCyclicComponents"
+            ]
+          },
+          {
+            "file": "../depgraph/types.ts",
+            "imports": [
+              "CyclicComponent",
+              "ParsedFile"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../io.ts",
+            "imports": [
+              "writeReport"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../map/query.ts",
+            "imports": [
+              "dependents",
+              "GraphDocument",
+              "cycles",
+              "symbolUsers"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./graph.ts",
+            "imports": [
+              "buildForward",
+              "fileEntriesOf",
+              "invert"
+            ]
+          },
+          {
+            "file": "./load.ts",
+            "imports": [
+              "loadSurfaces",
+              "QueryInput"
+            ]
+          },
+          {
+            "file": "./safety.ts",
+            "imports": [
+              "browserSafePackages",
+              "computeTaint",
+              "findLeaks",
+              "packagesOf"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "dependents",
+          "symbolUsersCommand",
+          "isPublic",
+          "cycles",
+          "nodeSafety",
+          "emit",
+          "checkBrowserSafety"
+        ],
+        "functions": [
+          "dependents",
+          "symbolUsersCommand",
+          "isPublic",
+          "cycles",
+          "nodeSafety",
+          "emit",
+          "checkBrowserSafety"
+        ]
+      },
+      "src/query/graph.ts": {
+        "description": "The edge model of `repo-tools query` on the core graph: the forward and the reverse file edges.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./load.ts",
+            "imports": [
+              "GraphFileEntry",
+              "QueryGraph"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "fileEntriesOf",
+          "buildForward",
+          "invert"
+        ],
+        "functions": [
+          "fileEntriesOf",
+          "buildForward",
+          "invert"
+        ]
+      },
+      "src/query/index.ts": {
+        "description": "`repo-tools query`: answers structural questions from the core graph that `repo-tools map`",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "loadConfigSections",
+              "mergeQueryConfig"
+            ]
+          },
+          {
+            "file": "../depgraph/paths.ts",
+            "imports": [
+              "maskRoot",
+              "OUTPUT_SUBDIR"
+            ]
+          },
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./args.ts",
+            "imports": [
+              "parseQueryArgs"
+            ]
+          },
+          {
+            "file": "./commands.ts",
+            "imports": [
+              "checkBrowserSafety",
+              "cycles",
+              "dependents",
+              "emit",
+              "isPublic",
+              "nodeSafety",
+              "symbolUsersCommand"
+            ]
+          },
+          {
+            "file": "./load.ts",
+            "imports": [
+              "loadQueryInput"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "QUERY_HELP",
+          "run"
+        ],
+        "functions": [
+          "run"
+        ],
+        "constants": [
+          "QUERY_HELP"
+        ]
+      },
+      "src/query/load.ts": {
+        "description": "The input of `repo-tools query` (design decision D8): the core `dependency-graph.json` of",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "existsSync",
+              "readFileSync"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../config.ts",
+            "imports": [
+              "resolveUnderRoot"
+            ]
+          },
+          {
+            "file": "../map/query.ts",
+            "imports": [
+              "GraphDocument",
+              "loadGraph"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "loadQueryInput",
+          "loadSurfaces"
+        ],
+        "interfaces": [
+          "GraphEdge",
+          "GraphFileEntry",
+          "QueryGraph",
+          "QueryInput"
+        ],
+        "functions": [
+          "loadQueryInput",
+          "loadSurfaces"
+        ]
+      },
+      "src/query/safety.ts": {
+        "description": "The browser-safety model of `repo-tools query` (design section 7).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./graph.ts",
+            "imports": [
+              "FilePair"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "ROOT_PACKAGE",
+          "entryOf",
+          "packagesOf",
+          "browserSafePackages",
+          "computeTaint",
+          "reachableFrom",
+          "findLeaks"
+        ],
+        "functions": [
+          "entryOf",
+          "packagesOf",
+          "browserSafePackages",
+          "computeTaint",
+          "reachableFrom",
+          "findLeaks"
+        ],
+        "constants": [
+          "ROOT_PACKAGE"
+        ]
+      }
+    },
+    "ste": {
+      "src/ste/index.ts": {
+        "description": "`repo-tools ste`: check Markdown documents, or docstring prose, against the mechanically",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "Dirent",
+              "existsSync",
+              "lstatSync",
+              "readdirSync",
+              "readFileSync",
+              "statSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "join",
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../io-types.ts",
+            "imports": [
+              "Io"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "compareCodeUnits"
+            ]
+          },
+          {
+            "file": "./markdown.ts",
+            "imports": [
+              "checkMarkdownFindings"
+            ]
+          },
+          {
+            "file": "./prose.ts",
+            "imports": [
+              "checkProse",
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./since.ts",
+            "imports": [
+              "addedLinesSince",
+              "SinceError",
+              "touchesAdded"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "STE_HELP",
+          "HISTORICAL_MARKER",
+          "run"
+        ],
+        "functions": [
+          "run"
+        ],
+        "constants": [
+          "STE_HELP",
+          "HISTORICAL_MARKER"
+        ]
+      },
+      "src/ste/markdown.ts": {
+        "description": "The Markdown harness of the STE checker: a Markdown document in, gate findings out.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../py.ts",
+            "imports": [
+              "B",
+              "D",
+              "headCodePoints",
+              "isAlnum",
+              "pyLstrip",
+              "pyRepr",
+              "pySplit",
+              "pySplitlines",
+              "pyStrip",
+              "reEscape",
+              "S"
+            ]
+          },
+          {
+            "file": "./rules.ts",
+            "imports": [
+              "AMBIGUOUS_SOURCE",
+              "IDENTIFIER_SOURCE",
+              "MAX_WORDS_DESCRIPTIVE",
+              "MAX_WORDS_PROCEDURAL",
+              "PASSIVE_SOURCE",
+              "rule",
+              "WORDY"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "checkMarkdownFindings",
+          "checkMarkdown"
+        ],
+        "interfaces": [
+          "Finding"
+        ],
+        "functions": [
+          "checkMarkdownFindings",
+          "checkMarkdown"
+        ]
+      },
+      "src/ste/prose.ts": {
+        "description": "The docstring harness of the STE checker: a string of prose in, advisory findings out.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../py.ts",
+            "imports": [
+              "B",
+              "ci",
+              "codePointLength",
+              "headCodePoints",
+              "pySplit",
+              "pySplitlines",
+              "pyStrip",
+              "reEscape",
+              "S"
+            ]
+          },
+          {
+            "file": "./rules.ts",
+            "imports": [
+              "AMBIGUOUS_SOURCE",
+              "MAX_WORDS_PROCEDURAL",
+              "PASSIVE_SOURCE",
+              "rule",
+              "stripIdentifiers",
+              "WORDY"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "checkProse",
+          "proseOf"
+        ],
+        "functions": [
+          "checkProse",
+          "proseOf"
+        ]
+      },
+      "src/ste/rules.ts": {
+        "description": "The ASD-STE100 rule core: the one set of rules that both STE harnesses use.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../py.ts",
+            "imports": [
+              "B",
+              "ci",
+              "S",
+              "W"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "IRREGULAR_PARTICIPLES",
+          "DETERMINERS",
+          "PASSIVE_SOURCE",
+          "AMBIGUOUS_SOURCE",
+          "WORDY",
+          "IDENTIFIER_SOURCE",
+          "MAX_WORDS_PROCEDURAL",
+          "MAX_WORDS_DESCRIPTIVE",
+          "rule",
+          "stripIdentifiers"
+        ],
+        "functions": [
+          "rule",
+          "stripIdentifiers"
+        ],
+        "constants": [
+          "IRREGULAR_PARTICIPLES",
+          "DETERMINERS",
+          "PASSIVE_SOURCE",
+          "AMBIGUOUS_SOURCE",
+          "WORDY",
+          "IDENTIFIER_SOURCE",
+          "MAX_WORDS_PROCEDURAL",
+          "MAX_WORDS_DESCRIPTIVE"
+        ]
+      },
+      "src/ste/since.ts": {
+        "description": "`repo-tools ste --since=<rev>`: the lines of a file that the working tree adds or changes since",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "child_process",
+            "imports": [
+              "spawnSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "basename",
+              "dirname",
+              "resolve"
+            ]
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "SinceError",
+          "addedLinesSince",
+          "touchesAdded"
+        ],
+        "classes": [
+          "SinceError"
+        ],
+        "functions": [
+          "addedLinesSince",
+          "touchesAdded"
+        ]
+      }
+    }
+  },
+  "cyclicComponents": {
+    "runtime": [
+      {
+        "members": [
+          "tests/fixtures/depgraph/mini-repo/src/ping.ts",
+          "tests/fixtures/depgraph/mini-repo/src/pong.ts"
+        ],
+        "cycle": [
+          "tests/fixtures/depgraph/mini-repo/src/ping.ts",
+          "tests/fixtures/depgraph/mini-repo/src/pong.ts",
+          "tests/fixtures/depgraph/mini-repo/src/ping.ts"
+        ]
+      }
+    ],
+    "typeOnly": [
+      {
+        "members": [
+          "scripts/fix-ledger-audit.ts",
+          "scripts/fix-ledger-mutations.ts"
+        ],
+        "cycle": [
+          "scripts/fix-ledger-audit.ts",
+          "scripts/fix-ledger-mutations.ts",
+          "scripts/fix-ledger-audit.ts"
+        ]
+      },
+      {
+        "members": [
+          "src/chunk/manifest.ts",
+          "src/chunk/splitters.ts"
+        ],
+        "cycle": [
+          "src/chunk/manifest.ts",
+          "src/chunk/splitters.ts",
+          "src/chunk/manifest.ts"
+        ]
+      },
+      {
+        "members": [
+          "src/compress/formats.ts",
+          "src/compress/legend.ts"
+        ],
+        "cycle": [
+          "src/compress/formats.ts",
+          "src/compress/legend.ts",
+          "src/compress/formats.ts"
+        ]
+      },
+      {
+        "members": [
+          "tests/fixtures/depgraph/mini-repo/src/Z/loop.ts",
+          "tests/fixtures/depgraph/mini-repo/src/Z/zed.ts"
+        ],
+        "cycle": [
+          "tests/fixtures/depgraph/mini-repo/src/Z/loop.ts",
+          "tests/fixtures/depgraph/mini-repo/src/Z/zed.ts",
+          "tests/fixtures/depgraph/mini-repo/src/Z/loop.ts"
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "name": "Root",
+      "files": [
+        "src/assets.d.ts",
+        "src/bin.ts",
+        "src/cli.ts",
+        "src/config.ts",
+        "src/io-types.ts",
+        "src/io.ts",
+        "src/mask.ts",
+        "src/py.ts",
+        "src/sort.ts"
+      ]
+    },
+    {
+      "name": "Check",
+      "files": [
+        "src/check/claims.ts",
+        "src/check/index.ts",
+        "src/check/metrics.ts",
+        "src/check/verify.ts"
+      ]
+    },
+    {
+      "name": "Chunk",
+      "files": [
+        "src/chunk/index.ts",
+        "src/chunk/manifest.ts",
+        "src/chunk/splitters.ts"
+      ]
+    },
+    {
+      "name": "Clones",
+      "files": [
+        "src/clones/detect.ts",
+        "src/clones/index.ts",
+        "src/clones/normalise.ts",
+        "src/clones/report.ts",
+        "src/clones/settings.ts",
+        "src/clones/units.ts"
+      ]
+    },
+    {
+      "name": "Compress",
+      "files": [
+        "src/compress/formats.ts",
+        "src/compress/index.ts",
+        "src/compress/legend.ts"
+      ]
+    },
+    {
+      "name": "Depgraph",
+      "files": [
+        "src/depgraph/analysis.ts",
+        "src/depgraph/api-surface.ts",
+        "src/depgraph/args.ts",
+        "src/depgraph/coverage.ts",
+        "src/depgraph/cycles.ts",
+        "src/depgraph/description.ts",
+        "src/depgraph/dirlist.ts",
+        "src/depgraph/duplicates.ts",
+        "src/depgraph/exclude.ts",
+        "src/depgraph/extensions.ts",
+        "src/depgraph/paths.ts",
+        "src/depgraph/reporters/banner.ts",
+        "src/depgraph/reporters/coverage.ts",
+        "src/depgraph/reporters/duplicates.ts",
+        "src/depgraph/reporters/json.ts",
+        "src/depgraph/reporters/markdown.ts",
+        "src/depgraph/reporters/surfaces.ts",
+        "src/depgraph/reporters/yaml.ts",
+        "src/depgraph/resolver.ts",
+        "src/depgraph/roots.ts",
+        "src/depgraph/types.ts",
+        "src/depgraph/workspaces.ts"
+      ]
+    },
+    {
+      "name": "Docs",
+      "files": [
+        "src/docs/analyse.ts",
+        "src/docs/discovery.ts",
+        "src/docs/index.ts",
+        "src/docs/model.ts",
+        "src/docs/python.ts",
+        "src/docs/report.ts",
+        "src/docs/rules.ts",
+        "src/docs/stub.ts",
+        "src/docs/typescript.ts"
+      ]
+    },
+    {
+      "name": "Map",
+      "files": [
+        "src/map/adapter.ts",
+        "src/map/artifacts.ts",
+        "src/map/command.ts",
+        "src/map/coverage.ts",
+        "src/map/cycles.ts",
+        "src/map/discovery.ts",
+        "src/map/grammars.ts",
+        "src/map/graph.ts",
+        "src/map/layers.ts",
+        "src/map/markdown.ts",
+        "src/map/package-field.ts",
+        "src/map/parsing.ts",
+        "src/map/python-stdlib.ts",
+        "src/map/query.ts",
+        "src/map/reports.ts",
+        "src/map/resolvers.ts",
+        "src/map/schema.ts",
+        "src/map/surfaces.ts"
+      ]
+    },
+    {
+      "name": "Query",
+      "files": [
+        "src/query/args.ts",
+        "src/query/commands.ts",
+        "src/query/graph.ts",
+        "src/query/index.ts",
+        "src/query/load.ts",
+        "src/query/safety.ts"
+      ]
+    },
+    {
+      "name": "Ste",
+      "files": [
+        "src/ste/index.ts",
+        "src/ste/markdown.ts",
+        "src/ste/prose.ts",
+        "src/ste/rules.ts",
+        "src/ste/since.ts"
+      ]
+    }
+  ]
+}

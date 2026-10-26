@@ -33,6 +33,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The repository now has its own `docs/architecture/` folder. `repo-tools map . --out=docs/architecture` writes it:
+  the dependency graph, the file inventory, the duplicate and unused reports, and the test coverage. `repo-tools check`
+  passes against it. Biome skips this folder, because the generator owns the format of its files.
 - The privacy check (`scripts/privacy-check.ts`) keeps the hashes of the candidates of each word, so it hashes a word
   once. The scan of this repository took about 4.5 s on a Windows machine and takes about 1.5 s now, and the findings
   are the same. The test "this repository scans clean" timed out at the 5 s default of `bun test` on that machine.
