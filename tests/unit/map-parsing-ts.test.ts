@@ -93,6 +93,52 @@ describe("parseTs: re-exports are both an export and an import", () => {
     ]);
   });
 
+  // Grammar 0.23.2 gives an error node for `export type *`. The statement and its source stay in the
+  // tree, but the `type` word is inside the error node.
+  test("export type * from sets typeOnly, with no name and no export", () => {
+    const mod = parseTs('export type * from "./t.js";\n');
+    expect(mod.exports).toEqual([]);
+    expect(mod.reExports).toEqual(["type * from ./t.js"]);
+    expect(mod.imports).toEqual([
+      { specifier: "./t.js", names: [], typeOnly: true, reExport: true },
+    ]);
+  });
+
+  test("export type * as ns from sets typeOnly and gives the export", () => {
+    const mod = parseTs('export type * as ns from "./t.js";\n');
+    expect(mod.exports).toEqual(["ns"]);
+    expect(mod.imports).toEqual([
+      { specifier: "./t.js", names: ["*"], typeOnly: true, reExport: true },
+    ]);
+  });
+
+  test("export type * with a line break or no space sets typeOnly", () => {
+    expect(parseTs('export type\n  * from "./t.js";\n').imports[0]?.typeOnly).toBe(true);
+    expect(parseTs('export type* from "./t.js";\n').imports[0]?.typeOnly).toBe(true);
+  });
+
+  test("export type * with a comment inside the statement sets typeOnly", () => {
+    const forms = [
+      'export /* c */ type * from "./t.js";\n',
+      'export type /* c */ * from "./t.js";\n',
+    ];
+    for (const form of forms) expect(parseTs(form).imports[0]?.typeOnly).toBe(true);
+  });
+
+  test("a star re-export whose source path says type stays runtime", () => {
+    expect(parseTs('export * from "./type.js";\n').imports[0]?.typeOnly).toBe(false);
+    expect(parseTs('export * as type from "./t.js";\n').imports[0]?.typeOnly).toBe(false);
+  });
+
+  test("a runtime star re-export beside export type * stays runtime", () => {
+    const mod = parseTs('export type * from "./t.js";\nexport * from "./m.js";\n');
+    expect(mod.imports.map((i) => [i.specifier, i.typeOnly])).toEqual([
+      ["./t.js", true],
+      ["./m.js", false],
+    ]);
+    expect(mod.reExports).toEqual(["type * from ./t.js", "* from ./m.js"]);
+  });
+
   test("a default-alias re-export records the source name", () => {
     const mod = parseTs('export { default as D } from "./d";\n');
     expect(mod.exports).toEqual(["D"]);

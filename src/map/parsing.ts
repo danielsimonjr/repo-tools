@@ -199,6 +199,16 @@ function isTypeOnlyExport(stmt: Node, clause: Node): boolean {
   return specifiers.every((s) => hasChild(s, "type"));
 }
 
+/** White space or a block comment: what can stand between the words of a statement. */
+const GAP = String.raw`(?:\s|/\*[\s\S]*?\*/)`;
+
+/**
+ * The start of `export type * from` and `export type * as ns from`. Grammar 0.23.2 does not know
+ * this syntax: the statement and its source stay in the tree, but the word `type` is inside an
+ * error node, so the statement text decides.
+ */
+const EXPORT_TYPE_STAR = new RegExp(String.raw`^export${GAP}+type${GAP}*\*`, "u");
+
 /** Python `str.strip(chars)`. */
 function stripChars(text: string, chars: string): string {
   let a = 0;
@@ -347,16 +357,18 @@ export function parseTs(source: string, path = ""): ParsedModule {
         const nsExport = node.children.find((c) => c.type === "namespace_export");
         let names: string[] = [];
         let typeOnly = false;
+        const typeStar = hasChild(node, "type") || EXPORT_TYPE_STAR.test(node.text);
         if (clause) {
           names = exportClauseSourceNames(clause);
           typeOnly = isTypeOnlyExport(node, clause);
           for (const [name] of exportEntries(node)) mod.reExports.push(name);
         } else if (nsExport) {
           names = ["*"];
+          typeOnly = typeStar;
           for (const [name] of exportEntries(node)) mod.reExports.push(name);
         } else {
-          const typeStar = hasChild(node, "type") ? "type " : "";
-          mod.reExports.push(`${typeStar}* from ${specifierOf(spec)}`);
+          typeOnly = typeStar;
+          mod.reExports.push(`${typeStar ? "type " : ""}* from ${specifierOf(spec)}`);
         }
         mod.imports.push({ specifier: specifierOf(spec), names, typeOnly, reExport: true });
       }

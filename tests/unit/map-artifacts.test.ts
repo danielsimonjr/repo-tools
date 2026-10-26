@@ -133,6 +133,18 @@ describe("dependency-graph.json", () => {
     ]);
   });
 
+  test("D2: a cycle through export type * is type-only, not a runtime cycle", async () => {
+    const root = tmp({
+      "src/a.ts": 'export type * from "./b.js";\nexport const a = 1;\n',
+      "src/b.ts": 'import { a } from "./a.js";\nexport const b = a;\n',
+    });
+    const graph = await buildGraph(root);
+    const edge = graph.files.get("src/a.ts")?.internal.find((d) => d.file === "src/b.ts");
+    expect(edge?.typeOnly).toBe(true);
+    const s = read(emitDependencyGraph(graph, join(root, "out"))).statistics;
+    expect([s.runtimeCircularDeps, s.typeOnlyCircularDeps]).toEqual([0, 1]);
+  });
+
   test("D2: the cyclic components (SCCs) are counted beside the simple cycles", () => {
     const g = graphOf([
       fnode("src/a.ts", "src", "reachable", 1, { internal: [dep("src/b.ts")] }),
