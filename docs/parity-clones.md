@@ -190,6 +190,9 @@ runs from the source files with Bun, without an output folder, on one Windows co
 
 - The record shows that two parsers agree, not that every pair is a copy that should merge. Read both
   bodies of a pair before you change anything.
+- The record is a regression record for the choice of parser. The two tools give different pair counts
+  on the same input (177 and 145 on memoryjs, 442 and 402 on deepthinking-mcp). A count is therefore
+  not a stable measure, and the record makes no claim of comparison between repositories.
 - The record covers two repositories, and both are TypeScript with a library layout. A repository with
   more generated code, other syntax or a JavaScript majority can differ. The command does not read
   Python files, so no Python repository can be compared.

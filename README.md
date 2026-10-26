@@ -343,8 +343,13 @@ Exit codes: 0 when the run finished, even if it found no copy. 1 when the root h
 to read. 2 on a usage error, a bad config file or a root that is not a folder.
 
 The result is a list of candidates. Read both bodies of a pair before you change anything.
+
+The command serves the owner of one repository during a refactoring. A score ranks the pairs of one run. Do not
+compare counts or scores between repositories, settings or tool versions.
+
 `docs/design.md` (section 17) gives the rules. `docs/parity-clones.md` records the comparison with the
-prototype of the memoryjs audit, on memoryjs and on deepthinking-mcp.
+prototype of the memoryjs audit, on memoryjs and on deepthinking-mcp. The record shows that the two parsers
+agree. The record makes no claim about other repositories.
 
 ## Develop
 
