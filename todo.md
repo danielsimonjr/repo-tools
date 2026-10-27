@@ -387,3 +387,4 @@ data. Other findings are filed here.
   new input; maintainability — 2 exact groups and 7 of 8 near pairs of `clones` are gone. NOT done: `statsJson` and
   `symbolJson` in `src/docs/report.ts` stay, because they map different fields to snake_case keys and a merge would
   hide the mapping.
+- [x] 2026-10-26 · five-axis pass (architecture documents): speed — no code changed; stability — no test changed; reliability — `repo-tools check` and `repo-tools ste` pass on `docs/architecture`; security — no new input or dependency; maintainability — the five hand-written documents exist, and each number has a Verification row or a stated source. NOT done: the signature blocks in `COMPONENTS.md` copy declarations by hand, so a changed signature needs a manual edit.

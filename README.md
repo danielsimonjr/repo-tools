@@ -366,6 +366,24 @@ agree. The record makes no claim about other repositories.
 | `bun run audit:ledger` | Reverts each fix of `docs/fix-ledger-2.0.0.md` in a scratch copy and checks that a test of that fix fails. |
 | `bun run check:design` | Finds each reference to a section of `docs/design.md` that has no heading with that number. |
 
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md) | The project, its metrics and its layout. |
+| [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | The layers, the key decisions, the build and the test strategy. |
+| [docs/architecture/COMPONENTS.md](docs/architecture/COMPONENTS.md) | Each module, with the real signatures of its exports. |
+| [docs/architecture/DATAFLOW.md](docs/architecture/DATAFLOW.md) | One run of each subcommand, step by step. |
+| [docs/architecture/API.md](docs/architecture/API.md) | The commands, the flags, the config keys, the exit codes and the report files. |
+| [docs/architecture/FILE_INVENTORY.md](docs/architecture/FILE_INVENTORY.md) | Every source file with its area and disposition. Generated. |
+| [docs/architecture/TEST_COVERAGE.md](docs/architecture/TEST_COVERAGE.md) | The source files that a test imports. Generated. |
+| [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) | Who imports whom. Generated. |
+| [docs/architecture/unused-analysis.md](docs/architecture/unused-analysis.md) | Files and exports with no importer. Generated. |
+| [docs/architecture/duplicate-symbols.md](docs/architecture/duplicate-symbols.md) | Names that more than one file defines. Generated. |
+| [docs/design.md](docs/design.md) | The design of each subcommand, section by section. |
+
+Run `repo-tools check . --docs=docs/architecture` to compare the numbers in these documents with the code.
+
 ## Design
 
 `docs/design.md` describes the modules, the output rules, the config, the extension contract,

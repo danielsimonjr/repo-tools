@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- The five hand-written architecture documents `OVERVIEW.md`, `ARCHITECTURE.md`, `COMPONENTS.md`,
+  `DATAFLOW.md` and `API.md` in `docs/architecture/`. Each ends with a Verification table that
+  `repo-tools check` reads. The root `README.md` has a Documentation section that links all ten
+  architecture documents and the design document.
 - The config key `dispatchCalls` (in section `depgraph` or `map`) lists the calls that register a typed-dispatch
   constant. The duplicate report tagged only the call `mathTyped` as `DISPATCH_VARIANT`. Repositories with other
   registration calls received a `TRUE_DUPLICATE` for each registered name. The default list is
