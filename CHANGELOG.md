@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-03
+
 ### Added
 
 - The five hand-written architecture documents `OVERVIEW.md`, `ARCHITECTURE.md`, `COMPONENTS.md`,
