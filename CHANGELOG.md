@@ -77,6 +77,11 @@ All notable changes to this project are recorded in this file. The format follow
   error node, so the edge held `typeOnly: false`. A cycle through such an edge counted as a runtime cycle. A
   committed `dependency-graph.json` changes in a repository that uses the syntax. `docs/design.md` section 14.4
   states the rule.
+- `repo-tools ste` does not measure a list of identifiers against the sentence limit. A list item or a sentence
+  whose only words are `and`, `or` and inline code is a list of names, not a sentence. A generated report of
+  `repo-tools map` gave such a bullet of 32 words (limit 25), so `repo-tools ste` failed on its own output. A sentence
+  with one prose word keeps the limit, and so does prose with many code spans. `docs/design.md` section 9 states the
+  difference from the Python checker.
 
 ## [2.3.0] - 2026-10-22
 

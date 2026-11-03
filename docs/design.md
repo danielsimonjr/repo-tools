@@ -233,9 +233,10 @@ below comes from a run of both harnesses on the same text.
 |---|---|---|
 | Input | A Markdown file, or each `.md` file below a folder | One docstring |
 | Text removed first | Fences, tables, headings, quotes, HTML comments, frontmatter, `- Not:` lines, link targets | Tag lines (`@param`), section headers (`Args:`), doctest lines, rules, fences |
-| Code-like tokens | Removed before every rule | Removed before the wordy rule only |
+| Code-like tokens | The port removes the code-like tokens before the wordy, ambiguous and passive rules. Each code span counts as one word for the sentence limit | Removed before the wordy rule only |
 | A backticked agent (`` by `parse` ``) | Not an agent: no passive finding | An agent: a passive finding |
 | Sentence limit | 20 words for a numbered step or a check box, 25 for other text | 20 words |
+| A list of identifiers | Not measured against the sentence limit when it has no prose word: only inline code, commas, `and` or `or` | Measured like any sentence |
 | A word | A token with a letter or a digit | Any token (a lone `-` counts) |
 | A wordy form | Lower case only; each occurrence, with its line | Any case; one finding per form |
 | Passive and ambiguous | Each match, with its line | The first match per sentence |
@@ -254,8 +255,10 @@ same findings, byte for byte. The CHANGELOG records the measurement. The port di
 - **File selection.** The port reads a file whose name ends in `.md` on every operating system. A
   folder with a `.md` name is not a file, so the port does not read it.
 - **The usage text** names `repo-tools ste`.
+- **Identifier lists.** The port does not measure a list of identifiers with no prose word against
+  the sentence limit. The Python checker has no such rule.
 - **Two options.** `--require=<path>` and `--since=<rev>` do not exist in `ste_check.py`. A run
-  without them gives the output of the Python tool.
+  without the two options gives the output of the Python tool, apart from the identifier-list difference above.
 
 ### 9.1 The options of the Markdown mode
 

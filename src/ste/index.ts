@@ -24,9 +24,12 @@ cannot judge the approved dictionary.
 
 Markdown mode (the default) checks each Markdown file, or each .md file below a
 directory, in code-unit order of the path. A descriptive sentence may have 25
-words; a procedural one (a numbered step or a check box) may have 20. Code
-fences, tables, headings, quotes, comments, frontmatter, inline code and
-identifiers are not checked. A file whose first five lines hold
+words; a procedural one (a numbered step or a check box) may have 20. A list of
+identifiers with no prose word is not a sentence, so the word limit does not
+apply to it. Code fences, tables, headings, quotes, comments and frontmatter are
+not checked. Inline code and identifiers are not checked by the wordy, ambiguous
+and passive rules, and each one counts as a word. A file whose first five lines
+hold
 "<!-- ste:historical-record -->" is skipped, and the skip is counted.
 
   --require=<path>  The file must exist, and the run must examine it. Repeat the

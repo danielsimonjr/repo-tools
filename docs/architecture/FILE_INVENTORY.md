@@ -135,8 +135,8 @@ This report lists each source file that the map census finds, with a disposition
 | `src/query/load.ts` | @danielsimonjr/repo-tools | src | reachable | 120 |
 | `src/query/safety.ts` | @danielsimonjr/repo-tools | src | reachable | 100 |
 | `src/sort.ts` | @danielsimonjr/repo-tools | src | reachable | 18 |
-| `src/ste/index.ts` | @danielsimonjr/repo-tools | src | reachable | 255 |
-| `src/ste/markdown.ts` | @danielsimonjr/repo-tools | src | reachable | 220 |
+| `src/ste/index.ts` | @danielsimonjr/repo-tools | src | reachable | 258 |
+| `src/ste/markdown.ts` | @danielsimonjr/repo-tools | src | reachable | 237 |
 | `src/ste/prose.ts` | @danielsimonjr/repo-tools | src | reachable | 104 |
 | `src/ste/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 96 |
 | `src/ste/since.ts` | @danielsimonjr/repo-tools | src | reachable | 95 |
@@ -327,7 +327,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/shared-helpers.test.ts` | (root) | tests | test | 71 |
 | `tests/unit/sort.test.ts` | (root) | tests | test | 34 |
 | `tests/unit/ste-cli.test.ts` | (root) | tests | test | 161 |
-| `tests/unit/ste-markdown.test.ts` | (root) | tests | test | 106 |
+| `tests/unit/ste-markdown.test.ts` | (root) | tests | test | 144 |
 | `tests/unit/ste-options.test.ts` | (root) | tests | test | 307 |
 | `tests/unit/ste-prose.test.ts` | (root) | tests | test | 132 |
 | `tests/unit/ste-py.test.ts` | (root) | tests | test | 49 |

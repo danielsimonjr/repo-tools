@@ -28,7 +28,7 @@ the rows that the drift gate checks.
 | Source files in `src/` | 85 | area `src` | `file-inventory.json`, `byArea` |
 | Test files | 193 | area `tests` | `file-inventory.json`, `byArea` |
 | Script files | 10 | area `tools` | `file-inventory.json`, `byArea` |
-| Lines of code, whole repository | 44494 | repo-wide | `dependency-graph.json`, `totalLinesOfCode` |
+| Lines of code, whole repository | 44552 | repo-wide | `dependency-graph.json`, `totalLinesOfCode` |
 | Lines of code in `src/` | 19481 | area `src` | `file-inventory.json`, sum of `loc` |
 | Lines of code in `tests/` | 22216 | area `tests` | `file-inventory.json`, sum of `loc` |
 | Exports | 716 | repo-wide | `dependency-graph.json`, `totalExports` |
@@ -156,7 +156,7 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 289 | dependency-graph.json |
-| totalLinesOfCode | 44494 | dependency-graph.json |
+| totalLinesOfCode | 44552 | dependency-graph.json |
 | totalExports | 716 | dependency-graph.json |
 | totalFunctions | 410 | dependency-graph.json |
 | totalInterfaces | 140 | dependency-graph.json |

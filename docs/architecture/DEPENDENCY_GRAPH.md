@@ -1970,7 +1970,7 @@ graph TD
 |----------|-------|
 | Total Source Files | 289 |
 | Subsystems | 10 |
-| Total Lines of Code | 44494 |
+| Total Lines of Code | 44552 |
 | Total Exports | 716 |
 | Total Re-exports | 12 |
 | Total Classes | 13 |

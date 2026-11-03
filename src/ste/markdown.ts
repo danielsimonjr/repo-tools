@@ -107,6 +107,23 @@ function wordCount(sentence: string): number {
   return pySplit(s).filter((w) => Array.from(w).some(isAlnum)).length;
 }
 
+/** The words `and` and `or` join the items of a list of identifiers. */
+const LIST_JOINS: ReadonlySet<string> = new Set(["and", "or"]);
+
+/**
+ * True when a sentence or a list item has no prose word. Remove its inline code, its link targets
+ * and its list marker first. Then each word that is left must be "and" or "or". Such a list of
+ * identifiers is not a sentence, so the word limit does not apply to it. The words are the tokens
+ * that `wordCount` counts. A separator, such as a comma or a colon, does not change a word.
+ */
+function isIdentifierList(sentence: string): boolean {
+  const s = sentence.replace(CODE_SPAN, " ").replace(LINK, "$1").replace(LIST_MARKER, "");
+  return pySplit(s)
+    .map((w) => Array.from(w).filter(isAlnum).join("").toLowerCase())
+    .filter((w) => w !== "")
+    .every((w) => LIST_JOINS.has(w));
+}
+
 /** A paragraph: its first line, its joined text, and the source line of each character. */
 type Block = [start: number, text: string, lineMap: number[]];
 
@@ -181,7 +198,7 @@ export function checkMarkdownFindings(name: string, text: string): Finding[] {
     const last = lineMap.length > 0 ? (lineMap[lineMap.length - 1] as number) : start;
     for (const sentence of sentences(block)) {
       const n = wordCount(sentence);
-      if (n > limit) {
+      if (n > limit && !isIdentifierList(sentence)) {
         const tier = procedural ? "procedural" : "descriptive";
         found.push({
           text: `${name}:~${start}: ${n} words (>${limit} ${tier}): ${headCodePoints(pyStrip(sentence), 90)}`,

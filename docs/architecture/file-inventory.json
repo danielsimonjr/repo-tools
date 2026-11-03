@@ -657,14 +657,14 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 255
+      "loc": 258
     },
     {
       "file": "src/ste/markdown.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 220
+      "loc": 237
     },
     {
       "file": "src/ste/prose.ts",
@@ -2001,7 +2001,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 106
+      "loc": 144
     },
     {
       "file": "tests/unit/ste-options.test.ts",
