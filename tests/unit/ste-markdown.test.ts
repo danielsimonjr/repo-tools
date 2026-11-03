@@ -44,6 +44,44 @@ describe("checkMarkdown: sentence length", () => {
   });
 });
 
+describe("checkMarkdown: a list of identifiers is not a sentence", () => {
+  /** `count` identifier names, from `createSymbol0` on. */
+  const names = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `createSymbol${i}`);
+  /** The names are inline code spans, with commas between them. */
+  const spans = (list: string[]): string => list.map((name) => `\`${name}\``).join(", ");
+
+  test("a generated bullet of identifiers passes, with the shape of the map reports", () => {
+    // The line that `bucket()` in src/map/markdown.ts writes: a file span, a colon, then the names.
+    const bullet = `- \`plugin/skills/example/patterns.ts\`: \`${names(31).join("`, `")}\`\n`;
+    expect(checkMarkdown("unused-analysis.md", bullet)).toEqual([]);
+  });
+
+  test("a numbered step of identifiers joined by 'and' passes; the step number is not a word", () => {
+    expect(checkMarkdown("s.md", `1. ${spans(names(24))}, and \`createLast\`.\n`)).toEqual([]);
+  });
+
+  test("a sentence of prose with many code spans keeps the limit", () => {
+    const text = `The tool reads ${spans(names(30))} and writes them to the cache.\n`;
+    // Three prose words, 30 code spans and six prose words: 39 words.
+    expect(checkMarkdown("p.md", text)).toEqual([
+      `p.md:~1: 39 words (>25 descriptive): ${text.trimEnd().slice(0, 90)}`,
+    ]);
+  });
+
+  test("a list of code spans with one prose word keeps the limit", () => {
+    const text = `${spans(names(26))} returns.\n`;
+    // Twenty-six code spans and one prose word: 27 words.
+    expect(checkMarkdown("b.md", text)).toEqual([
+      `b.md:~1: 27 words (>25 descriptive): ${text.trimEnd().slice(0, 90)}`,
+    ]);
+  });
+
+  test("a short list of identifiers passes", () => {
+    expect(checkMarkdown("l.md", "- `alpha`, `beta`, and `gamma`.\n")).toEqual([]);
+  });
+});
+
 describe("checkMarkdown: the rules and their line numbers", () => {
   test("a wordy form on a wrapped line names that line", () => {
     const text = "# T\n\nThe tool reads the file\nin order to write a report.\n";

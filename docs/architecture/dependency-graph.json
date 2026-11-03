@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "repo-tools",
+    "name": "@danielsimonjr/repo-tools",
     "schemaVersion": "2.0.0",
     "language": "typescript",
     "totalFiles": 289,
@@ -8786,7 +8786,7 @@
     "totalTypeScriptFiles": 289,
     "totalSourceFiles": 289,
     "totalModules": 4,
-    "totalLinesOfCode": 44494,
+    "totalLinesOfCode": 44552,
     "totalExports": 716,
     "entryRoots": 1,
     "reachableFiles": 83,
