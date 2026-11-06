@@ -22,7 +22,7 @@ jobs:
           - os: windows-latest
             target: bun-windows-x64
             exe: repo-tools-windows-x64.exe
-          - os: macos-14
+          - os: macos-15
             target: bun-darwin-arm64
             exe: repo-tools-darwin-arm64
     runs-on: ${{ matrix.os }}

@@ -16,6 +16,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- CI runs the macOS jobs on `macos-15`. GitHub no longer supports the `macos-14` image, so
+  those jobs were cancelled before any step ran.
 - `check` and `map` share one claim judge (`src/check/verify.ts`) and one reader of the metric
   reports (`src/check/measure.ts`). The messages of `check` are unchanged.
 

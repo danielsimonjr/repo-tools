@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -51,7 +51,7 @@ jobs:
           - os: windows-latest
             target: bun-windows-x64
             exe: repo-tools-windows-x64.exe
-          - os: macos-14
+          - os: macos-15
             target: bun-darwin-arm64
             exe: repo-tools-darwin-arm64
     runs-on: ${{ matrix.os }}
