@@ -1,7 +1,7 @@
 {
   "metadata": {
     "name": "@danielsimonjr/repo-tools",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "schemaVersion": "2.0.0",
     "language": "typescript"
   },
@@ -393,6 +393,53 @@
           "NO_VERIFICATION_MARKER"
         ]
       },
+      "src/check/docs.ts": {
+        "description": "The Markdown documents of a docs folder, read for `repo-tools check` and for the Verification",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readdirSync",
+              "readFileSync"
+            ]
+          },
+          {
+            "module": "path",
+            "imports": [
+              "join"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../depgraph/paths.ts",
+            "imports": [
+              "isDirectory"
+            ]
+          },
+          {
+            "file": "../sort.ts",
+            "imports": [
+              "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./verify.ts",
+            "imports": [
+              "DocFile"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "readDocs"
+        ],
+        "functions": [
+          "readDocs"
+        ]
+      },
       "src/check/index.ts": {
         "description": "`repo-tools check` (design section 15): the drift gate. It reads the Verification tables of",
         "externalDependencies": [],
@@ -447,6 +494,12 @@
             ]
           },
           {
+            "file": "./docs.ts",
+            "imports": [
+              "readDocs"
+            ]
+          },
+          {
             "file": "./metrics.ts",
             "imports": [
               "collectMetrics"
@@ -470,6 +523,38 @@
         ],
         "constants": [
           "CHECK_HELP"
+        ]
+      },
+      "src/check/measure.ts": {
+        "description": "The metrics of the four reports of `repo-tools map` that hold them. `repo-tools check` reads the",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "fs",
+            "imports": [
+              "readFileSync"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "./verify.ts",
+            "imports": [
+              "Measured",
+              "MetricValue"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "measureReports"
+        ],
+        "interfaces": [
+          "MetricReports"
+        ],
+        "functions": [
+          "measureReports"
         ]
       },
       "src/check/metrics.ts": {
@@ -510,6 +595,12 @@
             "file": "../map/command.ts",
             "imports": [
               "graphOf"
+            ]
+          },
+          {
+            "file": "./measure.ts",
+            "imports": [
+              "measureReports"
             ]
           },
           {
@@ -3145,6 +3236,19 @@
             ]
           },
           {
+            "file": "../check/docs.ts",
+            "imports": [
+              "readDocs"
+            ]
+          },
+          {
+            "file": "../check/measure.ts",
+            "imports": [
+              "MetricReports",
+              "measureReports"
+            ]
+          },
+          {
             "file": "../check/verify.ts",
             "imports": [
               "DocFile",
@@ -4957,7 +5061,9 @@
       "name": "Check",
       "files": [
         "src/check/claims.ts",
+        "src/check/docs.ts",
         "src/check/index.ts",
+        "src/check/measure.ts",
         "src/check/metrics.ts",
         "src/check/verify.ts"
       ]

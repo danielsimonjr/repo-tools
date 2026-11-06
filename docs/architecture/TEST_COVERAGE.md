@@ -8,16 +8,16 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 84 |
-| Total Test Files | 138 |
+| Total Source Files | 86 |
+| Total Test Files | 139 |
 | Source Files with Tests | 68 |
-| Source Files without Tests | 16 |
-| Coverage (raw, direct-import) | **81.0%** |
+| Source Files without Tests | 18 |
+| Coverage (raw, direct-import) | **79.1%** |
 ---
 
 ## Source Files Not Imported By A Test
 
-The following 16 source files are not directly imported by any test file:
+The following 18 source files are not directly imported by any test file:
 
 ### root/
 
@@ -25,7 +25,9 @@ The following 16 source files are not directly imported by any test file:
 
 ### check/
 
+- `src/check/docs.ts` → Expected test: `tests/unit/check/docs.test.ts`
 - `src/check/index.ts` → Expected test: `tests/unit/check/index.test.ts`
+- `src/check/measure.ts` → Expected test: `tests/unit/check/measure.test.ts`
 
 ### chunk/
 
@@ -68,11 +70,11 @@ The following 16 source files are not directly imported by any test file:
 
 | Source File | Test Files |
 |-------------|------------|
-| `check/claims.ts` | `check-claims.test.ts`, `check-command.test.ts`, `check-verify.test.ts` |
+| `check/claims.ts` | `check-claims.test.ts`, `check-command.test.ts`, `check-verify.test.ts`, `map-verification.test.ts` |
 | `check/metrics.ts` | `check-metrics.test.ts` |
 | `check/verify.ts` | `check-verify.test.ts` |
 | `chunk/index.ts` | `chunk-review-2.test.ts`, `chunk-review.test.ts`, `chunk.test.ts` |
-| `src/cli.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `map-command.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
+| `src/cli.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `map-command.test.ts`, `map-verification.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
 | `clones/detect.ts` | `clones-detect.test.ts` |
 | `clones/normalise.ts` | `clones-units.test.ts` |
 | `clones/settings.ts` | `clones-settings.test.ts` |
@@ -109,7 +111,7 @@ The following 16 source files are not directly imported by any test file:
 | `docs/report.ts` | `docs-report.test.ts` |
 | `docs/stub.ts` | `docs-stub.test.ts` |
 | `docs/typescript.ts` | `docs-review.test.ts`, `docs-stub.test.ts`, `docs-typescript.test.ts` |
-| `src/io-types.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `depgraph-report.test.ts`, `map-command.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
+| `src/io-types.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `depgraph-report.test.ts`, `map-command.test.ts`, `map-verification.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
 | `src/io.ts` | `io.test.ts`, `shared-helpers.test.ts` |
 | `map/adapter.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `map-adapter.test.ts` |
 | `map/artifacts.ts` | `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-reports.test.ts` |
@@ -259,6 +261,7 @@ The following 16 source files are not directly imported by any test file:
 | `unit/map-reports.test.ts` | 4 files |
 | `unit/map-resolvers.test.ts` | 2 files |
 | `unit/map-surfaces.test.ts` | 3 files |
+| `unit/map-verification.test.ts` | 3 files |
 | `unit/mask.test.ts` | 1 files |
 | `unit/no-literal-bom.test.ts` | 0 files |
 | `unit/node-compat.test.ts` | 2 files |
