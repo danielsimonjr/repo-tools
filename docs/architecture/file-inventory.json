@@ -111,28 +111,28 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 79
+      "loc": 122
     },
     {
       "file": "src/check/index.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 191
+      "loc": 151
     },
     {
       "file": "src/check/metrics.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 89
+      "loc": 67
     },
     {
       "file": "src/check/verify.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 177
+      "loc": 248
     },
     {
       "file": "src/chunk/index.ts",
@@ -307,7 +307,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 50
+      "loc": 60
     },
     {
       "file": "src/depgraph/reporters/banner.ts",
@@ -482,7 +482,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 421
+      "loc": 444
     },
     {
       "file": "src/map/coverage.ts",

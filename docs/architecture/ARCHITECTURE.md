@@ -224,5 +224,5 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
 | typeOnlyCircularDeps | 4 | dependency-graph.json |
-| unusedExportsCount | 120 | dependency-graph.json |
+| unusedExportsCount | 121 | dependency-graph.json |
 | orphanedFiles | 2 | dependency-graph.json |

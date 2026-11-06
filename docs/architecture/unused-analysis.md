@@ -10,9 +10,9 @@
 - **Dormant files**: 2
   - **Orphaned (reachable from nothing)**: 2
   - **Test-only (only a test reaches them)**: 0
-- **Potentially unused exports**: 120
+- **Potentially unused exports**: 121
   - **Unreferenced anywhere**: 3
-  - **Referenced in their own module**: 117
+  - **Referenced in their own module**: 118
   - **Not classified**: 0
 
 ## Caveats
@@ -63,6 +63,7 @@ No other file imports these names, but their own module uses them.
 
 - `src/check/claims.ts`: `Claim`, `Scan`
 - `src/check/metrics.ts`: `MetricsOptions`
+- `src/check/verify.ts`: `ClaimChange`
 - `src/chunk/manifest.ts`: `isPlainFileName`, `legacyHash`, `validateManifest`
 - `src/chunk/splitters.ts`: `Section`, `chunkExtension`
 - `src/cli.ts`: `SubcommandName`

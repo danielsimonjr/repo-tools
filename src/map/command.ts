@@ -7,8 +7,12 @@
  *
  * Standard error shows the root as `<root>`, never as an absolute path.
  */
-import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { verificationMarkers } from "../check/claims.ts";
+import { readDocs } from "../check/docs.ts";
+import { type MetricReports, measureReports } from "../check/measure.ts";
+import { type DocFile, syncClaims } from "../check/verify.ts";
 import {
   type DepgraphConfig,
   loadConfigFile,
@@ -36,7 +40,7 @@ import {
   reportContext,
   runHook,
 } from "../depgraph/extensions.ts";
-import { maskRoot, OUTPUT_SUBDIR, relativePosix } from "../depgraph/paths.ts";
+import { isDirectory, maskRoot, OUTPUT_SUBDIR, relativePosix } from "../depgraph/paths.ts";
 import { writeReport } from "../io.ts";
 import type { Io } from "../io-types.ts";
 import { sortCodeUnits } from "../sort.ts";
@@ -68,7 +72,9 @@ repository, and write the reports into the output folder (default:
 <root>/${OUTPUT_SUBDIR}). The census is the set of source files that git tracks
 (outside a git work tree, a pruned walk). A flag wins over the config file, and
 the config file wins over the default. Every path is relative to the root; a
-path can start with ../ to leave the root.
+path can start with ../ to leave the root. After the reports, map writes the
+measured value into each stale row of the Verification tables. These tables are
+in the Markdown files of the output folder. Map logs each change as 'Updated:'.
 
 Options:
   --root=<path>        Project root (default: the current directory). An
@@ -132,14 +138,7 @@ const SCAN_SCOPE_KEYS: Readonly<Record<string, string>> = {
   alsoExclude: "--also-exclude",
 };
 
-/** True when `path` is an existing folder. */
-export function isDirectory(path: string): boolean {
-  try {
-    return statSync(path).isDirectory();
-  } catch {
-    return false;
-  }
-}
+export { isDirectory };
 
 /** `<root>/<rel>`: the form of a path in a message. */
 const shown = (rel: string): string => `<root>/${rel.replace(/\\/g, "/")}`;
@@ -232,15 +231,22 @@ async function runPipeline(
   }
   const written: string[] = [];
   const banner = { command: config.regenerateCommand, marker: config.verificationMarker };
-  const corePath = emitDependencyGraph(graph, outDir);
-  written.push(corePath, emitFileInventory(graph, outDir));
-  written.push(
-    emitDuplicateSymbols(graph, outDir, {
+  const reports: MetricReports = {
+    dependencyGraph: emitDependencyGraph(graph, outDir),
+    fileInventory: emitFileInventory(graph, outDir),
+    duplicateSymbols: emitDuplicateSymbols(graph, outDir, {
       allowlistPath: resolveUnderRoot(root, config.duplicateAllowlist),
       dispatchCalls: config.dispatchCalls,
     }),
+    unusedAnalysis: emitUnusedAnalysis(graph, outDir),
+  };
+  const corePath = reports.dependencyGraph;
+  written.push(
+    reports.dependencyGraph,
+    reports.fileInventory,
+    reports.duplicateSymbols,
+    reports.unusedAnalysis,
   );
-  written.push(emitUnusedAnalysis(graph, outDir));
   // Workspace warnings are already on the graph (findRoots). A second warn here would print them twice.
   const view = subsystemView(graph, root);
   written.push(emitDependencyLayers(graph, root, outDir, view));
@@ -263,6 +269,23 @@ async function runPipeline(
     log(`Written: ${relativePosix(root, apiPath)} (${count} surface symbols)`);
   }
   for (const path of written) log(`Written: ${relativePosix(root, path)}`);
+  // The values of the Verification tables come from the graph, never from a hand edit.
+  const markers = verificationMarkers(config.verificationMarker);
+  // If the sync cannot read a document, only the sync stops. The reports are already on disk, and the
+  // warnings, gates and hooks below must still run.
+  let docs: DocFile[] = [];
+  try {
+    docs = readDocs(outDir, `<root>/${outRel}`);
+  } catch (error) {
+    io.stderr(`Warning: Verification values not written: ${(error as Error).message}\n`);
+  }
+  const measured = measureReports(reports, graph.warnings);
+  for (const { doc, changes } of syncClaims(docs, measured, markers)) {
+    writeFileSync(join(outDir, doc.name), doc.text);
+    for (const c of changes) {
+      log(`Updated: ${relativePosix(root, join(outDir, c.name))} ${c.claim} ${c.from} -> ${c.to}`);
+    }
+  }
   for (const warning of graph.warnings) io.stderr(`Warning: ${warning}\n`);
 
   const orphans = sortCodeUnits(

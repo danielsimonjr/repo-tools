@@ -9,7 +9,7 @@
  * `unused-analysis.json`, merged in that order. A value that is not a string, a number or a
  * boolean (a table of tags, for example) is not a metric.
  */
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -19,7 +19,8 @@ import {
   emitUnusedAnalysis,
 } from "../map/artifacts.ts";
 import { graphOf } from "../map/command.ts";
-import type { Measured, MetricValue } from "./verify.ts";
+import { measureReports } from "./measure.ts";
+import type { Measured } from "./verify.ts";
 
 /** The options of `collectMetrics`. */
 export interface MetricsOptions {
@@ -29,29 +30,6 @@ export interface MetricsOptions {
   dispatchCalls?: readonly string[];
   /** The folder that holds the scratch folder. Default: the temp folder of the system. */
   scratchBase?: string;
-}
-
-/** A parsed JSON report. */
-type Report = Record<string, unknown>;
-
-const readReport = (path: string): Report => JSON.parse(readFileSync(path, "utf8")) as Report;
-
-/** The object at `key` of `report`; throws when it is not an object. */
-function section(report: Report, key: string): Report {
-  const value = report[key];
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`the report has no '${key}' object`);
-  }
-  return value as Report;
-}
-
-/** Adds each scalar entry of `source` to `into`. */
-function addScalars(into: Map<string, MetricValue>, source: Report): void {
-  for (const [name, value] of Object.entries(source)) {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      into.set(name, value);
-    }
-  }
 }
 
 /**
@@ -67,22 +45,22 @@ export async function collectMetrics(
   const graph = await graphOf(root);
   const scratch = mkdtempSync(join(options.scratchBase ?? tmpdir(), "repo-tools-check-"));
   try {
-    const dep = readReport(emitDependencyGraph(graph, scratch));
-    const inventory = readReport(emitFileInventory(graph, scratch));
-    const duplicates = readReport(
-      emitDuplicateSymbols(graph, scratch, {
-        ...(options.allowlistPath === undefined ? {} : { allowlistPath: options.allowlistPath }),
-        ...(options.dispatchCalls === undefined ? {} : { dispatchCalls: options.dispatchCalls }),
-      }),
+    const dep = emitDependencyGraph(graph, scratch);
+    const inventory = emitFileInventory(graph, scratch);
+    const duplicates = emitDuplicateSymbols(graph, scratch, {
+      ...(options.allowlistPath === undefined ? {} : { allowlistPath: options.allowlistPath }),
+      ...(options.dispatchCalls === undefined ? {} : { dispatchCalls: options.dispatchCalls }),
+    });
+    const unused = emitUnusedAnalysis(graph, scratch);
+    return measureReports(
+      {
+        dependencyGraph: dep,
+        fileInventory: inventory,
+        duplicateSymbols: duplicates,
+        unusedAnalysis: unused,
+      },
+      graph.warnings,
     );
-    const unused = readReport(emitUnusedAnalysis(graph, scratch));
-    const metrics = new Map<string, MetricValue>();
-    addScalars(metrics, section(dep, "metadata"));
-    addScalars(metrics, section(dep, "statistics"));
-    addScalars(metrics, { totalFiles: inventory.totalFiles });
-    addScalars(metrics, section(duplicates, "summary"));
-    addScalars(metrics, section(unused, "summary"));
-    return { metrics, warnings: [...graph.warnings] };
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }

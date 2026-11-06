@@ -57,10 +57,10 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/update-map-goldens.ts` | (root) | tools | tool | 79 |
 | `src/assets.d.ts` | @danielsimonjr/repo-tools | src | orphan | 5 |
 | `src/bin.ts` | @danielsimonjr/repo-tools | src | orphan | 8 |
-| `src/check/claims.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
-| `src/check/index.ts` | @danielsimonjr/repo-tools | src | reachable | 191 |
-| `src/check/metrics.ts` | @danielsimonjr/repo-tools | src | reachable | 89 |
-| `src/check/verify.ts` | @danielsimonjr/repo-tools | src | reachable | 177 |
+| `src/check/claims.ts` | @danielsimonjr/repo-tools | src | reachable | 122 |
+| `src/check/index.ts` | @danielsimonjr/repo-tools | src | reachable | 151 |
+| `src/check/metrics.ts` | @danielsimonjr/repo-tools | src | reachable | 67 |
+| `src/check/verify.ts` | @danielsimonjr/repo-tools | src | reachable | 248 |
 | `src/chunk/index.ts` | @danielsimonjr/repo-tools | src | reachable | 706 |
 | `src/chunk/manifest.ts` | @danielsimonjr/repo-tools | src | reachable | 203 |
 | `src/chunk/splitters.ts` | @danielsimonjr/repo-tools | src | reachable | 780 |
@@ -85,7 +85,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/depgraph/duplicates.ts` | @danielsimonjr/repo-tools | src | reachable | 555 |
 | `src/depgraph/exclude.ts` | @danielsimonjr/repo-tools | src | reachable | 48 |
 | `src/depgraph/extensions.ts` | @danielsimonjr/repo-tools | src | reachable | 197 |
-| `src/depgraph/paths.ts` | @danielsimonjr/repo-tools | src | reachable | 50 |
+| `src/depgraph/paths.ts` | @danielsimonjr/repo-tools | src | reachable | 60 |
 | `src/depgraph/reporters/banner.ts` | @danielsimonjr/repo-tools | src | reachable | 31 |
 | `src/depgraph/reporters/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 198 |
 | `src/depgraph/reporters/duplicates.ts` | @danielsimonjr/repo-tools | src | reachable | 111 |
@@ -110,7 +110,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/io.ts` | @danielsimonjr/repo-tools | src | reachable | 47 |
 | `src/map/adapter.ts` | @danielsimonjr/repo-tools | src | reachable | 166 |
 | `src/map/artifacts.ts` | @danielsimonjr/repo-tools | src | reachable | 702 |
-| `src/map/command.ts` | @danielsimonjr/repo-tools | src | reachable | 421 |
+| `src/map/command.ts` | @danielsimonjr/repo-tools | src | reachable | 444 |
 | `src/map/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 85 |
 | `src/map/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
 | `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 463 |

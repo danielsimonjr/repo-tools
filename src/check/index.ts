@@ -5,17 +5,16 @@
  *
  * Standard error shows the root as `<root>`, and an absolute `--docs` folder as `<docs>`.
  */
-import { readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { ABSOLUTE_PATH_TEXT, isAbsolutePath, loadConfigFile, mergeMapConfig } from "../config.ts";
 import { wantsHelp } from "../depgraph/args.ts";
 import { maskRoot } from "../depgraph/paths.ts";
 import type { Io } from "../io-types.ts";
 import { isDirectory } from "../map/command.ts";
-import { sortCodeUnits } from "../sort.ts";
-import { NO_VERIFICATION_MARKER } from "./claims.ts";
+import { NO_VERIFICATION_MARKER, verificationMarkers } from "./claims.ts";
+import { readDocs } from "./docs.ts";
 import { collectMetrics } from "./metrics.ts";
-import { type DocFile, type Verdict, verifyDocs } from "./verify.ts";
+import { type Verdict, verifyDocs } from "./verify.ts";
 
 /** The help text of `repo-tools check`. */
 export const CHECK_HELP = `Usage: repo-tools check [options] [project-root] --docs=<dir>
@@ -51,7 +50,7 @@ Options:
 
 The duplicate allowlist defaults to docs/architecture/duplicate-allowlist.json
 and never comes from the --docs folder. The check writes nothing in the
-repository.
+repository. To write the measured values into a stale table, run repo-tools map.
 
 Exit codes: 0 when every claim in every document matches. 1 when the root is not
 a folder, when the docs folder does not exist or holds no Markdown file, when a
@@ -105,42 +104,6 @@ function parseCheckArgs(argv: readonly string[], cwd: string): CheckOptions {
   return options;
 }
 
-const decoder = new TextDecoder("utf-8", { fatal: true });
-
-/** Reads the Markdown documents of `dir`, in code-unit order. `label` names the folder. */
-function readDocs(dir: string, label: string): DocFile[] {
-  if (!isDirectory(dir)) {
-    throw new Error(`the docs folder ${label} does not exist or is not a folder`);
-  }
-  let entries: string[];
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    throw new Error(`cannot read the docs folder ${label}`);
-  }
-  // The ending matches in any letter case: a skipped `X.MD` would be a silent pass.
-  const names = sortCodeUnits(entries.filter((name) => /\.md$/i.test(name)));
-  if (names.length === 0) {
-    throw new Error(
-      `the docs folder ${label} holds no *.md file -- nothing to verify. This is a failure, ` +
-        "not a pass: an empty folder can mean that the documents moved or were never written.",
-    );
-  }
-  return names.map((name) => {
-    let bytes: Uint8Array;
-    try {
-      bytes = readFileSync(join(dir, name));
-    } catch {
-      throw new Error(`cannot read ${label}/${name}`);
-    }
-    try {
-      return { name, text: decoder.decode(bytes) };
-    } catch {
-      throw new Error(`${label}/${name} is not valid UTF-8`);
-    }
-  });
-}
-
 const count = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? "" : "s"}`;
 
 /** The one line of a passing check. */
@@ -173,10 +136,7 @@ export async function run(argv: string[], io: Io): Promise<number> {
       allowlistPath: resolve(root, config.duplicateAllowlist),
       dispatchCalls: config.dispatchCalls,
     });
-    const markers = [NO_VERIFICATION_MARKER];
-    if (config.verificationMarker !== null && !markers.includes(config.verificationMarker)) {
-      markers.push(config.verificationMarker);
-    }
+    const markers = verificationMarkers(config.verificationMarker);
     const verdict = verifyDocs(docs, measured, markers);
     if (verdict.problems.length > 0) {
       stderr(`${verdict.problems.join("\n")}\n`);
