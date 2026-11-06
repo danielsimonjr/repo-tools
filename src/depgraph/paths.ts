@@ -2,6 +2,7 @@
  * Root, source, test and output paths. Every path that leaves this module for a report is POSIX
  * and relative to the root.
  */
+import { statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 /** The output directory, relative to the root. Lowercase, as git tracks it. */
@@ -47,4 +48,13 @@ export function srcDirOf(root: string): string {
 /** Returns the absolute output directory of `root`. */
 export function outputDirOf(root: string): string {
   return join(root, "docs", "architecture");
+}
+
+/** True when `path` is an existing directory. A path that cannot be read is not a directory. */
+export function isDirectory(path: string): boolean {
+  try {
+    return statSync(path).isDirectory();
+  } catch {
+    return false;
+  }
 }

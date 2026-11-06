@@ -557,7 +557,10 @@ never reads one.
 - The check loads the config file as `map` does. The check uses two keys of the `map` section:
   `duplicateAllowlist` and `verificationMarker`. The allowlist defaults to
   `docs/architecture/duplicate-allowlist.json` and never comes from the docs folder. The check
-  writes nothing in the repository. The four core reports go into a scratch folder, and the
+  writes nothing in the repository. `repo-tools map` writes the values. After `map` writes its
+  reports, `map` replaces each mismatched value in the Verification tables of the Markdown files
+  in its output folder. `map` keeps an unknown claim, a truncated count and a tainted metric
+  unchanged. `map` also skips a document with the opt-out marker. The check still reports these items. The four core reports go into a scratch folder, and the
   check removes that folder before the check returns.
 
 ### 15.2 What a claim is

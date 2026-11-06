@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `Claim`, `Scan`
-- Functions: `scanVerification`, `parseClaims`, `hasVerificationSection`
+- Functions: `verificationMarkers`, `scanVerification`, `rewriteClaimValues`, `parseClaims`, `hasVerificationSection`
 - Constants: `NO_VERIFICATION_MARKER`
 
 ---
@@ -195,8 +195,7 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `readdirSync, readFileSync` |
-| `path` | `join, resolve` |
+| `path` | `resolve` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -206,10 +205,9 @@ The codebase is organized into the following modules:
 | `../depgraph/paths.ts` | `maskRoot` | Import |
 | `../io-types.ts` | `Io` | Import (type-only) |
 | `../map/command.ts` | `isDirectory` | Import |
-| `../sort.ts` | `sortCodeUnits` | Import |
-| `./claims.ts` | `NO_VERIFICATION_MARKER` | Import |
+| `./claims.ts` | `NO_VERIFICATION_MARKER, verificationMarkers` | Import |
 | `./metrics.ts` | `collectMetrics` | Import |
-| `./verify.ts` | `DocFile, Verdict, verifyDocs` | Import |
+| `./verify.ts` | `Verdict, verifyDocs` | Import |
 
 **Exports:**
 - Functions: `run`
@@ -222,7 +220,7 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `mkdtempSync, readFileSync, rmSync` |
+| `fs` | `mkdtempSync, rmSync` |
 | `os` | `tmpdir` |
 | `path` | `join` |
 
@@ -231,7 +229,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../map/artifacts.ts` | `emitDependencyGraph, emitDuplicateSymbols, emitFileInventory, emitUnusedAnalysis` | Import |
 | `../map/command.ts` | `graphOf` | Import |
-| `./verify.ts` | `Measured, MetricValue` | Import (type-only) |
+| `./verify.ts` | `Measured` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `MetricsOptions`
@@ -244,12 +242,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./claims.ts` | `NO_VERIFICATION_MARKER, parseClaims, scanVerification` | Import |
+| `./claims.ts` | `NO_VERIFICATION_MARKER, parseClaims, rewriteClaimValues, scanVerification` | Import |
 
 **Exports:**
-- Interfaces: `Measured`, `DocFile`, `Verdict`
+- Interfaces: `Measured`, `DocFile`, `Verdict`, `ClaimChange`
 - Types: `MetricValue`
-- Functions: `verifyDocs`
+- Functions: `verifyDocs`, `syncClaims`
 
 ---
 
@@ -714,10 +712,11 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
+| `fs` | `statSync` |
 | `path` | `join, relative` |
 
 **Exports:**
-- Functions: `withoutTsExtension`, `toPosix`, `isSrcIndex`, `relativePosix`, `maskRoot`, `srcDirOf`, `outputDirOf`
+- Functions: `withoutTsExtension`, `toPosix`, `isSrcIndex`, `relativePosix`, `maskRoot`, `srcDirOf`, `outputDirOf`, `isDirectory`
 - Constants: `OUTPUT_SUBDIR`
 
 ---
@@ -1158,17 +1157,19 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `existsSync, mkdirSync, readFileSync, statSync` |
-| `path` | `resolve` |
+| `fs` | `existsSync, mkdirSync, readFileSync, writeFileSync` |
+| `path` | `join, resolve` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `../check/claims.ts` | `verificationMarkers` | Import |
+| `../check/verify.ts` | `DocFile, syncClaims` | Import |
 | `../config.ts` | `DepgraphConfig, loadConfigFile, mergeMapConfig, resolveUnderRoot` | Import |
 | `../depgraph/args.ts` | `DepgraphOptions, MapCommand, parseDepgraphArgs, scanScopeText, wantsHelp` | Import |
 | `../depgraph/duplicates.ts` | `asBaselineNames, asDuplicateEntries, buildDuplicateBaseline, DuplicateEntries, findNewDuplicates, trueDuplicateNames` | Import |
 | `../depgraph/extensions.ts` | `loadExtensions, preflightContext, reportContext, runHook` | Import |
-| `../depgraph/paths.ts` | `maskRoot, OUTPUT_SUBDIR, relativePosix` | Import |
+| `../depgraph/paths.ts` | `isDirectory, maskRoot, OUTPUT_SUBDIR, relativePosix` | Import |
 | `../io.ts` | `writeReport` | Import |
 | `../io-types.ts` | `Io` | Import (type-only) |
 | `../sort.ts` | `sortCodeUnits` | Import |
@@ -1183,7 +1184,7 @@ The codebase is organized into the following modules:
 | `./surfaces.ts` | `emitApiSurface, emitExportSurfaces, NO_SURFACE_REASON` | Import |
 
 **Exports:**
-- Functions: `isDirectory`, `runMap`, `graphOf`
+- Functions: `runMap`, `graphOf`
 - Constants: `MAP_HELP`, `DEPGRAPH_DEPRECATION`
 
 ---
@@ -1709,8 +1710,8 @@ The codebase is organized into the following modules:
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `src/map/command` | 17 files | 5 files |
-| `src/sort` | 0 files | 21 files |
+| `src/map/command` | 19 files | 5 files |
+| `src/sort` | 0 files | 20 files |
 | `src/map/artifacts` | 14 files | 4 files |
 | `src/config` | 5 files | 11 files |
 | `src/depgraph/types` | 0 files | 16 files |
@@ -1724,12 +1725,12 @@ The codebase is organized into the following modules:
 | `src/map/layers` | 9 files | 2 files |
 | `src/py` | 0 files | 11 files |
 | `src/query/commands` | 10 files | 1 file |
-| `src/check/index` | 9 files | 1 file |
 | `src/cli` | 9 files | 1 file |
 | `src/depgraph/duplicates` | 4 files | 6 files |
 | `src/depgraph/roots` | 5 files | 5 files |
 | `src/io-types` | 0 files | 10 files |
 | `src/map/surfaces` | 9 files | 1 file |
+| `src/check/index` | 8 files | 1 file |
 | `src/depgraph/resolver` | 2 files | 7 files |
 | `src/depgraph/workspaces` | 4 files | 5 files |
 | `src/map/coverage` | 8 files | 1 file |
@@ -1889,7 +1890,6 @@ graph TD
     N10 --> N27
     N10 --> N4
     N10 --> N47
-    N10 --> N8
     N10 --> N9
     N10 --> N11
     N10 --> N12
@@ -1959,6 +1959,7 @@ graph TD
     N37 --> N50
     N37 --> N8
     N38 --> N27
+    N38 --> N4
 ```
 
 ---
@@ -1970,12 +1971,12 @@ graph TD
 |----------|-------|
 | Total Source Files | 289 |
 | Subsystems | 10 |
-| Total Lines of Code | 44552 |
-| Total Exports | 716 |
+| Total Lines of Code | 44637 |
+| Total Exports | 721 |
 | Total Re-exports | 12 |
 | Total Classes | 13 |
-| Total Interfaces | 140 |
-| Total Functions | 410 |
+| Total Interfaces | 141 |
+| Total Functions | 413 |
 | Total Type Guards | 19 |
 | Total Enums | 4 |
 | Type-only Imports | 63 |

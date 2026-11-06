@@ -6,7 +6,12 @@
  * never "found nothing to check": a document without a Verification section, a section without a
  * row, an unknown claim, and a metric that the graph build declared unreliable are each reported.
  */
-import { NO_VERIFICATION_MARKER, parseClaims, scanVerification } from "./claims.ts";
+import {
+  NO_VERIFICATION_MARKER,
+  parseClaims,
+  rewriteClaimValues,
+  scanVerification,
+} from "./claims.ts";
 
 /** The value of one metric. Only scalar values are metrics. */
 export type MetricValue = string | number | boolean;
@@ -119,9 +124,7 @@ export function verifyDocs(
   measured: Measured,
   markers: readonly string[] = [NO_VERIFICATION_MARKER],
 ): Verdict {
-  const { metrics, warnings } = measured;
-  const truncated = metrics.get("circularDepsTruncated") === true;
-  const tainted = taintedMetrics(warnings);
+  const judgeContext = contextOf(measured);
   const verdict: Verdict = { problems: [], claimsChecked: 0, docsChecked: 0, docsOptedOut: 0 };
   const problem = (line: string): number => verdict.problems.push(line);
   for (const { name, text } of docs) {
@@ -149,29 +152,97 @@ export function verifyDocs(
     verdict.docsChecked += 1;
     for (const { claim, value } of claims) {
       verdict.claimsChecked += 1;
-      const actual = metrics.get(claim);
-      if (actual === undefined) {
+      const judged = judge(claim, value, judgeContext);
+      if (judged.kind === "unknown") {
         problem(
           `${name}: unknown claim '${claim}' - cannot verify (no metric by this name; an ` +
             "unrecognised claim is reported, never silently skipped -- check the spelling of the name)",
         );
-      } else if (TRUNCATABLE.has(claim) && truncated) {
+      } else if (judged.kind === "truncated") {
         problem(
           `${name}: ${claim} claims ${value}, but the cycle enumeration of this repository was ` +
             "truncated (circularDepsTruncated=true) -- the count is a floor, not exact, so this " +
             "claim cannot be verified either way. It is not reported as a match or a mismatch.",
         );
-      } else if (tainted.has(claim)) {
+      } else if (judged.kind === "tainted") {
         problem(
           `${name}: ${claim} claims ${value}, but the graph build of this repository emitted a ` +
-            `warning that makes this metric unusable as ground truth ('${tainted.get(claim)}') ` +
+            `warning that makes this metric unusable as ground truth ('${judged.warning}') ` +
             "-- it cannot be verified either way. It is not reported as a match or a mismatch.",
         );
-      } else if (!matches(value, actual)) {
+      } else if (judged.kind === "mismatch") {
         const note = DEAD_LOOKING.has(claim) ? DEAD_LOOKING_NOTE : "";
-        problem(`${name}: ${claim} claims ${value} but actual is ${textOf(actual)}${note}`);
+        problem(`${name}: ${claim} claims ${value} but actual is ${judged.actual}${note}`);
       }
     }
   }
   return verdict;
+}
+
+/** What the graph says about one claim. Only a `mismatch` has a value that a writer may state. */
+type Judged =
+  | { kind: "match" }
+  | { kind: "mismatch"; actual: string }
+  | { kind: "unknown" }
+  | { kind: "truncated" }
+  | { kind: "tainted"; warning: string };
+
+/** The facts of one graph build that `judge` reads. */
+interface JudgeContext {
+  metrics: ReadonlyMap<string, MetricValue>;
+  truncated: boolean;
+  tainted: ReadonlyMap<string, string>;
+}
+
+function contextOf(measured: Measured): JudgeContext {
+  return {
+    metrics: measured.metrics,
+    truncated: measured.metrics.get("circularDepsTruncated") === true,
+    tainted: taintedMetrics(measured.warnings),
+  };
+}
+
+/** Judges one claim against the graph. The check and the writer share this one rule. */
+function judge(claim: string, value: string, context: JudgeContext): Judged {
+  const actual = context.metrics.get(claim);
+  if (actual === undefined) return { kind: "unknown" };
+  if (TRUNCATABLE.has(claim) && context.truncated) return { kind: "truncated" };
+  const warning = context.tainted.get(claim);
+  if (warning !== undefined) return { kind: "tainted", warning };
+  return matches(value, actual) ? { kind: "match" } : { kind: "mismatch", actual: textOf(actual) };
+}
+
+/** One value that `syncClaims` changed. */
+export interface ClaimChange {
+  name: string;
+  claim: string;
+  from: string;
+  to: string;
+}
+
+/**
+ * The documents of `docs` whose Verification values differ from the graph, with each value
+ * replaced by the measured one. Only a plain mismatch is written: an unknown claim, a truncated
+ * count and a metric that a warning made unusable keep their text, so `check` still reports them.
+ * A document that holds a marker of `markers` is not read. A document with no change is not returned.
+ */
+export function syncClaims(
+  docs: readonly DocFile[],
+  measured: Measured,
+  markers: readonly string[] = [NO_VERIFICATION_MARKER],
+): { doc: DocFile; changes: ClaimChange[] }[] {
+  const context = contextOf(measured);
+  const out: { doc: DocFile; changes: ClaimChange[] }[] = [];
+  for (const { name, text } of docs) {
+    if (holdsMarker(text, markers)) continue;
+    const changes: ClaimChange[] = [];
+    const next = rewriteClaimValues(text, ({ claim, value }) => {
+      const judged = judge(claim, value, context);
+      if (judged.kind !== "mismatch") return undefined;
+      changes.push({ name, claim, from: value, to: judged.actual });
+      return judged.actual;
+    });
+    if (changes.length > 0) out.push({ doc: { name, text: next }, changes });
+  }
+  return out;
 }

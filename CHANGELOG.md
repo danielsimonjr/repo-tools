@@ -6,6 +6,19 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- `repo-tools map` writes the values of the Verification tables in the Markdown documents of its
+  output folder. Map replaces each mismatched value with the measured value and logs an `Updated:`
+  line for each change. Map keeps an unknown claim, a truncated count, a tainted metric and an
+  opted-out document unchanged, so `repo-tools check` still reports them. A stale count no longer
+  needs a hand edit.
+
+### Changed
+
+- `check` and `map` share one claim judge (`src/check/verify.ts`) and one reader of the metric
+  reports (`src/check/measure.ts`). The messages of `check` are unchanged.
+
 ## [2.4.0] - 2026-11-03
 
 ### Added

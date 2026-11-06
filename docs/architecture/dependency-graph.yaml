@@ -4,7 +4,7 @@ metadata:
   language: typescript
   totalFiles: 289
   totalModules: 4
-  totalExports: 716
+  totalExports: 721
 modules:
   tools:
     scripts/build.ts:
@@ -213,15 +213,16 @@ modules:
           typeOnly: false
       exports:
         - NO_VERIFICATION_MARKER
+        - verificationMarkers
         - Claim
         - Scan
         - scanVerification
+        - rewriteClaimValues
         - parseClaims
         - hasVerificationSection
     src/check/index.ts:
       externalDependencies: []
       nodeDependencies:
-        - node:fs
         - node:path
       internalDependencies:
         - file: src/config.ts
@@ -247,13 +248,10 @@ modules:
           imports:
             - isDirectory
           typeOnly: false
-        - file: src/sort.ts
-          imports:
-            - sortCodeUnits
-          typeOnly: false
         - file: src/check/claims.ts
           imports:
             - NO_VERIFICATION_MARKER
+            - verificationMarkers
           typeOnly: false
         - file: src/check/metrics.ts
           imports:
@@ -261,7 +259,6 @@ modules:
           typeOnly: false
         - file: src/check/verify.ts
           imports:
-            - DocFile
             - Verdict
             - verifyDocs
           typeOnly: false
@@ -289,7 +286,6 @@ modules:
         - file: src/check/verify.ts
           imports:
             - Measured
-            - MetricValue
           typeOnly: true
       exports:
         - MetricsOptions
@@ -302,6 +298,7 @@ modules:
           imports:
             - NO_VERIFICATION_MARKER
             - parseClaims
+            - rewriteClaimValues
             - scanVerification
           typeOnly: false
       exports:
@@ -310,6 +307,8 @@ modules:
         - DocFile
         - Verdict
         - verifyDocs
+        - ClaimChange
+        - syncClaims
     src/chunk/index.ts:
       externalDependencies: []
       nodeDependencies:
@@ -1035,6 +1034,7 @@ modules:
     src/depgraph/paths.ts:
       externalDependencies: []
       nodeDependencies:
+        - node:fs
         - node:path
       internalDependencies: []
       exports:
@@ -1046,6 +1046,7 @@ modules:
         - maskRoot
         - srcDirOf
         - outputDirOf
+        - isDirectory
     src/depgraph/reporters/banner.ts:
       externalDependencies: []
       nodeDependencies: []
@@ -1717,6 +1718,15 @@ modules:
         - node:fs
         - node:path
       internalDependencies:
+        - file: src/check/claims.ts
+          imports:
+            - verificationMarkers
+          typeOnly: false
+        - file: src/check/verify.ts
+          imports:
+            - DocFile
+            - syncClaims
+          typeOnly: false
         - file: src/config.ts
           imports:
             - DepgraphConfig
@@ -1750,6 +1760,7 @@ modules:
           typeOnly: false
         - file: src/depgraph/paths.ts
           imports:
+            - isDirectory
             - maskRoot
             - OUTPUT_SUBDIR
             - relativePosix
@@ -5874,8 +5885,8 @@ statistics:
   totalTypeScriptFiles: 289
   totalSourceFiles: 289
   totalModules: 4
-  totalLinesOfCode: 44552
-  totalExports: 716
+  totalLinesOfCode: 44637
+  totalExports: 721
   entryRoots: 1
   reachableFiles: 83
   dormantFiles: 2
@@ -5885,15 +5896,15 @@ statistics:
   typeOnlyCircularDeps: 4
   totalTypeOnlyImports: 63
   noImporterFileCount: 2
-  unusedExportsCount: 120
+  unusedExportsCount: 121
   circularDepsTruncated: false
   runtimeCyclicComponents: 1
   typeOnlyCyclicComponents: 4
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 8
   totalClasses: 13
-  totalInterfaces: 140
-  totalFunctions: 410
+  totalInterfaces: 141
+  totalFunctions: 413
   totalTypeGuards: 19
   totalEnums: 4
   totalConstants: 99

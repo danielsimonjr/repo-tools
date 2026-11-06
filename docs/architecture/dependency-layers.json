@@ -372,7 +372,9 @@
         "workspaceDependencies": [],
         "exports": [
           "NO_VERIFICATION_MARKER",
+          "verificationMarkers",
           "scanVerification",
+          "rewriteClaimValues",
           "parseClaims",
           "hasVerificationSection"
         ],
@@ -381,7 +383,9 @@
           "Scan"
         ],
         "functions": [
+          "verificationMarkers",
           "scanVerification",
+          "rewriteClaimValues",
           "parseClaims",
           "hasVerificationSection"
         ],
@@ -394,16 +398,8 @@
         "externalDependencies": [],
         "nodeDependencies": [
           {
-            "module": "fs",
-            "imports": [
-              "readdirSync",
-              "readFileSync"
-            ]
-          },
-          {
             "module": "path",
             "imports": [
-              "join",
               "resolve"
             ]
           }
@@ -444,15 +440,10 @@
             ]
           },
           {
-            "file": "../sort.ts",
-            "imports": [
-              "sortCodeUnits"
-            ]
-          },
-          {
             "file": "./claims.ts",
             "imports": [
-              "NO_VERIFICATION_MARKER"
+              "NO_VERIFICATION_MARKER",
+              "verificationMarkers"
             ]
           },
           {
@@ -464,7 +455,6 @@
           {
             "file": "./verify.ts",
             "imports": [
-              "DocFile",
               "Verdict",
               "verifyDocs"
             ]
@@ -490,7 +480,6 @@
             "module": "fs",
             "imports": [
               "mkdtempSync",
-              "readFileSync",
               "rmSync"
             ]
           },
@@ -526,8 +515,7 @@
           {
             "file": "./verify.ts",
             "imports": [
-              "Measured",
-              "MetricValue"
+              "Measured"
             ],
             "typeOnly": true
           }
@@ -553,21 +541,25 @@
             "imports": [
               "NO_VERIFICATION_MARKER",
               "parseClaims",
+              "rewriteClaimValues",
               "scanVerification"
             ]
           }
         ],
         "workspaceDependencies": [],
         "exports": [
-          "verifyDocs"
+          "verifyDocs",
+          "syncClaims"
         ],
         "interfaces": [
           "Measured",
           "DocFile",
-          "Verdict"
+          "Verdict",
+          "ClaimChange"
         ],
         "functions": [
-          "verifyDocs"
+          "verifyDocs",
+          "syncClaims"
         ]
       }
     },
@@ -1836,6 +1828,12 @@
         "externalDependencies": [],
         "nodeDependencies": [
           {
+            "module": "fs",
+            "imports": [
+              "statSync"
+            ]
+          },
+          {
             "module": "path",
             "imports": [
               "join",
@@ -1853,7 +1851,8 @@
           "relativePosix",
           "maskRoot",
           "srcDirOf",
-          "outputDirOf"
+          "outputDirOf",
+          "isDirectory"
         ],
         "functions": [
           "withoutTsExtension",
@@ -1862,7 +1861,8 @@
           "relativePosix",
           "maskRoot",
           "srcDirOf",
-          "outputDirOf"
+          "outputDirOf",
+          "isDirectory"
         ],
         "constants": [
           "OUTPUT_SUBDIR"
@@ -3126,17 +3126,31 @@
               "existsSync",
               "mkdirSync",
               "readFileSync",
-              "statSync"
+              "writeFileSync"
             ]
           },
           {
             "module": "path",
             "imports": [
+              "join",
               "resolve"
             ]
           }
         ],
         "internalDependencies": [
+          {
+            "file": "../check/claims.ts",
+            "imports": [
+              "verificationMarkers"
+            ]
+          },
+          {
+            "file": "../check/verify.ts",
+            "imports": [
+              "DocFile",
+              "syncClaims"
+            ]
+          },
           {
             "file": "../config.ts",
             "imports": [
@@ -3179,6 +3193,7 @@
           {
             "file": "../depgraph/paths.ts",
             "imports": [
+              "isDirectory",
               "maskRoot",
               "OUTPUT_SUBDIR",
               "relativePosix"
@@ -3277,7 +3292,6 @@
           "graphOf"
         ],
         "functions": [
-          "isDirectory",
           "runMap",
           "graphOf"
         ],

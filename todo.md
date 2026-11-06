@@ -392,3 +392,14 @@ data. Other findings are filed here.
   of a sentence. A code span with a space counts once for each token. A list marker counts as a word. Give `src/ste/prose.ts`
   the rule of `markdown.ts`, or state the token count in `docs/design.md` section 9.
 - [x] 2026-11-03 · five-axis pass (STE identifier lists): speed — the rule runs only on a sentence over the limit; one `ste docs` run (17 files) took 5.3 s of wall time, measured once, with no before run; stability — 5 new tests, and the full run gives 1945 pass, 1 skip, 0 fail for 1946 tests (1940 pass and 1941 tests before); reliability — `repo-tools ste` gives 0 problems on the architecture folder of another repository (1 before) and on `docs/architecture`, `repo-tools check` passes, `repo-tools docs check` passes on the 84 tracked source files, and the smoke test passes 11 steps; security — no new input and no new dependency; maintainability — one rule, `isIdentifierList`, reuses the three patterns of `markdown.ts`, and `docs/design.md` section 9 and the help text state it. NOT done: the docstring harness (open row above).
+
+## map writes the Verification values
+
+`repo-tools check` reads the Verification tables but nothing writes them, so each stale count is edited by hand from the check message.
+
+- [x] Test first: `tests/unit/map-verification.test.ts` (a stale value is written; prose and CRLF are kept; a matching document, an unknown claim, an unusable metric and an opted-out document are not written).
+- [x] `measureReports` in `src/check/metrics.ts`: one reader of the four metric reports, for `check` and for `map`.
+- [x] One `judge` of a claim in `src/check/verify.ts`; `verifyDocs` and the new `syncClaims` both use it.
+- [x] `map` updates the Verification values of the Markdown documents in its report folder and logs each change.
+- [x] Review, simplify, clones, full suite, doc gates, help text and `docs/design.md`, CHANGELOG. Review fixes: the BOM is kept, an unreadable document only warns, only a rewritable cell is reported.
+- 2026-11-05 five-axis: speed - map reuses its own reports, no second graph build; stability - 9 tests incl. BOM, CRLF, non-UTF-8, U+2028; reliability - a bad document warns, the gates and hooks still run; security - n/a; maintainability - one `judge` and one `walkRows` for check and map. clones 0, 0, 1 before and after; declined: `statsJson`/`symbolJson` in `src/docs/report.ts` (JSON shapes differ).

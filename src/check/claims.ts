@@ -14,6 +14,13 @@ import { VERIFICATION_MARKER } from "../depgraph/reporters/banner.ts";
  */
 export const NO_VERIFICATION_MARKER = VERIFICATION_MARKER;
 
+/** The opt-out markers: the built-in one, and the config key map.verificationMarker when it is set. */
+export function verificationMarkers(configured: string | null): string[] {
+  return configured === null || configured === NO_VERIFICATION_MARKER
+    ? [NO_VERIFICATION_MARKER]
+    : [NO_VERIFICATION_MARKER, configured];
+}
+
 /** One row of a Verification table. */
 export interface Claim {
   /** The metric name. */
@@ -38,13 +45,15 @@ export interface Scan {
   found: boolean;
 }
 
-/** Reads the claims of `markdown` and whether it has a Verification section at all. */
-export function scanVerification(markdown: string): Scan {
-  const claims: Claim[] = [];
+/**
+ * Walks the lines of `markdown` and calls `onRow` for each claim row of a Verification section, with
+ * the index of its line in `lines`. Returns true when any heading is a Verification heading.
+ */
+function walkRows(lines: readonly string[], onRow: (claim: Claim, index: number) => void): boolean {
   let found = false;
   let inSection = false;
   let sectionLevel = 0;
-  for (const raw of markdown.replace(/^\uFEFF/, "").split(/\r\n|\r|\n/)) {
+  lines.forEach((raw, index) => {
     const line = raw.trimEnd();
     const heading = line.trimStart().startsWith("#") ? HEADING.exec(line) : null;
     if (heading) {
@@ -55,17 +64,51 @@ export function scanVerification(markdown: string): Scan {
         found = true;
         sectionLevel = level;
       }
-      continue;
+      return;
     }
-    if (!inSection) continue;
+    if (!inSection) return;
     const row = ROW.exec(line.trim());
-    if (!row) continue;
+    if (!row) return;
     const [claim, value, source] = [row[1], row[2], row[3]].map((cell) => (cell as string).trim());
-    if (HEADER_CLAIMS.has((claim as string).toLowerCase())) continue;
-    if (/^[-: ]*$/.test(claim as string)) continue;
-    claims.push({ claim: claim as string, value: value as string, source: source as string });
-  }
+    if (HEADER_CLAIMS.has((claim as string).toLowerCase())) return;
+    if (/^[-: ]*$/.test(claim as string)) return;
+    onRow({ claim: claim as string, value: value as string, source: source as string }, index);
+  });
+  return found;
+}
+
+/** Reads the claims of `markdown` and whether it has a Verification section at all. */
+export function scanVerification(markdown: string): Scan {
+  const claims: Claim[] = [];
+  const found = walkRows(markdown.replace(/^\uFEFF/, "").split(/\r\n|\r|\n/), (claim) =>
+    claims.push(claim),
+  );
   return { claims, found };
+}
+
+/** The value cell of a claim row: the text before it, the value, and the text after it. */
+const VALUE_CELL = /^(\s*\|[^|]*\|\s*)([^|]*?)(\s*\|[\s\S]*)$/;
+
+/**
+ * Returns `markdown` with the value cell of each claim row replaced by `next(claim)`, when `next`
+ * gives a value. Every other character, the line ends and a leading byte order mark included, is kept.
+ */
+export function rewriteClaimValues(
+  markdown: string,
+  next: (claim: Claim) => string | undefined,
+): string {
+  const bom = markdown.startsWith("\uFEFF") ? "\uFEFF" : "";
+  const parts = markdown.slice(bom.length).split(/(\r\n|\r|\n)/);
+  // Even indexes are lines, odd indexes are the line ends between them.
+  const lines = parts.filter((_, i) => i % 2 === 0);
+  walkRows(lines, (claim, index) => {
+    // The cell match runs first, so `next` sees only a row that can be rewritten.
+    const cell = VALUE_CELL.exec(lines[index] as string);
+    if (!cell) return;
+    const value = next(claim);
+    if (value !== undefined) lines[index] = `${cell[1]}${value}${cell[3]}`;
+  });
+  return bom + parts.map((part, i) => (i % 2 === 0 ? lines[i / 2] : part)).join("");
 }
 
 /** The claims of `markdown`, in document order. */
