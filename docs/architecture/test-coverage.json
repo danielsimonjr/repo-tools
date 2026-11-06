@@ -1,25 +1,27 @@
 {
   "metadata": {
-    "totalSourceFiles": 84,
-    "totalTestFiles": 138,
+    "totalSourceFiles": 86,
+    "totalTestFiles": 139,
     "testedCount": 68,
-    "untestedCount": 16,
-    "coveragePercent": "81.0",
+    "untestedCount": 18,
+    "coveragePercent": "79.1",
     "effectiveCoverage": {
       "policyLoaded": false,
-      "activeFiles": 84,
+      "activeFiles": 86,
       "testedActive": 68,
-      "activeUntested": 16,
+      "activeUntested": 18,
       "excludedTotal": 0,
-      "percent": "81.0",
+      "percent": "79.1",
       "breakdown": {
-        "active_untested": 16
+        "active_untested": 18
       }
     }
   },
   "untestedFiles": [
     "src/bin.ts",
+    "src/check/docs.ts",
     "src/check/index.ts",
+    "src/check/measure.ts",
     "src/chunk/manifest.ts",
     "src/chunk/splitters.ts",
     "src/clones/index.ts",
@@ -110,9 +112,12 @@
     "src/check/claims.ts": [
       "tests/unit/check-claims.test.ts",
       "tests/unit/check-command.test.ts",
-      "tests/unit/check-verify.test.ts"
+      "tests/unit/check-verify.test.ts",
+      "tests/unit/map-verification.test.ts"
     ],
+    "src/check/docs.ts": [],
     "src/check/index.ts": [],
+    "src/check/measure.ts": [],
     "src/check/metrics.ts": [
       "tests/unit/check-metrics.test.ts"
     ],
@@ -131,6 +136,7 @@
       "tests/unit/chunk.test.ts",
       "tests/unit/cli.test.ts",
       "tests/unit/map-command.test.ts",
+      "tests/unit/map-verification.test.ts",
       "tests/unit/query-args.test.ts",
       "tests/unit/query-load.test.ts",
       "tests/unit/ste-cli.test.ts",
@@ -313,6 +319,7 @@
       "tests/unit/cli.test.ts",
       "tests/unit/depgraph-report.test.ts",
       "tests/unit/map-command.test.ts",
+      "tests/unit/map-verification.test.ts",
       "tests/unit/query-args.test.ts",
       "tests/unit/query-load.test.ts",
       "tests/unit/ste-cli.test.ts",
@@ -871,6 +878,11 @@
       "src/map/cycles.ts",
       "src/map/surfaces.ts"
     ],
+    "tests/unit/map-verification.test.ts": [
+      "src/check/claims.ts",
+      "src/cli.ts",
+      "src/io-types.ts"
+    ],
     "tests/unit/mask.test.ts": [
       "src/mask.ts"
     ],
@@ -946,7 +958,15 @@
       "category": null
     },
     {
+      "file": "src/check/docs.ts",
+      "category": null
+    },
+    {
       "file": "src/check/index.ts",
+      "category": null
+    },
+    {
+      "file": "src/check/measure.ts",
       "category": null
     },
     {

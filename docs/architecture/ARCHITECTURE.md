@@ -220,9 +220,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 289 | dependency-graph.json |
+| totalSourceFiles | 292 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
 | typeOnlyCircularDeps | 4 | dependency-graph.json |
-| unusedExportsCount | 121 | dependency-graph.json |
+| unusedExportsCount | 119 | dependency-graph.json |
 | orphanedFiles | 2 | dependency-graph.json |

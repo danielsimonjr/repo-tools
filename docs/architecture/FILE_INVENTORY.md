@@ -8,38 +8,38 @@ This report lists each source file that the map census finds, with a disposition
 
 **Language**: typescript
 
-**Total files**: 289
+**Total files**: 292
 
 ## Disposition counts
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 82 | A `src`-area file that an entry root reaches. |
+| `reachable` | 84 | A `src`-area file that an entry root reaches. |
 | `build-entry` | 1 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
 | `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
-| `test` | 193 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
+| `test` | 194 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
 | `tool` | 10 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 1 | A `*.config.*` file of TypeScript or JavaScript. |
 | `example` | 0 | A file in `examples/` or `docs/`. |
 | `bench` | 0 | A file in `bench/` or `benchmarks/`, or a `*.bench.*` file. |
-| **Total** | **289** | |
+| **Total** | **292** | |
 
 ## Per-area counts
 
 | Area | Files |
 | --- | --: |
 | `config` | 1 |
-| `src` | 85 |
-| `tests` | 193 |
+| `src` | 87 |
+| `tests` | 194 |
 | `tools` | 10 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 204 |
-| `@danielsimonjr/repo-tools` | 85 |
+| `(root)` | 205 |
+| `@danielsimonjr/repo-tools` | 87 |
 
 ## All files
 
@@ -58,7 +58,9 @@ This report lists each source file that the map census finds, with a disposition
 | `src/assets.d.ts` | @danielsimonjr/repo-tools | src | orphan | 5 |
 | `src/bin.ts` | @danielsimonjr/repo-tools | src | orphan | 8 |
 | `src/check/claims.ts` | @danielsimonjr/repo-tools | src | reachable | 122 |
+| `src/check/docs.ts` | @danielsimonjr/repo-tools | src | reachable | 45 |
 | `src/check/index.ts` | @danielsimonjr/repo-tools | src | reachable | 151 |
+| `src/check/measure.ts` | @danielsimonjr/repo-tools | src | reachable | 52 |
 | `src/check/metrics.ts` | @danielsimonjr/repo-tools | src | reachable | 67 |
 | `src/check/verify.ts` | @danielsimonjr/repo-tools | src | reachable | 248 |
 | `src/chunk/index.ts` | @danielsimonjr/repo-tools | src | reachable | 706 |
@@ -308,6 +310,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/map-reports.test.ts` | (root) | tests | test | 139 |
 | `tests/unit/map-resolvers.test.ts` | (root) | tests | test | 187 |
 | `tests/unit/map-surfaces.test.ts` | (root) | tests | test | 115 |
+| `tests/unit/map-verification.test.ts` | (root) | tests | test | 145 |
 | `tests/unit/mask.test.ts` | (root) | tests | test | 33 |
 | `tests/unit/no-literal-bom.test.ts` | (root) | tests | test | 61 |
 | `tests/unit/node-compat.test.ts` | (root) | tests | test | 95 |

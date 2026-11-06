@@ -4,7 +4,7 @@
 
 # @danielsimonjr/repo-tools - Dependency Graph
 
-**Version**: 2.4.0
+**Version**: 2.5.0
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -37,7 +37,7 @@ This document provides a comprehensive dependency graph of all files, components
 The codebase is organized into the following modules:
 
 - **root**: 9 files
-- **check**: 4 files
+- **check**: 6 files
 - **chunk**: 3 files
 - **clones**: 6 files
 - **compress**: 3 files
@@ -190,6 +190,26 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/check/docs.ts` - The Markdown documents of a docs folder, read for `repo-tools check` and for the Verification
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `fs` | `readdirSync, readFileSync` |
+| `path` | `join` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../depgraph/paths.ts` | `isDirectory` | Import |
+| `../sort.ts` | `sortCodeUnits` | Import |
+| `./verify.ts` | `DocFile` | Import (type-only) |
+
+**Exports:**
+- Functions: `readDocs`
+
+---
+
 ### `src/check/index.ts` - `repo-tools check` (design section 15): the drift gate. It reads the Verification tables of
 
 **Node.js Built-in Dependencies:**
@@ -206,12 +226,31 @@ The codebase is organized into the following modules:
 | `../io-types.ts` | `Io` | Import (type-only) |
 | `../map/command.ts` | `isDirectory` | Import |
 | `./claims.ts` | `NO_VERIFICATION_MARKER, verificationMarkers` | Import |
+| `./docs.ts` | `readDocs` | Import |
 | `./metrics.ts` | `collectMetrics` | Import |
 | `./verify.ts` | `Verdict, verifyDocs` | Import |
 
 **Exports:**
 - Functions: `run`
 - Constants: `CHECK_HELP`
+
+---
+
+### `src/check/measure.ts` - The metrics of the four reports of `repo-tools map` that hold them. `repo-tools check` reads the
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `fs` | `readFileSync` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./verify.ts` | `Measured, MetricValue` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `MetricReports`
+- Functions: `measureReports`
 
 ---
 
@@ -229,6 +268,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../map/artifacts.ts` | `emitDependencyGraph, emitDuplicateSymbols, emitFileInventory, emitUnusedAnalysis` | Import |
 | `../map/command.ts` | `graphOf` | Import |
+| `./measure.ts` | `measureReports` | Import |
 | `./verify.ts` | `Measured` | Import (type-only) |
 
 **Exports:**
@@ -1164,6 +1204,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../check/claims.ts` | `verificationMarkers` | Import |
+| `../check/docs.ts` | `readDocs` | Import |
+| `../check/measure.ts` | `MetricReports, measureReports` | Import |
 | `../check/verify.ts` | `DocFile, syncClaims` | Import |
 | `../config.ts` | `DepgraphConfig, loadConfigFile, mergeMapConfig, resolveUnderRoot` | Import |
 | `../depgraph/args.ts` | `DepgraphOptions, MapCommand, parseDepgraphArgs, scanScopeText, wantsHelp` | Import |
@@ -1710,12 +1752,12 @@ The codebase is organized into the following modules:
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `src/map/command` | 19 files | 5 files |
-| `src/sort` | 0 files | 20 files |
+| `src/map/command` | 21 files | 5 files |
+| `src/sort` | 0 files | 21 files |
 | `src/map/artifacts` | 14 files | 4 files |
 | `src/config` | 5 files | 11 files |
+| `src/depgraph/paths` | 0 files | 16 files |
 | `src/depgraph/types` | 0 files | 16 files |
-| `src/depgraph/paths` | 0 files | 15 files |
 | `src/map/graph` | 13 files | 2 files |
 | `src/map/reports` | 10 files | 3 files |
 | `src/clones/index` | 11 files | 1 file |
@@ -1725,12 +1767,12 @@ The codebase is organized into the following modules:
 | `src/map/layers` | 9 files | 2 files |
 | `src/py` | 0 files | 11 files |
 | `src/query/commands` | 10 files | 1 file |
+| `src/check/index` | 9 files | 1 file |
 | `src/cli` | 9 files | 1 file |
 | `src/depgraph/duplicates` | 4 files | 6 files |
 | `src/depgraph/roots` | 5 files | 5 files |
 | `src/io-types` | 0 files | 10 files |
 | `src/map/surfaces` | 9 files | 1 file |
-| `src/check/index` | 8 files | 1 file |
 | `src/depgraph/resolver` | 2 files | 7 files |
 | `src/depgraph/workspaces` | 4 files | 5 files |
 | `src/map/coverage` | 8 files | 1 file |
@@ -1743,13 +1785,13 @@ The codebase is organized into the following modules:
 | `src/docs/typescript` | 5 files | 2 files |
 | `src/map/markdown` | 6 files | 1 file |
 | `src/query/index` | 6 files | 1 file |
+| `src/check/verify` | 1 file | 5 files |
 | `src/depgraph/description` | 3 files | 3 files |
 | `src/depgraph/dirlist` | 1 file | 5 files |
 | `src/depgraph/reporters/json` | 4 files | 2 files |
 | `src/depgraph/reporters/markdown` | 5 files | 1 file |
 | `src/map/resolvers` | 4 files | 2 files |
 | `src/ste/index` | 5 files | 1 file |
-| `src/ste/prose` | 2 files | 4 files |
 
 ---
 
@@ -1802,164 +1844,166 @@ graph TD
 
     subgraph Check
         N9[claims]
-        N10[index]
-        N11[metrics]
-        N12[verify]
+        N10[docs]
+        N11[index]
+        N12[measure]
+        N13[metrics]
+        N14[verify]
     end
 
     subgraph Chunk
-        N13[index]
-        N14[manifest]
-        N15[splitters]
+        N15[index]
+        N16[manifest]
+        N17[splitters]
     end
 
     subgraph Clones
-        N16[detect]
-        N17[index]
-        N18[normalise]
-        N19[report]
-        N20[settings]
-        N21[units]
+        N18[detect]
+        N19[index]
+        N20[normalise]
+        N21[report]
+        N22[settings]
+        N23[units]
     end
 
     subgraph Compress
-        N22[formats]
-        N23[index]
-        N24[legend]
+        N24[formats]
+        N25[index]
+        N26[legend]
     end
 
     subgraph Depgraph
-        N25[analysis]
-        N26[api-surface]
-        N27[args]
-        N28[coverage]
-        N29[cycles]
-        N30[description]
-        N31[dirlist]
-        N32[duplicates]
-        N33[exclude]
-        N34[extensions]
-        N35[...12 more]
+        N27[analysis]
+        N28[api-surface]
+        N29[args]
+        N30[coverage]
+        N31[cycles]
+        N32[description]
+        N33[dirlist]
+        N34[duplicates]
+        N35[exclude]
+        N36[extensions]
+        N37[...12 more]
     end
 
     subgraph Docs
-        N36[analyse]
-        N37[discovery]
-        N38[index]
-        N39[model]
-        N40[python]
-        N41[report]
-        N42[rules]
-        N43[stub]
-        N44[typescript]
+        N38[analyse]
+        N39[discovery]
+        N40[index]
+        N41[model]
+        N42[python]
+        N43[report]
+        N44[rules]
+        N45[stub]
+        N46[typescript]
     end
 
     subgraph Map
-        N45[adapter]
-        N46[artifacts]
-        N47[command]
-        N48[coverage]
-        N49[cycles]
-        N50[discovery]
-        N51[grammars]
-        N52[graph]
-        N53[layers]
-        N54[markdown]
-        N55[...8 more]
+        N47[adapter]
+        N48[artifacts]
+        N49[command]
+        N50[coverage]
+        N51[cycles]
+        N52[discovery]
+        N53[grammars]
+        N54[graph]
+        N55[layers]
+        N56[markdown]
+        N57[...8 more]
     end
 
     subgraph Query
-        N56[args]
-        N57[commands]
-        N58[graph]
-        N59[index]
-        N60[load]
-        N61[safety]
+        N58[args]
+        N59[commands]
+        N60[graph]
+        N61[index]
+        N62[load]
+        N63[safety]
     end
 
     subgraph Ste
-        N62[index]
-        N63[markdown]
-        N64[prose]
-        N65[rules]
-        N66[since]
+        N64[index]
+        N65[markdown]
+        N66[prose]
+        N67[rules]
+        N68[since]
     end
 
     N1 --> N2
-    N10 --> N3
-    N10 --> N27
-    N10 --> N4
-    N10 --> N47
-    N10 --> N9
-    N10 --> N11
-    N10 --> N12
-    N11 --> N46
-    N11 --> N47
-    N11 --> N12
-    N12 --> N9
-    N13 --> N5
-    N13 --> N4
+    N10 --> N8
+    N10 --> N14
+    N11 --> N3
+    N11 --> N29
+    N11 --> N4
+    N11 --> N49
+    N11 --> N9
+    N11 --> N10
+    N11 --> N13
+    N11 --> N14
+    N12 --> N14
+    N13 --> N48
+    N13 --> N49
+    N13 --> N12
     N13 --> N14
-    N13 --> N15
-    N14 --> N5
-    N14 --> N15
-    N15 --> N14
-    N2 --> N10
-    N2 --> N13
-    N2 --> N17
-    N2 --> N23
-    N2 --> N38
-    N2 --> N4
-    N2 --> N47
-    N2 --> N59
-    N2 --> N62
-    N16 --> N21
-    N17 --> N3
-    N17 --> N5
-    N17 --> N4
-    N17 --> N47
-    N17 --> N50
-    N17 --> N51
+    N14 --> N9
+    N15 --> N5
+    N15 --> N4
+    N15 --> N16
+    N15 --> N17
+    N16 --> N5
+    N16 --> N17
     N17 --> N16
-    N17 --> N19
-    N17 --> N20
-    N17 --> N21
-    N19 --> N16
-    N19 --> N20
+    N2 --> N11
+    N2 --> N15
+    N2 --> N19
+    N2 --> N25
+    N2 --> N40
+    N2 --> N4
+    N2 --> N49
+    N2 --> N61
+    N2 --> N64
+    N18 --> N23
+    N19 --> N3
+    N19 --> N5
+    N19 --> N4
+    N19 --> N49
+    N19 --> N52
+    N19 --> N53
+    N19 --> N18
     N19 --> N21
-    N20 --> N3
+    N19 --> N22
+    N19 --> N23
     N21 --> N18
-    N22 --> N24
-    N23 --> N4
-    N23 --> N8
-    N23 --> N22
-    N23 --> N24
-    N24 --> N22
-    N3 --> N26
-    N3 --> N32
-    N3 --> N33
-    N25 --> N6
-    N25 --> N29
-    N25 --> N32
-    N27 --> N3
-    N29 --> N49
-    N29 --> N8
-    N30 --> N6
+    N21 --> N22
+    N21 --> N23
+    N22 --> N3
+    N23 --> N20
+    N24 --> N26
+    N25 --> N4
+    N25 --> N8
+    N25 --> N24
+    N25 --> N26
+    N26 --> N24
+    N3 --> N28
+    N3 --> N34
+    N3 --> N35
+    N27 --> N6
+    N27 --> N31
+    N27 --> N34
+    N29 --> N3
+    N31 --> N51
     N31 --> N8
     N32 --> N6
-    N32 --> N8
-    N33 --> N31
-    N34 --> N3
-    N34 --> N5
+    N33 --> N8
     N34 --> N6
-    N36 --> N37
-    N36 --> N39
-    N36 --> N40
-    N36 --> N44
-    N37 --> N50
-    N37 --> N8
-    N38 --> N27
-    N38 --> N4
+    N34 --> N8
+    N35 --> N33
+    N36 --> N3
+    N36 --> N5
+    N36 --> N6
+    N38 --> N39
+    N38 --> N41
+    N38 --> N42
 ```
 
 ---
@@ -1969,17 +2013,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total Source Files | 289 |
+| Total Source Files | 292 |
 | Subsystems | 10 |
-| Total Lines of Code | 44637 |
-| Total Exports | 721 |
+| Total Lines of Code | 44879 |
+| Total Exports | 724 |
 | Total Re-exports | 12 |
 | Total Classes | 13 |
-| Total Interfaces | 141 |
-| Total Functions | 413 |
+| Total Interfaces | 142 |
+| Total Functions | 415 |
 | Total Type Guards | 19 |
 | Total Enums | 4 |
-| Type-only Imports | 63 |
+| Type-only Imports | 65 |
 | Runtime Cyclic Components | 1 |
 | Type-only Cyclic Components | 4 |
 | Files in Runtime Cycles | 2 |
@@ -1987,4 +2031,4 @@ graph TD
 
 ---
 
-*Version*: 2.4.0
+*Version*: 2.5.0

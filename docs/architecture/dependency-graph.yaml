@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 289
+  totalFiles: 292
   totalModules: 4
-  totalExports: 721
+  totalExports: 724
 modules:
   tools:
     scripts/build.ts:
@@ -220,6 +220,26 @@ modules:
         - rewriteClaimValues
         - parseClaims
         - hasVerificationSection
+    src/check/docs.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/depgraph/paths.ts
+          imports:
+            - isDirectory
+          typeOnly: false
+        - file: src/sort.ts
+          imports:
+            - sortCodeUnits
+          typeOnly: false
+        - file: src/check/verify.ts
+          imports:
+            - DocFile
+          typeOnly: true
+      exports:
+        - readDocs
     src/check/index.ts:
       externalDependencies: []
       nodeDependencies:
@@ -253,6 +273,10 @@ modules:
             - NO_VERIFICATION_MARKER
             - verificationMarkers
           typeOnly: false
+        - file: src/check/docs.ts
+          imports:
+            - readDocs
+          typeOnly: false
         - file: src/check/metrics.ts
           imports:
             - collectMetrics
@@ -265,6 +289,19 @@ modules:
       exports:
         - CHECK_HELP
         - run
+    src/check/measure.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:fs
+      internalDependencies:
+        - file: src/check/verify.ts
+          imports:
+            - Measured
+            - MetricValue
+          typeOnly: true
+      exports:
+        - MetricReports
+        - measureReports
     src/check/metrics.ts:
       externalDependencies: []
       nodeDependencies:
@@ -282,6 +319,10 @@ modules:
         - file: src/map/command.ts
           imports:
             - graphOf
+          typeOnly: false
+        - file: src/check/measure.ts
+          imports:
+            - measureReports
           typeOnly: false
         - file: src/check/verify.ts
           imports:
@@ -1721,6 +1762,15 @@ modules:
         - file: src/check/claims.ts
           imports:
             - verificationMarkers
+          typeOnly: false
+        - file: src/check/docs.ts
+          imports:
+            - readDocs
+          typeOnly: false
+        - file: src/check/measure.ts
+          imports:
+            - MetricReports
+            - measureReports
           typeOnly: false
         - file: src/check/verify.ts
           imports:
@@ -5422,6 +5472,27 @@ modules:
             - makeTempDir
           typeOnly: false
       exports: []
+    tests/unit/map-verification.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: src/check/claims.ts
+          imports:
+            - NO_VERIFICATION_MARKER
+            - '*'
+          typeOnly: false
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+        - file: tests/unit/temp.ts
+          imports:
+            - makeTempDir
+          typeOnly: false
+      exports: []
     tests/unit/mask.test.ts:
       externalDependencies:
         - bun:test
@@ -5882,29 +5953,29 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 289
-  totalSourceFiles: 289
+  totalTypeScriptFiles: 292
+  totalSourceFiles: 292
   totalModules: 4
-  totalLinesOfCode: 44637
-  totalExports: 721
+  totalLinesOfCode: 44879
+  totalExports: 724
   entryRoots: 1
-  reachableFiles: 83
+  reachableFiles: 85
   dormantFiles: 2
   orphanedFiles: 2
   testOnlyFiles: 0
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
-  totalTypeOnlyImports: 63
+  totalTypeOnlyImports: 65
   noImporterFileCount: 2
-  unusedExportsCount: 121
+  unusedExportsCount: 119
   circularDepsTruncated: false
   runtimeCyclicComponents: 1
   typeOnlyCyclicComponents: 4
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 8
   totalClasses: 13
-  totalInterfaces: 141
-  totalFunctions: 413
+  totalInterfaces: 142
+  totalFunctions: 415
   totalTypeGuards: 19
   totalEnums: 4
   totalConstants: 99
@@ -5912,7 +5983,7 @@ statistics:
 reachability:
   roots:
     - src/cli.ts
-  reachableCount: 83
+  reachableCount: 85
   dormantCount: 2
   orphaned:
     - src/assets.d.ts

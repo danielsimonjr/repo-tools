@@ -1,11 +1,11 @@
 {
-  "totalFiles": 289,
+  "totalFiles": 292,
   "byDisposition": {
-    "reachable": 82,
+    "reachable": 84,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 193,
+    "test": 194,
     "tool": 10,
     "config": 1,
     "bench": 0,
@@ -13,13 +13,13 @@
   },
   "byArea": {
     "tools": 10,
-    "src": 85,
-    "tests": 193,
+    "src": 87,
+    "tests": 194,
     "config": 1
   },
   "byPackage": {
-    "(root)": 204,
-    "@danielsimonjr/repo-tools": 85
+    "(root)": 205,
+    "@danielsimonjr/repo-tools": 87
   },
   "files": [
     {
@@ -114,11 +114,25 @@
       "loc": 122
     },
     {
+      "file": "src/check/docs.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 45
+    },
+    {
       "file": "src/check/index.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
       "loc": 151
+    },
+    {
+      "file": "src/check/measure.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 52
     },
     {
       "file": "src/check/metrics.ts",
@@ -1862,6 +1876,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 115
+    },
+    {
+      "file": "tests/unit/map-verification.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 145
     },
     {
       "file": "tests/unit/mask.test.ts",

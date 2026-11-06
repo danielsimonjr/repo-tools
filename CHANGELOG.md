@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-11-05
+
 ### Added
 
 - `repo-tools map` writes the values of the Verification tables in the Markdown documents of its
