@@ -295,6 +295,10 @@ data. Other findings are filed here.
   security — `bun audit` finds no vulnerability in 43 packages and no Dependabot alert is open; maintainability —
   the defaults are in `src/clones/settings.ts` only, and the feature adds no dependency. NOT done: the two open
   items below.
+- [ ] `clones` reports false containment pairs for a unit whose shingles are only one object literal. Measured on
+  universal-physics-tensor (2026-11-08): 13 of 35 near pairs were the field-copy literal of one function contained in
+  large builders. Cap the containment weight of a shingle set that comes from object-literal fields only. Do not filter
+  on `jNames < 0.1`: a real duplicate in the same run had `jNames` 0.096.
 - [ ] `clones` reads TypeScript and JavaScript only. The Python grammar is already bundled, so add Python units.
 - [x] 2026-10-25 `docs/parity-clones.md` covers one repository. Add a second repository with other naming habits.
   Done: deepthinking-mcp at `9e04da7` (243 files). 1,172 of 1,201 units are the same. The 29 other units lie at the
