@@ -17,6 +17,9 @@ const VISIBILITY = new Set(["private", "protected", "public", "module_function"]
 const INLINE_VISIBILITY = new Set(["private", "protected", "private_class_method"]);
 const METHOD_HIDERS = new Set(["private", "protected"]);
 const SINGLETON_HIDERS = new Set(["private_class_method"]);
+const CONSTANT_HIDERS = new Set(["private_constant"]);
+/** The rows of each tree that carry a `:nodoc:` mark, filled on the first lookup. */
+const NODOC_ROWS = new WeakMap<object, Map<number, "nodoc" | "all">>();
 const KIND_CONTAINERS = new Set([
   "class",
   "module",
@@ -150,10 +153,38 @@ function nodeName(node: Node): string {
   return node.childForFieldName("name")?.text ?? "";
 }
 
+/** Returns the `:nodoc:` mark of a comment on the first line of the node. */
+function nodocOf(node: Node): "" | "nodoc" | "all" {
+  let rows = NODOC_ROWS.get(node.tree);
+  if (!rows) {
+    // One pass over the comments of the tree, so each declaration costs one lookup.
+    rows = new Map();
+    for (const comment of node.tree.rootNode.descendantsOfType(["comment"])) {
+      const match = comment.text.match(/:nodoc:(\s+all\b)?/);
+      if (match) rows.set(comment.startPosition.row, match[1] ? "all" : "nodoc");
+    }
+    NODOC_ROWS.set(node.tree, rows);
+  }
+  return rows.get(node.startPosition.row) ?? "";
+}
+
+/** Returns true when a class or module above the node carries `:nodoc: all`. */
+function underNodocAll(node: Node): boolean {
+  for (let ancestor = node.parent; ancestor; ancestor = ancestor.parent) {
+    if ((ancestor.type === "class" || ancestor.type === "module") && nodocOf(ancestor) === "all") {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Returns true when a Ruby declaration is public. */
 function isExported(node: Node): boolean {
+  if (nodocOf(node) !== "" || underNodocAll(node)) return false;
   if (node.type === "class" || node.type === "module") {
-    return !hasAncestorType(node, METHOD_ANCESTORS);
+    if (hasAncestorType(node, METHOD_ANCESTORS)) return false;
+    const name = nodeName(node).split("::").pop() ?? "";
+    return !hidesName(bodyOf(node), name, CONSTANT_HIDERS);
   }
 
   if (hasAncestorType(node, NESTED_METHOD_ANCESTORS)) return false;
