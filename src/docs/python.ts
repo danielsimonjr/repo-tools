@@ -81,6 +81,18 @@ function section(doc: string, header: string): string {
   return out.join("\n");
 }
 
+/**
+ * The entry lines of a NumPy section: the lines at the smallest indent of the block. A description
+ * line sits deeper under its entry. Without this filter, a description such as `Note: x` reads as
+ * a parameter named `Note` and reports as stale (rule M3).
+ */
+function numpyEntries(block: string): string {
+  const lines = block.split("\n").filter((l) => pyStrip(l) !== "" && !isRule(l));
+  const depth = (l: string): number => l.length - l.trimStart().length;
+  const top = Math.min(...lines.map(depth));
+  return lines.filter((l) => depth(l) === top).join("\n");
+}
+
 /** Returns the names in `doc` matching `pattern`, with a leading `*` or `**` removed. */
 function namesOf(pattern: RegExp, block: string): string[] {
   return [...block.matchAll(pattern)].map((m) => (m[1] ?? "").replace(/^\*+/, ""));
@@ -89,7 +101,7 @@ function namesOf(pattern: RegExp, block: string): string[] {
 /** Returns the parameter names that the docstring documents, for the stale-name rule (M3). */
 export function documentedParams(doc: string, dialect: string): string[] {
   if (dialect === "rest") return namesOf(REST_PARAM, doc);
-  if (dialect === "numpy") return namesOf(NUMPY_PARAM, section(doc, "Parameters"));
+  if (dialect === "numpy") return namesOf(NUMPY_PARAM, numpyEntries(section(doc, "Parameters")));
   if (dialect === "google") {
     return namesOf(GOOGLE_PARAM, section(doc, "Args") || section(doc, "Arguments"));
   }

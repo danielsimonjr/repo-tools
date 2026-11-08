@@ -334,6 +334,11 @@ describe("python: the dialect and the documented names", () => {
     expect(documentedParams(doc, "numpy")).toEqual(["a", "b"]);
   });
 
+  test("a NumPy description line with a colon is not a parameter", () => {
+    const doc = "S.\n\nParameters\n----------\na : int\n    Note: the value.\nb\n    TODO: fill.\n";
+    expect(documentedParams(doc, "numpy")).toEqual(["a"]);
+  });
+
   test("the reST names come from the :param lines", () => {
     expect(documentedParams(":param a: x\n:param b: y\n", "rest")).toEqual(["a", "b"]);
     expect(documentedParams("S.", "")).toEqual([]);
