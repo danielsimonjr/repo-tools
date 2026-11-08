@@ -61,7 +61,9 @@ describe("every style", () => {
     test(`${id}: the summary line and each parameter line hold the marker`, () => {
       const lines = style.render(FN, "");
       // One marker line for the summary, one for each parameter, one for the return value.
-      expect(lines.filter((l) => l.includes(STUB_MARKER)).length).toBe(2 + FN.params.length);
+      // GoDoc has no parameter tag and no return tag: its stub is the summary line alone.
+      const expected = id === "godoc" ? 1 : 2 + FN.params.length;
+      expect(lines.filter((l) => l.includes(STUB_MARKER)).length).toBe(expected);
       expect(style.id).toBe(id);
     });
   }
@@ -108,4 +110,45 @@ describe("typescript styles are read back as their dialect", () => {
     expect([...report.dialects]).toEqual(["jsdoc"]);
     expect(report.symbols[0]?.docParams).toEqual(["a"]);
   });
+});
+
+describe("godoc, javadoc and kdoc", () => {
+  const M = STUB_MARKER;
+  const METHOD: DocSymbol = { ...FN, name: "Run", kind: "method" };
+  const TYPE: DocSymbol = { ...FN, name: "Box", kind: "struct", params: [] };
+
+  test("godoc is one line that starts with the name of the symbol", () => {
+    expect(STYLES.godoc?.language).toBe("go");
+    expect(STYLES.godoc?.render(FN, "")).toEqual([
+      `// f ${M} state what this does, in one active-voice sentence.`,
+    ]);
+    expect(STYLES.godoc?.render(TYPE, "\t")).toEqual([
+      `\t// Box ${M} state what this does, in one active-voice sentence.`,
+    ]);
+  });
+
+  for (const [id, language] of [
+    ["javadoc", "java"],
+    ["kdoc", "kotlin"],
+  ] as const) {
+    test(`${id} writes @param for each parameter and @return for a value`, () => {
+      const style = STYLES[id];
+      expect(style?.language).toBe(language);
+      const lines = style?.render(METHOD, "  ") ?? [];
+      expect(lines[0]).toBe("  /**");
+      expect(lines.at(-1)).toBe("   */");
+      expect(lines).toContain(`   * @param a ${M} state what it is. Do not repeat the type.`);
+      expect(lines).toContain(`   * @param b ${M} state what it is. Do not repeat the type.`);
+      expect(lines).toContain(`   * @return ${M} state what the caller gets back.`);
+      expect(lines.join("\n")).not.toContain("@returns");
+    });
+
+    test(`${id} writes no @return for a type or for a method that returns nothing`, () => {
+      const style = STYLES[id];
+      expect(style?.render(TYPE, "").join("\n")).not.toContain("@return");
+      const none = style?.render({ ...METHOD, returnsValue: false }, "").join("\n") ?? "";
+      expect(none).not.toContain("@return");
+      expect(none).toContain("@param a");
+    });
+  }
 });

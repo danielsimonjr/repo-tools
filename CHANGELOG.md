@@ -20,6 +20,10 @@ All notable changes to this project are recorded in this file. The format follow
   package grows from about 4.4 MB to 10.9 MB. A grammar ships only with the analyser that reads it.
 - The npm package and the executables also carry the tree-sitter grammars of Go, Java and Kotlin,
   which the analysers of the next commits read. The Kotlin grammar is the community build 1.1.0.
+- The doc driver of the tree-sitter analysers takes three optional hooks (`docSiteOf`, `adjacentDoc`,
+  `nameOf`), and `read` gets the declaration. The hooks serve Go, Java and Kotlin. C# and Rust use
+  none, and their output does not change. `stub` gains the styles `godoc` (one line that starts
+  with the name), `javadoc` and `kdoc` (`@param` and `@return`). No language selects them yet.
 - `NOTICE` holds the MIT licence of mintlify/writer, from which the node kinds, the default doc
   forms and the stub templates derive. The npm package ships it.
 - Golden sets `cs-repo` and `rs-repo` for `repo-tools map`. They fix the output of the C# and Rust
