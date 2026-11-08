@@ -12,6 +12,11 @@ All notable changes to this project are recorded in this file. The format follow
   `tree-sitter-cpp` 0.23.4, `tree-sitter-php` 0.24.2 and `tree-sitter-ruby` 0.23.1. They hold the
   grammar files of the C, C++, PHP and Ruby readers. The lockfile also names `tree-sitter-c` 0.23.6
   below `tree-sitter-cpp`. That copy is a development dependency and does not ship.
+- The grammar loader of `repo-tools map` loads the C, C++, PHP and Ruby grammars. The package and
+  the executables carry four more `.wasm` files: 0.63 MB for C, 3.43 MB for C++, 1.06 MB for PHP
+  and 2.11 MB for Ruby. The PHP grammar is `tree-sitter-php.wasm`, which reads a file that mixes
+  HTML and PHP. `map` still refuses a repository of these languages. For a C or C++ repository it
+  now counts `.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` and `.hxx` files as `cpp`.
 - `repo-tools docs` reads Go (`.go`), Java (`.java`) and Kotlin (`.kt`, `.kts`). A Go name is
   exported when its first letter is upper case; a Go doc is the `//` run with no blank line above
   the declaration. A Java declaration is exported when it is `public` or `protected`, or is a
