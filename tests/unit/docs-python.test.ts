@@ -339,6 +339,12 @@ describe("python: the dialect and the documented names", () => {
     expect(documentedParams(doc, "numpy")).toEqual(["a"]);
   });
 
+  test("an underlined NumPy header that is not a known section ends the Parameters block", () => {
+    const doc =
+      "S.\n\nParameters\n----------\na : int\n\nWarnings\n--------\nNote: this is unsafe.\n";
+    expect(documentedParams(doc, "numpy")).toEqual(["a"]);
+  });
+
   test("the reST names come from the :param lines", () => {
     expect(documentedParams(":param a: x\n:param b: y\n", "rest")).toEqual(["a", "b"]);
     expect(documentedParams("S.", "")).toEqual([]);
