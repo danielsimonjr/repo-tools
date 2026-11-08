@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- The `repo-tools docs` command gains tree-sitter analysers for Go, Java and Kotlin. A Go name is
+  exported when its first letter is upper case. A Java declaration is exported when it is `public`
+  or `protected`, or is a member of an interface. A Kotlin declaration is exported unless it is
+  `private` or `internal`. The registry entries follow in the next commit.
 - `repo-tools docs` reads C# (`.cs`) and Rust (`.rs`). Each language has a tree-sitter analyser
   with its own exported rule: C# `public` or `protected` on the declaration and each enclosing
   type; Rust the bare `pub` on the item and each enclosing module. The doc of a C# declaration is
