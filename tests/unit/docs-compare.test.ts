@@ -334,3 +334,62 @@ describe("main", () => {
     }
   });
 });
+
+describe("diffCoverage duplicates", () => {
+  test("a repeated symbol key within a file is kept, with a numbered suffix", () => {
+    const one = makeSymbol({ name: "f" });
+    const base = makeCoverage([makeFile({ symbols: [one, { ...one }] })]);
+    const next = makeCoverage([makeFile({ symbols: [one] })]);
+    const diff = diffCoverage(base, next);
+    expect(diff.symbolsRemoved).toEqual(["src/a.ts:1 f function #2"]);
+  });
+
+  test("a repeated file path is kept, with a numbered suffix", () => {
+    const base = makeCoverage([makeFile({ path: "a.ts" }), makeFile({ path: "a.ts" })]);
+    const next = makeCoverage([makeFile({ path: "a.ts" })]);
+    expect(diffCoverage(base, next).filesRemoved).toEqual(["a.ts #2"]);
+  });
+});
+
+describe("main input checks", () => {
+  const runIn = (files: Record<string, unknown>, argv: string[]) => {
+    const dir = mkdtempSync(join(tmpdir(), `docs-compare-${process.pid}-`));
+    try {
+      for (const [name, body] of Object.entries(files)) {
+        writeFileSync(join(dir, name), JSON.stringify(body));
+      }
+      const args = argv.map((a) => (a.endsWith(".json") ? join(dir, a) : a));
+      return Bun.spawnSync([process.execPath, "scripts/docs-compare.ts", ...args]).exitCode;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  test("diff exits 2 on a malformed file record", () => {
+    const good = { summary: {}, files: [] };
+    for (const bad of [
+      { error: "", symbols: [] },
+      { path: 3, error: "", symbols: [] },
+      { path: "a.ts", error: "" },
+      { path: "a.ts", error: 5, symbols: [] },
+      "a.ts",
+      null,
+    ]) {
+      const report = { summary: {}, files: [bad] };
+      expect(runIn({ "a.json": good, "b.json": report }, ["diff", "a.json", "b.json"])).toBe(2);
+    }
+    const nullError = { summary: {}, files: [{ path: "a.ts", error: null, symbols: [] }] };
+    expect(runIn({ "a.json": nullError, "b.json": nullError }, ["diff", "a.json", "b.json"])).toBe(
+      0,
+    );
+  });
+
+  test("summary exits 2 on a missing or non-numeric field", () => {
+    const report = (summary: unknown) => ({ summary, files: [] });
+    expect(runIn({ "c.json": report(baseSummary) }, ["summary", "c.json"])).toBe(0);
+    expect(runIn({ "c.json": report({}) }, ["summary", "c.json"])).toBe(2);
+    expect(
+      runIn({ "c.json": report({ ...baseSummary, symbols: "1" }) }, ["summary", "c.json"]),
+    ).toBe(2);
+  });
+});

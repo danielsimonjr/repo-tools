@@ -116,6 +116,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `docs-compare diff` keeps a repeated symbol key or file path: the second copy gets the suffix
+  ` #2`, the third ` #3`, and so on. Before, the later copy replaced the earlier one. Every mode
+  exits 2 on a file record without a `path` text, a `symbols` list, or an `error` text or null.
+  `summary` exits 2 when a field of the parity row is not a number.
 - `docs-compare triage` counts header functions without the rows of function-like macros, reads
   the access specifiers of a struct or a union as well as a class (a struct starts public), and
   blanks the `extern "C"` guards before the parse, as the analyser does. A header tree with an
