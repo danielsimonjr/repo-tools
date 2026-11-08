@@ -149,4 +149,52 @@ describe("Ruby analyser", () => {
     expect(report.error).toMatch(/^parse error/);
     expect(report.symbols).toEqual([]);
   });
+
+  it("hides a class or module that private_constant names in the same body", async () => {
+    const source = [
+      "module M",
+      "  class Hidden; end",
+      "  class Kept; end",
+      "  module Inner; end",
+      "  private_constant :Hidden",
+      "  private_constant(:Inner)",
+      "end",
+      "class Hidden; end",
+      "",
+    ].join("\n");
+    const all = await symbols(source);
+    const named = (name: string) => all.filter((s) => s.name === name);
+    expect(named("Hidden")[0]?.exported).toBe(false);
+    // The decoy at top level is another body, so it stays public.
+    expect(named("Hidden")[1]?.exported).toBe(true);
+    expect(named("Kept")[0]?.exported).toBe(true);
+    expect(named("Inner")[0]?.exported).toBe(false);
+  });
+
+  it("hides a declaration marked :nodoc:, and every member under :nodoc: all", async () => {
+    const source = [
+      "class A",
+      "  def hidden # :nodoc:",
+      "  end",
+      "  def kept",
+      "  end",
+      "end",
+      "class B # :nodoc: all",
+      "  def m",
+      "  end",
+      "end",
+      "class C # :nodoc:",
+      "  def m2",
+      "  end",
+      "end",
+      "",
+    ].join("\n");
+    expect((await byName(source, "hidden")).exported).toBe(false);
+    expect((await byName(source, "kept")).exported).toBe(true);
+    expect((await byName(source, "B")).exported).toBe(false);
+    expect((await byName(source, "m")).exported).toBe(false);
+    // A bare :nodoc: hides the class only, not its members.
+    expect((await byName(source, "C")).exported).toBe(false);
+    expect((await byName(source, "m2")).exported).toBe(true);
+  });
 });

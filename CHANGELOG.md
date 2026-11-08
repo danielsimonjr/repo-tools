@@ -104,6 +104,9 @@ All notable changes to this project are recorded in this file. The format follow
   function, and a public data member as a property. A function-pointer member
   (`int (*cb)(int);`) is a property. A member line with several names (`int a, b;`), an
   object-like macro and an `extern` variable are not reported.
+- The Ruby reader does not export a class or module that `private_constant` names in the same
+  body, or a declaration whose first line carries `# :nodoc:`. `# :nodoc: all` also hides
+  every member.
 - The Doxygen dialect also holds `@ingroup`, `@def`, `@var`, `@fn`, `@typedef`, `@struct`, `@enum`
   and `@copydoc`. The PHPDoc dialect also holds `@psalm-*` and `@phpstan-*` tags.
 - A PHPDoc or Javadoc that holds only an inline tag (`/** {@inheritDoc} */`) has an empty summary.
