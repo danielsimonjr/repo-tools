@@ -115,7 +115,7 @@ const UNPARSEABLE_SUFFIXES: Readonly<Record<string, string[]>> = {
   ruby: [".rb"],
   php: [".php"],
   swift: [".swift"],
-  cpp: [".cpp", ".cc", ".hpp"],
+  cpp: [".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx"],
 };
 
 const SUFFIX_TO_LANGUAGE = new Map<string, string>([
