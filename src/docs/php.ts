@@ -38,7 +38,10 @@ const DOC_COMMENT = /^\/\*\*(?!\/)/;
 
 /** The PHPDoc tags that mark a doc block as phpdoc. */
 const PHPDOC_TAG =
-  /@(?:param|return|var|throws|method|property(?:-read|-write)?|deprecated|see|since|inheritdoc|template|api|internal|link|mixin)\b|\{@inheritdoc\}/i;
+  /@(?:param|return|var|throws|method|property(?:-read|-write)?|deprecated|see|since|inheritdoc|template|api|internal|link|mixin|psalm-\w+|phpstan-\w+)\b|\{@inheritdoc\}/i;
+
+/** An inline tag such as `{@link Foo}` or `{@inheritDoc}`. The text after the tag name stays. */
+const INLINE_TAG = /\{@\w+(?:\s+([^}]*))?\}/g;
 
 /** Collect the parent chain of one node, nearest first. */
 function ancestorsOf(node: Node): Node[] {
@@ -181,7 +184,9 @@ function docParamNames(text: string): string[] {
 /** Read one doc comment run and return its documentation text. */
 function read(run: Node[], _node: Node): DocText {
   const lines = docLines(run);
-  const proseLines = lines.filter((line) => !line.startsWith("@"));
+  const proseLines = lines
+    .filter((line) => !line.startsWith("@"))
+    .map((line) => line.replace(INLINE_TAG, "$1"));
   const text = lines.join("\n");
   return {
     docParams: docParamNames(text),

@@ -270,3 +270,8 @@ record R(int x, int y) { R { } }`;
     expect(report.symbols).toEqual([]);
   });
 });
+
+test("gives an empty summary to an inline-tag-only Javadoc", async () => {
+  const all = await symbols("public class A {\n  /** {@inheritDoc} */\n  public void run() {}\n}\n");
+  expect(byName(all, "run").summary).toBe("");
+});

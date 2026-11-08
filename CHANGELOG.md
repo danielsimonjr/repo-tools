@@ -97,6 +97,25 @@ All notable changes to this project are recorded in this file. The format follow
 - `docs` ends a NumPy Parameters block at any underlined header, for example `Warnings`. A section
   name outside the known list let the block run on, so a line such as `Note: x` read as a stale
   parameter.
+- The C and C++ reader of `docs` (not released before) no longer loses a name without a notice.
+  A declaration of two functions (`int m1(void), m2(void);`) and a typedef with two names or a
+  pointer name (`typedef struct P2 {..} P2, *P2Ptr;`, `typedef struct Point {..} *PointPtr;`)
+  now make the file unparsed, with the C grammar too. Before, the report kept one name only.
+- The C and C++ reader clears the export flag of an undocumented copy only for a free function
+  with the same scope, name and parameters. Before, `void f(int)` in namespace `b`, or `m(int)` in
+  struct `T`, lost its M1 issue when a namesake in another scope had a doc.
+- The C and C++ reader no longer reports an anonymous enum, struct or union as `<anonymous>`, and
+  no longer reports a function-pointer variable or data member (`int (*hook)(int);`) as a
+  function. `void (*signal(int, void (*)(int)))(int)` stays a function, and now gives the
+  parameters `sig` and `func` and a return value.
+- The C and C++ reader reads the return type of a template function, exports a static template
+  member of a struct, names a conversion operator `operator int` (not `operator int() const`),
+  gives the parameter `args` for `Args&&... args`, and finds the doc above a single
+  `extern "C" int f(int);`.
+- The Doxygen dialect also holds `@ingroup`, `@def`, `@var`, `@fn`, `@typedef`, `@struct`, `@enum`
+  and `@copydoc`. The PHPDoc dialect also holds `@psalm-*` and `@phpstan-*` tags.
+- A PHPDoc or Javadoc that holds only an inline tag (`/** {@inheritDoc} */`) has an empty
+  summary. Before, the summary was the tag text.
 
 ## [2.5.0] - 2026-11-05
 

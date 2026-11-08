@@ -44,7 +44,7 @@ const GUARD_END = /^\s*#\s*endif\b/;
 const DOC_OPEN = /^(?:\/\*\*(?![/<*])|\/\*!(?!<)|\/\/\/(?![/<])|\/\/!(?!<))/;
 const DOC_META = /(?:^|\s)[@\\](?:file|mainpage|page|defgroup|addtogroup|name)\b|[@\\][{}]/;
 const DIALECT_TAG =
-  /(?:^|\s)[@\\](?:brief|details|param|tparam|returns?|retval|throws?|exception|note|warning|see|sa|since|deprecated|pre|post)\b/;
+  /(?:^|\s)[@\\](?:brief|details|param|tparam|returns?|retval|throws?|exception|note|warning|see|sa|since|deprecated|pre|post|ingroup|def|var|fn|typedef|struct|enum|copydoc)\b/;
 const PLAIN_TAG = /^\s*[@\\](?!brief\b|details\b)\w+/;
 const BRIEF_TAG = /^\s*[@\\](?:brief|details)\s*/;
 
@@ -161,7 +161,11 @@ function leafOf(start: Node): Node {
       node = inner;
       continue;
     }
-    if (node.type === "parenthesized_declarator" || node.type === "reference_declarator") {
+    if (
+      node.type === "parenthesized_declarator" ||
+      node.type === "reference_declarator" ||
+      node.type === "variadic_declarator"
+    ) {
       const next = nextDeclaratorChild(node);
       if (next) {
         node = next;
@@ -173,34 +177,126 @@ function leafOf(start: Node): Node {
 }
 
 /**
- * Find the function declarator inside a declaration node.
+ * Tell whether a function declarator names a pointer object, not a function.
+ *
+ * A pointer declarator between the function declarator and the leaf makes
+ * the name a variable that holds a function pointer.
  */
-function functionDeclaratorOf(decl: Node): Node | null {
-  const starts = decl.childrenForFieldName("declarator");
-  if (!starts) {
-    return null;
+function namesPointerObject(fn: Node): boolean {
+  let sawPointer = false;
+  let node: Node | null = fn.childForFieldName("declarator");
+  while (node && !LEAF_TYPES.has(node.type)) {
+    if (node.type === "function_declarator") {
+      return false;
+    }
+    if (node.type === "pointer_declarator") {
+      sawPointer = true;
+    }
+    node =
+      node.type === "parenthesized_declarator"
+        ? nextDeclaratorChild(node)
+        : node.childForFieldName("declarator");
   }
-  for (const start of starts) {
-    let node: Node | null = start;
-    while (node) {
-      if (node.type === "function_declarator" || node.type === "operator_cast") {
-        return node;
-      }
-      if (LEAF_TYPES.has(node.type)) {
-        break;
-      }
-      const inner: Node | null = node.childForFieldName("declarator");
+  return sawPointer;
+}
+
+/**
+ * Return the function declarator nested in the name part of another one.
+ */
+function innerFunctionOf(fn: Node): Node | null {
+  let node: Node | null = fn.childForFieldName("declarator");
+  while (node && !LEAF_TYPES.has(node.type)) {
+    if (node.type === "function_declarator") {
+      return node;
+    }
+    node =
+      node.type === "parenthesized_declarator"
+        ? nextDeclaratorChild(node)
+        : node.childForFieldName("declarator");
+  }
+  return null;
+}
+
+/**
+ * Find the function declarator that one declarator start names.
+ */
+function functionDeclaratorFrom(start: Node): Node | null {
+  let node: Node | null = start;
+  while (node) {
+    if (node.type === "operator_cast") {
+      return node;
+    }
+    if (node.type === "function_declarator") {
+      const inner = innerFunctionOf(node);
       if (inner) {
+        // A function that returns a function pointer: the inner declarator names it.
         node = inner;
         continue;
       }
-      node =
-        node.type === "parenthesized_declarator" || node.type === "reference_declarator"
-          ? nextDeclaratorChild(node)
-          : null;
+      return namesPointerObject(node) ? null : node;
+    }
+    if (LEAF_TYPES.has(node.type)) {
+      return null;
+    }
+    const inner: Node | null = node.childForFieldName("declarator");
+    if (inner) {
+      node = inner;
+      continue;
+    }
+    node =
+      node.type === "parenthesized_declarator" || node.type === "reference_declarator"
+        ? nextDeclaratorChild(node)
+        : null;
+  }
+  return null;
+}
+
+/**
+ * Find the function declarator inside a declaration node.
+ */
+function functionDeclaratorOf(decl: Node): Node | null {
+  for (const start of decl.childrenForFieldName("declarator") ?? []) {
+    const found = functionDeclaratorFrom(start);
+    if (found) {
+      return found;
     }
   }
   return null;
+}
+
+/**
+ * Count the declarators of a declaration that name a function.
+ */
+function functionDeclaratorCount(decl: Node): number {
+  let count = 0;
+  for (const start of decl.childrenForFieldName("declarator") ?? []) {
+    if (functionDeclaratorFrom(start)) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+/**
+ * Tell whether a typedef declares more names than the report can keep.
+ *
+ * The report keeps one name per declaration. A typedef with several
+ * declarators, or a named tag with a pointer declarator, has more names.
+ */
+function typedefLosesName(node: Node): boolean {
+  const declarators = node.childrenForFieldName("declarator") ?? [];
+  if (declarators.length > 1) {
+    return true;
+  }
+  const inner = node.childForFieldName("type");
+  const first = declarators[0];
+  return (
+    inner !== null &&
+    inner.childForFieldName("body") !== null &&
+    inner.childForFieldName("name") !== null &&
+    first !== undefined &&
+    first.type !== "type_identifier"
+  );
 }
 
 /**
@@ -227,7 +323,11 @@ function leafName(leaf: Node): string {
     const name = node.childForFieldName("name");
     return name ? leafName(name) : "<anonymous>";
   }
-  if (node.type === "operator_name" || node.type === "operator_cast") {
+  if (node.type === "operator_cast") {
+    const target = node.childForFieldName("type");
+    return target ? `operator ${target.text.replace(/\s+/g, " ")}` : "operator";
+  }
+  if (node.type === "operator_name") {
     return node.text.replace(/\s+/g, " ");
   }
   return node.text;
@@ -251,7 +351,7 @@ function siteOf(node: Node): Node {
     if (!parent) {
       return current;
     }
-    if (parent.type === "template_declaration") {
+    if (parent.type === "template_declaration" || parent.type === "linkage_specification") {
       current = parent;
       continue;
     }
@@ -307,7 +407,11 @@ function reports(node: Node): boolean {
     type === "enum_specifier" ||
     type === "class_specifier"
   ) {
-    return node.childForFieldName("body") !== null && parent?.type !== "type_definition";
+    return (
+      node.childForFieldName("body") !== null &&
+      node.childForFieldName("name") !== null &&
+      parent?.type !== "type_definition"
+    );
   }
   if (type === "namespace_definition") {
     return node.childForFieldName("name") !== null;
@@ -429,7 +533,7 @@ function isExported(node: Node, header: boolean): boolean {
       }
     }
   }
-  if (node.parent?.type !== "field_declaration_list") {
+  if (wrapperOf(node).parent?.type !== "field_declaration_list") {
     for (const child of node.namedChildren) {
       if (child.type === "storage_class_specifier" && child.text === "static") {
         return false;
@@ -524,12 +628,11 @@ function returnsValueOf(node: Node): boolean | undefined {
   if (kind !== "function" && kind !== "method") {
     return undefined;
   }
-  const wrapper = wrapperOf(node);
   const declarator = functionDeclaratorOf(node);
   if (declarator?.type === "operator_cast") {
     return true;
   }
-  const typeNode = wrapper.childForFieldName("type");
+  const typeNode = node.childForFieldName("type");
   if (!typeNode) {
     return false;
   }
@@ -541,7 +644,7 @@ function returnsValueOf(node: Node): boolean | undefined {
     return trailing.text.replace(/^\s*->\s*/, "").trim() !== "void";
   }
   if (typeNode.text.trim() === "void") {
-    const top = wrapper.childrenForFieldName("declarator")?.[0] ?? null;
+    const top = node.childrenForFieldName("declarator")?.[0] ?? null;
     if (!top || !pathHasPointer(top, declarator)) {
       return false;
     }
@@ -570,6 +673,42 @@ function hasBadSubscript(root: Node): boolean {
     }
   }
   return false;
+}
+
+const MANY_NAMES =
+  "parse error (a declaration declares several names, and the report keeps one name per declaration)";
+
+/**
+ * Detect a declaration that declares more names than the report can keep.
+ */
+function manyNames(root: Node): string | null {
+  const stack: Node[] = [root];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node) {
+      continue;
+    }
+    if (node.type === "type_definition" && typedefLosesName(node)) {
+      return MANY_NAMES;
+    }
+    if (
+      (node.type === "declaration" || node.type === "field_declaration") &&
+      functionDeclaratorCount(node) > 1
+    ) {
+      return MANY_NAMES;
+    }
+    for (const child of node.namedChildren) {
+      stack.push(child);
+    }
+  }
+  return null;
+}
+
+/**
+ * Detect a source that the C++ grammar reads wrongly, or a lost name.
+ */
+function misreadCpp(root: Node): string | null {
+  return manyNames(root) ?? misread(root);
 }
 
 /**
@@ -652,6 +791,50 @@ function read(run: Node[]): DocText {
 }
 
 /**
+ * Return the scope chain of a node, outermost first, joined by "::".
+ *
+ * The chain holds the enclosing namespace and class names, and the
+ * qualifier of a qualified declarator name.
+ */
+function scopeOf(node: Node): string {
+  const names: string[] = [];
+  for (let parent = node.parent; parent; parent = parent.parent) {
+    if (
+      parent.type === "namespace_definition" ||
+      parent.type === "class_specifier" ||
+      parent.type === "struct_specifier" ||
+      parent.type === "union_specifier"
+    ) {
+      names.unshift(parent.childForFieldName("name")?.text ?? "<anonymous>");
+    }
+  }
+  const declarator = functionDeclaratorOf(node);
+  if (declarator) {
+    const leaf = leafOf(declarator);
+    if (leaf.type === "qualified_identifier") {
+      const scope = leaf.childForFieldName("scope");
+      if (scope) {
+        names.push(scope.text.replace(/\s+/g, ""));
+      }
+    }
+  }
+  return names.join("::");
+}
+
+/**
+ * Return the identity key of a free function, or null for other symbols.
+ *
+ * Two declarations of one function share the key. The driver clears the
+ * export flag on an undocumented copy of a documented function.
+ */
+function shadowKeyOf(node: Node): string | null {
+  if (kindOf(node) !== "function") {
+    return null;
+  }
+  return JSON.stringify([scopeOf(node), nameOf(node), paramsOf(node)]);
+}
+
+/**
  * Build a reader for the given grammar and header flag.
  */
 function cFamilyReader(grammar: "c" | "cpp", header: boolean): Reader {
@@ -670,10 +853,9 @@ function cFamilyReader(grammar: "c" | "cpp", header: boolean): Reader {
     paramsOf,
     returnsValueOf,
     read,
+    misread: grammar === "cpp" ? misreadCpp : manyNames,
+    shadowKeyOf,
   };
-  if (grammar === "cpp") {
-    reader.misread = misread;
-  }
   return reader;
 }
 
@@ -707,44 +889,10 @@ function readerFor(path: string): Reader {
 }
 
 /**
- * Build the identity key of a symbol for duplicate detection.
- */
-function symbolKey(symbol: { name: string; kind: string; params: readonly string[] }): string {
-  return JSON.stringify([symbol.name, symbol.kind, symbol.params]);
-}
-
-/**
- * Clear the export flag on undocumented duplicates of a documented symbol.
- */
-function dropShadowedExports(report: FileReport): void {
-  const documented = new Set<string>();
-  for (const symbol of report.symbols) {
-    if (symbol.hasDoc) {
-      documented.add(symbolKey(symbol));
-    }
-  }
-  for (const symbol of report.symbols) {
-    if (!symbol.exported || symbol.hasDoc) {
-      continue;
-    }
-    if (symbol.kind !== "function" && symbol.kind !== "method") {
-      continue;
-    }
-    if (!documented.has(symbolKey(symbol))) {
-      continue;
-    }
-    symbol.exported = false;
-    symbol.issues = [];
-  }
-}
-
-/**
  * Analyse one C or C++ file and return its documentation report.
  */
-export async function analyseCFamily(path: string, source: string): Promise<FileReport> {
-  const report = await analyseWith(readerFor(path), path, sanitiseGuards(source));
-  dropShadowedExports(report);
-  return report;
+export function analyseCFamily(path: string, source: string): Promise<FileReport> {
+  return analyseWith(readerFor(path), path, sanitiseGuards(source));
 }
 
 /**
