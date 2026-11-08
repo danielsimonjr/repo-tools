@@ -116,6 +116,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- Python, NumPy dialect: a bare entry `x:` with no description and no deeper next line gives the
+  name `x` again, as 2.5.0 did. A combined entry `x, y : int` gives both names.
 - C and C++: a data member with several names (`int a, *b;`) gives one `property` symbol per
   name. The symbols share the doc comment and the anchor of the member line. Before, the line gave
   no symbol. The shared driver takes a new optional hook, `declaratorsOf`, for this case. A

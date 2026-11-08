@@ -345,6 +345,16 @@ describe("python: the dialect and the documented names", () => {
     expect(documentedParams(doc, "numpy")).toEqual(["dim", "n_skew", "n_friction", "eps"]);
   });
 
+  test("a bare NumPy entry with no description gives its name", () => {
+    const doc = "S.\n\nParameters\n----------\nx:\ny : int\n    The y.\nz:\n";
+    expect(documentedParams(doc, "numpy")).toEqual(["x", "y", "z"]);
+  });
+
+  test("a combined NumPy entry gives each of its names", () => {
+    const doc = "S.\n\nParameters\n----------\nx, y : int\n    The point.\n*args, **kw : Any\n";
+    expect(documentedParams(doc, "numpy")).toEqual(["x", "y", "args", "kw"]);
+  });
+
   test("an underlined NumPy header that is not a known section ends the Parameters block", () => {
     const doc =
       "S.\n\nParameters\n----------\na : int\n\nWarnings\n--------\nNote: this is unsafe.\n";
