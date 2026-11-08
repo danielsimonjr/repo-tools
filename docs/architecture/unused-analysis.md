@@ -10,9 +10,9 @@
 - **Dormant files**: 2
   - **Orphaned (reachable from nothing)**: 2
   - **Test-only (only a test reaches them)**: 0
-- **Potentially unused exports**: 117
+- **Potentially unused exports**: 119
   - **Unreferenced anywhere**: 3
-  - **Referenced in their own module**: 114
+  - **Referenced in their own module**: 116
   - **Not classified**: 0
 
 ## Caveats
@@ -91,6 +91,8 @@ No other file imports these names, but their own module uses them.
 - `src/docs/analyse.ts`: `RepoAnalysis`
 - `src/docs/discovery.ts`: `Discovery`, `SKIP_DIRS`
 - `src/docs/index.ts`: `unquoteGitPath`
+- `src/docs/java.ts`: `JAVA`
+- `src/docs/kotlin.ts`: `KOTLIN`
 - `src/docs/model.ts`: `Issue`, `Tier`
 - `src/docs/rules.ts`: `RuleOptions`, `isTestFile`
 - `src/docs/stub.ts`: `Applied`

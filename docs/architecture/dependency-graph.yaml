@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 309
+  totalFiles: 316
   totalModules: 4
-  totalExports: 764
+  totalExports: 772
 modules:
   tools:
     scripts/build.ts:
@@ -1485,6 +1485,35 @@ modules:
         - Discovery
         - languageOf
         - discover
+    src/docs/go.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - parsesAsGo
+        - analyseGo
     src/docs/index.ts:
       externalDependencies: []
       nodeDependencies:
@@ -1555,6 +1584,66 @@ modules:
         - DOCS_HELP
         - unquoteGitPath
         - run
+    src/docs/java.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - JAVA
+        - analyseJava
+        - parsesAsJava
+    src/docs/kotlin.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - KOTLIN
+        - analyseKotlin
+        - parsesAsKotlin
     src/docs/languages.ts:
       externalDependencies: []
       nodeDependencies: []
@@ -1568,6 +1657,21 @@ modules:
           imports:
             - analyseCSharp
             - parsesAsCSharp
+          typeOnly: false
+        - file: src/docs/go.ts
+          imports:
+            - analyseGo
+            - parsesAsGo
+          typeOnly: false
+        - file: src/docs/java.ts
+          imports:
+            - analyseJava
+            - parsesAsJava
+          typeOnly: false
+        - file: src/docs/kotlin.ts
+          imports:
+            - analyseKotlin
+            - parsesAsKotlin
           typeOnly: false
         - file: src/docs/model.ts
           imports:
@@ -4939,6 +5043,19 @@ modules:
             - tree
           typeOnly: false
       exports: []
+    tests/unit/docs-comments.test.ts:
+      externalDependencies:
+        - bun:test
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - Reader
+          typeOnly: false
+      exports: []
     tests/unit/docs-csharp.test.ts:
       externalDependencies:
         - bun:test
@@ -4988,6 +5105,28 @@ modules:
             - tree
           typeOnly: false
       exports: []
+    tests/unit/docs-go.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/go.ts
+          imports:
+            - analyseGo
+            - parsesAsGo
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+          typeOnly: true
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+      exports: []
     tests/unit/docs-golden.test.ts:
       externalDependencies:
         - bun:test
@@ -5025,6 +5164,50 @@ modules:
         - CliRun
         - cli
         - read
+    tests/unit/docs-java.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/java.ts
+          imports:
+            - analyseJava
+            - parsesAsJava
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+          typeOnly: true
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+      exports: []
+    tests/unit/docs-kotlin.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/kotlin.ts
+          imports:
+            - analyseKotlin
+            - parsesAsKotlin
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+          typeOnly: true
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+      exports: []
     tests/unit/docs-languages.test.ts:
       externalDependencies:
         - bun:test
@@ -5169,9 +5352,25 @@ modules:
         - bun:test
       nodeDependencies: []
       internalDependencies:
+        - file: src/docs/go.ts
+          imports:
+            - analyseGo
+            - parsesAsGo
+          typeOnly: false
+        - file: src/docs/java.ts
+          imports:
+            - analyseJava
+            - parsesAsJava
+          typeOnly: false
+        - file: src/docs/kotlin.ts
+          imports:
+            - analyseKotlin
+            - parsesAsKotlin
+          typeOnly: false
         - file: src/docs/model.ts
           imports:
             - DocSymbol
+            - FileReport
             - STUB_MARKER
           typeOnly: false
         - file: src/docs/python.ts
@@ -6289,21 +6488,21 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 309
-  totalSourceFiles: 309
+  totalTypeScriptFiles: 316
+  totalSourceFiles: 316
   totalModules: 4
-  totalLinesOfCode: 46771
-  totalExports: 764
+  totalLinesOfCode: 48323
+  totalExports: 772
   entryRoots: 1
-  reachableFiles: 90
+  reachableFiles: 93
   dormantFiles: 2
   orphanedFiles: 2
   testOnlyFiles: 0
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
-  totalTypeOnlyImports: 71
+  totalTypeOnlyImports: 77
   noImporterFileCount: 2
-  unusedExportsCount: 117
+  unusedExportsCount: 119
   circularDepsTruncated: false
   runtimeCyclicComponents: 1
   typeOnlyCyclicComponents: 4
@@ -6311,15 +6510,15 @@ statistics:
   typeOnlyFilesInCycles: 8
   totalClasses: 15
   totalInterfaces: 148
-  totalFunctions: 439
+  totalFunctions: 443
   totalTypeGuards: 20
   totalEnums: 4
-  totalConstants: 105
+  totalConstants: 109
   totalReExports: 12
 reachability:
   roots:
     - src/cli.ts
-  reachableCount: 90
+  reachableCount: 93
   dormantCount: 2
   orphaned:
     - src/assets.d.ts

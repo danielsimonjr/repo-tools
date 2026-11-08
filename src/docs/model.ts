@@ -75,7 +75,8 @@ export interface DocSymbol {
   summary: string;
   /**
    * The style id that the doc shows evidence of (`google`, `numpy`, `rest`, `tsdoc`, `jsdoc`,
-   * `xmldoc`, `rustdoc`), or an empty string when the doc has no marker.
+   * `xmldoc`, `rustdoc`, `godoc`, `javadoc`, `kdoc`), or an empty string when the doc has no
+   * marker.
    */
   dialect: string;
   issues: Issue[];
@@ -84,7 +85,7 @@ export interface DocSymbol {
 /** The results for one file. `error` is set when the analyser could not read the file. */
 export interface FileReport {
   path: string;
-  /** The registry id of the language (`python`, `typescript`, `csharp`, `rust`), or "". */
+  /** The registry id of the language (`python`, `typescript`, `csharp`, `rust`, `go`, `java`, `kotlin`), or "". */
   language: string;
   symbols: DocSymbol[];
   dialects: Set<string>;

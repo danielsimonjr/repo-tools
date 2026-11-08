@@ -514,7 +514,8 @@ pair. The command writes `inventory.jsonl` and `clones.json` only when `--out` o
 ## 8. Docs (`src/docs/`)
 
 The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`stub`) and gates
-(`check`) for the languages of its registry: TypeScript, JavaScript, Python, C# and Rust.
+(`check`). It reads the languages of its registry: TypeScript, JavaScript, Python, C#, Rust, Go, Java and
+Kotlin.
 
 | File | Purpose |
 |---|---|
@@ -526,11 +527,14 @@ The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`s
 | `python.ts` | Reads docstrings of Python and detects the dialect. |
 | `csharp.ts` | The C# rules: declarations, accessibility, `///` and `/** */` docs, `<param>` names. |
 | `rust.ts` | The Rust rules: items, the bare `pub`, outer doc comments, `# Arguments` names. |
-| `comments.ts` | The driver of the C# and Rust analysers: parse, the doc run above a declaration, the rules. |
+| `go.ts` | The Go rules: declarations and specs, upper-case names, `//` docs with no blank line, directive comments. |
+| `java.ts` | The Java rules: declarations, `public` and `protected`, implicit interface members, `/** */` docs, `@param` names. |
+| `kotlin.ts` | The Kotlin rules: declarations, public by default, `/** */` docs, `@param` and `@property` names. |
+| `comments.ts` | The driver of the tree-sitter analysers: parse, the doc run above a declaration, the optional hooks `docSiteOf`, `adjacentDoc` and `nameOf`, the rules. |
 | `rules.ts` | Applies the MUST and SHOULD rules to one symbol. |
 | `model.ts` | The types: `Kind`, `Tier`, `Issue`, `DocSymbol`, `FileReport`, `Stats`. |
 | `stub.ts` | Plans and applies the skeleton comments. |
-| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, `xmldoc`, `rustdoc`. |
+| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, `xmldoc`, `rustdoc`, `godoc`, `javadoc`, `kdoc`. |
 | `report.ts` | Writes `COVERAGE.md` and `coverage.json`. |
 
 ```ts
@@ -546,6 +550,9 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
 export async function analysePython(path: string, source: string): Promise<FileReport>
 export function analyseCSharp(path: string, source: string): Promise<FileReport>
 export function analyseRust(path: string, source: string): Promise<FileReport>
+export function analyseGo(path: string, source: string): Promise<FileReport>
+export function analyseJava(path: string, source: string): Promise<FileReport>
+export function analyseKotlin(path: string, source: string): Promise<FileReport>
 export async function analyseWith(reader: Reader, path: string, source: string): Promise<FileReport>
 export function applyRules(sym: DocSymbol, doc: string, path: string, options: RuleOptions): void
 export const STUB_MARKER = "TODO:";
@@ -681,9 +688,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 309 | dependency-graph.json |
-| totalFunctions | 439 | dependency-graph.json |
+| totalSourceFiles | 316 | dependency-graph.json |
+| totalFunctions | 443 | dependency-graph.json |
 | totalInterfaces | 148 | dependency-graph.json |
 | totalClasses | 15 | dependency-graph.json |
-| totalExports | 764 | dependency-graph.json |
+| totalExports | 772 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |

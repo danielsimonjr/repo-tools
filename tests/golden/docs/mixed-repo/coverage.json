@@ -1,13 +1,13 @@
 {
   "summary": {
-    "files_scanned": 8,
-    "files_parsed": 8,
+    "files_scanned": 11,
+    "files_parsed": 11,
     "files_unparsed": 0,
-    "symbols": 27,
-    "exported_symbols": 24,
-    "exported_documented": 12,
-    "exported_documented_pct": 50,
-    "must_issues": 14,
+    "symbols": 36,
+    "exported_symbols": 33,
+    "exported_documented": 16,
+    "exported_documented_pct": 48.5,
+    "must_issues": 19,
     "should_issues": 1,
     "files_mixed_dialect": 1
   },
@@ -63,6 +63,48 @@
           "exported": true,
           "has_doc": false,
           "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Shape.java",
+      "language": "java",
+      "error": "",
+      "dialects": [],
+      "symbols": [
+        {
+          "file": "Shape.java",
+          "line": 2,
+          "name": "Shape",
+          "kind": "class",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "A shape with a width.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "Shape.java",
+          "line": 3,
+          "name": "area",
+          "kind": "method",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "w"
+          ],
           "doc_params": [],
           "summary": "",
           "dialect": "",
@@ -366,6 +408,86 @@
       ]
     },
     {
+      "path": "shapes.go",
+      "language": "go",
+      "error": "",
+      "dialects": [
+        "godoc"
+      ],
+      "symbols": [
+        {
+          "file": "shapes.go",
+          "line": 4,
+          "name": "Area",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "w",
+            "h"
+          ],
+          "doc_params": [],
+          "summary": "Area returns the area of a rectangle.",
+          "dialect": "godoc",
+          "issues": []
+        },
+        {
+          "file": "shapes.go",
+          "line": 8,
+          "name": "Perimeter",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "w",
+            "h"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "shapes.go",
+          "line": 14,
+          "name": "Point",
+          "kind": "struct",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "Point is a position.",
+          "dialect": "godoc",
+          "issues": []
+        },
+        {
+          "file": "shapes.go",
+          "line": 18,
+          "name": "Size",
+          "kind": "struct",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "path": "src/jsdoc.js",
       "language": "typescript",
       "error": "",
@@ -600,6 +722,67 @@
           "summary": "",
           "dialect": "",
           "issues": []
+        }
+      ]
+    },
+    {
+      "path": "tool.kt",
+      "language": "kotlin",
+      "error": "",
+      "dialects": [],
+      "symbols": [
+        {
+          "file": "tool.kt",
+          "line": 2,
+          "name": "run",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "Runs the tool.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "tool.kt",
+          "line": 6,
+          "name": "Tool",
+          "kind": "class",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "name"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "tool.kt",
+          "line": 7,
+          "name": "id",
+          "kind": "method",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
         }
       ]
     }

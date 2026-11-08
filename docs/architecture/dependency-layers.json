@@ -2720,6 +2720,59 @@
           "CONFIG_NAME"
         ]
       },
+      "src/docs/go.ts": {
+        "description": "Go analyser of `repo-tools docs`, built on tree-sitter.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "parsesAsGo",
+          "analyseGo"
+        ],
+        "functions": [
+          "parsesAsGo",
+          "analyseGo"
+        ]
+      },
       "src/docs/index.ts": {
         "description": "`repo-tools docs` (design section 16): measure, stub and gate the documentation comments of the",
         "externalDependencies": [],
@@ -2844,6 +2897,118 @@
           "DOCS_HELP"
         ]
       },
+      "src/docs/java.ts": {
+        "description": "The Java analyser of `repo-tools docs`, built on tree-sitter.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "JAVA",
+          "analyseJava",
+          "parsesAsJava"
+        ],
+        "functions": [
+          "analyseJava",
+          "parsesAsJava"
+        ],
+        "constants": [
+          "JAVA"
+        ]
+      },
+      "src/docs/kotlin.ts": {
+        "description": "The Kotlin analyser of `repo-tools docs` builds on tree-sitter.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "KOTLIN",
+          "analyseKotlin",
+          "parsesAsKotlin"
+        ],
+        "constants": [
+          "KOTLIN",
+          "analyseKotlin",
+          "parsesAsKotlin"
+        ]
+      },
       "src/docs/languages.ts": {
         "description": "The language registry of `repo-tools docs`: one entry for each language that the command reads.",
         "externalDependencies": [],
@@ -2861,6 +3026,27 @@
             "imports": [
               "analyseCSharp",
               "parsesAsCSharp"
+            ]
+          },
+          {
+            "file": "./go.ts",
+            "imports": [
+              "analyseGo",
+              "parsesAsGo"
+            ]
+          },
+          {
+            "file": "./java.ts",
+            "imports": [
+              "analyseJava",
+              "parsesAsJava"
+            ]
+          },
+          {
+            "file": "./kotlin.ts",
+            "imports": [
+              "analyseKotlin",
+              "parsesAsKotlin"
             ]
           },
           {
@@ -5435,7 +5621,10 @@
         "src/docs/comments.ts",
         "src/docs/csharp.ts",
         "src/docs/discovery.ts",
+        "src/docs/go.ts",
         "src/docs/index.ts",
+        "src/docs/java.ts",
+        "src/docs/kotlin.ts",
         "src/docs/languages.ts",
         "src/docs/model.ts",
         "src/docs/python.ts",

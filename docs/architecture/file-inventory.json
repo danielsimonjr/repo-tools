@@ -1,11 +1,11 @@
 {
-  "totalFiles": 309,
+  "totalFiles": 316,
   "byDisposition": {
-    "reachable": 89,
+    "reachable": 92,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 205,
+    "test": 209,
     "tool": 11,
     "config": 1,
     "bench": 0,
@@ -13,13 +13,13 @@
   },
   "byArea": {
     "tools": 11,
-    "src": 92,
-    "tests": 205,
+    "src": 95,
+    "tests": 209,
     "config": 1
   },
   "byPackage": {
-    "(root)": 217,
-    "@danielsimonjr/repo-tools": 92
+    "(root)": 221,
+    "@danielsimonjr/repo-tools": 95
   },
   "files": [
     {
@@ -76,7 +76,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 398
+      "loc": 402
     },
     {
       "file": "scripts/update-depgraph-goldens.ts",
@@ -436,6 +436,13 @@
       "loc": 240
     },
     {
+      "file": "src/docs/go.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 179
+    },
+    {
       "file": "src/docs/index.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
@@ -443,18 +450,32 @@
       "loc": 542
     },
     {
+      "file": "src/docs/java.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 232
+    },
+    {
+      "file": "src/docs/kotlin.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 251
+    },
+    {
       "file": "src/docs/languages.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 105
+      "loc": 141
     },
     {
       "file": "src/docs/model.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 120
+      "loc": 121
     },
     {
       "file": "src/docs/python.ts",
@@ -1717,6 +1738,13 @@
       "loc": 553
     },
     {
+      "file": "tests/unit/docs-comments.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
+    },
+    {
       "file": "tests/unit/docs-csharp.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -1728,7 +1756,14 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 226
+      "loc": 230
+    },
+    {
+      "file": "tests/unit/docs-go.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 188
     },
     {
       "file": "tests/unit/docs-golden.test.ts",
@@ -1745,11 +1780,25 @@
       "loc": 88
     },
     {
+      "file": "tests/unit/docs-java.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 272
+    },
+    {
+      "file": "tests/unit/docs-kotlin.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 258
+    },
+    {
       "file": "tests/unit/docs-languages.test.ts",
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 60
+      "loc": 50
     },
     {
       "file": "tests/unit/docs-python.test.ts",
@@ -1791,7 +1840,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 154
+      "loc": 218
     },
     {
       "file": "tests/unit/docs-typescript.test.ts",

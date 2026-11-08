@@ -5,6 +5,9 @@
  */
 import { CSHARP_SKIP_DIRS, suffixOf } from "../map/discovery.ts";
 import { analyseCSharp, parsesAsCSharp } from "./csharp.ts";
+import { analyseGo, parsesAsGo } from "./go.ts";
+import { analyseJava, parsesAsJava } from "./java.ts";
+import { analyseKotlin, parsesAsKotlin } from "./kotlin.ts";
 import type { FileReport } from "./model.ts";
 import { analysePython, parsesAsPython } from "./python.ts";
 import { analyseRust, parsesAsRust } from "./rust.ts";
@@ -81,6 +84,39 @@ export const LANGUAGES: readonly LanguageSpec[] = [
     stubPosition: "above",
     styles: ["rustdoc"],
     defaultStyle: "rustdoc",
+  },
+  {
+    id: "go",
+    names: ["Go"],
+    suffixes: new Set([".go"]),
+    skipDirs: new Set(),
+    analyse: analyseGo,
+    parses: parsesAsGo,
+    stubPosition: "above",
+    styles: ["godoc"],
+    defaultStyle: "godoc",
+  },
+  {
+    id: "java",
+    names: ["Java"],
+    suffixes: new Set([".java"]),
+    skipDirs: new Set(),
+    analyse: analyseJava,
+    parses: parsesAsJava,
+    stubPosition: "above",
+    styles: ["javadoc"],
+    defaultStyle: "javadoc",
+  },
+  {
+    id: "kotlin",
+    names: ["Kotlin"],
+    suffixes: new Set([".kt", ".kts"]),
+    skipDirs: new Set(),
+    analyse: analyseKotlin,
+    parses: parsesAsKotlin,
+    stubPosition: "above",
+    styles: ["kdoc"],
+    defaultStyle: "kdoc",
   },
 ];
 

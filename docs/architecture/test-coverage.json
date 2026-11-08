@@ -1,19 +1,19 @@
 {
   "metadata": {
-    "totalSourceFiles": 91,
-    "totalTestFiles": 144,
-    "testedCount": 73,
-    "untestedCount": 18,
-    "coveragePercent": "80.2",
+    "totalSourceFiles": 94,
+    "totalTestFiles": 148,
+    "testedCount": 77,
+    "untestedCount": 17,
+    "coveragePercent": "81.9",
     "effectiveCoverage": {
       "policyLoaded": false,
-      "activeFiles": 91,
-      "testedActive": 73,
-      "activeUntested": 18,
+      "activeFiles": 94,
+      "testedActive": 77,
+      "activeUntested": 17,
       "excludedTotal": 0,
-      "percent": "80.2",
+      "percent": "81.9",
       "breakdown": {
-        "active_untested": 18
+        "active_untested": 17
       }
     }
   },
@@ -27,7 +27,6 @@
     "src/clones/index.ts",
     "src/clones/report.ts",
     "src/depgraph/exclude.ts",
-    "src/docs/comments.ts",
     "src/docs/rules.ts",
     "src/map/package-field.ts",
     "src/map/python-stdlib.ts",
@@ -73,9 +72,13 @@
     "src/depgraph/types.ts",
     "src/depgraph/workspaces.ts",
     "src/docs/analyse.ts",
+    "src/docs/comments.ts",
     "src/docs/csharp.ts",
     "src/docs/discovery.ts",
+    "src/docs/go.ts",
     "src/docs/index.ts",
+    "src/docs/java.ts",
+    "src/docs/kotlin.ts",
     "src/docs/languages.ts",
     "src/docs/model.ts",
     "src/docs/python.ts",
@@ -290,15 +293,29 @@
     "src/docs/analyse.ts": [
       "tests/unit/docs-discovery.test.ts"
     ],
-    "src/docs/comments.ts": [],
+    "src/docs/comments.ts": [
+      "tests/unit/docs-comments.test.ts"
+    ],
     "src/docs/csharp.ts": [
       "tests/unit/docs-csharp.test.ts"
     ],
     "src/docs/discovery.ts": [
       "tests/unit/docs-discovery.test.ts"
     ],
+    "src/docs/go.ts": [
+      "tests/unit/docs-go.test.ts",
+      "tests/unit/docs-styles.test.ts"
+    ],
     "src/docs/index.ts": [
       "tests/unit/docs-languages.test.ts"
+    ],
+    "src/docs/java.ts": [
+      "tests/unit/docs-java.test.ts",
+      "tests/unit/docs-styles.test.ts"
+    ],
+    "src/docs/kotlin.ts": [
+      "tests/unit/docs-kotlin.test.ts",
+      "tests/unit/docs-styles.test.ts"
     ],
     "src/docs/languages.ts": [
       "tests/unit/docs-languages.test.ts"
@@ -306,6 +323,9 @@
     "src/docs/model.ts": [
       "tests/unit/docs-command.test.ts",
       "tests/unit/docs-csharp.test.ts",
+      "tests/unit/docs-go.test.ts",
+      "tests/unit/docs-java.test.ts",
+      "tests/unit/docs-kotlin.test.ts",
       "tests/unit/docs-python.test.ts",
       "tests/unit/docs-report.test.ts",
       "tests/unit/docs-rust.test.ts",
@@ -328,6 +348,9 @@
     ],
     "src/docs/stub.ts": [
       "tests/unit/docs-csharp.test.ts",
+      "tests/unit/docs-go.test.ts",
+      "tests/unit/docs-java.test.ts",
+      "tests/unit/docs-kotlin.test.ts",
       "tests/unit/docs-rust.test.ts",
       "tests/unit/docs-stub.test.ts",
       "tests/unit/docs-styles.test.ts"
@@ -769,6 +792,9 @@
     "tests/unit/docs-command.test.ts": [
       "src/docs/model.ts"
     ],
+    "tests/unit/docs-comments.test.ts": [
+      "src/docs/comments.ts"
+    ],
     "tests/unit/docs-csharp.test.ts": [
       "src/docs/csharp.ts",
       "src/docs/model.ts",
@@ -778,7 +804,22 @@
       "src/docs/analyse.ts",
       "src/docs/discovery.ts"
     ],
+    "tests/unit/docs-go.test.ts": [
+      "src/docs/go.ts",
+      "src/docs/model.ts",
+      "src/docs/stub.ts"
+    ],
     "tests/unit/docs-golden.test.ts": [],
+    "tests/unit/docs-java.test.ts": [
+      "src/docs/java.ts",
+      "src/docs/model.ts",
+      "src/docs/stub.ts"
+    ],
+    "tests/unit/docs-kotlin.test.ts": [
+      "src/docs/kotlin.ts",
+      "src/docs/model.ts",
+      "src/docs/stub.ts"
+    ],
     "tests/unit/docs-languages.test.ts": [
       "src/docs/index.ts",
       "src/docs/languages.ts",
@@ -808,6 +849,9 @@
       "src/docs/typescript.ts"
     ],
     "tests/unit/docs-styles.test.ts": [
+      "src/docs/go.ts",
+      "src/docs/java.ts",
+      "src/docs/kotlin.ts",
       "src/docs/model.ts",
       "src/docs/python.ts",
       "src/docs/stub.ts",
@@ -1042,10 +1086,6 @@
     },
     {
       "file": "src/depgraph/exclude.ts",
-      "category": null
-    },
-    {
-      "file": "src/docs/comments.ts",
       "category": null
     },
     {

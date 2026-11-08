@@ -411,12 +411,14 @@ data. Other findings are filed here.
 ## docs: more languages and docstring formats (from mintlify/writer, MIT)
 
 - [ ] L0 Language registry for `docs`: one analyser and one grammar entry per language. `analyse.ts`, `index.ts` and `discovery.ts` stop branching on `python`.
-- [ ] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository. C# and Rust are bundled. Each other grammar is added in the PR of its analyser, so no release ships a grammar that nothing reads.
+- [ ] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository. C# and Rust are bundled. Go, Java and Kotlin are bundled. Each other grammar is added in the PR of its analyser, so no release ships a grammar that nothing reads.
 - [x] L2 C# and Rust analysers first (map reads both; docs refuses them today). Exported rule, doc-comment form, parameters, stub anchor, dialect.
-- [ ] L3 Go, Java, Kotlin analysers. L4 C, C++, PHP, Ruby analysers; drop a language whose exported rule cannot be decided, with the reason.
+- [x] L3 Go, Java, Kotlin analysers.
+- [ ] L4 C, C++, PHP, Ruby analysers; drop a language whose exported rule cannot be decided, with the reason.
 - [ ] F1 Docstring formats for `docs stub --style=`: port the writer templates as plain TypeScript, without type slots where the signature has types. Every stub keeps `STUB_MARKER`.
 - [ ] F2 Widen dialect detection and M5. Compare old and new detection over a real corpus; the five existing dialect results must not change.
 - [ ] N1 Mintlify MIT copyright notice for ported code. Update `docs/parity-docs.md`, `docs/design.md`, README. Measure the package size growth for the PR body.
+- [ ] Re-measure the Kotlin one-line class body defect (tree-sitter-grammars/tree-sitter-kotlin#10 and #12) on the next grammar release. If PR 5 shows a bad unparsed rate, evaluate the equal-length sanitise precedent in `src/docs/typescript.ts`.
 - [x] L0a Registry for the two current languages (`src/docs/languages.ts`): discovery, analysis, the stub writer, the help text and the refusal read it. L0 stays open for the grammar entry of each new language.
 - [x] F1a Styles for the two current languages (`src/docs/styles.ts`): `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, and `--style=auto`. No flag keeps the 2.5.0 stubs (the docs goldens hold them). F1 stays open for the styles of each new language.
 - [x] G0 Docs goldens (`tests/golden/docs`), before any change to `docs` output.
