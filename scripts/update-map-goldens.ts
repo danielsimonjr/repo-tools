@@ -27,6 +27,10 @@ import { API_SURFACE_FILE, GOLDEN_FLAGS, maskGolden } from "./update-depgraph-go
 export const MAP_GOLDEN_SETS = [
   { set: "mini-repo/default", fixture: "mini-repo" },
   { set: "mono-repo/default", fixture: "mono-repo" },
+  // The C# and Rust readers of `map` are regex readers, kept apart from the tree-sitter readers of
+  // `docs` (design 16.6). These two sets fix their output, so a change of reader shows as a diff.
+  { set: "cs-repo/default", fixture: "cs-repo" },
+  { set: "rs-repo/default", fixture: "rs-repo" },
 ];
 
 /** Runs `map` on `root` with `flags`; returns the exit code and the standard output. */

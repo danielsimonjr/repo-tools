@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "name": "cs-repo",
+    "schemaVersion": "2.0.0",
+    "language": "csharp",
+    "totalFiles": 4,
+    "totalModules": 1,
+    "totalExports": 3
+  },
+  "modules": {
+    "src": {
+      "src/App/Program.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/Lib/Format.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/Lib/Greeter.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/Lib/Unused.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "Program"
+        ]
+      },
+      "src/Lib/Format.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": []
+      },
+      "src/Lib/Greeter.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "Greeter"
+        ]
+      },
+      "src/Lib/Unused.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "Unused"
+        ]
+      }
+    }
+  },
+  "statistics": {
+    "totalTypeScriptFiles": 4,
+    "totalSourceFiles": 4,
+    "totalModules": 1,
+    "totalLinesOfCode": 25,
+    "totalExports": 3,
+    "entryRoots": 1,
+    "reachableFiles": 4,
+    "dormantFiles": 0,
+    "orphanedFiles": 0,
+    "testOnlyFiles": 0,
+    "runtimeCircularDeps": 0,
+    "typeOnlyCircularDeps": 0,
+    "totalTypeOnlyImports": 0,
+    "noImporterFileCount": 0,
+    "unusedExportsCount": 2,
+    "circularDepsTruncated": false,
+    "runtimeCyclicComponents": 0,
+    "typeOnlyCyclicComponents": 0,
+    "runtimeFilesInCycles": 0,
+    "typeOnlyFilesInCycles": 0
+  },
+  "reachability": {
+    "roots": [
+      "src/App/Program.cs"
+    ],
+    "reachableCount": 4,
+    "dormantCount": 0,
+    "orphaned": [],
+    "testOnly": []
+  },
+  "warnings": []
+}

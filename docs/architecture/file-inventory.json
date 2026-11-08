@@ -1,11 +1,11 @@
 {
-  "totalFiles": 304,
+  "totalFiles": 309,
   "byDisposition": {
-    "reachable": 86,
+    "reachable": 89,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 203,
+    "test": 205,
     "tool": 11,
     "config": 1,
     "bench": 0,
@@ -13,13 +13,13 @@
   },
   "byArea": {
     "tools": 11,
-    "src": 89,
-    "tests": 203,
+    "src": 92,
+    "tests": 205,
     "config": 1
   },
   "byPackage": {
-    "(root)": 215,
-    "@danielsimonjr/repo-tools": 89
+    "(root)": 217,
+    "@danielsimonjr/repo-tools": 92
   },
   "files": [
     {
@@ -76,7 +76,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 390
+      "loc": 398
     },
     {
       "file": "scripts/update-depgraph-goldens.ts",
@@ -97,7 +97,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 79
+      "loc": 83
     },
     {
       "file": "src/assets.d.ts",
@@ -415,11 +415,25 @@
       "loc": 60
     },
     {
+      "file": "src/docs/comments.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 130
+    },
+    {
+      "file": "src/docs/csharp.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 174
+    },
+    {
       "file": "src/docs/discovery.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 238
+      "loc": 240
     },
     {
       "file": "src/docs/index.ts",
@@ -433,14 +447,14 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 73
+      "loc": 105
     },
     {
       "file": "src/docs/model.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 100
+      "loc": 120
     },
     {
       "file": "src/docs/python.ts",
@@ -464,6 +478,13 @@
       "loc": 79
     },
     {
+      "file": "src/docs/rust.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 173
+    },
+    {
       "file": "src/docs/stub.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
@@ -475,7 +496,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 94
+      "loc": 119
     },
     {
       "file": "src/docs/typescript.ts",
@@ -545,7 +566,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 84
+      "loc": 121
     },
     {
       "file": "src/map/graph.ts",
@@ -1147,7 +1168,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 241
+      "loc": 244
     },
     {
       "file": "tests/unit/check-claims.test.ts",
@@ -1693,14 +1714,21 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 551
+      "loc": 553
+    },
+    {
+      "file": "tests/unit/docs-csharp.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 194
     },
     {
       "file": "tests/unit/docs-discovery.test.ts",
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 213
+      "loc": 226
     },
     {
       "file": "tests/unit/docs-golden.test.ts",
@@ -1743,6 +1771,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 249
+    },
+    {
+      "file": "tests/unit/docs-rust.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 198
     },
     {
       "file": "tests/unit/docs-stub.test.ts",

@@ -411,8 +411,8 @@ data. Other findings are filed here.
 ## docs: more languages and docstring formats (from mintlify/writer, MIT)
 
 - [ ] L0 Language registry for `docs`: one analyser and one grammar entry per language. `analyse.ts`, `index.ts` and `discovery.ts` stop branching on `python`.
-- [ ] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository.
-- [ ] L2 C# and Rust analysers first (map reads both; docs refuses them today). Exported rule, doc-comment form, parameters, stub anchor, dialect.
+- [x] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository.
+- [x] L2 C# and Rust analysers first (map reads both; docs refuses them today). Exported rule, doc-comment form, parameters, stub anchor, dialect.
 - [ ] L3 Go, Java, Kotlin analysers. L4 C, C++, PHP, Ruby analysers; drop a language whose exported rule cannot be decided, with the reason.
 - [ ] F1 Docstring formats for `docs stub --style=`: port the writer templates as plain TypeScript, without type slots where the signature has types. Every stub keeps `STUB_MARKER`.
 - [ ] F2 Widen dialect detection and M5. Compare old and new detection over a real corpus; the five existing dialect results must not change.

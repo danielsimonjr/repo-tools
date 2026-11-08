@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "name": "cs-repo",
+    "version": "unknown",
+    "schemaVersion": "2.0.0",
+    "language": "csharp"
+  },
+  "entryPoints": [],
+  "modules": {
+    "App": {
+      "src/App/Program.cs": {
+        "description": "Program.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "Lib",
+            "imports": []
+          },
+          {
+            "file": "Lib",
+            "imports": []
+          },
+          {
+            "file": "Lib",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "Program"
+        ]
+      }
+    },
+    "Lib": {
+      "src/Lib/Format.cs": {
+        "description": "Format.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/Lib/Greeter.cs": {
+        "description": "Greeter.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "Greeter"
+        ]
+      },
+      "src/Lib/Unused.cs": {
+        "description": "Unused.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "Unused"
+        ]
+      }
+    }
+  },
+  "cyclicComponents": {
+    "runtime": [],
+    "typeOnly": []
+  },
+  "layers": [
+    {
+      "name": "App",
+      "files": [
+        "src/App/Program.cs"
+      ]
+    },
+    {
+      "name": "Lib",
+      "files": [
+        "src/Lib/Format.cs",
+        "src/Lib/Greeter.cs",
+        "src/Lib/Unused.cs"
+      ]
+    }
+  ]
+}

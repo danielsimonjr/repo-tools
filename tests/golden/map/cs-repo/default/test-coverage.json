@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "totalSourceFiles": 4,
+    "totalTestFiles": 0,
+    "testedCount": 0,
+    "untestedCount": 4,
+    "coveragePercent": "0.0",
+    "coverageBasis": "namespace-import",
+    "coverageCaveat": "Coverage is counted by namespace import. A C# `using` directive usually names a namespace, not a type, so a test covers every file that declares the namespace. A namespace import does not show that a test uses the file. A test in the same namespace, or in a nested namespace, needs no `using` and does not count. The percentage can be too high or too low.",
+    "effectiveCoverage": {
+      "policyLoaded": false,
+      "activeFiles": 4,
+      "testedActive": 0,
+      "activeUntested": 4,
+      "excludedTotal": 0,
+      "percent": "0.0",
+      "breakdown": {
+        "active_untested": 4
+      }
+    }
+  },
+  "untestedFiles": [
+    "src/App/Program.cs",
+    "src/Lib/Format.cs",
+    "src/Lib/Greeter.cs",
+    "src/Lib/Unused.cs"
+  ],
+  "testedFiles": [],
+  "coverageMap": {
+    "src/App/Program.cs": [],
+    "src/Lib/Format.cs": [],
+    "src/Lib/Greeter.cs": [],
+    "src/Lib/Unused.cs": []
+  },
+  "testToSourceMap": {},
+  "classifiedUntested": [
+    {
+      "file": "src/App/Program.cs",
+      "category": null
+    },
+    {
+      "file": "src/Lib/Format.cs",
+      "category": null
+    },
+    {
+      "file": "src/Lib/Greeter.cs",
+      "category": null
+    },
+    {
+      "file": "src/Lib/Unused.cs",
+      "category": null
+    }
+  ]
+}

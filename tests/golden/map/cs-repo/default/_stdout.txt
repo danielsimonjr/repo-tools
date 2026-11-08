@@ -1,0 +1,17 @@
+Language: csharp; 4 source files; 1 roots
+Created output directory: docs/architecture
+Note: package-export-surfaces.json is not written for C#: a public type is public to every assembly that references the project, and no file lists the API of a package.
+Written: docs/architecture/dependency-graph.json
+Written: docs/architecture/file-inventory.json
+Written: docs/architecture/duplicate-symbols.json
+Written: docs/architecture/unused-analysis.json
+Written: docs/architecture/dependency-layers.json
+Written: docs/architecture/DEPENDENCY_GRAPH.md
+Written: docs/architecture/dependency-graph.yaml
+Written: docs/architecture/dependency-summary.compact.json
+Written: docs/architecture/FILE_INVENTORY.md
+Written: docs/architecture/duplicate-symbols.md
+Written: docs/architecture/unused-analysis.md
+Written: docs/architecture/TEST_COVERAGE.md
+Written: docs/architecture/test-coverage.json
+census passed: 4 files

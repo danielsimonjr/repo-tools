@@ -8,6 +8,22 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `repo-tools docs` reads C# (`.cs`) and Rust (`.rs`). Each language has a tree-sitter analyser
+  with its own exported rule: C# `public` or `protected` on the declaration and each enclosing
+  type; Rust the bare `pub` on the item and each enclosing module. The doc of a C# declaration is
+  its `///` run or `/** */` block; the doc of a Rust item is its run of outer doc comments, across
+  attributes. Rule M3 reads `<param name="x">` in C# and the bullets of `# Arguments` in Rust. The
+  new dialects are `xmldoc` and `rustdoc`, and `stub` writes both styles. A `.cs` file below `obj`
+  or `bin` is generated and is not read. `coverage.json` can now hold the kinds `struct`, `enum`,
+  `trait` and `property`.
+- The npm package and the executables carry nine more tree-sitter grammars: C#, Rust, Go, Java,
+  Kotlin, C, C++, PHP and Ruby. The unpacked package grows from about 4.4 MB to 22.2 MB. Go, Java,
+  Kotlin, C, C++, PHP and Ruby have no analyser yet; their grammars load and wait for one.
+- `NOTICE` holds the MIT licence of mintlify/writer, from which the node kinds, the default doc
+  forms and the stub templates derive. The npm package ships it.
+- Golden sets `cs-repo` and `rs-repo` for `repo-tools map`. They fix the output of the C# and Rust
+  readers of `map`, which stay regular-expression readers.
+
 - `repo-tools docs stub --style=<style>` selects the docstring form: `tsdoc` or `jsdoc` for
   TypeScript and JavaScript, `google`, `numpy` or `rest` for Python. `--style=auto` follows the one
   dialect of each file. With no flag the stubs are the 2.5.0 forms, byte for byte (the docs goldens

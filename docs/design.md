@@ -527,8 +527,9 @@ browser-safety commands serve TypeScript/JavaScript only.
 
 ### 14.6 Assets
 
-The Node bundle needs the four tree-sitter `.wasm` files: the runtime and the TypeScript, TSX
-and Python grammars. The build writes them next to
+The Node bundle needs one tree-sitter `.wasm` file for the runtime and one for each grammar in
+`GRAMMAR_NAMES` of `src/map/grammars.ts`: TypeScript, TSX, Python, C#, Rust, Go, Java, Kotlin, C,
+C++, PHP and Ruby. The build writes them next to
 `dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
 system. A relative asset path resolves against the URL of its module, never against the working
 folder.
@@ -633,7 +634,7 @@ On success the check prints one line on standard output.
 
 `repo-tools docs` measures the documentation comments of the source files, plans the missing
 comments, and gates the result. The command is a port of `code_docs.py` of the code-docs skill. It
-reads TypeScript, JavaScript and Python. Tree-sitter parses each file. A regular expression cannot
+reads TypeScript, JavaScript, Python, C# and Rust. Tree-sitter parses each file. A regular expression cannot
 tell an exported declaration from the word "export" in a string. A regular expression also cannot
 attach a comment to the declaration below it.
 
@@ -695,8 +696,9 @@ describe the wrong files.
 | `src/docs/discovery.ts` | The source files, the skip lists, and the exclusions of `.code-docs.json`. |
 | `src/docs/languages.ts` | The language registry: for each language, its suffixes, analyser, parse check, stub position and styles. Discovery, the stub writer and the help text read the registry and name no language. |
 | `src/docs/analyse.ts` | Reads each file and calls the analyser of its language. |
-| `src/docs/python.ts`, `typescript.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
-| `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Both analysers call one function. |
+| `src/docs/python.ts`, `typescript.ts`, `csharp.ts`, `rust.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
+| `src/docs/comments.ts` | The helpers of the C# and Rust analysers: the run of doc comments above a declaration, and the parse check. |
+| `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Every analyser calls one function. |
 | `src/docs/report.ts` | The counts, `COVERAGE.md` and `coverage.json`. |
 | `src/docs/stub.ts` | Plans the skeleton comments and applies them. |
 | `src/docs/styles.ts` | The docstring styles of `stub --style`. Each style renders the lines of one stub. |
@@ -707,7 +709,9 @@ prose check of `repo-tools ste`.
 ### 16.3 What the tool measures
 
 **The files.** The files are the files that git tracks with the suffix `.py`, `.ts`, `.tsx`,
-`.js`, `.jsx`, `.mjs` or `.cjs`. A file below a folder named `node_modules`, `dist`, `build`,
+`.js`, `.jsx`, `.mjs`, `.cjs`, `.cs` or `.rs`. A `.cs` file below a folder named `obj` or `bin` is
+not read, because a C# build writes generated code there. That rule applies to C# files only: a
+`bin` folder of Python scripts is source. A file below a folder named `node_modules`, `dist`, `build`,
 `bundle`, `out`, `coverage`, `vendor` or `target` is not read. The same holds for the other
 generated or cache folders that `src/docs/discovery.ts` lists. A file with a generated name
 (`.d.ts`, `.min.js`, `.bundle.js`, `.g.ts`, `_pb2.py`) is not read either. A stub in a generated
@@ -744,6 +748,23 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   top of a module, a name is exported when `__all__` lists it. Without `__all__`, a name is
   exported when it has no leading underscore, or when it has the form `__x__`. The doc is the
   docstring: the first statement of the body, when it is a string.
+- In C#: classes, structs, interfaces, enums, records, delegates, methods, constructors and
+  properties. A `record struct` is a struct. A declaration is exported when it is `public`,
+  `protected` or `protected internal`, and each type that encloses it is exported too. A member of
+  an interface with no modifier is public. Any other declaration with no modifier is `internal` or
+  `private`, and is not exported. `private protected` is not exported. The doc is the run of `///`
+  lines, or the `/** */` block, above the declaration. An attribute is part of the declaration in
+  the grammar, so the doc can stand above the attributes. A blank line or a plain comment between
+  the doc and the declaration does not detach the doc, as in the compiler.
+- In Rust: functions, structs, unions, enums, traits, type aliases, constants, statics and modules.
+  A function in an `impl` or a `trait` block is a method. An item is exported when it carries the
+  bare `pub` and each enclosing module is `pub`. `pub(crate)`, `pub(super)` and `pub(in path)` are
+  not exported. An item of a trait has the visibility of the trait. A method of an
+  `impl Trait for T` block is not exported, because its doc is on the trait. A method of an inherent
+  `impl` block needs its own `pub`. An item in a function body is not exported. The doc is the run of
+  outer doc comments (`///`, but not `////`, or `/** */`) above the item. Attributes, plain comments
+  and blank lines between the doc and the item do not detach the doc, as in rustc. An inner doc
+  comment (`//!`) documents the enclosing module and stops the walk.
 
 A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file needs the TSX grammar, and a `.ts` file needs the
 TypeScript grammar. The wrong grammar gives a tree of error nodes and not an exception. Thus a file
@@ -776,6 +797,11 @@ parses again.
   the name.
 - A reST field `:param type name:` gives `name`. The text between `:param` and the name is the
   type. The type can hold spaces and brackets.
+- A C# parameter gives its name, also with `ref`, `out`, `in`, `this` or `params`. A record gives
+  the parameters of its primary constructor. A C# doc names a parameter with `<param name="x">`.
+- A Rust parameter gives the names that its pattern binds: `(a, b): (i32, i32)` gives `a` and `b`.
+  `self` and `_` give no name. A Rust doc names a parameter with a bullet `` * `x` `` or
+  `` - `x` `` below a `# Arguments` or `# Parameters` heading.
 
 The coverage percentage is the exported symbols with a doc, divided by all exported symbols. The
 count includes the symbols of test files. A report with no exported symbol shows 100.
@@ -799,8 +825,10 @@ named `test_*`, `*_test.*`, `*.test.*` or `*.spec.*`. A test file is exempt from
 doc is wrong in a test file too, so M3, M4 and M5 still apply. A symbol with an M1 issue gets no
 other issue, because every other rule reads the doc.
 
-The dialects are `google`, `numpy` and `rest` for Python, and `tsdoc` and `jsdoc` for TypeScript. A
-comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
+The dialects are `google`, `numpy` and `rest` for Python, `tsdoc` and `jsdoc` for TypeScript,
+`xmldoc` for C# and `rustdoc` for Rust. A C# doc with an XML tag such as `<summary>` or `<param>` is
+`xmldoc`. A Rust doc with a section heading such as `# Arguments`, `# Panics` or `# Examples` is
+`rustdoc`. A comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
 `{type}` after a tag and TSDoc never does. Thus the `{type}` form is the evidence of JSDoc. M5
 shows the dialects as a list in the Python style, for example `['jsdoc', 'tsdoc']`.
 
@@ -835,7 +863,10 @@ inside the body, below the line that ends the signature. The writer finds that l
 of the signature only. The writer removes the strings and the comments. Then the writer counts the
 round, square and curly brackets. The line is the first line at depth 0 that ends with a colon. Thus a
 signature on many lines, a bracket in a default string and a comment after the colon all work. A
-TypeScript stub goes above the outermost `export` statement, and thus above each decorator.
+TypeScript stub goes above the outermost `export` statement, and thus above each decorator. A C#
+stub goes above the declaration and thus above its attributes. A Rust stub goes above the first
+attribute of the item. A C# or Rust stub writes no return line for a declaration that gives no
+value back: a `void` method, a constructor, or a Rust function with no return type.
 
 The style of a stub comes from `--style`. Each language of the registry has a list of styles and a
 default:
@@ -844,6 +875,8 @@ default:
 |---|---|---|
 | TypeScript, JavaScript | `tsdoc`, `jsdoc` | `tsdoc` |
 | Python | `google`, `numpy`, `rest` | `google` |
+| C# | `xmldoc` | `xmldoc` |
+| Rust | `rustdoc` | `rustdoc` |
 
 With no flag, each file gets the default of its language. `--style=auto` takes the one dialect of
 a file (section 16.4). A file with no dialect, or with two, gets the default. A named style must
@@ -851,7 +884,13 @@ belong to the language of each file that gets a stub. Otherwise the command exit
 command writes a file. The message names the file and its styles. Only the `jsdoc` style writes a
 type slot, and the slot holds the marker. In a TypeScript file, rule S5 reports a filled type
 slot, and the writer decides. The `jsdoc` style stays a TypeScript style, because `auto` must keep a
-file in JSDoc in one dialect (rule M5). The templates follow `mintlify/writer` (MIT).
+file in JSDoc in one dialect (rule M5). The templates follow `mintlify/writer` (MIT); `NOTICE`
+holds its licence.
+
+`map` keeps its own regular-expression readers for C# and Rust (section 14). They build the module
+graph and need no comment and no parameter list. `docs` needs both, so it uses the tree-sitter
+grammars. The golden sets `cs-repo` and `rs-repo` of `tests/golden/map` fix the output of the
+`map` readers, so a later move of `map` to the grammars shows as a diff.
 
 ### 16.6 Differences from the Python tool
 

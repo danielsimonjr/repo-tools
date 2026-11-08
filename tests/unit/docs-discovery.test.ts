@@ -18,10 +18,12 @@ const SRC = "export const x = 1;\n";
 describe("languageOf", () => {
   test("names the language of a source path and nothing else", () => {
     expect(languageOf("a.py")).toBe("python");
+    expect(languageOf("a.cs")).toBe("csharp");
+    expect(languageOf("a.rs")).toBe("rust");
     for (const name of ["a.ts", "a.tsx", "a.js", "a.jsx", "a.mjs", "a.cjs"]) {
       expect(languageOf(`src/${name}`)).toBe("typescript");
     }
-    for (const name of ["a.md", "a.json", "a.rs", "Makefile", "a.pyc"]) {
+    for (const name of ["a.md", "a.json", "a.swift", "Makefile", "a.pyc"]) {
       expect(languageOf(name)).toBe("");
     }
   });
@@ -52,6 +54,17 @@ describe("discover: a git work tree", () => {
     git(root, "init", "-q", "--template=");
     git(root, "add", "-A", "-f");
     expect(discover(root).files).toEqual(["src/a.ts"]);
+  });
+
+  test("skips the obj and bin build folders of C#, and only for C# files", () => {
+    const root = tree({
+      "src/A.cs": "class A {}\n",
+      "obj/Debug/A.g.cs": "class G {}\n",
+      "bin/Release/B.cs": "class B {}\n",
+      "bin/tool.py": "x = 1\n",
+    });
+    trackAll(root);
+    expect(discover(root).files).toEqual(["bin/tool.py", "src/A.cs"]);
   });
 
   test("an untracked source file is named in the provenance, and is not measured", () => {

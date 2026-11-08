@@ -1,0 +1,52 @@
+{
+  "totalFiles": 4,
+  "byDisposition": {
+    "reachable": 3,
+    "build-entry": 1,
+    "test-only": 0,
+    "orphan": 0,
+    "test": 0,
+    "tool": 0,
+    "config": 0,
+    "bench": 0,
+    "example": 0
+  },
+  "byArea": {
+    "src": 4
+  },
+  "byPackage": {
+    "App": 4
+  },
+  "files": [
+    {
+      "file": "src/App/Program.cs",
+      "package": "App",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 9
+    },
+    {
+      "file": "src/Lib/Format.cs",
+      "package": "App",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 6
+    },
+    {
+      "file": "src/Lib/Greeter.cs",
+      "package": "App",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 7
+    },
+    {
+      "file": "src/Lib/Unused.cs",
+      "package": "App",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 3
+    }
+  ],
+  "skippedLinks": [],
+  "warnings": []
+}

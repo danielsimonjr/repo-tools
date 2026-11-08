@@ -98,16 +98,19 @@ count is a count of one language. A refusal is safer than a number about the wro
 **Trade-offs.** A repository with two large languages gets a graph of one. The `metadata.language`
 field names the choice, and a reader must check it before trusting a count.
 
-### Decision 5: tree-sitter grammars for TypeScript, TSX and Python
+### Decision 5: tree-sitter grammars, and text rules for the C# and Rust graph
 
-**Decision.** `src/map/grammars.ts` loads the grammars from four `.wasm` files. Parsers read
-TypeScript, JavaScript and Python. The C# and Rust readers use text rules in
-`src/map/parsing.ts`.
+**Decision.** `src/map/grammars.ts` loads the grammars from one `.wasm` file for the runtime and
+one for each name in `GRAMMAR_NAMES`. `map` parses TypeScript, JavaScript and Python with them.
+The C# and Rust readers of `map` use text rules in `src/map/parsing.ts`. `docs` parses C# and Rust
+with the grammars, because a doc rule needs the comments and the parameter lists.
 
 **Rationale.** A grammar parse sees the import forms that a regular expression misses. A text rule
 is enough for the C# `using` and the Rust `mod` and `use` forms that decide the edges.
 
-**Trade-offs.** The package ships four binary files next to the bundle. A grammar loads in
+**Trade-offs.** The package ships the binary grammar files next to the bundle, about 18 MB.
+Two readers exist for C# and for Rust. The golden sets `cs-repo` and `rs-repo` fix the output of
+the `map` readers. A grammar loads in
 asynchronous code, so `buildGraph` is asynchronous.
 
 ### Decision 6: deterministic output
@@ -220,9 +223,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 304 | dependency-graph.json |
+| totalSourceFiles | 309 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
 | typeOnlyCircularDeps | 4 | dependency-graph.json |
-| unusedExportsCount | 119 | dependency-graph.json |
+| unusedExportsCount | 117 | dependency-graph.json |
 | orphanedFiles | 2 | dependency-graph.json |

@@ -257,19 +257,27 @@ function checkGate(command: string[]): string | undefined {
  * file, so one run loads all three grammars of the product. Documented source must exit 0. A new
  * exported symbol with no doc comment must exit 1 with its M1 line.
  */
+/**
+ * One documented file per grammar that `docs` reads, each with one exported symbol. Each file
+ * loads its grammar from the shipped files, so a grammar that the build fails to ship fails here.
+ */
+const DOCUMENTED: Readonly<Record<string, string>> = {
+  "a.ts": "/** Returns one. */\nexport function a() {}\n",
+  "b.tsx": "/** Draws it. */\nexport function B() {\n  return <i />;\n}\n",
+  "c.py": 'def c():\n    """Returns one."""\n',
+  "D.cs": "/// <summary>Holds one.</summary>\npublic class D {}\n",
+  "e.rs": "/// Returns one.\npub fn e() {}\n",
+};
+
 function docsGate(command: string[]): string | undefined {
   const dir = mkdtempSync(join(tmpdir(), "repo-tools-smoke-"));
   try {
-    writeFileSync(join(dir, "a.ts"), "/** Returns one. */\nexport function a() {}\n");
-    writeFileSync(
-      join(dir, "b.tsx"),
-      "/** Draws it. */\nexport function B() {\n  return <i />;\n}\n",
-    );
-    writeFileSync(join(dir, "c.py"), 'def c():\n    """Returns one."""\n');
+    for (const [name, text] of Object.entries(DOCUMENTED)) writeFileSync(join(dir, name), text);
     const check = () => Bun.spawnSync([...command, "docs", "check", dir]);
     const pass = check();
     if (pass.exitCode !== 0) return `documented source: exit ${pass.exitCode}, expected 0`;
-    const line = "PASS -- 3/3 exported symbols documented, 0 MUST issues";
+    const n = Object.keys(DOCUMENTED).length;
+    const line = `PASS -- ${n}/${n} exported symbols documented, 0 MUST issues`;
     if (!pass.stdout.toString().includes(line)) {
       return `the pass line is missing from ${JSON.stringify(pass.stdout.toString())}`;
     }
