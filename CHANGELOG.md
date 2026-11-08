@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- Four development dependencies, pinned to exact versions: `tree-sitter-c` 0.24.1,
+  `tree-sitter-cpp` 0.23.4, `tree-sitter-php` 0.24.2 and `tree-sitter-ruby` 0.23.1. They hold the
+  grammar files of the C, C++, PHP and Ruby readers. The lockfile also names `tree-sitter-c` 0.23.6
+  below `tree-sitter-cpp`. That copy is a development dependency and does not ship.
 - `repo-tools docs` reads Go (`.go`), Java (`.java`) and Kotlin (`.kt`, `.kts`). A Go name is
   exported when its first letter is upper case; a Go doc is the `//` run with no blank line above
   the declaration. A Java declaration is exported when it is `public` or `protected`, or is a
