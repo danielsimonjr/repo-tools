@@ -158,3 +158,15 @@ test("reports a parse error", async () => {
   expect(report.error).toMatch(/^parse error/);
   expect(report.symbols).toHaveLength(0);
 });
+
+test("marks the phpdoc dialect for psalm and phpstan tags", async () => {
+  for (const tag of ["psalm-pure", "phpstan-return int"]) {
+    const sym = await byName(`<?php\n/**\n * Adds.\n * @${tag}\n */\nfunction add() {}\n`, "add");
+    expect(sym.dialect).toBe("phpdoc");
+  }
+});
+
+test("gives an empty summary to an inline-tag-only doc", async () => {
+  const sym = await byName("<?php\nclass B {\n  /** {@inheritDoc} */\n  public function get() {}\n}\n", "get");
+  expect(sym.summary).toBe("");
+});

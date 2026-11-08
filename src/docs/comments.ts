@@ -52,6 +52,12 @@ export interface Reader {
   reports?: (node: Node) => boolean;
   /** The name of the symbol. The default is the field `name` of the declaration. */
   nameOf?: (node: Node) => string;
+  /**
+   * The identity key of a symbol that the file can declare twice, or null. When a documented
+   * symbol and an undocumented symbol share a key, the driver clears the export flag and the
+   * issues of the undocumented one. The default is no key.
+   */
+  shadowKeyOf?: (node: Node) => string | null;
   /** The node that `stub` writes above. */
   anchorOf: (node: Node) => Node;
   kindOf: (node: Node) => Kind;
@@ -101,7 +107,18 @@ export function firstProse(lines: readonly string[]): string {
   return "";
 }
 
-const NO_DOC: DocText = { docParams: [], summary: "", dialect: "", prose: "" };
+/** Clears the export flag and the issues of an undocumented symbol that a documented one shadows. */
+function dropShadowed(keys: ReadonlyMap<DocSymbol, string>): void {
+  const documented = new Set<string>();
+  for (const [sym, key] of keys) if (sym.hasDoc) documented.add(key);
+  for (const [sym, key] of keys) {
+    if (!sym.exported || sym.hasDoc || !documented.has(key)) continue;
+    sym.exported = false;
+    sym.issues = [];
+  }
+}
+
+const NO_DOC: DocText ={ docParams: [], summary: "", dialect: "", prose: "" };
 
 /** Analyses one source file with the rules of `reader`, and returns its report. */
 export async function analyseWith(
@@ -126,6 +143,7 @@ export async function analyseWith(
       report.error = misread;
       return report;
     }
+    const keys = new Map<DocSymbol, string>();
     for (const node of tree.rootNode.descendantsOfType([...reader.declarations])) {
       if (reader.reports && !reader.reports(node)) continue;
       const run = docRunAbove(reader.docSiteOf?.(node) ?? node, reader);
@@ -152,7 +170,10 @@ export async function analyseWith(
       applyRules(sym, doc, path, { noun: "doc comment", restatesType: null, prose: text.prose });
       report.symbols.push(sym);
       if (sym.dialect) report.dialects.add(sym.dialect);
+      const key = reader.shadowKeyOf?.(node) ?? null;
+      if (key !== null) keys.set(sym, key);
     }
+    dropShadowed(keys);
   } finally {
     tree.delete();
   }

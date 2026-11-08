@@ -701,7 +701,7 @@ describe the wrong files.
 | `src/docs/languages.ts` | The language registry: for each language, its suffixes, analyser, parse check, stub position and styles. Discovery, the stub writer and the help text read the registry and name no language. |
 | `src/docs/analyse.ts` | Reads each file and calls the analyser of its language. |
 | `src/docs/python.ts`, `typescript.ts`, `csharp.ts`, `rust.ts`, `go.ts`, `java.ts`, `kotlin.ts`, `cfamily.ts`, `php.ts`, `ruby.ts` | One analyser for each language. Each finds the declarations and the doc of each one. `cfamily.ts` reads both C and C++. |
-| `src/docs/comments.ts` | The driver of the tree-sitter analysers (all but Python and TypeScript): the run of doc comments above a declaration, the optional hooks `docSiteOf`, `adjacentDoc`, `nameOf` and `reports`, and the parse check. The hook `reports` skips a node of a declaration type that is not a symbol, for example a C variable. |
+| `src/docs/comments.ts` | The driver of the tree-sitter analysers (all but Python and TypeScript): the run of doc comments above a declaration, the optional hooks `docSiteOf`, `adjacentDoc`, `nameOf`, `reports` and `shadowKeyOf`, and the parse check. The hook `reports` skips a node of a declaration type that is not a symbol, for example a C variable. |
 | `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Every analyser calls one function. |
 | `src/docs/report.ts` | The counts, `COVERAGE.md` and `coverage.json`. |
 | `src/docs/stub.ts` | Plans the skeleton comments and applies them. |
@@ -830,9 +830,14 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   comment with four slashes are not docs. A comment that holds `@file`, `@defgroup`, `@name` or a
   group brace is not a doc. A plain comment is not a doc. A blank line or a plain comment between the doc and the declaration does
   not detach the doc. The tool did not check this against Doxygen. A header can hold a definition
-  and a declaration of one function. When an undocumented definition has the same name, kind and
-  parameters as a documented declaration in the same file, the definition is not exported. This
-  serves a single-header library.
+  and a declaration of one function. When an undocumented free function has the same scope, name
+  and parameters as a documented free function in the same file, the undocumented one is not
+  exported. The scope is the chain of enclosing namespace and class names, plus the qualifier of
+  a name such as `a::f`. A method does not take part, so `S::m` and `T::m` stay two symbols. This
+  serves a single-header library. A struct, union or enum without a name is not a symbol. A
+  pointer to a function (`int (*hook)(int);`, a member `int (*cb)(int);`) is a variable, not a
+  function. A function that returns a function pointer, such as
+  `void (*signal(int, void (*)(int)))(int)`, is a function.
 - In PHP: functions, methods, classes, interfaces, traits and enums. A property, a constant, an
   enum case, a closure and an arrow function are not symbols. A `private` method is not exported.
   A declaration in a function body or in an anonymous class is not exported. A declaration is not
@@ -927,6 +932,22 @@ parses again.
 - Trade-offs: a C program with no header gates nothing. The rule is one line in `cfamily.ts`
   (`isExported` returns the flag of the header). A later measurement of `antirez/sds` and
   `fmtlib/fmt` can decide whether to flip it.
+
+**A declaration with several names makes the file unparsed.**
+
+- Decision: the C and C++ reader reports a file as unparsed when one declaration declares two or
+  more functions (`int m1(void), m2(void);`), or when a typedef has two or more declarators
+  (`typedef struct P2 {..} P2, *P2Ptr;`), or when a typedef of a named tag with a body has a
+  declarator other than a plain name (`typedef struct Point {..} *PointPtr;`). The check runs for
+  the C grammar and for the C++ grammar.
+- Rationale: the driver makes one symbol from one declaration node, with one name. Each of these
+  shapes declares more names than that, so a name would disappear and the gate would pass without
+  a notice. An unparsed file is an error that a reader sees.
+- Trade-offs: a file with one such declaration reports no symbol at all, and so gates nothing. One
+  symbol for each declarator would keep the file, but it needs a driver hook that returns several
+  symbols for one node, with a name, parameters and an anchor for each. The shapes are rare in
+  library headers. The measurement of PR 5 on `antirez/sds` and `fmtlib/fmt` can show whether
+  the hook is worth its cost.
 
 **Limits of the C and C++ reader.**
 

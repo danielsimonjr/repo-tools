@@ -44,7 +44,7 @@ const JAVADOC_DIALECT_RE =
 
 const DOC_PARAM_RE = /^\s*\*?\s*@param\s+(?!<)([\w$]+)/gm;
 
-const INLINE_TAG_RE = /\{@\w+\s+([^}]*)\}/g;
+const INLINE_TAG_RE = /\{@\w+(?:\s+([^}]*))?\}/g;
 
 /** Return the Java kind for a declaration node. */
 function kindOfDeclaration(node: Node): Kind {

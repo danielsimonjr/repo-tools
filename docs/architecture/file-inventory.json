@@ -419,14 +419,14 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 755
+      "loc": 903
     },
     {
       "file": "src/docs/comments.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 162
+      "loc": 183
     },
     {
       "file": "src/docs/csharp.ts",
@@ -489,7 +489,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 218
+      "loc": 223
     },
     {
       "file": "src/docs/python.ts",
@@ -1756,7 +1756,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 254
+      "loc": 373
     },
     {
       "file": "tests/unit/docs-command.test.ts",
@@ -1812,7 +1812,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 272
+      "loc": 277
     },
     {
       "file": "tests/unit/docs-kotlin.test.ts",
@@ -1833,7 +1833,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 160
+      "loc": 172
     },
     {
       "file": "tests/unit/docs-python.test.ts",

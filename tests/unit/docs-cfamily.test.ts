@@ -252,3 +252,122 @@ describe("docs cfamily", () => {
     expect(fine.error).toBe("");
   });
 });
+
+describe("docs cfamily review fixes", () => {
+  test("refuses a declaration with several function declarators", async () => {
+    for (const path of ["a.h", "a.c", "a.cpp"]) {
+      const report = await analyseCFamily(path, "int m1(void), m2(void);\n");
+      expect(report.error).toMatch(/^parse error \(/);
+    }
+  });
+
+  test("refuses a typedef with a pointer or several declarators", async () => {
+    const pointer = await analyseCFamily("a.h", "typedef struct Point { int x; } *PointPtr;\n");
+    expect(pointer.error).toMatch(/^parse error \(/);
+    const many = await analyseCFamily("a.c", "typedef struct P2 { int x; } P2, *P2Ptr;\n");
+    expect(many.error).toMatch(/^parse error \(/);
+    const plain = await analyseCFamily("a.h", "typedef struct P3 { int x; } P3;\n");
+    expect(plain.error).toBe("");
+    expect(byName(plain.symbols, "P3").kind).toBe("struct");
+  });
+
+  test("keeps the export flag of an undocumented overload in another namespace", async () => {
+    const source = [
+      "namespace a {",
+      "/** Does a. */",
+      "void f(int x);",
+      "}",
+      "namespace b {",
+      "void f(int x);",
+      "}",
+      "",
+    ].join("\n");
+    const all = await symbols("a.h", source);
+    const second = all.filter((symbol) => symbol.name === "f")[1];
+    expect(second?.exported).toBe(true);
+    expect(second?.hasDoc).toBe(false);
+  });
+
+  test("drops the export flag of an out-of-class method only for the declared one", async () => {
+    const source = [
+      "struct S {",
+      "  /** Does m. */",
+      "  void m(int x);",
+      "};",
+      "struct T {",
+      "  void m(int x);",
+      "};",
+      "",
+    ].join("\n");
+    const all = await symbols("a.h", source);
+    const second = all.filter((symbol) => symbol.name === "m")[1];
+    expect(second?.exported).toBe(true);
+  });
+
+  test("skips anonymous enums, structs and unions", async () => {
+    const source = "enum { A, B };\nstruct { int x; } s;\nunion { int i; } u;\n";
+    const all = await symbols("a.h", source);
+    expect(all.some((symbol) => symbol.name === "<anonymous>")).toBe(false);
+  });
+
+  test("skips function-pointer variables and members", async () => {
+    const header = await symbols("a.h", "int (*hook)(int);\nstruct S { int (*cb)(int); };\n");
+    expect(header.some((symbol) => symbol.name === "hook")).toBe(false);
+    expect(header.some((symbol) => symbol.name === "cb")).toBe(false);
+    const source = await symbols("a.c", "int (*fp)(int) = 0;\n");
+    expect(source.some((symbol) => symbol.name === "fp")).toBe(false);
+    const signal = await symbols("a.h", "void (*signal(int sig, void (*func)(int)))(int);\n");
+    expect(byName(signal, "signal").kind).toBe("function");
+    expect(byName(signal, "signal").returnsValue).toBe(true);
+  });
+
+  test("reads the return type of a template function", async () => {
+    const all = await symbols(
+      "a.h",
+      "template <typename T> void tv(T x);\ntemplate <typename T> T tr(T x);\n",
+    );
+    expect(byName(all, "tv").returnsValue).toBe(false);
+    expect(byName(all, "tr").returnsValue).toBe(true);
+  });
+
+  test("exports a static template member of a struct", async () => {
+    const all = await symbols("a.h", "struct S {\n  template <typename T> static void sm(T x);\n};\n");
+    expect(byName(all, "sm").exported).toBe(true);
+  });
+
+  test("keeps a class default-private static member unexported", async () => {
+    const all = await symbols("a.h", "class Q { static void sm(); };\n");
+    expect(byName(all, "sm").exported).toBe(false);
+  });
+
+  test("names a conversion operator without its qualifiers", async () => {
+    const all = await symbols("a.h", "struct S {\n  operator int() const;\n};\n");
+    expect(all.some((symbol) => symbol.name === "operator int")).toBe(true);
+  });
+
+  test("reads a variadic pack parameter name", async () => {
+    const source = [
+      "/**",
+      " * Forwards.",
+      " * @param args The arguments.",
+      " */",
+      "template <typename... Args> void va(Args&&... args);",
+      "",
+    ].join("\n");
+    const va = byName(await symbols("a.h", source), "va");
+    expect(va.params).toEqual(["args"]);
+    expect(va.issues.map((issue) => issue.rule)).not.toContain("M3");
+  });
+
+  test("finds the doc of a single extern C declaration", async () => {
+    const all = await symbols("a.h", '/** Does ef. */\nextern "C" int ef(int x);\n');
+    expect(byName(all, "ef").hasDoc).toBe(true);
+  });
+
+  test("marks the doxygen dialect for grouping and reference tags", async () => {
+    for (const tag of ["ingroup g", "def X", "var v", "fn f", "typedef T", "struct S", "enum E", "copydoc f"]) {
+      const report = await analyseCFamily("a.h", `/** Does f.\n * @${tag}\n */\nvoid f(void);\n`);
+      expect(byName(report.symbols, "f").dialect).toBe("doxygen");
+    }
+  });
+});
