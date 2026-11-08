@@ -41,7 +41,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 474
+      "loc": 551
     },
     {
       "file": "scripts/fix-ledger-audit.ts",
@@ -426,14 +426,14 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 931
+      "loc": 949
     },
     {
       "file": "src/docs/comments.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 183
+      "loc": 195
     },
     {
       "file": "src/docs/csharp.ts",
@@ -503,7 +503,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 484
+      "loc": 483
     },
     {
       "file": "src/docs/report.ts",
@@ -517,7 +517,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 330
+      "loc": 341
     },
     {
       "file": "src/docs/rules.ts",
@@ -1763,7 +1763,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 465
+      "loc": 491
     },
     {
       "file": "tests/unit/docs-command.test.ts",
@@ -1784,7 +1784,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 294
+      "loc": 395
     },
     {
       "file": "tests/unit/docs-csharp.test.ts",
@@ -1854,7 +1854,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 386
+      "loc": 396
     },
     {
       "file": "tests/unit/docs-report.test.ts",
@@ -1875,7 +1875,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 200
+      "loc": 233
     },
     {
       "file": "tests/unit/docs-rust.test.ts",

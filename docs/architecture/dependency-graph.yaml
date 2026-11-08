@@ -4,7 +4,7 @@ metadata:
   language: typescript
   totalFiles: 324
   totalModules: 4
-  totalExports: 799
+  totalExports: 802
 modules:
   tools:
     scripts/build.ts:
@@ -48,6 +48,7 @@ modules:
         - file: src/docs/cfamily.ts
           imports:
             - parsesAsCFamily
+            - sanitiseGuards
           typeOnly: false
         - file: src/docs/kotlin.ts
           imports:
@@ -77,6 +78,9 @@ modules:
         - delegationLambdaHoldsDeclaration
         - classifyUnparsed
         - countCppHeaderShapes
+        - headerFunctionCount
+        - triageHeaderTree
+        - badSummaryField
         - main
     scripts/fix-ledger-audit.ts:
       externalDependencies: []
@@ -1838,7 +1842,6 @@ modules:
           typeOnly: false
         - file: src/py.ts
           imports:
-            - NON_SPACE
             - pySplitlines
             - pyStrip
             - S
@@ -5246,12 +5249,14 @@ modules:
             - delegationLambdaHoldsDeclaration
             - diffCoverage
             - filesByLanguage
+            - headerFunctionCount
             - isEmpty
             - parseArgs
             - renderDiff
             - rewriteCppMacros
             - rewriteKotlinOneLineBody
             - summaryRow
+            - triageHeaderTree
             - unparsedByError
           typeOnly: false
         - file: src/docs/cfamily.ts
@@ -6751,8 +6756,8 @@ statistics:
   totalTypeScriptFiles: 324
   totalSourceFiles: 324
   totalModules: 4
-  totalLinesOfCode: 51760
-  totalExports: 799
+  totalLinesOfCode: 52047
+  totalExports: 802
   entryRoots: 1
   reachableFiles: 96
   dormantFiles: 2
@@ -6770,7 +6775,7 @@ statistics:
   typeOnlyFilesInCycles: 8
   totalClasses: 15
   totalInterfaces: 154
-  totalFunctions: 463
+  totalFunctions: 466
   totalTypeGuards: 21
   totalEnums: 4
   totalConstants: 109

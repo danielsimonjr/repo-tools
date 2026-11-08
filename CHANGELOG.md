@@ -11,7 +11,9 @@ All notable changes to this project are recorded in this file. The format follow
 - `scripts/docs-compare.ts` (`bun run compare:docs`) compares two `docs scan` reports (`diff`, exit 1 on
   any difference), writes one row of the parity table (`summary`), and gives a cause to each
   unparsed file (`triage`). The `triage` rewrites are measurement heuristics and change no report.
-- `docs/parity-docs.md` records 2.5.0 against this version (zero differences on nine repositories),
+- `docs/parity-docs.md` records 2.5.0 against this version (zero differences on eight repositories;
+  on PITS-MRAS 2 fields of one symbol change, because 2.5.0 read no name from a combined NumPy
+  entry),
   one public repository per new language, and the measurements that decided the C, C++, Kotlin
   and Ruby rules. The first 2.5.0 run found the NumPy entry regression that this release fixes.
 - Four development dependencies, pinned to exact versions: `tree-sitter-c` 0.24.1,
