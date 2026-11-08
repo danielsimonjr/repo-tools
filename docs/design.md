@@ -813,8 +813,10 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   aliases, concepts and named namespaces. One registry entry, `cpp`, reads both languages, because
   a style names one language id. A `.c` file reports the language `cpp` in `coverage.json`, and
   `map` calls a C repository `cpp`. A `.c` file uses the C grammar. Every other suffix, `.h`
-  included, uses the C++ grammar, which reads C too. The tool reports no macro, no file-scope
-  variable and no data member. It also reports no enumerator, no `using` declaration and no
+  included, uses the C++ grammar, which reads C too. A function-like macro (`#define SQ(x)`) is a
+  function. A data member is a property, and a function-pointer member is a property too. A
+  member line with several names (`int a, b;`) is not reported. The tool reports no object-like
+  macro and no file-scope variable. It also reports no enumerator, no `using` declaration and no
   `friend` declaration. It reports no forward declaration and nothing in a function body. A type definition of a struct, union or enum with
   a body is one symbol: `typedef struct Point {..} Point;` gives `Point`. A declaration is
   exported when it is in a header (`.h`, `.hpp`, `.hh`, `.hxx`) and none of these cases holds:
@@ -930,25 +932,24 @@ parses again.
   definition in a source file is an implementation detail. A rule that gated both would ask for the
   same doc twice.
 - Trade-offs: a C program with no header gates nothing. The rule is one line in `cfamily.ts`
-  (`isExported` returns the flag of the header). A later measurement of `antirez/sds` and
-  `fmtlib/fmt` can decide whether to flip it.
+  (`isExported` returns the flag of the header). The measurement in `docs/parity-docs.md` holds
+  no library without headers. The measurement does not test this case.
 
 **A declaration with several names makes the file unparsed.**
 
-- Decision: the C and C++ reader reports a file as unparsed when one declaration declares two or
-  more functions (`int m1(void), m2(void);`), or when a typedef has two or more declarators
-  (`typedef struct P2 {..} P2, *P2Ptr;`), or when a typedef of a named tag with a body has a
-  declarator other than a plain name (`typedef struct Point {..} *PointPtr;`). The check runs for
-  the C grammar and for the C++ grammar.
+- Decision: the C and C++ reader reports a file as unparsed for three shapes. The first shape is
+  one declaration of two or more functions (`int m1(void), m2(void);`). The second is a typedef
+  with two or more declarators (`typedef struct P2 {..} P2, *P2Ptr;`). The third is a typedef of
+  a named tag with a body and a pointer name (`typedef struct Point {..} *PointPtr;`). The check
+  runs for the C grammar and for the C++ grammar.
 - Rationale: the driver makes one symbol from one declaration node, with one name. Each of these
   shapes declares more names than that, so a name would disappear and the gate would pass without
   a notice. An unparsed file is an error that a reader sees.
 - Trade-offs: a file with one such declaration reports no symbol at all, and so gates nothing. One
-  symbol for each declarator would keep the file, but it needs a driver hook that returns several
-  symbols for one node, with a name, parameters and an anchor for each. The frequency of these
-  shapes is not measured. `typedef struct _T {..} T, *PT;` is a common C idiom, and a header
-  in that style gates nothing. The measurement on `antirez/sds` and `fmtlib/fmt` decides
-  whether to build the hook.
+  symbol for each declarator would keep the file. That needs a driver hook that returns several
+  symbols for one node, each with a name, parameters and an anchor. `typedef struct _T {..}
+  T, *PT;` is a common C idiom, and a header in that style gates nothing. The measurement in
+  `docs/parity-docs.md` found no such file, so the hook is not built.
 
 **Limits of the C and C++ reader.**
 
