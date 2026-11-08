@@ -378,6 +378,7 @@ agree. The record makes no claim about other repositories.
 | `bun run privacy` | Runs the privacy check on the tracked files and the commit messages. |
 | `bun run hooks` | Installs the `commit-msg` hook that runs the privacy check on each message. |
 | `bun run audit:ledger` | Reverts each fix of `docs/fix-ledger-2.0.0.md` in a scratch copy and checks that a test of that fix fails. |
+| `bun run compare:docs` | Compares two `docs scan` reports, writes a parity row, or gives a cause to each unparsed file. |
 | `bun run check:design` | Finds each reference to a section of `docs/design.md` that has no heading with that number. |
 
 ## Documentation

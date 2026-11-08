@@ -1,7 +1,7 @@
 {
   "metadata": {
     "totalSourceFiles": 97,
-    "totalTestFiles": 151,
+    "totalTestFiles": 152,
     "testedCount": 80,
     "untestedCount": 17,
     "coveragePercent": "82.5",
@@ -298,6 +298,7 @@
     ],
     "src/docs/cfamily.ts": [
       "tests/unit/docs-cfamily.test.ts",
+      "tests/unit/docs-compare.test.ts",
       "tests/unit/docs-styles.test.ts"
     ],
     "src/docs/comments.ts": [
@@ -321,6 +322,7 @@
       "tests/unit/docs-styles.test.ts"
     ],
     "src/docs/kotlin.ts": [
+      "tests/unit/docs-compare.test.ts",
       "tests/unit/docs-kotlin.test.ts",
       "tests/unit/docs-styles.test.ts"
     ],
@@ -456,6 +458,7 @@
     "src/map/grammars.ts": [
       "tests/unit/build.test.ts",
       "tests/unit/clones-units.test.ts",
+      "tests/unit/docs-compare.test.ts",
       "tests/unit/map-parsing-py.test.ts",
       "tests/unit/map-parsing-ts.test.ts",
       "tests/unit/map-parsing-tsx.test.ts"
@@ -818,6 +821,11 @@
     ],
     "tests/unit/docs-comments.test.ts": [
       "src/docs/comments.ts"
+    ],
+    "tests/unit/docs-compare.test.ts": [
+      "src/docs/cfamily.ts",
+      "src/docs/kotlin.ts",
+      "src/map/grammars.ts"
     ],
     "tests/unit/docs-csharp.test.ts": [
       "src/docs/csharp.ts",

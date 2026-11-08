@@ -9,7 +9,7 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 97 |
-| Total Test Files | 151 |
+| Total Test Files | 152 |
 | Source Files with Tests | 80 |
 | Source Files without Tests | 17 |
 | Coverage (raw, direct-import) | **82.5%** |
@@ -104,14 +104,14 @@ The following 17 source files are not directly imported by any test file:
 | `depgraph/types.ts` | `depgraph-analysis.test.ts`, `depgraph-f22.test.ts`, `depgraph-f26.test.ts`, `depgraph-f27.test.ts`, `depgraph-parse.test.ts`, `depgraph-report.test.ts`, `depgraph-scan.test.ts`, `map-adapter.test.ts`, `shared-helpers.test.ts` |
 | `depgraph/workspaces.ts` | `depgraph-f13.test.ts`, `depgraph-f34.test.ts`, `depgraph-f36.test.ts`, `depgraph-scan.test.ts` |
 | `docs/analyse.ts` | `docs-discovery.test.ts` |
-| `docs/cfamily.ts` | `docs-cfamily.test.ts`, `docs-styles.test.ts` |
+| `docs/cfamily.ts` | `docs-cfamily.test.ts`, `docs-compare.test.ts`, `docs-styles.test.ts` |
 | `docs/comments.ts` | `docs-comments.test.ts` |
 | `docs/csharp.ts` | `docs-csharp.test.ts` |
 | `docs/discovery.ts` | `docs-discovery.test.ts` |
 | `docs/go.ts` | `docs-go.test.ts`, `docs-styles.test.ts` |
 | `docs/index.ts` | `docs-languages.test.ts` |
 | `docs/java.ts` | `docs-java.test.ts`, `docs-styles.test.ts` |
-| `docs/kotlin.ts` | `docs-kotlin.test.ts`, `docs-styles.test.ts` |
+| `docs/kotlin.ts` | `docs-compare.test.ts`, `docs-kotlin.test.ts`, `docs-styles.test.ts` |
 | `docs/languages.ts` | `docs-languages.test.ts` |
 | `docs/model.ts` | `docs-cfamily.test.ts`, `docs-command.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
 | `docs/php.ts` | `docs-php.test.ts`, `docs-styles.test.ts` |
@@ -130,7 +130,7 @@ The following 17 source files are not directly imported by any test file:
 | `map/coverage.ts` | `map-coverage.test.ts` |
 | `map/cycles.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
 | `map/discovery.ts` | `depgraph-inventory-coverage.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-discovery.test.ts`, `map-graph-e2e.test.ts`, `shared-helpers.test.ts` |
-| `map/grammars.ts` | `build.test.ts`, `clones-units.test.ts`, `map-parsing-py.test.ts`, `map-parsing-ts.test.ts`, `map-parsing-tsx.test.ts` |
+| `map/grammars.ts` | `build.test.ts`, `clones-units.test.ts`, `docs-compare.test.ts`, `map-parsing-py.test.ts`, `map-parsing-ts.test.ts`, `map-parsing-tsx.test.ts` |
 | `map/graph.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
 | `map/layers.ts` | `map-layers.test.ts` |
 | `map/markdown.ts` | `map-markdown.test.ts` |
@@ -241,6 +241,7 @@ The following 17 source files are not directly imported by any test file:
 | `unit/docs-cfamily.test.ts` | 3 files |
 | `unit/docs-command.test.ts` | 1 files |
 | `unit/docs-comments.test.ts` | 1 files |
+| `unit/docs-compare.test.ts` | 3 files |
 | `unit/docs-csharp.test.ts` | 3 files |
 | `unit/docs-discovery.test.ts` | 2 files |
 | `unit/docs-go.test.ts` | 3 files |

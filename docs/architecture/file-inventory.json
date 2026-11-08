@@ -1,24 +1,24 @@
 {
-  "totalFiles": 322,
+  "totalFiles": 324,
   "byDisposition": {
     "reachable": 95,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 212,
-    "tool": 11,
+    "test": 213,
+    "tool": 12,
     "config": 1,
     "bench": 0,
     "example": 0
   },
   "byArea": {
-    "tools": 11,
+    "tools": 12,
     "src": 98,
-    "tests": 212,
+    "tests": 213,
     "config": 1
   },
   "byPackage": {
-    "(root)": 224,
+    "(root)": 226,
     "@danielsimonjr/repo-tools": 98
   },
   "files": [
@@ -35,6 +35,13 @@
       "area": "tools",
       "disposition": "tool",
       "loc": 125
+    },
+    {
+      "file": "scripts/docs-compare.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 474
     },
     {
       "file": "scripts/fix-ledger-audit.ts",
@@ -419,7 +426,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 903
+      "loc": 931
     },
     {
       "file": "src/docs/comments.ts",
@@ -496,7 +503,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 475
+      "loc": 484
     },
     {
       "file": "src/docs/report.ts",
@@ -510,7 +517,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 299
+      "loc": 330
     },
     {
       "file": "src/docs/rules.ts",
@@ -1756,7 +1763,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 373
+      "loc": 465
     },
     {
       "file": "tests/unit/docs-command.test.ts",
@@ -1771,6 +1778,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 92
+    },
+    {
+      "file": "tests/unit/docs-compare.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 294
     },
     {
       "file": "tests/unit/docs-csharp.test.ts",
@@ -1812,7 +1826,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 277
+      "loc": 279
     },
     {
       "file": "tests/unit/docs-kotlin.test.ts",
@@ -1833,14 +1847,14 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 172
+      "loc": 175
     },
     {
       "file": "tests/unit/docs-python.test.ts",
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 380
+      "loc": 386
     },
     {
       "file": "tests/unit/docs-report.test.ts",
@@ -1861,7 +1875,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 152
+      "loc": 200
     },
     {
       "file": "tests/unit/docs-rust.test.ts",

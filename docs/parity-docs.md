@@ -225,8 +225,90 @@ The method compares two tools, and two equal verdicts can both be wrong. The raw
 the SHOULD tier showed 3131 symbols with a different list of issues. A reader could take them for
 errors of the port. The control showed that two defects of the Python tool cause all of them.
 
+## Result: 2.5.0 against this version
+
+This check compares the reports of version 2.5.0 with the reports of this version, on the nine
+repositories above at the same commits. A git worktree at the tag `v2.5.0` gave the 2.5.0 build.
+Both builds and every scan used bun 1.4.2, the runtime of CI. The script
+`scripts/docs-compare.ts diff` compared each pair of `coverage.json` reports, with the method of
+step 1 above.
+
+| Repository | Commit | Files | Symbols | Fields changed | File records changed |
+| --- | --- | --- | --- | --: | --: |
+| memoryjs | `0158a38` | +0 -0 | +0 -0 | 0 | 0 |
+| Mathts | `253aa72` | +0 -0 | +0 -0 | 0 | 0 |
+| universal-physics-tensor | `0099eda` | +0 -0 | +0 -0 | 0 | 0 |
+| repo-tools | `1b569c2` | +0 -0 | +0 -0 | 0 | 0 |
+| fermat-mcp | `ef84ce2` | +0 -0 | +0 -0 | 0 | 0 |
+| PITS-MRAS | `8b2cb2d` | +0 -0 | +0 -0 | 0 | 0 |
+| auto-memory | `d4adb29` | +0 -0 | +0 -0 | 0 | 0 |
+| memvid | `c416853` | +0 -0 | +0 -0 | 0 | 0 |
+| deepthinking-mcp | `eeb45e5` | +0 -0 | +0 -0 | 0 | 0 |
+
+The first run found 2 changed fields in PITS-MRAS. A NumPy entry such as `n_friction:`, with its
+description on the next line, lost its name. The entry filter of the NumPy reader is now applied
+to each entry alone, and the diff is zero.
+
+## Result: the new languages
+
+Each row is one public repository for one new language. Each run used a fresh clone (depth 1) of
+the default branch. The rows come from `scripts/docs-compare.ts summary`. The stub styles of
+these languages port the templates of mintlify/writer (MIT, see `NOTICE`).
+
+| Repository | Language | Commit | Files | Symbols | Exported | Documented | MUST issues | Unparsed |
+| --- | --- | --- | --: | --: | --: | --: | --: | --: |
+| serde-rs/serde | Rust | `0db9b3b` | 208 | 2972 | 421 | 219 | 160 | 0 |
+| gin-gonic/gin | Go | `0f09c3a` | 99 | 2036 | 1331 | 479 | 164 | 0 |
+| google/gson | Java | `65df6e5` | 266 | 4289 | 2567 | 731 | 221 | 0 |
+| square/okio | Kotlin | `f0e3f47` | 357 | 9114 | 3255 | 499 | 2759 | 5 |
+| antirez/sds | C | `5347739` | 4 | 74 | 68 | 0 | 68 | 1 |
+| fmtlib/fmt | C++ | `e7e6e3f` | 79 | 393 | 123 | 6 | 43 | 39 |
+| Seldaek/monolog | PHP | `3bed304` | 228 | 1863 | 1721 | 929 | 725 | 0 |
+| rack/rack | Ruby | `da90464` | 97 | 1001 | 745 | 188 | 447 | 3 |
+| JamesNK/Newtonsoft.Json | C# | `52fa3ae` | 951 | 9601 | 7728 | 836 | 6897 | 66 |
+
+The causes of the unparsed files:
+
+- **okio (5):** the grammar does not read the soft keyword `final` as a name, or the form
+  `internal actual constructor(`. The two rewrites of `triage` do not change the result.
+- **sds (1):** `sds.c` passes a type to a macro (`va_arg(ap, char*)`).
+- **fmt (39):** 1 file parses after the export macros are blanked. Blanking does not repair the
+  other 38, because macros such as `FMT_BEGIN_NAMESPACE` open and close braces.
+- **rack (3):** 2 JavaScript files are test assets, and the Ruby analyser does not read them. The
+  antivirus software of the host removed 1 test file (`test/spec_multipart.rb`) from the work
+  tree, so the report gives it as unreadable.
+- **Newtonsoft.Json (66):** the generic error text. This check did not classify these files.
+
+## Measurements of the open items
+
+`scripts/docs-compare.ts triage` gave these numbers. Its rewrites are measurement heuristics only.
+The C and C++ rewrite blanks every upper-case name with an underscore, such as `SIZE_MAX`. That
+rewrite can make a clean file unparsed, so the method can only count too few export-macro files.
+
+Each rule was fixed before the data. The thresholds were not changed after the measurement.
+
+| Item | Measurement | Rule | Result |
+| --- | --- | --- | --- |
+| Kotlin one-line class body | 0 of 327 okio files | 3 files or 2% | Not read. The upstream defects stay recorded. |
+| Kotlin delegation check, false hits | 0 delegation files in okio | 1 file | The check stays as it is. |
+| C and C++ source files export nothing | sds 45 exported either way. fmt 108 exported, and 273 when a source file exports. | Change only for a library with no exported header symbol | The rule stays. The sample holds no library without headers, so this case was not tested. |
+| Function-like macros | 18 of 96 header functions (sds 5 of 45, fmt 13 of 51) | 10%, both repositories together | Read. A macro of a header is a function. |
+| `extern` variables | 1 of 96 | 10% | Not read. |
+| Public data members | 18 of 96 (sds 18 of 45, fmt 0 of 51) | 10% | Read. A member is a property. All 18 are fields of sds. |
+| Declarations with several names | 0 files | 1 file | The file stays unparsed. |
+| Export macros | sds 0 of 3 headers, fmt 1 of 26 | 10% in one repository | No `macros` setting. |
+| Array-reference parameters | 0 files | record only | No change. |
+| Nested C++ scope key | 0 symbols changed in fmt (6 of 26 headers parse) | always | Fixed. |
+| Ruby `private_constant` | 18 calls in rack | 1 call | Read. |
+| Ruby `:nodoc:` | 11 marks in rack | 5 marks | Read. `:nodoc: all` also hides the members. |
+
+The macro and member counts of fmt come from its 6 parsed headers only.
+
 ## Residuals
 
 - The grammar accepts a few Python errors that CPython finds (see the result of the parser).
 - The grammar rejects a name that continues on the next line inside round brackets. The command
   reports such a file as unparsed.
+- The Kotlin grammar does not read `final` as a name or `internal actual constructor(`. The C
+  grammar does not read a type as a macro argument. C++ export macros that open and close
+  braces make a file unparsed. Each of these files is unparsed, and the gate fails on it.

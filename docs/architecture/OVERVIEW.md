@@ -155,11 +155,11 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 322 | dependency-graph.json |
-| totalLinesOfCode | 50773 | dependency-graph.json |
-| totalExports | 779 | dependency-graph.json |
-| totalFunctions | 450 | dependency-graph.json |
-| totalInterfaces | 148 | dependency-graph.json |
+| totalSourceFiles | 324 | dependency-graph.json |
+| totalLinesOfCode | 51760 | dependency-graph.json |
+| totalExports | 799 | dependency-graph.json |
+| totalFunctions | 463 | dependency-graph.json |
+| totalInterfaces | 154 | dependency-graph.json |
 | totalClasses | 15 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |

@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 322
+  totalFiles: 324
   totalModules: 4
-  totalExports: 779
+  totalExports: 799
 modules:
   tools:
     scripts/build.ts:
@@ -37,6 +37,46 @@ modules:
         - findReferences
         - danglingReferences
         - scanRepository
+        - main
+    scripts/docs-compare.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies:
+        - node:fs/promises
+        - node:path
+      internalDependencies:
+        - file: src/docs/cfamily.ts
+          imports:
+            - parsesAsCFamily
+          typeOnly: false
+        - file: src/docs/kotlin.ts
+          imports:
+            - parsesAsKotlin
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - loadGrammar
+          typeOnly: false
+      exports:
+        - Cause
+        - CoverageSummary
+        - CoverageSymbol
+        - CoverageFile
+        - Coverage
+        - Diff
+        - ParsedArgs
+        - parseArgs
+        - diffCoverage
+        - renderDiff
+        - isEmpty
+        - summaryRow
+        - unparsedByError
+        - filesByLanguage
+        - rewriteKotlinOneLineBody
+        - rewriteCppMacros
+        - delegationLambdaHoldsDeclaration
+        - classifyUnparsed
+        - countCppHeaderShapes
         - main
     scripts/fix-ledger-audit.ts:
       externalDependencies: []
@@ -5185,6 +5225,48 @@ modules:
             - Reader
           typeOnly: false
       exports: []
+    tests/unit/docs-compare.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: scripts/docs-compare.ts
+          imports:
+            - Coverage
+            - CoverageFile
+            - CoverageSymbol
+          typeOnly: true
+        - file: scripts/docs-compare.ts
+          imports:
+            - classifyUnparsed
+            - countCppHeaderShapes
+            - delegationLambdaHoldsDeclaration
+            - diffCoverage
+            - filesByLanguage
+            - isEmpty
+            - parseArgs
+            - renderDiff
+            - rewriteCppMacros
+            - rewriteKotlinOneLineBody
+            - summaryRow
+            - unparsedByError
+          typeOnly: false
+        - file: src/docs/cfamily.ts
+          imports:
+            - parsesAsCFamily
+          typeOnly: false
+        - file: src/docs/kotlin.ts
+          imports:
+            - parsesAsKotlin
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - loadGrammar
+          typeOnly: false
+      exports: []
     tests/unit/docs-csharp.test.ts:
       externalDependencies:
         - bun:test
@@ -6666,11 +6748,11 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 322
-  totalSourceFiles: 322
+  totalTypeScriptFiles: 324
+  totalSourceFiles: 324
   totalModules: 4
-  totalLinesOfCode: 50773
-  totalExports: 779
+  totalLinesOfCode: 51760
+  totalExports: 799
   entryRoots: 1
   reachableFiles: 96
   dormantFiles: 2
@@ -6678,7 +6760,7 @@ statistics:
   testOnlyFiles: 0
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
-  totalTypeOnlyImports: 81
+  totalTypeOnlyImports: 82
   noImporterFileCount: 2
   unusedExportsCount: 119
   circularDepsTruncated: false
@@ -6687,9 +6769,9 @@ statistics:
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 8
   totalClasses: 15
-  totalInterfaces: 148
-  totalFunctions: 450
-  totalTypeGuards: 20
+  totalInterfaces: 154
+  totalFunctions: 463
+  totalTypeGuards: 21
   totalEnums: 4
   totalConstants: 109
   totalReExports: 12

@@ -130,8 +130,9 @@
 - [x] `docs` C/C++ scope key: a nested qualified name `S::Inner::in` keys on `S` only. A documented
   `S::Inner::in` can hide an undocumented `void in(int)` in a namespace `S`. Key on the full
   qualifier chain.
-- [ ] `docs` C/C++ multi-declarator declarations make the file unparsed. Measure on `antirez/sds`
+- [x] `docs` C/C++ multi-declarator declarations make the file unparsed. Measure on `antirez/sds`
   and `fmtlib/fmt`; if any file is hit, add a driver hook that returns one symbol per declarator.
+  Measured: 0 files. The unparsed verdict stands (design 16.3).
 - [ ] Names of private decisions (`D2`, `D8`, `D10b`, `criterion 4`) appear about 74 times in
   comments and test titles. `docs/parity-2.0.0.md` defines the 2.0.0 ones. A reader of the public
   repository cannot resolve the 1.x ones. Replace each with a statement of the rule, or with a
@@ -415,17 +416,17 @@ data. Other findings are filed here.
 
 ## docs: more languages and docstring formats (from mintlify/writer, MIT)
 
-- [ ] L0 Language registry for `docs`: one analyser and one grammar entry per language. `analyse.ts`, `index.ts` and `discovery.ts` stop branching on `python`.
-- [ ] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository. C# and Rust are bundled. Go, Java and Kotlin are bundled. C, C++, PHP and Ruby are bundled (12 grammars). Each other grammar is added in the PR of its analyser, so no release ships a grammar that nothing reads.
+- [x] L0 Language registry for `docs`: one analyser and one grammar entry per language. `analyse.ts`, `index.ts` and `discovery.ts` stop branching on `python`.
+- [x] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository. C# and Rust are bundled. Go, Java and Kotlin are bundled. C, C++, PHP and Ruby are bundled (12 grammars). Each other grammar is added in the PR of its analyser, so no release ships a grammar that nothing reads.
 - [x] L2 C# and Rust analysers first (map reads both; docs refuses them today). Exported rule, doc-comment form, parameters, stub anchor, dialect.
 - [x] L3 Go, Java, Kotlin analysers.
 - [x] L4 C, C++, PHP, Ruby analysers; drop a language whose exported rule cannot be decided, with the reason.
-- [ ] F1 Docstring formats for `docs stub --style=`: port the writer templates as plain TypeScript, without type slots where the signature has types. Every stub keeps `STUB_MARKER`.
-- [ ] F2 Widen dialect detection and M5. Compare old and new detection over a real corpus; the five existing dialect results must not change.
-- [ ] N1 Mintlify MIT copyright notice for ported code. Update `docs/parity-docs.md`, `docs/design.md`, README. Measure the package size growth for the PR body.
-- [ ] Re-measure the Kotlin one-line class body defect (tree-sitter-grammars/tree-sitter-kotlin#10 and #12) and the delegation defect on the next grammar release. In PR 5, measure on square/okio how many files each defect makes unparsed, and how many of the delegation hits are the valid `by lazy { }` form. If PR 5 shows a bad unparsed rate, evaluate the equal-length sanitise precedent in `src/docs/typescript.ts`.
+- [x] F1 Docstring formats for `docs stub --style=`: port the writer templates as plain TypeScript, without type slots where the signature has types. Every stub keeps `STUB_MARKER`.
+- [x] F2 Widen dialect detection and M5. Compare old and new detection over a real corpus; the five existing dialect results must not change.
+- [x] N1 Mintlify MIT copyright notice for ported code. Update `docs/parity-docs.md`, `docs/design.md`, README. Measure the package size growth for the PR body.
+- [ ] Measured on okio: 0 one-line body files and 0 delegation files of 327 (`docs/parity-docs.md`). Re-measure the Kotlin one-line class body defect (tree-sitter-grammars/tree-sitter-kotlin#10 and #12) and the delegation defect on the next grammar release. In PR 5, measure on square/okio how many files each defect makes unparsed, and how many of the delegation hits are the valid `by lazy { }` form. If PR 5 shows a bad unparsed rate, evaluate the equal-length sanitise precedent in `src/docs/typescript.ts`.
 - [x] C and C++: macros, file-scope variables and data members are not symbols. Measured on sds and fmt (pooled): function-like macros 18 of 96 header functions (18.8%), data members 18 of 96 (18.8%), `extern` variables 1 of 96 (1.0%). The 10% rule reports function-like macros and public data members; `extern` variables stay unreported. Source files keep exporting nothing (no header-less library in the sample; see `docs/parity-docs.md`).
-- [ ] Re-measure the C++ array-reference misread (`void g(int (&arr)[3]);`) and the rate of the export macro error (`EXPORT_API int f();`) on the next release of the C and C++ grammars. In PR 5, measure both on antirez/sds and fmtlib/fmt.
+- [ ] Measured on sds and fmt: 0 array-reference files; export macros in 1 of 29 headers, below the 10% rule. Re-measure the C++ array-reference misread (`void g(int (&arr)[3]);`) and the rate of the export macro error (`EXPORT_API int f();`) on the next release of the C and C++ grammars. In PR 5, measure both on antirez/sds and fmtlib/fmt.
 - [x] Ruby: `private_constant` and the `# :nodoc:` comment are not read. Measured on rack: 18 `private_constant` calls, 11 `:nodoc:` marks. Both are now read; `:nodoc: all` also hides the members.
 - [x] L0a Registry for the two current languages (`src/docs/languages.ts`): discovery, analysis, the stub writer, the help text and the refusal read it. L0 stays open for the grammar entry of each new language.
 - [x] F1a Styles for the two current languages (`src/docs/styles.ts`): `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, and `--style=auto`. No flag keeps the 2.5.0 stubs (the docs goldens hold them). F1 stays open for the styles of each new language.

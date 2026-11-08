@@ -8,7 +8,7 @@ This report lists each source file that the map census finds, with a disposition
 
 **Language**: typescript
 
-**Total files**: 322
+**Total files**: 324
 
 ## Disposition counts
 
@@ -18,12 +18,12 @@ This report lists each source file that the map census finds, with a disposition
 | `build-entry` | 1 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
 | `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
-| `test` | 212 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
-| `tool` | 11 | A file in a `tools/` or `scripts/` folder outside `src/`. |
+| `test` | 213 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
+| `tool` | 12 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 1 | A `*.config.*` file of TypeScript or JavaScript. |
 | `example` | 0 | A file in `examples/` or `docs/`. |
 | `bench` | 0 | A file in `bench/` or `benchmarks/`, or a `*.bench.*` file. |
-| **Total** | **322** | |
+| **Total** | **324** | |
 
 ## Per-area counts
 
@@ -31,14 +31,14 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --: |
 | `config` | 1 |
 | `src` | 98 |
-| `tests` | 212 |
-| `tools` | 11 |
+| `tests` | 213 |
+| `tools` | 12 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 224 |
+| `(root)` | 226 |
 | `@danielsimonjr/repo-tools` | 98 |
 
 ## All files
@@ -47,6 +47,7 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --- | --- | --- | --: |
 | `scripts/build.ts` | (root) | tools | tool | 118 |
 | `scripts/design-refs.ts` | (root) | tools | tool | 125 |
+| `scripts/docs-compare.ts` | (root) | tools | tool | 474 |
 | `scripts/fix-ledger-audit.ts` | (root) | tools | tool | 657 |
 | `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 660 |
 | `scripts/lockcheck.ts` | (root) | tools | tool | 128 |
@@ -101,7 +102,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/depgraph/types.ts` | @danielsimonjr/repo-tools | src | reachable | 210 |
 | `src/depgraph/workspaces.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/analyse.ts` | @danielsimonjr/repo-tools | src | reachable | 60 |
-| `src/docs/cfamily.ts` | @danielsimonjr/repo-tools | src | reachable | 903 |
+| `src/docs/cfamily.ts` | @danielsimonjr/repo-tools | src | reachable | 931 |
 | `src/docs/comments.ts` | @danielsimonjr/repo-tools | src | reachable | 183 |
 | `src/docs/csharp.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 240 |
@@ -112,9 +113,9 @@ This report lists each source file that the map census finds, with a disposition
 | `src/docs/languages.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
 | `src/docs/model.ts` | @danielsimonjr/repo-tools | src | reachable | 121 |
 | `src/docs/php.ts` | @danielsimonjr/repo-tools | src | reachable | 223 |
-| `src/docs/python.ts` | @danielsimonjr/repo-tools | src | reachable | 475 |
+| `src/docs/python.ts` | @danielsimonjr/repo-tools | src | reachable | 484 |
 | `src/docs/report.ts` | @danielsimonjr/repo-tools | src | reachable | 197 |
-| `src/docs/ruby.ts` | @danielsimonjr/repo-tools | src | reachable | 299 |
+| `src/docs/ruby.ts` | @danielsimonjr/repo-tools | src | reachable | 330 |
 | `src/docs/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
 | `src/docs/rust.ts` | @danielsimonjr/repo-tools | src | reachable | 179 |
 | `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 185 |
@@ -292,22 +293,23 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-scan.test.ts` | (root) | tests | test | 177 |
 | `tests/unit/depgraph-tsx.test.ts` | (root) | tests | test | 52 |
 | `tests/unit/design-refs.test.ts` | (root) | tests | test | 148 |
-| `tests/unit/docs-cfamily.test.ts` | (root) | tests | test | 373 |
+| `tests/unit/docs-cfamily.test.ts` | (root) | tests | test | 465 |
 | `tests/unit/docs-command.test.ts` | (root) | tests | test | 553 |
 | `tests/unit/docs-comments.test.ts` | (root) | tests | test | 92 |
+| `tests/unit/docs-compare.test.ts` | (root) | tests | test | 294 |
 | `tests/unit/docs-csharp.test.ts` | (root) | tests | test | 194 |
 | `tests/unit/docs-discovery.test.ts` | (root) | tests | test | 235 |
 | `tests/unit/docs-go.test.ts` | (root) | tests | test | 195 |
 | `tests/unit/docs-golden.test.ts` | (root) | tests | test | 35 |
 | `tests/unit/docs-helpers.ts` | (root) | tests | test | 88 |
-| `tests/unit/docs-java.test.ts` | (root) | tests | test | 277 |
+| `tests/unit/docs-java.test.ts` | (root) | tests | test | 279 |
 | `tests/unit/docs-kotlin.test.ts` | (root) | tests | test | 302 |
 | `tests/unit/docs-languages.test.ts` | (root) | tests | test | 50 |
-| `tests/unit/docs-php.test.ts` | (root) | tests | test | 172 |
-| `tests/unit/docs-python.test.ts` | (root) | tests | test | 380 |
+| `tests/unit/docs-php.test.ts` | (root) | tests | test | 175 |
+| `tests/unit/docs-python.test.ts` | (root) | tests | test | 386 |
 | `tests/unit/docs-report.test.ts` | (root) | tests | test | 158 |
 | `tests/unit/docs-review.test.ts` | (root) | tests | test | 249 |
-| `tests/unit/docs-ruby.test.ts` | (root) | tests | test | 152 |
+| `tests/unit/docs-ruby.test.ts` | (root) | tests | test | 200 |
 | `tests/unit/docs-rust.test.ts` | (root) | tests | test | 210 |
 | `tests/unit/docs-stub.test.ts` | (root) | tests | test | 281 |
 | `tests/unit/docs-styles.test.ts` | (root) | tests | test | 328 |
