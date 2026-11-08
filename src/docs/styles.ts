@@ -53,6 +53,10 @@ function renderRest(sym: DocSymbol, I: string): string[] {
   return pythonDoc(sym, I, params, [`${I}:returns: ${RETURNS}`]);
 }
 
+/** True when the stub of `sym` needs a line for the value that it gives back. */
+const givesValue = (sym: DocSymbol): boolean =>
+  (sym.kind === "function" || sym.kind === "method") && sym.returnsValue !== false;
+
 /**
  * A block comment: the summary line, the parameter lines after a ` *` line, the return line for a
  * function or a method, and the closing line.
@@ -60,7 +64,7 @@ function renderRest(sym: DocSymbol, I: string): string[] {
 function blockDoc(sym: DocSymbol, I: string, param: (p: string) => string, returns: string) {
   const lines = [`${I}/**`, `${I} * ${SUMMARY}`];
   if (sym.params.length > 0) lines.push(`${I} *`, ...sym.params.map((p) => `${I} * ${param(p)}`));
-  if (sym.kind === "function" || sym.kind === "method") lines.push(`${I} * ${returns}`);
+  if (givesValue(sym)) lines.push(`${I} * ${returns}`);
   lines.push(`${I} */`);
   return lines;
 }
@@ -78,10 +82,6 @@ const renderJsdoc = (sym: DocSymbol, I: string): string[] =>
     (p) => `@param {${M} type} ${p} ${M} state what it is.`,
     `@returns {${M} type} ${RETURNS}`,
   );
-
-/** True when the stub of `sym` needs a line for the value that it gives back. */
-const givesValue = (sym: DocSymbol): boolean =>
-  (sym.kind === "function" || sym.kind === "method") && sym.returnsValue !== false;
 
 /** The C# XML doc comment: `<summary>`, one `<param>` per parameter, and `<returns>`. */
 function renderXmldoc(sym: DocSymbol, I: string): string[] {
@@ -102,6 +102,13 @@ function renderRustdoc(sym: DocSymbol, I: string): string[] {
   return lines;
 }
 
+/** The Go doc comment: one line that starts with the name, as godoc and golint expect. */
+const renderGodoc = (sym: DocSymbol, I: string): string[] => [`${I}// ${sym.name} ${SUMMARY}`];
+
+// Javadoc and KDoc share this form. Javadoc says `@return`, and so does KDoc.
+const renderJavadoc = (sym: DocSymbol, I: string): string[] =>
+  blockDoc(sym, I, (p) => `@param ${p} ${PARAM}`, `@return ${RETURNS}`);
+
 /** True when `id` names a style of the registry. A name of an object property is not a style. */
 export function isStyle(id: string): boolean {
   return Object.hasOwn(STYLES, id);
@@ -116,4 +123,7 @@ export const STYLES: Readonly<Record<string, Style>> = {
   jsdoc: { id: "jsdoc", language: "typescript", render: renderJsdoc },
   xmldoc: { id: "xmldoc", language: "csharp", render: renderXmldoc },
   rustdoc: { id: "rustdoc", language: "rust", render: renderRustdoc },
+  godoc: { id: "godoc", language: "go", render: renderGodoc },
+  javadoc: { id: "javadoc", language: "java", render: renderJavadoc },
+  kdoc: { id: "kdoc", language: "kotlin", render: renderJavadoc },
 };

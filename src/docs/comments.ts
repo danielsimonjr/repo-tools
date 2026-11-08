@@ -1,5 +1,5 @@
 /**
- * The driver that the tree-sitter analysers of C# and Rust share. A grammar keeps a comment as a
+ * The driver that the tree-sitter analysers of C#, Rust, Go, Java and Kotlin share. A grammar keeps a comment as a
  * sibling node of the declaration after the comment. Thus the doc of a declaration is a run of
  * sibling nodes above the declaration. Each language gives a `Reader`: its node types and its
  * rules. The driver parses the file, walks the declarations and applies the rules of the spec.
@@ -29,6 +29,19 @@ export interface Reader {
   isDoc: (node: Node) => boolean;
   /** True for a node that the doc walk steps over: an attribute, or a comment that is not a doc. */
   isSkipped: (node: Node) => boolean;
+  /**
+   * The node whose previous siblings hold the doc. The default is the declaration. A Go type spec
+   * with no group takes its doc from the `type_declaration` above it.
+   */
+  docSiteOf?: (node: Node) => Node;
+  /**
+   * True when `comment` belongs to `below`, the node under it: the declaration, or the comment
+   * that the walk accepted before. The walk stops at the first false. The default is true, and the
+   * doc then crosses blank lines. Go and Kotlin ask for a comment with no blank line below it.
+   */
+  adjacentDoc?: (comment: Node, below: Node) => boolean;
+  /** The name of the symbol. The default is the field `name` of the declaration. */
+  nameOf?: (node: Node) => string;
   /** The node that `stub` writes above. */
   anchorOf: (node: Node) => Node;
   kindOf: (node: Node) => Kind;
@@ -36,21 +49,24 @@ export interface Reader {
   paramsOf: (node: Node) => string[];
   /** False when the declaration returns no value. Undefined for a declaration that has no result. */
   returnsValueOf: (node: Node) => boolean | undefined;
-  /** Reads a run of doc comments. The run is not empty. */
-  read: (run: Node[]) => DocText;
+  /** Reads a run of doc comments above `node`. The run is not empty. */
+  read: (run: Node[], node: Node) => DocText;
 }
 
 /**
  * The doc comments above `node`, in source order. The walk goes up the siblings. The walk steps over
  * the skipped nodes, collects the doc comments, and stops at the first other node. The compilers of
  * C# and Rust attach a doc comment to the next declaration across blank lines. Thus a blank line
- * does not stop the walk.
+ * does not stop the walk, unless the reader gives `adjacentDoc`.
  */
 function docRunAbove(node: Node, reader: Reader): Node[] {
   const run: Node[] = [];
+  let below = node;
   for (let prev = node.previousSibling; prev; prev = prev.previousSibling) {
+    if (reader.adjacentDoc && !reader.adjacentDoc(prev, below)) break;
     if (reader.isDoc(prev)) run.unshift(prev);
     else if (!reader.isSkipped(prev)) break;
+    below = prev;
   }
   return run;
 }
@@ -96,16 +112,16 @@ export async function analyseWith(
       return report;
     }
     for (const node of tree.rootNode.descendantsOfType([...reader.declarations])) {
-      const run = docRunAbove(node, reader);
+      const run = docRunAbove(reader.docSiteOf?.(node) ?? node, reader);
       const doc = run.map((n) => n.text).join("\n");
-      const text = run.length > 0 ? reader.read(run) : NO_DOC;
+      const text = run.length > 0 ? reader.read(run, node) : NO_DOC;
       const anchor = reader.anchorOf(node);
       const sym: DocSymbol = {
         file: path,
         line: node.startPosition.row + 1,
         anchorLine: anchor.startPosition.row + 1,
         anchorColumn: anchor.startPosition.column,
-        name: node.childForFieldName("name")?.text ?? "<anonymous>",
+        name: reader.nameOf?.(node) ?? node.childForFieldName("name")?.text ?? "<anonymous>",
         kind: reader.kindOf(node),
         exported: reader.isExported(node),
         hasDoc: run.length > 0,

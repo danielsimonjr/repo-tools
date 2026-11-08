@@ -419,7 +419,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 130
+      "loc": 146
     },
     {
       "file": "src/docs/csharp.ts",
@@ -496,7 +496,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 119
+      "loc": 129
     },
     {
       "file": "src/docs/typescript.ts",
@@ -566,7 +566,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 91
+      "loc": 108
     },
     {
       "file": "src/map/graph.ts",
@@ -1749,7 +1749,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 50
+      "loc": 60
     },
     {
       "file": "tests/unit/docs-python.test.ts",
@@ -1791,7 +1791,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 111
+      "loc": 154
     },
     {
       "file": "tests/unit/docs-typescript.test.ts",
