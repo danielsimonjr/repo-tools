@@ -85,15 +85,24 @@ function section(doc: string, header: string): string {
 }
 
 /**
- * The entry lines of a NumPy section: the lines at the smallest indent of the block. A description
+ * The names of a NumPy section, from the lines at the smallest indent of the block. A description
  * line sits deeper under its entry. Without this filter, a description such as `Note: x` reads as
  * a parameter named `Note` and reports as stale (rule M3).
  */
-function numpyEntries(block: string): string {
+function numpyNames(block: string): string[] {
   const lines = block.split("\n").filter((l) => pyStrip(l) !== "" && !isRule(l));
   const depth = (l: string): number => l.length - l.trimStart().length;
   const top = Math.min(...lines.map(depth));
-  return lines.filter((l) => depth(l) === top).join("\n");
+  // Each entry is matched alone, with its first description line when that line sits deeper.
+  // A match over the joined entries runs past a bare `name:` into the next entry line.
+  return lines.flatMap((line, i) => {
+    if (depth(line) !== top) return [];
+    const next = lines[i + 1];
+    const text = next !== undefined && depth(next) > top ? `${line}\n${next}` : line;
+    // Only a match that starts on the entry line counts, never one on its description line.
+    const first = [...text.matchAll(NUMPY_PARAM)][0];
+    return first?.index === 0 ? namesOf(NUMPY_PARAM, first[0]) : [];
+  });
 }
 
 /** Returns the names in `doc` matching `pattern`, with a leading `*` or `**` removed. */
@@ -104,7 +113,7 @@ function namesOf(pattern: RegExp, block: string): string[] {
 /** Returns the parameter names that the docstring documents, for the stale-name rule (M3). */
 export function documentedParams(doc: string, dialect: string): string[] {
   if (dialect === "rest") return namesOf(REST_PARAM, doc);
-  if (dialect === "numpy") return namesOf(NUMPY_PARAM, numpyEntries(section(doc, "Parameters")));
+  if (dialect === "numpy") return numpyNames(section(doc, "Parameters"));
   if (dialect === "google") {
     return namesOf(GOOGLE_PARAM, section(doc, "Args") || section(doc, "Arguments"));
   }
