@@ -87,8 +87,8 @@ export interface CoverageSymbol {
 export interface CoverageFile {
   path: string;
   language: string;
-  /** The parse error text. An empty text marks a parsed file. */
-  error: string;
+  /** The parse error text. An empty text or null marks a parsed file. */
+  error: string | null;
   dialects: string[];
   symbols: CoverageSymbol[];
 }
@@ -147,10 +147,24 @@ function symbolKey(s: CoverageSymbol): string {
   return `${s.file}:${s.line} ${s.name} ${s.kind}`;
 }
 
-function symbolsByKey(coverage: Coverage): Map<string, CoverageSymbol> {
-  const map = new Map<string, CoverageSymbol>();
-  for (const file of coverage.files) for (const s of file.symbols) map.set(symbolKey(s), s);
+/** Gives each repeated key a numbered suffix (` #2`, ` #3`...), so no entry is collapsed. */
+function keyedUnique<T>(items: Iterable<T>, keyOf: (item: T) => string): Map<string, T> {
+  const map = new Map<string, T>();
+  const seen = new Map<string, number>();
+  for (const item of items) {
+    const key = keyOf(item);
+    const n = (seen.get(key) ?? 0) + 1;
+    seen.set(key, n);
+    map.set(n === 1 ? key : `${key} #${n}`, item);
+  }
   return map;
+}
+
+function symbolsByKey(coverage: Coverage): Map<string, CoverageSymbol> {
+  return keyedUnique(
+    coverage.files.flatMap((f) => f.symbols),
+    symbolKey,
+  );
 }
 
 function onlyIn<T>(a: Map<string, T>, b: Map<string, T>): string[] {
@@ -159,8 +173,8 @@ function onlyIn<T>(a: Map<string, T>, b: Map<string, T>): string[] {
 
 /** Compares two reports, and returns every difference. Order of files and symbols does not count. */
 export function diffCoverage(base: Coverage, next: Coverage): Diff {
-  const baseFiles = new Map(base.files.map((f) => [f.path, f] as const));
-  const nextFiles = new Map(next.files.map((f) => [f.path, f] as const));
+  const baseFiles = keyedUnique(base.files, (f) => f.path);
+  const nextFiles = keyedUnique(next.files, (f) => f.path);
   const baseSymbols = symbolsByKey(base);
   const nextSymbols = symbolsByKey(next);
   const fieldChanges: string[] = [];
@@ -405,6 +419,17 @@ export async function triageHeaderTree(
   }
 }
 
+/** Returns true for a file record with a `path` text, a `symbols` list and an `error` text or null. */
+function isFileRecord(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const f = value as Record<string, unknown>;
+  return (
+    typeof f.path === "string" &&
+    Array.isArray(f.symbols) &&
+    (typeof f.error === "string" || f.error === null)
+  );
+}
+
 async function readCoverage(path: string): Promise<Coverage | { error: string }> {
   let parsed: unknown;
   try {
@@ -417,7 +442,29 @@ async function readCoverage(path: string): Promise<Coverage | { error: string }>
   if (!Array.isArray(record.files) || typeof record.summary !== "object" || !record.summary) {
     return { error: `${path} has no files and summary` };
   }
+  const bad = record.files.findIndex((f) => !isFileRecord(f));
+  if (bad >= 0) return { error: `${path} has a bad file record at files[${bad}]` };
   return parsed as Coverage;
+}
+
+/** The summary fields that the parity row reads. */
+const ROW_FIELDS = [
+  "files_scanned",
+  "symbols",
+  "exported_symbols",
+  "exported_documented",
+  "must_issues",
+  "files_unparsed",
+] as const;
+
+/** Returns the first summary field of the parity row that is not a finite number, or null. */
+export function badSummaryField(summary: CoverageSummary): string | null {
+  const record = summary as unknown as Record<string, unknown>;
+  for (const field of ROW_FIELDS) {
+    const value = record[field];
+    if (typeof value !== "number" || !Number.isFinite(value)) return field;
+  }
+  return null;
 }
 
 async function triage(coverage: Coverage, root: string, json: boolean): Promise<number> {
@@ -488,6 +535,11 @@ export async function main(argv: string[]): Promise<number> {
     return isEmpty(diff) ? 0 : 1;
   }
   if (args.mode === "summary") {
+    const bad = badSummaryField(first.summary);
+    if (bad !== null) {
+      console.error(`${args.files[0]} has no number in summary.${bad}`);
+      return 2;
+    }
     console.log(summaryRow(first, args.name ?? "", args.commit ?? ""));
     for (const [text, n] of unparsedByError(first)) console.log(`unparsed ${n}: ${text}`);
     for (const [language, n] of filesByLanguage(first)) console.log(`files ${n}: ${language}`);
