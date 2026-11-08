@@ -8,6 +8,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `docs` no longer reads a NumPy description line as a parameter. A line such as `Note: x` under
+  an entry of the Parameters section gave a parameter named `Note`, so rule M3 failed a correct
+  docstring. The entries are now the lines at the indent of the first entry.
 - `docs stub --apply` no longer reverts a Python file whose function signature continues on an
   aligned line. The stub took its indent from the last line of the signature, so the docstring
   landed deeper than the body and the file no longer parsed. The stub now takes the indent of the

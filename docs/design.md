@@ -868,6 +868,8 @@ TypeScript stub goes above the outermost `export` statement, and thus above each
 | JSDoc name with `$` or brackets | `foo$bar` gives `foo`, so M3 fails a correct doc. `[name]` is not read, so a stale optional parameter passes. | Reads both forms. |
 | Parameter named `abstract` | M3 fails a correct doc. | Reads the name from the original source. |
 | Binding pattern | `{ opts: { b } }` gives no `b`, so M3 fails a correct doc. `{ a = fallback }` gives `fallback`. | Gives the bound names: `b` and `a`. |
+| NumPy description with a colon | A description line such as `Note: x` under a parameter gives a parameter `Note`, so M3 fails a correct doc. | Reads the entry lines only: the lines at the indent of the first entry. |
+| Stub of a signature over several lines | Takes the indent from the last signature line. An aligned argument line gives a file that does not parse, and the write is reverted. | Takes the indent of the first body line. |
 
 ## 17. The clones subcommand
 
