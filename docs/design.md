@@ -815,7 +815,7 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   `map` calls a C repository `cpp`. A `.c` file uses the C grammar. Every other suffix, `.h`
   included, uses the C++ grammar, which reads C too. A function-like macro (`#define SQ(x)`) is a
   function. A data member is a property, and a function-pointer member is a property too. A
-  member line with several names (`int a, b;`) gives no symbol. The tool reports no object-like
+  member line with several names (`int a, b;`) gives one property per name. The tool reports no object-like
   macro and no file-scope variable. It also reports no enumerator, no `using` declaration and no
   `friend` declaration. It reports no forward declaration and nothing in a function body. A type definition of a struct, union or enum with
   a body is one symbol: `typedef struct Point {..} Point;` gives `Point`. A declaration is
