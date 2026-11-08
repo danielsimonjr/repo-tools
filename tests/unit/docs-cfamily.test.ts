@@ -333,7 +333,8 @@ describe("docs cfamily review fixes", () => {
   test("skips function-pointer variables and members", async () => {
     const header = await symbols("a.h", "int (*hook)(int);\nstruct S { int (*cb)(int); };\n");
     expect(header.some((symbol) => symbol.name === "hook")).toBe(false);
-    expect(header.some((symbol) => symbol.name === "cb")).toBe(false);
+    // A function-pointer data member is a data member: a property, not a method.
+    expect(byName(header, "cb").kind).toBe("property");
     const source = await symbols("a.c", "int (*fp)(int) = 0;\n");
     expect(source.some((symbol) => symbol.name === "fp")).toBe(false);
     const signal = await symbols("a.h", "void (*signal(int sig, void (*func)(int)))(int);\n");
@@ -401,5 +402,64 @@ describe("docs cfamily review fixes", () => {
       const report = await analyseCFamily("a.h", `/** Does f.\n * @${tag}\n */\nvoid f(void);\n`);
       expect(byName(report.symbols, "f").dialect).toBe("doxygen");
     }
+  });
+});
+
+describe("docs cfamily macros and data members", () => {
+  test("reports a function-like macro of a header as a function", async () => {
+    const source = [
+      "#ifndef G_H",
+      "#define G_H",
+      "/** Squares x. */",
+      "#define SQ(x) ((x) * (x))",
+      "#define LIMIT 8",
+      "#define LOG(fmt, ...) printf(fmt, __VA_ARGS__)",
+      "#endif",
+      "",
+    ].join("\n");
+    const all = await symbols("a.h", source);
+    const sq = byName(all, "SQ");
+    expect(sq.kind).toBe("function");
+    expect(sq.exported).toBe(true);
+    expect(sq.hasDoc).toBe(true);
+    expect(sq.params).toEqual(["x"]);
+    expect(sq.returnsValue).toBeUndefined();
+    expect(byName(all, "LOG").params).toEqual(["fmt"]);
+    // Object-like macros and include guards are not symbols.
+    expect(all.some((s) => s.name === "LIMIT" || s.name === "G_H")).toBe(false);
+    // A macro of a source file is not exported.
+    const src = await symbols("a.c", "#define SQ(x) ((x) * (x))\n");
+    expect(byName(src, "SQ").exported).toBe(false);
+  });
+
+  test("reports a public data member as a property", async () => {
+    const source = [
+      "struct P {",
+      "  /** The x. */",
+      "  int x;",
+      "  unsigned flag : 1;",
+      "  union { int i; float f; };",
+      "};",
+      "class K {",
+      "  int hidden;",
+      " public:",
+      "  static int count;",
+      "  int a, b;",
+      "};",
+      "",
+    ].join("\n");
+    const all = await symbols("a.h", source);
+    const x = byName(all, "x");
+    expect(x.kind).toBe("property");
+    expect(x.exported).toBe(true);
+    expect(x.hasDoc).toBe(true);
+    expect(x.params).toEqual([]);
+    expect(x.returnsValue).toBeUndefined();
+    expect(byName(all, "flag").exported).toBe(true);
+    expect(byName(all, "i").exported).toBe(true);
+    expect(byName(all, "hidden").exported).toBe(false);
+    expect(byName(all, "count").exported).toBe(true);
+    // A member line with several names is not reported, because the report keeps one name.
+    expect(all.some((s) => s.name === "a" || s.name === "b")).toBe(false);
   });
 });
