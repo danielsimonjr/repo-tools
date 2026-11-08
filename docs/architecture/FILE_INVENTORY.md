@@ -47,7 +47,7 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --- | --- | --- | --: |
 | `scripts/build.ts` | (root) | tools | tool | 118 |
 | `scripts/design-refs.ts` | (root) | tools | tool | 125 |
-| `scripts/docs-compare.ts` | (root) | tools | tool | 551 |
+| `scripts/docs-compare.ts` | (root) | tools | tool | 554 |
 | `scripts/fix-ledger-audit.ts` | (root) | tools | tool | 657 |
 | `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 660 |
 | `scripts/lockcheck.ts` | (root) | tools | tool | 128 |

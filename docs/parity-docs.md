@@ -251,10 +251,11 @@ each entry alone.
 
 The final run finds 2 changed fields in PITS-MRAS, in one symbol. The docstring of `GFINNDecoder`
 has two combined NumPy entries (`energy_hidden, entropy_hidden:` and
-`skew_hidden, friction_hidden:`). Version 2.5.0 reads no name from a combined entry. This
-version reads both names of each entry, so `doc_params` gains 4 names and M3 gives 4 more
-issues. M3 is correct here, because the docstring is on the class and the class has no
-parameters. Verdict: `2.5.0-wrong`. The diff of the other eight repositories is zero.
+`skew_hidden, friction_hidden:`). Version 2.5.0 reads no name from a combined entry. The new
+version reads both names of each entry, so `doc_params` gains 4 names. Both versions compare a
+class docstring with the signature of the class, and so give M3 for each documented name. The 4
+new M3 issues follow the same rule as the 4 earlier M3 issues. Verdict: `2.5.0-wrong`, for the reading
+of the names. The diff of the other eight repositories is zero.
 
 The `diff` mode gives a number to each repeated key in a file. Thus two symbols with one key
 count as two symbols, and the zero rows above do not hide a collapsed key.
@@ -315,9 +316,10 @@ Each rule existed before the data, and no threshold changed after the measuremen
 
 The macro and member counts of fmt come from its 6 parsed headers only.
 
-The first version of `triage` had two counting defects. It counted a macro as a function, and
-it did not read an access specifier in a struct. Both are fixed. A rerun on the final build
-gives the same counts: 18 macros and 18 members of 96 header functions.
+The first version of `triage` had two counting defects. That version counted a macro as a
+function. That version also did not read an access specifier in a struct. The final build fixes
+both defects. A rerun gives the same counts: 18 macros and 18 members, against 96 header
+functions.
 
 ## Residuals
 

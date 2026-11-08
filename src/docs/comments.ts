@@ -54,7 +54,7 @@ export interface Reader {
   nameOf?: (node: Node) => string;
   /**
    * The declarators of a declaration that declares several names (`int a, b;`), or an empty list.
-   * Each declarator gives its own symbol, with the name that `nameOf` gives for the declarator.
+   * Each declarator gives one symbol. The symbol has the name that `nameOf` gives for the declarator.
    * The symbols share the doc, the anchor and the other fields of the declaration. The default is
    * one symbol per declaration.
    */
