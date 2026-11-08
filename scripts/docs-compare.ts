@@ -11,7 +11,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Node } from "web-tree-sitter";
-import { parsesAsCFamily } from "../src/docs/cfamily.ts";
+import { parsesAsCFamily, sanitiseGuards } from "../src/docs/cfamily.ts";
 import { parsesAsKotlin } from "../src/docs/kotlin.ts";
 import { loadGrammar } from "../src/map/grammars.ts";
 
@@ -349,9 +349,10 @@ function isPublicDataMember(field: Node): boolean {
   const list = field.parent;
   const owner = list?.parent;
   if (list?.type !== "field_declaration_list" || !owner) return false;
-  if (owner.type === "struct_specifier" || owner.type === "union_specifier") return true;
-  if (owner.type !== "class_specifier") return false;
-  let access = "private";
+  const kinds = ["struct_specifier", "union_specifier", "class_specifier"];
+  if (!kinds.includes(owner.type)) return false;
+  // A struct or a union starts public. A class starts private.
+  let access = owner.type === "class_specifier" ? "private" : "public";
   for (const child of list.namedChildren) {
     if (!child) continue;
     if (child.id === field.id) break;
@@ -371,6 +372,37 @@ export function countCppHeaderShapes(root: Node): {
     externs: root.descendantsOfType(["declaration"]).filter(isExternObject).length,
     members: root.descendantsOfType(["field_declaration"]).filter(isPublicDataMember).length,
   };
+}
+
+/** Counts the function and method symbols of a header, without the rows of function-like macros. */
+export function headerFunctionCount(root: Node, symbols: CoverageSymbol[]): number {
+  const macroRows = new Set(
+    root.descendantsOfType(["preproc_function_def"]).map((n) => n.startPosition.row + 1),
+  );
+  return symbols.filter(
+    (s) => (s.kind === "function" || s.kind === "method") && !macroRows.has(s.line),
+  ).length;
+}
+
+/**
+ * Counts the shapes and the functions of one parsed header. The text has its `extern "C"` guards
+ * blanked first, as the analyser does. Returns null for a tree with an error node.
+ */
+export async function triageHeaderTree(
+  text: string,
+  symbols: CoverageSymbol[],
+): Promise<{ functions: number; macros: number; externs: number; members: number } | null> {
+  const tree = (await loadGrammar("cpp")).parse(sanitiseGuards(text));
+  if (!tree) return null;
+  try {
+    if (tree.rootNode.hasError) return null;
+    return {
+      functions: headerFunctionCount(tree.rootNode, symbols),
+      ...countCppHeaderShapes(tree.rootNode),
+    };
+  } finally {
+    tree.delete();
+  }
 }
 
 async function readCoverage(path: string): Promise<Coverage | { error: string }> {
@@ -406,20 +438,13 @@ async function triage(coverage: Coverage, root: string, json: boolean): Promise<
       causes.set(cause, (causes.get(cause) ?? 0) + 1);
       continue;
     }
-    const tree = (await loadGrammar("cpp")).parse(text);
-    if (!tree) continue;
-    try {
-      const shapes = countCppHeaderShapes(tree.rootNode);
-      totals.headers += 1;
-      totals.macros += shapes.macros;
-      totals.externs += shapes.externs;
-      totals.members += shapes.members;
-      totals.functions += file.symbols.filter(
-        (s) => s.kind === "function" || s.kind === "method",
-      ).length;
-    } finally {
-      tree.delete();
-    }
+    const shapes = await triageHeaderTree(text, file.symbols);
+    if (!shapes) continue;
+    totals.headers += 1;
+    totals.functions += shapes.functions;
+    totals.macros += shapes.macros;
+    totals.externs += shapes.externs;
+    totals.members += shapes.members;
   }
   if (json) {
     const counts = Object.fromEntries(CAUSES.map((c) => [c, causes.get(c) ?? 0]));
