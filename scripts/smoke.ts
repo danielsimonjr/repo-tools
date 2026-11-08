@@ -272,7 +272,7 @@ const DOCUMENTED: Readonly<Record<string, string>> = {
   "G.java": "/** Holds one. */\npublic class G {}\n",
   "h.kt": "/** Returns one. */\nfun h() {}\n",
   "i.h": "/** Returns one. */\nint i(void);\n",
-  "j.h": "/** Holds one. */\nstruct J { int x; };\n",
+  "j.h": "/** Holds nothing. */\nstruct J {};\n",
   "k.php": "<?php\n/** Returns one. */\nfunction k() {}\n",
   "l.rb": "# Returns one.\ndef l; end\n",
 };

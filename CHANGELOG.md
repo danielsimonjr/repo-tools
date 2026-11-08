@@ -100,6 +100,10 @@ All notable changes to this project are recorded in this file. The format follow
 - The C and C++ reader reads the return type of a template function, exports a static template
   member of a struct, names a conversion operator `operator int`, gives the parameter `args` for
   `Args&&... args`, and finds the doc above a single `extern "C" int f(int);`.
+- The C and C++ reader reports a function-like macro of a header (`#define SQ(x) ...`) as a
+  function, and a public data member as a property. A function-pointer member
+  (`int (*cb)(int);`) is a property. A member line with several names (`int a, b;`), an
+  object-like macro and an `extern` variable are not reported.
 - The Doxygen dialect also holds `@ingroup`, `@def`, `@var`, `@fn`, `@typedef`, `@struct`, `@enum`
   and `@copydoc`. The PHPDoc dialect also holds `@psalm-*` and `@phpstan-*` tags.
 - A PHPDoc or Javadoc that holds only an inline tag (`/** {@inheritDoc} */`) has an empty summary.

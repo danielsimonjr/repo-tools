@@ -23,6 +23,7 @@ const DECLARATIONS: readonly string[] = [
   "alias_declaration",
   "concept_definition",
   "namespace_definition",
+  "preproc_function_def",
 ];
 
 const LEAF_TYPES: ReadonlySet<string> = new Set([
@@ -398,8 +399,12 @@ function reports(node: Node): boolean {
     return false;
   }
   const type = node.type;
-  if (type === "declaration" || type === "field_declaration") {
+  if (type === "declaration") {
     return functionDeclaratorOf(node) !== null;
+  }
+  if (type === "field_declaration") {
+    // A data member with several names (`int a, b;`) is not reported: the report keeps one name.
+    return !isDataMember(node) || node.childrenForFieldName("declarator").length === 1;
   }
   if (
     type === "struct_specifier" ||
@@ -420,6 +425,15 @@ function reports(node: Node): boolean {
 }
 
 /**
+ * Tell whether a field declaration is a data member: it has no function declarator, or its
+ * function declarator names a pointer object (`int (*cb)(int);`).
+ */
+function isDataMember(node: Node): boolean {
+  const fn = functionDeclaratorOf(node);
+  return fn === null || namesPointerObject(fn);
+}
+
+/**
  * Return the symbol kind of a reported declaration.
  */
 function kindOf(node: Node): Kind {
@@ -427,6 +441,9 @@ function kindOf(node: Node): Kind {
   const inFieldList = wrapperOf(node).parent?.type === "field_declaration_list";
   if (type === "function_definition") {
     return inFieldList ? "method" : "function";
+  }
+  if (type === "field_declaration" && isDataMember(node)) {
+    return "property";
   }
   if (type === "declaration" || type === "field_declaration") {
     return inFieldList ? "method" : "function";
@@ -465,7 +482,7 @@ function kindOf(node: Node): Kind {
 function nameOf(node: Node): string {
   const type = node.type;
   if (type === "function_definition" || type === "declaration" || type === "field_declaration") {
-    const declarator = functionDeclaratorOf(node);
+    const declarator = functionDeclaratorOf(node) ?? node.childForFieldName("declarator");
     return declarator ? leafName(leafOf(declarator)) : "<anonymous>";
   }
   if (type === "type_definition") {
@@ -547,6 +564,15 @@ function isExported(node: Node, header: boolean): boolean {
  * Return the parameter names of a function declaration.
  */
 function paramsOf(node: Node): string[] {
+  if (node.type === "preproc_function_def") {
+    const parameters = node.childForFieldName("parameters");
+    return (parameters?.namedChildren ?? [])
+      .filter((child) => child.type === "identifier")
+      .map((child) => child.text);
+  }
+  if (node.type === "field_declaration" && isDataMember(node)) {
+    return [];
+  }
   const declarator = functionDeclaratorOf(node);
   if (!declarator) {
     return [];
@@ -625,7 +651,7 @@ function pathHasPointer(top: Node, target: Node): boolean {
  */
 function returnsValueOf(node: Node): boolean | undefined {
   const kind = kindOf(node);
-  if (kind !== "function" && kind !== "method") {
+  if ((kind !== "function" && kind !== "method") || node.type === "preproc_function_def") {
     return undefined;
   }
   const declarator = functionDeclaratorOf(node);
@@ -830,7 +856,7 @@ function scopeOf(node: Node): string {
  * export flag on an undocumented copy of a documented function.
  */
 function shadowKeyOf(node: Node): string | null {
-  if (kindOf(node) !== "function") {
+  if (node.type === "preproc_function_def" || kindOf(node) !== "function") {
     return null;
   }
   return JSON.stringify([scopeOf(node), nameOf(node), paramsOf(node)]);
