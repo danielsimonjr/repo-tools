@@ -17,6 +17,14 @@ All notable changes to this project are recorded in this file. The format follow
   and 2.11 MB for Ruby. The PHP grammar is `tree-sitter-php.wasm`, which reads a file that mixes
   HTML and PHP. `map` still refuses a repository of these languages. For a C or C++ repository it
   now counts `.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` and `.hxx` files as `cpp`.
+- Three new analysers for `repo-tools docs`: `cfamily.ts` (C and C++, one language id `cpp`),
+  `php.ts` and `ruby.ts`. They are not yet registered, so `docs` does not read these files yet.
+  In a header, a C or C++ declaration is exported unless it is `static`, private, in an anonymous
+  namespace, inside a function, or an out-of-class definition such as `A::f`. A source file (`.c`, `.cpp`, `.cc`, `.cxx`) exports nothing. A
+  guard of the form `#ifdef __cplusplus` / `extern "C" {` is blanked before the parse. A PHP
+  declaration is exported unless it is `private`, nested in a function, or in an anonymous class.
+  A Ruby method is exported unless a `private` or `protected` section, `private def`,
+  `private :name` or a block hides it. The dialects are `doxygen`, `phpdoc` and `yard`.
 - The doc driver of the tree-sitter analysers takes a fourth optional hook, `reports`. A reader
   uses it to skip a node of a declaration type that is not a symbol, for example a variable
   declaration. `stub` has three new styles: `doxygen` (a `@brief` summary line, `@param` and

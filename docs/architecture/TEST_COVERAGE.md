@@ -8,11 +8,11 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 94 |
-| Total Test Files | 148 |
-| Source Files with Tests | 77 |
+| Total Source Files | 97 |
+| Total Test Files | 151 |
+| Source Files with Tests | 80 |
 | Source Files without Tests | 17 |
-| Coverage (raw, direct-import) | **81.9%** |
+| Coverage (raw, direct-import) | **82.5%** |
 ---
 
 ## Source Files Not Imported By A Test
@@ -104,6 +104,7 @@ The following 17 source files are not directly imported by any test file:
 | `depgraph/types.ts` | `depgraph-analysis.test.ts`, `depgraph-f22.test.ts`, `depgraph-f26.test.ts`, `depgraph-f27.test.ts`, `depgraph-parse.test.ts`, `depgraph-report.test.ts`, `depgraph-scan.test.ts`, `map-adapter.test.ts`, `shared-helpers.test.ts` |
 | `depgraph/workspaces.ts` | `depgraph-f13.test.ts`, `depgraph-f34.test.ts`, `depgraph-f36.test.ts`, `depgraph-scan.test.ts` |
 | `docs/analyse.ts` | `docs-discovery.test.ts` |
+| `docs/cfamily.ts` | `docs-cfamily.test.ts` |
 | `docs/comments.ts` | `docs-comments.test.ts` |
 | `docs/csharp.ts` | `docs-csharp.test.ts` |
 | `docs/discovery.ts` | `docs-discovery.test.ts` |
@@ -112,11 +113,13 @@ The following 17 source files are not directly imported by any test file:
 | `docs/java.ts` | `docs-java.test.ts`, `docs-styles.test.ts` |
 | `docs/kotlin.ts` | `docs-kotlin.test.ts`, `docs-styles.test.ts` |
 | `docs/languages.ts` | `docs-languages.test.ts` |
-| `docs/model.ts` | `docs-command.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
+| `docs/model.ts` | `docs-cfamily.test.ts`, `docs-command.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
+| `docs/php.ts` | `docs-php.test.ts` |
 | `docs/python.ts` | `docs-python.test.ts`, `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/report.ts` | `docs-report.test.ts` |
+| `docs/ruby.ts` | `docs-ruby.test.ts` |
 | `docs/rust.ts` | `docs-rust.test.ts` |
-| `docs/stub.ts` | `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
+| `docs/stub.ts` | `docs-cfamily.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-php.test.ts`, `docs-ruby.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/styles.ts` | `docs-languages.test.ts`, `docs-styles.test.ts` |
 | `docs/typescript.ts` | `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
 | `src/io-types.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `depgraph-report.test.ts`, `map-command.test.ts`, `map-verification.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
@@ -235,6 +238,7 @@ The following 17 source files are not directly imported by any test file:
 | `unit/depgraph-scan.test.ts` | 4 files |
 | `unit/depgraph-tsx.test.ts` | 0 files |
 | `unit/design-refs.test.ts` | 0 files |
+| `unit/docs-cfamily.test.ts` | 3 files |
 | `unit/docs-command.test.ts` | 1 files |
 | `unit/docs-comments.test.ts` | 1 files |
 | `unit/docs-csharp.test.ts` | 3 files |
@@ -244,9 +248,11 @@ The following 17 source files are not directly imported by any test file:
 | `unit/docs-java.test.ts` | 3 files |
 | `unit/docs-kotlin.test.ts` | 3 files |
 | `unit/docs-languages.test.ts` | 3 files |
+| `unit/docs-php.test.ts` | 2 files |
 | `unit/docs-python.test.ts` | 2 files |
 | `unit/docs-report.test.ts` | 2 files |
 | `unit/docs-review.test.ts` | 2 files |
+| `unit/docs-ruby.test.ts` | 2 files |
 | `unit/docs-rust.test.ts` | 3 files |
 | `unit/docs-stub.test.ts` | 4 files |
 | `unit/docs-styles.test.ts` | 8 files |

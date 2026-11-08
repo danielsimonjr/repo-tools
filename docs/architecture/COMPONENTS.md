@@ -688,9 +688,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 316 | dependency-graph.json |
-| totalFunctions | 443 | dependency-graph.json |
+| totalSourceFiles | 322 | dependency-graph.json |
+| totalFunctions | 450 | dependency-graph.json |
 | totalInterfaces | 148 | dependency-graph.json |
 | totalClasses | 15 | dependency-graph.json |
-| totalExports | 772 | dependency-graph.json |
+| totalExports | 779 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
