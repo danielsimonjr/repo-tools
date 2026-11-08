@@ -70,9 +70,12 @@ function section(doc: string, header: string): string {
       else if (stripped === header && underlined) inside = true;
       continue;
     }
+    // A known header ends the block. So does any NumPy header: a text line that a dash rule
+    // underlines, for example `Warnings`, which is not in the list of known names.
     if (
-      SECTION_HEADERS.has(stripped.replace(/:+$/, "")) &&
-      (stripped.endsWith(":") || underlined)
+      (SECTION_HEADERS.has(stripped.replace(/:+$/, "")) &&
+        (stripped.endsWith(":") || underlined)) ||
+      (underlined && stripped !== "")
     ) {
       break;
     }

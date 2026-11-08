@@ -98,13 +98,14 @@ function headerEnd(lines: string[], start: number): number {
 
 /**
  * The indent of the body of the definition that starts at line `start` and whose signature ends at
- * line `end`. It is the indent of the first non-blank line after `end`, when that line is deeper
+ * line `end`. It is the indent of the first code line after `end`, when that line is deeper
  * than the `def` line. Otherwise it is the `def` indent and four spaces. A continuation line of the
  * signature can align its arguments at any column, so it never sets the indent.
  */
 function bodyIndent(lines: string[], start: number, end: number): string {
   const head = indentOf(lines[start] ?? "");
-  const next = lines.slice(end + 1).find((l) => l.trim() !== "");
+  // A comment line can sit at any column, so a blank line and a comment line never set the indent.
+  const next = lines.slice(end + 1).find((l) => l.trim() !== "" && !l.trim().startsWith("#"));
   const indent = next === undefined ? "" : indentOf(next);
   return indent.length > head.length ? indent : `${head}    `;
 }
