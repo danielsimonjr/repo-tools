@@ -8,7 +8,7 @@
  */
 import type { Node } from "web-tree-sitter";
 import { loadGrammar, parserFor } from "../map/grammars.ts";
-import { NON_SPACE, pySplitlines, pyStrip, S, W } from "../py.ts";
+import { pySplitlines, pyStrip, S, W } from "../py.ts";
 import { proseOf } from "../ste/prose.ts";
 import { type DocSymbol, type FileReport, newReport } from "./model.ts";
 import { applyRules } from "./rules.ts";
@@ -23,7 +23,9 @@ const REST = new RegExp(`^${S}*:param${S}+${REST_TYPE}\\*{0,2}${W}+${S}*:`, "mu"
 
 // The optional "(type)" group does not capture, so each match yields the name alone.
 const GOOGLE_PARAM = new RegExp(`^${S}{1,8}(\\*{0,2}${W}+)${S}*(?:\\([^)]*\\))?${S}*:`, "gmu");
-const NUMPY_PARAM = new RegExp(`^${S}*(\\*{0,2}${W}+)${S}*:${S}*${NON_SPACE}`, "gmu");
+// A NumPy entry line: one name or several names split by commas (`x, y : int`), then a colon.
+// The type after the colon is optional, so a bare `x:` is an entry too.
+const NUMPY_ENTRY = new RegExp(`^${S}*(\\*{0,2}${W}+(?:${S}*,${S}*\\*{0,2}${W}+)*)${S}*:`, "u");
 const REST_PARAM = new RegExp(`^${S}*:param${S}+${REST_TYPE}(\\*{0,2}${W}+)${S}*:`, "gmu");
 
 /** The section headers that end an `Args` or `Parameters` block. */
@@ -93,15 +95,12 @@ function numpyNames(block: string): string[] {
   const lines = block.split("\n").filter((l) => pyStrip(l) !== "" && !isRule(l));
   const depth = (l: string): number => l.length - l.trimStart().length;
   const top = Math.min(...lines.map(depth));
-  // Each entry is matched alone, with its first description line when that line sits deeper.
-  // A match over the joined entries runs past a bare `name:` into the next entry line.
-  return lines.flatMap((line, i) => {
+  // Each entry line at the top depth is matched alone. A deeper line is a description.
+  return lines.flatMap((line) => {
     if (depth(line) !== top) return [];
-    const next = lines[i + 1];
-    const text = next !== undefined && depth(next) > top ? `${line}\n${next}` : line;
-    // Only a match that starts on the entry line counts, never one on its description line.
-    const first = [...text.matchAll(NUMPY_PARAM)][0];
-    return first?.index === 0 ? namesOf(NUMPY_PARAM, first[0]) : [];
+    const names = line.match(NUMPY_ENTRY)?.[1];
+    if (names === undefined) return [];
+    return names.split(",").map((name) => name.trim().replace(/^\*+/, ""));
   });
 }
 
