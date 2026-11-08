@@ -1,6 +1,6 @@
 /**
- * The optional hooks of the shared doc driver: `docSiteOf`, `adjacentDoc`, `nameOf` and the node
- * argument of `read`. The tests run a small Go reader. C# and Rust use none of the hooks, and their
+ * The optional hooks of the shared doc driver: `docSiteOf`, `adjacentDoc`, `nameOf`, `reports` and
+ * the node argument of `read`. The tests run a small Go reader. C# and Rust use none of the hooks, and their
  * own test files hold their behaviour.
  */
 import { describe, expect, test } from "bun:test";
@@ -69,5 +69,24 @@ describe("the optional hooks of the doc driver", () => {
     const [f] = await symbols("package a\n// F does it.\nfunc F() {}\n");
     expect(f?.name).toBe("N:F");
     expect(seen).toEqual(["function_declaration:1"]);
+  });
+
+  test("reports drops a node of a declaration type that is not a symbol", async () => {
+    const src = "package a\n\n// T is a type.\ntype T struct{}\n\n// F does it.\nfunc F() {}\n";
+    const all = await symbols(src);
+    expect(all.map((s) => s.name)).toEqual(["N:T", "N:F"]);
+    const reader: Reader = { ...GO, reports: (node) => node.type !== "type_spec" };
+    const kept = (await analyseWith(reader, "a.go", src)).symbols;
+    expect(kept.map((s) => s.name)).toEqual(["N:F"]);
+  });
+
+  test("reports sees the node, so it can reject one node of a type and keep another", async () => {
+    const src = "package a\n\nfunc F() {}\n\nfunc G() {}\n";
+    const reader: Reader = {
+      ...GO,
+      reports: (node) => node.childForFieldName("name")?.text !== "F",
+    };
+    const kept = (await analyseWith(reader, "a.go", src)).symbols;
+    expect(kept.map((s) => s.name)).toEqual(["N:G"]);
   });
 });

@@ -156,6 +156,70 @@ describe("godoc, javadoc and kdoc", () => {
   }
 });
 
+describe("doxygen, phpdoc and yard", () => {
+  const M = STUB_MARKER;
+  const METHOD: DocSymbol = { ...FN, name: "run", kind: "method" };
+  const TYPE: DocSymbol = { ...FN, name: "Box", kind: "struct", params: [] };
+  const SUMMARY = `${M} state what this does, in one active-voice sentence.`;
+  const PARAM = `${M} state what it is. Do not repeat the type.`;
+  const RETURNS = `${M} state what the caller gets back.`;
+
+  test("doxygen opens the block with a @brief line, then @param and @return", () => {
+    expect(STYLES.doxygen?.language).toBe("cpp");
+    expect(STYLES.doxygen?.render(FN, "  ")).toEqual([
+      "  /**",
+      `   * @brief ${SUMMARY}`,
+      "   *",
+      `   * @param a ${PARAM}`,
+      `   * @param b ${PARAM}`,
+      `   * @return ${RETURNS}`,
+      "   */",
+    ]);
+  });
+
+  test("doxygen writes no @param for a type and no @return for a void function", () => {
+    expect(STYLES.doxygen?.render(TYPE, "")).toEqual(["/**", ` * @brief ${SUMMARY}`, " */"]);
+    const none = STYLES.doxygen?.render({ ...METHOD, returnsValue: false }, "").join("\n") ?? "";
+    expect(none).not.toContain("@return");
+    expect(none).toContain("@param a");
+  });
+
+  test("the summary line of the other block styles is unchanged", () => {
+    expect(STYLES.javadoc?.render(TYPE, "")).toEqual(["/**", ` * ${SUMMARY}`, " */"]);
+    expect(STYLES.tsdoc?.render(TYPE, "")).toEqual(["/**", ` * ${SUMMARY}`, " */"]);
+  });
+
+  test("phpdoc writes @param $name with no type slot, and @return", () => {
+    expect(STYLES.phpdoc?.language).toBe("php");
+    expect(STYLES.phpdoc?.render(FN, "")).toEqual([
+      "/**",
+      ` * ${SUMMARY}`,
+      " *",
+      ` * @param $a ${PARAM}`,
+      ` * @param $b ${PARAM}`,
+      ` * @return ${RETURNS}`,
+      " */",
+    ]);
+    const none = STYLES.phpdoc?.render({ ...METHOD, returnsValue: false }, "").join("\n") ?? "";
+    expect(none).not.toContain("@return");
+    expect(STYLES.phpdoc?.render(TYPE, "").join("\n")).not.toContain("@");
+  });
+
+  test("yard writes # lines with @param name and @return, and no type bracket", () => {
+    expect(STYLES.yard?.language).toBe("ruby");
+    expect(STYLES.yard?.render(FN, "  ")).toEqual([
+      `  # ${SUMMARY}`,
+      `  # @param a ${PARAM}`,
+      `  # @param b ${PARAM}`,
+      `  # @return ${RETURNS}`,
+    ]);
+    expect(STYLES.yard?.render(TYPE, "")).toEqual([`# ${SUMMARY}`]);
+    const none = STYLES.yard?.render({ ...METHOD, returnsValue: false }, "").join("\n") ?? "";
+    expect(none).not.toContain("@return");
+    expect(none).not.toContain("[");
+  });
+});
+
 describe("godoc, javadoc and kdoc are read back as their dialect", () => {
   /** Stubs the symbol `name` of `source` in `style`, applies the stub and analyses the result. */
   async function readBack(

@@ -101,7 +101,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/depgraph/types.ts` | @danielsimonjr/repo-tools | src | reachable | 210 |
 | `src/depgraph/workspaces.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/analyse.ts` | @danielsimonjr/repo-tools | src | reachable | 60 |
-| `src/docs/comments.ts` | @danielsimonjr/repo-tools | src | reachable | 156 |
+| `src/docs/comments.ts` | @danielsimonjr/repo-tools | src | reachable | 162 |
 | `src/docs/csharp.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 240 |
 | `src/docs/go.ts` | @danielsimonjr/repo-tools | src | reachable | 179 |
@@ -115,7 +115,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/docs/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
 | `src/docs/rust.ts` | @danielsimonjr/repo-tools | src | reachable | 179 |
 | `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 185 |
-| `src/docs/styles.ts` | @danielsimonjr/repo-tools | src | reachable | 129 |
+| `src/docs/styles.ts` | @danielsimonjr/repo-tools | src | reachable | 154 |
 | `src/docs/typescript.ts` | @danielsimonjr/repo-tools | src | reachable | 404 |
 | `src/io-types.ts` | @danielsimonjr/repo-tools | src | reachable | 10 |
 | `src/io.ts` | @danielsimonjr/repo-tools | src | reachable | 47 |
@@ -125,7 +125,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/map/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 85 |
 | `src/map/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
 | `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 463 |
-| `src/map/grammars.ts` | @danielsimonjr/repo-tools | src | reachable | 108 |
+| `src/map/grammars.ts` | @danielsimonjr/repo-tools | src | reachable | 120 |
 | `src/map/graph.ts` | @danielsimonjr/repo-tools | src | reachable | 659 |
 | `src/map/layers.ts` | @danielsimonjr/repo-tools | src | reachable | 76 |
 | `src/map/markdown.ts` | @danielsimonjr/repo-tools | src | reachable | 232 |
@@ -290,7 +290,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-tsx.test.ts` | (root) | tests | test | 52 |
 | `tests/unit/design-refs.test.ts` | (root) | tests | test | 148 |
 | `tests/unit/docs-command.test.ts` | (root) | tests | test | 553 |
-| `tests/unit/docs-comments.test.ts` | (root) | tests | test | 73 |
+| `tests/unit/docs-comments.test.ts` | (root) | tests | test | 92 |
 | `tests/unit/docs-csharp.test.ts` | (root) | tests | test | 194 |
 | `tests/unit/docs-discovery.test.ts` | (root) | tests | test | 230 |
 | `tests/unit/docs-go.test.ts` | (root) | tests | test | 195 |
@@ -298,13 +298,13 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/docs-helpers.ts` | (root) | tests | test | 88 |
 | `tests/unit/docs-java.test.ts` | (root) | tests | test | 272 |
 | `tests/unit/docs-kotlin.test.ts` | (root) | tests | test | 302 |
-| `tests/unit/docs-languages.test.ts` | (root) | tests | test | 50 |
+| `tests/unit/docs-languages.test.ts` | (root) | tests | test | 57 |
 | `tests/unit/docs-python.test.ts` | (root) | tests | test | 380 |
 | `tests/unit/docs-report.test.ts` | (root) | tests | test | 158 |
 | `tests/unit/docs-review.test.ts` | (root) | tests | test | 249 |
 | `tests/unit/docs-rust.test.ts` | (root) | tests | test | 210 |
 | `tests/unit/docs-stub.test.ts` | (root) | tests | test | 281 |
-| `tests/unit/docs-styles.test.ts` | (root) | tests | test | 218 |
+| `tests/unit/docs-styles.test.ts` | (root) | tests | test | 282 |
 | `tests/unit/docs-typescript.test.ts` | (root) | tests | test | 606 |
 | `tests/unit/dynamic-imports.ts` | (root) | tests | test | 25 |
 | `tests/unit/entry-roots-build-configs.test.ts` | (root) | tests | test | 115 |
