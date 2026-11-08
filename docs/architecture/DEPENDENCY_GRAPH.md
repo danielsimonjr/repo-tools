@@ -1163,12 +1163,15 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../map/discovery.ts` | `CSHARP_SKIP_DIRS, suffixOf` | Import |
+| `./cfamily.ts` | `analyseCFamily, parsesAsCFamily` | Import |
 | `./csharp.ts` | `analyseCSharp, parsesAsCSharp` | Import |
 | `./go.ts` | `analyseGo, parsesAsGo` | Import |
 | `./java.ts` | `analyseJava, parsesAsJava` | Import |
 | `./kotlin.ts` | `analyseKotlin, parsesAsKotlin` | Import |
 | `./model.ts` | `FileReport` | Import (type-only) |
+| `./php.ts` | `analysePhp, parsesAsPhp` | Import |
 | `./python.ts` | `analysePython, parsesAsPython` | Import |
+| `./ruby.ts` | `analyseRuby, parsesAsRuby` | Import |
 | `./rust.ts` | `analyseRust, parsesAsRust` | Import |
 | `./typescript.ts` | `analyseTypeScript, parsesAsTypeScript` | Import |
 
@@ -1988,10 +1991,10 @@ The codebase is organized into the following modules:
 | `src/config` | 5 files | 11 files |
 | `src/depgraph/paths` | 0 files | 16 files |
 | `src/depgraph/types` | 0 files | 16 files |
+| `src/docs/languages` | 12 files | 4 files |
 | `src/map/graph` | 13 files | 2 files |
 | `src/map/grammars` | 0 files | 14 files |
 | `src/ste/prose` | 2 files | 12 files |
-| `src/docs/languages` | 9 files | 4 files |
 | `src/map/reports` | 10 files | 3 files |
 | `src/clones/index` | 11 files | 1 file |
 | `src/docs/index` | 11 files | 1 file |
@@ -2246,7 +2249,7 @@ graph TD
 |----------|-------|
 | Total Source Files | 322 |
 | Subsystems | 10 |
-| Total Lines of Code | 50368 |
+| Total Lines of Code | 50463 |
 | Total Exports | 779 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |

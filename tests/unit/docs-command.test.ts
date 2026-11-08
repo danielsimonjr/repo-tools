@@ -171,10 +171,10 @@ describe("docs check: the gate on the whole repository", () => {
         const run = await cli(["docs", action, repo(swift())]);
         expect(run.code).toBe(1);
         expect(run.err).toContain(
-          "this repo is swift: 3 swift file(s) against 1 TypeScript, JavaScript, Python, C#, Rust, Go, Java or Kotlin file(s)",
+          "this repo is swift: 3 swift file(s) against 1 TypeScript, JavaScript, Python, C#, Rust, Go, Java, Kotlin, C, C++, PHP or Ruby file(s)",
         );
         expect(run.err).toContain(
-          "repo-tools docs reads TypeScript, JavaScript, Python, C#, Rust, Go, Java and Kotlin only",
+          "repo-tools docs reads TypeScript, JavaScript, Python, C#, Rust, Go, Java, Kotlin, C, C++, PHP and Ruby only",
         );
         expect(run.out).not.toContain("PASS");
       });

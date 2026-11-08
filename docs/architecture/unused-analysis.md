@@ -7,9 +7,9 @@
 ## Summary
 
 - **Files with no in-repo importer**: 2
-- **Dormant files**: 5
+- **Dormant files**: 2
   - **Orphaned (reachable from nothing)**: 2
-  - **Test-only (only a test reaches them)**: 3
+  - **Test-only (only a test reaches them)**: 0
 - **Potentially unused exports**: 119
   - **Unreferenced anywhere**: 3
   - **Referenced in their own module**: 116
@@ -34,9 +34,7 @@ Source files that no root and no test reaches. Verify each one before you delete
 
 Source files that only a test reaches. They ship nothing, but a test uses them.
 
-- `src/docs/cfamily.ts`
-- `src/docs/php.ts`
-- `src/docs/ruby.ts`
+_None._
 
 ## Files with no in-repo importer
 

@@ -1,9 +1,9 @@
 {
   "totalFiles": 322,
   "byDisposition": {
-    "reachable": 92,
+    "reachable": 95,
     "build-entry": 1,
-    "test-only": 3,
+    "test-only": 0,
     "orphan": 2,
     "test": 212,
     "tool": 11,
@@ -76,7 +76,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 402
+      "loc": 406
     },
     {
       "file": "scripts/update-depgraph-goldens.ts",
@@ -418,7 +418,7 @@
       "file": "src/docs/cfamily.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 755
     },
     {
@@ -475,7 +475,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 141
+      "loc": 178
     },
     {
       "file": "src/docs/model.ts",
@@ -488,7 +488,7 @@
       "file": "src/docs/php.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
-      "disposition": "test-only",
+      "disposition": "reachable",
       "loc": 218
     },
     {
@@ -509,8 +509,8 @@
       "file": "src/docs/ruby.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
-      "disposition": "test-only",
-      "loc": 297
+      "disposition": "reachable",
+      "loc": 299
     },
     {
       "file": "src/docs/rules.ts",
@@ -1784,7 +1784,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 230
+      "loc": 235
     },
     {
       "file": "tests/unit/docs-go.test.ts",
@@ -1826,7 +1826,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 57
+      "loc": 50
     },
     {
       "file": "tests/unit/docs-php.test.ts",
@@ -1861,7 +1861,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 144
+      "loc": 152
     },
     {
       "file": "tests/unit/docs-rust.test.ts",
@@ -1882,7 +1882,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 282
+      "loc": 328
     },
     {
       "file": "tests/unit/docs-typescript.test.ts",

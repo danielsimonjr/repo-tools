@@ -11,7 +11,7 @@
  * a `map` run that loads the fixture extension (12.1 step 7), the drift gate: `check` passes
  * a matching claim and fails a drifting one, each in a temp folder, the doc gate: `docs check`
  * passes one documented file of each language it reads (TypeScript, TSX, Python, C#, Rust, Go,
- * Java and Kotlin) and fails an undocumented export, and the clone
+ * Java, Kotlin, C and C++, PHP and Ruby) and fails an undocumented export, and the clone
  * finder: `clones` groups a renamed copy and leaves a function of another shape alone.
  */
 import {
@@ -271,6 +271,10 @@ const DOCUMENTED: Readonly<Record<string, string>> = {
   "f.go": "package p\n\n// F returns one.\nfunc F() {}\n",
   "G.java": "/** Holds one. */\npublic class G {}\n",
   "h.kt": "/** Returns one. */\nfun h() {}\n",
+  "i.h": "/** Returns one. */\nint i(void);\n",
+  "j.h": "/** Holds one. */\nstruct J { int x; };\n",
+  "k.php": "<?php\n/** Returns one. */\nfunction k() {}\n",
+  "l.rb": "# Returns one.\ndef l; end\n",
 };
 
 function docsGate(command: string[]): string | undefined {

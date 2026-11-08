@@ -157,7 +157,7 @@ Run `map` first.
 | Action | Meaning |
 |---|---|
 | `scan [--out=<dir>]` | Measures the coverage. Writes `COVERAGE.md` and `coverage.json`. The default folder is `docs/code-docs`. |
-| `stub [--apply] [--path=<path>] [--style=<style>]` | Plans a skeleton comment for each exported symbol that has none. A dry run is the default. Each stub holds `TODO:`. `--style` selects the form: `tsdoc` (default) or `jsdoc` for TypeScript and JavaScript, `google` (default), `numpy` or `rest` for Python, `xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java, `kdoc` for Kotlin, or `auto`. A style of another language exits 2. |
+| `stub [--apply] [--path=<path>] [--style=<style>]` | Plans a skeleton comment for each exported symbol that has none. A dry run is the default. Each stub holds `TODO:`. `--style` selects the form: `tsdoc` (default) or `jsdoc` for TypeScript and JavaScript, `google` (default), `numpy` or `rest` for Python, `xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java, `kdoc` for Kotlin, `doxygen` for C and C++, `phpdoc` for PHP, `yard` for Ruby, or `auto`. A style of another language exits 2. |
 | `check [--paths <path>... \| --paths-from=<file>]` | The gate. Exit 1 on a MUST issue or a file that does not parse. |
 
 The MUST rules decide the exit code. The SHOULD rules are reported only.

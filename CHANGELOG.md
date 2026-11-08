@@ -16,20 +16,31 @@ All notable changes to this project are recorded in this file. The format follow
   the executables carry four more `.wasm` files: 0.63 MB for C, 3.43 MB for C++, 1.06 MB for PHP
   and 2.11 MB for Ruby. The PHP grammar is `tree-sitter-php.wasm`, which reads a file that mixes
   HTML and PHP. `map` still refuses a repository of these languages. For a C or C++ repository it
-  now counts `.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` and `.hxx` files as `cpp`.
-- Three new analysers for `repo-tools docs`: `cfamily.ts` (C and C++, one language id `cpp`),
-  `php.ts` and `ruby.ts`. They are not yet registered, so `docs` does not read these files yet.
+  now counts `.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` and `.hxx` files as `cpp`. The
+  unpacked package grows from about 15.0 MB to 22.2 MB (`npm pack --dry-run`, 19 files). The
+  compiled Windows executable is 108 MB.
+- `repo-tools docs` reads C and C++ (`.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh`, `.hxx`),
+  PHP (`.php`) and Ruby (`.rb`). One registry entry, `cpp`, reads both C and C++. A `.c` file
+  therefore reports the language `cpp` in `coverage.json`, and `map` calls a C repository `cpp`.
   In a header, a C or C++ declaration is exported unless it is `static`, private, in an anonymous
-  namespace, inside a function, or an out-of-class definition such as `A::f`. A source file (`.c`, `.cpp`, `.cc`, `.cxx`) exports nothing. A
-  guard of the form `#ifdef __cplusplus` / `extern "C" {` is blanked before the parse. A PHP
-  declaration is exported unless it is `private`, nested in a function, or in an anonymous class.
-  A Ruby method is exported unless a `private` or `protected` section, `private def`,
-  `private :name` or a block hides it. The dialects are `doxygen`, `phpdoc` and `yard`.
+  namespace, inside a function, or an out-of-class definition such as `A::f`. A source file
+  (`.c`, `.cpp`, `.cc`, `.cxx`) exports nothing, because the header is the contract. A header
+  guard of the form `#ifdef __cplusplus` / `extern "C" {` is blanked before the parse, so every
+  position stays true. A PHP declaration is exported unless it is a `private` method, is nested
+  in a function, or is in an anonymous class. A Ruby class or module is exported unless a method
+  encloses it, and a Ruby method is exported unless a `private` or `protected` section,
+  `private def`, `private :name`, `private_class_method` or a block hides it. The new dialects are
+  `doxygen`, `phpdoc` and `yard`. The `stub` styles have the same names. A Ruby style `rdoc` is
+  not built, because no evidence selects it. Limits: a C++ function with an array-reference
+  parameter (`void g(int (&a)[3]);`) is read as a variable by the grammar, so `docs` reports
+  that file as unparsed. An export macro before the type (`EXPORT_API int f();`) is an error
+  node, so `docs` reports that file as unparsed. An Objective-C `.h` file reads as C++ and is
+  unparsed. A PHP doc between an attribute list and its declaration is not found.
 - The doc driver of the tree-sitter analysers takes a fourth optional hook, `reports`. A reader
   uses it to skip a node of a declaration type that is not a symbol, for example a variable
   declaration. `stub` has three new styles: `doxygen` (a `@brief` summary line, `@param` and
   `@return`), `phpdoc` (`@param $name`, with no type) and `yard` (`#` lines with `@param name` and
-  `@return`, with no type bracket). The styles need the analysers of their languages, which follow.
+  `@return`, with no type bracket).
 - `repo-tools docs` reads Go (`.go`), Java (`.java`) and Kotlin (`.kt`, `.kts`). A Go name is
   exported when its first letter is upper case; a Go doc is the `//` run with no blank line above
   the declaration. A Java declaration is exported when it is `public` or `protected`, or is a

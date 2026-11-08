@@ -297,7 +297,8 @@
       "tests/unit/docs-discovery.test.ts"
     ],
     "src/docs/cfamily.ts": [
-      "tests/unit/docs-cfamily.test.ts"
+      "tests/unit/docs-cfamily.test.ts",
+      "tests/unit/docs-styles.test.ts"
     ],
     "src/docs/comments.ts": [
       "tests/unit/docs-comments.test.ts"
@@ -341,7 +342,8 @@
       "tests/unit/docs-typescript.test.ts"
     ],
     "src/docs/php.ts": [
-      "tests/unit/docs-php.test.ts"
+      "tests/unit/docs-php.test.ts",
+      "tests/unit/docs-styles.test.ts"
     ],
     "src/docs/python.ts": [
       "tests/unit/docs-python.test.ts",
@@ -353,7 +355,8 @@
       "tests/unit/docs-report.test.ts"
     ],
     "src/docs/ruby.ts": [
-      "tests/unit/docs-ruby.test.ts"
+      "tests/unit/docs-ruby.test.ts",
+      "tests/unit/docs-styles.test.ts"
     ],
     "src/docs/rules.ts": [],
     "src/docs/rust.ts": [
@@ -878,11 +881,14 @@
       "src/docs/typescript.ts"
     ],
     "tests/unit/docs-styles.test.ts": [
+      "src/docs/cfamily.ts",
       "src/docs/go.ts",
       "src/docs/java.ts",
       "src/docs/kotlin.ts",
       "src/docs/model.ts",
+      "src/docs/php.ts",
       "src/docs/python.ts",
+      "src/docs/ruby.ts",
       "src/docs/stub.ts",
       "src/docs/styles.ts",
       "src/docs/typescript.ts"

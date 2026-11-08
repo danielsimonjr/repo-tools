@@ -33,6 +33,14 @@ describe("Ruby analyser", () => {
     expect((await byName(source, "radius=")).kind).toBe("method");
   });
 
+  it("reports one symbol for each class and module, not one for its keyword", async () => {
+    const report = await reportOf("# Doc.\nclass A\nend\n\nmodule M\nend\n");
+    expect(report.symbols.map((symbol) => `${symbol.name}:${symbol.kind}`)).toEqual([
+      "A:class",
+      "M:module",
+    ]);
+  });
+
   it("hoists documentation before the first body statement", async () => {
     const source =
       "module Outer\n  # First.\n  class First\n    # first method\n    def m1; end\n\n    # second\n    def m2; end\n  end\nend\n";

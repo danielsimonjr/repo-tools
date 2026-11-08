@@ -7,7 +7,7 @@
 | `map` | Writes the dependency graph and the architecture reports of a TypeScript/JavaScript, Python, C# or Rust repository. |
 | `depgraph` | The deprecated alias of `map` (through 2.x). |
 | `check` | Checks the `## Verification` tables of Markdown documents against a fresh graph, and fails on drift. |
-| `docs` | Measures the doc comments of TypeScript, JavaScript, Python, C#, Rust, Go, Java and Kotlin files, plans the missing ones, and gates the result. |
+| `docs` | Measures the doc comments of TypeScript, JavaScript, Python, C#, Rust, Go, Java, Kotlin, C, C++, PHP and Ruby files, plans the missing ones, and gates the result. |
 | `chunk` | Splits a large file into chunks, merges the chunks back, and shows which chunks changed. |
 | `compress` | Writes a compact copy of a file for a model context, and restores it. |
 | `query` | Answers structural questions from the graph of `map`, and writes two derived reports. |
@@ -216,7 +216,7 @@ differences from the Python tool. `docs/parity-check.md` records the comparison 
 
 ## Gate the documentation comments
 
-`repo-tools docs` reads the TypeScript, JavaScript, Python, C#, Rust, Go, Java and Kotlin files that git tracks. It
+`repo-tools docs` reads the TypeScript, JavaScript, Python, C#, Rust, Go, Java, Kotlin, C, C++, PHP and Ruby files that git tracks. It
 finds each function, class, interface, type alias and method, and the doc comment of each one. In
 C# and Rust it also finds each struct, enum, trait and property. It needs no Python, .NET or Rust toolchain on
 the computer.
@@ -232,7 +232,10 @@ repo-tools docs stub . --style=numpy --apply  # Python: google (default), numpy,
 The stub style of a C# file is `xmldoc` (`/// <summary>`), and of a Rust file `rustdoc` (`///` with
 `# Arguments` and `# Returns` sections). The stub style of a Go file is `godoc`: one `//` line that
 starts with the name. The stub style of a Java file is `javadoc`, and of a Kotlin file `kdoc`. Both
-write `@param` and `@return`.
+write `@param` and `@return`. The stub style of a C or C++ file is `doxygen`. It writes a `@brief` line,
+`@param` and `@return`. The stub style of a PHP file is `phpdoc` (`@param $x`). The stub style of a Ruby
+file is `yard` (`#` lines with `@param x` and `@return`). A C or C++ header (`.h`, `.hpp`, `.hh`, `.hxx`) has
+exported symbols. A source file (`.c`, `.cpp`, `.cc`, `.cxx`) has none, because the header is the contract.
 
 The rules are:
 
@@ -242,15 +245,15 @@ The rules are:
 | M2 | MUST | The doc comment has a summary line. |
 | M3 | MUST | The doc comment names no parameter that the signature lacks. |
 | M4 | MUST | The doc comment holds no `TODO:` marker. |
-| M5 | MUST | A file uses one doc dialect: `google`, `numpy` or `rest` for Python, `tsdoc` or `jsdoc` for TypeScript, `xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java, `kdoc` for Kotlin. |
+| M5 | MUST | A file uses one doc dialect: `google`, `numpy` or `rest` for Python, `tsdoc` or `jsdoc` for TypeScript, `xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java, `kdoc` for Kotlin, `doxygen` for C and C++, `phpdoc` for PHP, `yard` for Ruby. |
 | S2 | SHOULD | The summary ends with a full stop. |
 | S5 | SHOULD | The doc comment does not repeat a type that the signature holds. |
 | S6 | SHOULD | The prose follows Simplified Technical English (the rules of `repo-tools ste`). |
 
 Only a MUST issue changes the exit code of `check`. A file that does not parse is also a failure,
 because an unknown file is not a clean file. A repository with no source file fails too. So does a
-repository with more files of another language (Swift, for example) than TypeScript, JavaScript,
-Python, C#, Rust, Go, Java and Kotlin together. The command names the language and exits 1.
+repository with more files of another language (Swift, for example) than of all the languages
+above together. The command names the language and exits 1.
 
 `stub` is a dry run until you pass `--apply`. Each stub holds the marker `TODO:`, so `check` fails
 until you replace the stub with real prose. The command parses a file again after the change.

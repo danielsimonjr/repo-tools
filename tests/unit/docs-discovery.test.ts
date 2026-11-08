@@ -24,6 +24,11 @@ describe("languageOf", () => {
     expect(languageOf("a.java")).toBe("java");
     expect(languageOf("a.kt")).toBe("kotlin");
     expect(languageOf("build.gradle.kts")).toBe("kotlin");
+    for (const name of ["a.c", "a.h", "a.cpp", "a.cc", "a.cxx", "a.hpp", "a.hh", "a.hxx"]) {
+      expect(languageOf(name)).toBe("cpp");
+    }
+    expect(languageOf("a.php")).toBe("php");
+    expect(languageOf("a.rb")).toBe("ruby");
     for (const name of ["a.ts", "a.tsx", "a.js", "a.jsx", "a.mjs", "a.cjs"]) {
       expect(languageOf(`src/${name}`)).toBe("typescript");
     }
