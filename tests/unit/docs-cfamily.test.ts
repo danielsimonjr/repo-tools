@@ -331,7 +331,10 @@ describe("docs cfamily review fixes", () => {
   });
 
   test("exports a static template member of a struct", async () => {
-    const all = await symbols("a.h", "struct S {\n  template <typename T> static void sm(T x);\n};\n");
+    const all = await symbols(
+      "a.h",
+      "struct S {\n  template <typename T> static void sm(T x);\n};\n",
+    );
     expect(byName(all, "sm").exported).toBe(true);
   });
 
@@ -365,7 +368,16 @@ describe("docs cfamily review fixes", () => {
   });
 
   test("marks the doxygen dialect for grouping and reference tags", async () => {
-    for (const tag of ["ingroup g", "def X", "var v", "fn f", "typedef T", "struct S", "enum E", "copydoc f"]) {
+    for (const tag of [
+      "ingroup g",
+      "def X",
+      "var v",
+      "fn f",
+      "typedef T",
+      "struct S",
+      "enum E",
+      "copydoc f",
+    ]) {
       const report = await analyseCFamily("a.h", `/** Does f.\n * @${tag}\n */\nvoid f(void);\n`);
       expect(byName(report.symbols, "f").dialect).toBe("doxygen");
     }

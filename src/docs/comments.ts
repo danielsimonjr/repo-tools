@@ -118,7 +118,7 @@ function dropShadowed(keys: ReadonlyMap<DocSymbol, string>): void {
   }
 }
 
-const NO_DOC: DocText ={ docParams: [], summary: "", dialect: "", prose: "" };
+const NO_DOC: DocText = { docParams: [], summary: "", dialect: "", prose: "" };
 
 /** Analyses one source file with the rules of `reader`, and returns its report. */
 export async function analyseWith(

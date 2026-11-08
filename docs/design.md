@@ -945,9 +945,10 @@ parses again.
   a notice. An unparsed file is an error that a reader sees.
 - Trade-offs: a file with one such declaration reports no symbol at all, and so gates nothing. One
   symbol for each declarator would keep the file, but it needs a driver hook that returns several
-  symbols for one node, with a name, parameters and an anchor for each. The shapes are rare in
-  library headers. The measurement of PR 5 on `antirez/sds` and `fmtlib/fmt` can show whether
-  the hook is worth its cost.
+  symbols for one node, with a name, parameters and an anchor for each. The frequency of these
+  shapes is not measured. `typedef struct _T {..} T, *PT;` is a common C idiom, and a header
+  in that style gates nothing. The measurement on `antirez/sds` and `fmtlib/fmt` decides
+  whether to build the hook.
 
 **Limits of the C and C++ reader.**
 

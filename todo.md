@@ -127,6 +127,11 @@
   the subsections (no release step, publish from the CI tarball after a hash check, no token in
   CI) or point the comments at section 11. Add a check that fails on a dangling section
   reference.
+- [ ] `docs` C/C++ scope key: a nested qualified name `S::Inner::in` keys on `S` only. A documented
+  `S::Inner::in` can hide an undocumented `void in(int)` in a namespace `S`. Key on the full
+  qualifier chain.
+- [ ] `docs` C/C++ multi-declarator declarations make the file unparsed. Measure on `antirez/sds`
+  and `fmtlib/fmt`; if any file is hit, add a driver hook that returns one symbol per declarator.
 - [ ] Names of private decisions (`D2`, `D8`, `D10b`, `criterion 4`) appear about 74 times in
   comments and test titles. `docs/parity-2.0.0.md` defines the 2.0.0 ones. A reader of the public
   repository cannot resolve the 1.x ones. Replace each with a statement of the rule, or with a
