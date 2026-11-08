@@ -815,7 +815,7 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   `map` calls a C repository `cpp`. A `.c` file uses the C grammar. Every other suffix, `.h`
   included, uses the C++ grammar, which reads C too. A function-like macro (`#define SQ(x)`) is a
   function. A data member is a property, and a function-pointer member is a property too. A
-  member line with several names (`int a, b;`) is not reported. The tool reports no object-like
+  member line with several names (`int a, b;`) gives no symbol. The tool reports no object-like
   macro and no file-scope variable. It also reports no enumerator, no `using` declaration and no
   `friend` declaration. It reports no forward declaration and nothing in a function body. A type definition of a struct, union or enum with
   a body is one symbol: `typedef struct Point {..} Point;` gives `Point`. A declaration is
@@ -933,7 +933,7 @@ parses again.
   same doc twice.
 - Trade-offs: a C program with no header gates nothing. The rule is one line in `cfamily.ts`
   (`isExported` returns the flag of the header). The measurement in `docs/parity-docs.md` holds
-  no library without headers. The measurement does not test this case.
+  no library without headers. The measurement does not test a library without headers.
 
 **A declaration with several names makes the file unparsed.**
 
@@ -946,10 +946,10 @@ parses again.
   shapes declares more names than that, so a name would disappear and the gate would pass without
   a notice. An unparsed file is an error that a reader sees.
 - Trade-offs: a file with one such declaration reports no symbol at all, and so gates nothing. One
-  symbol for each declarator would keep the file. That needs a driver hook that returns several
+  symbol for each declarator would keep the file. Such symbols need a driver hook that returns several
   symbols for one node, each with a name, parameters and an anchor. `typedef struct _T {..}
   T, *PT;` is a common C idiom, and a header in that style gates nothing. The measurement in
-  `docs/parity-docs.md` found no such file, so the hook is not built.
+  `docs/parity-docs.md` found no such file, so the driver has no such hook.
 
 **Limits of the C and C++ reader.**
 
