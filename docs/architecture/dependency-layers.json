@@ -3273,7 +3273,6 @@
           {
             "file": "../py.ts",
             "imports": [
-              "NON_SPACE",
               "pySplitlines",
               "pyStrip",
               "S",

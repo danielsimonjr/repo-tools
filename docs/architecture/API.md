@@ -431,4 +431,4 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 | totalSourceFiles | 324 | dependency-graph.json |
 | totalTypeScriptFiles | 324 | dependency-graph.json |
 | totalModules | 4 | dependency-graph.json |
-| totalExports | 799 | dependency-graph.json |
+| totalExports | 802 | dependency-graph.json |

@@ -240,14 +240,24 @@ step 1 above.
 | universal-physics-tensor | `0099eda` | +0 -0 | +0 -0 | 0 | 0 |
 | repo-tools | `1b569c2` | +0 -0 | +0 -0 | 0 | 0 |
 | fermat-mcp | `ef84ce2` | +0 -0 | +0 -0 | 0 | 0 |
-| PITS-MRAS | `8b2cb2d` | +0 -0 | +0 -0 | 0 | 0 |
+| PITS-MRAS | `8b2cb2d` | +0 -0 | +0 -0 | 2 | 0 |
 | auto-memory | `d4adb29` | +0 -0 | +0 -0 | 0 | 0 |
 | memvid | `c416853` | +0 -0 | +0 -0 | 0 | 0 |
 | deepthinking-mcp | `eeb45e5` | +0 -0 | +0 -0 | 0 | 0 |
 
 The first run found 2 changed fields in PITS-MRAS. A NumPy entry such as `n_friction:`, with its
 description on the next line, lost its name. The NumPy reader now applies its entry filter to
-each entry alone, and the diff is zero.
+each entry alone.
+
+The final run finds 2 changed fields in PITS-MRAS, in one symbol. The docstring of `GFINNDecoder`
+has two combined NumPy entries (`energy_hidden, entropy_hidden:` and
+`skew_hidden, friction_hidden:`). Version 2.5.0 reads no name from a combined entry. This
+version reads both names of each entry, so `doc_params` gains 4 names and M3 gives 4 more
+issues. M3 is correct here, because the docstring is on the class and the class has no
+parameters. Verdict: `2.5.0-wrong`. The diff of the other eight repositories is zero.
+
+The `diff` mode gives a number to each repeated key in a file. Thus two symbols with one key
+count as two symbols, and the zero rows above do not hide a collapsed key.
 
 ## Result: the new languages
 
@@ -262,7 +272,7 @@ these languages port the templates of mintlify/writer (MIT, see `NOTICE`).
 | google/gson | Java | `65df6e5` | 266 | 4289 | 2567 | 731 | 221 | 0 |
 | square/okio | Kotlin | `f0e3f47` | 357 | 9114 | 3255 | 499 | 2759 | 5 |
 | antirez/sds | C | `5347739` | 4 | 74 | 68 | 0 | 68 | 1 |
-| fmtlib/fmt | C++ | `e7e6e3f` | 79 | 393 | 123 | 6 | 43 | 39 |
+| fmtlib/fmt | C++ | `e7e6e3f` | 79 | 396 | 123 | 6 | 43 | 39 |
 | Seldaek/monolog | PHP | `3bed304` | 228 | 1863 | 1721 | 929 | 725 | 0 |
 | rack/rack | Ruby | `da90464` | 97 | 1001 | 745 | 188 | 447 | 3 |
 | JamesNK/Newtonsoft.Json | C# | `52fa3ae` | 951 | 9601 | 7728 | 836 | 6897 | 66 |
@@ -296,7 +306,7 @@ Each rule existed before the data, and no threshold changed after the measuremen
 | Function-like macros | 18 of 96 header functions (sds 5 of 45, fmt 13 of 51) | 10%, both repositories together | Read. A macro of a header is a function. |
 | `extern` variables | 1 of 96 | 10% | Not read. |
 | Public data members | 18 of 96 (sds 18 of 45, fmt 0 of 51) | 10% | Read. A member is a property. All 18 are fields of sds. |
-| Declarations with several names | 0 files | 1 file | The file stays unparsed. |
+| Declarations with several names | functions and typedefs: 0 files. Data members: 1 line in fmt (`test/util.h`) | 1 file | Functions and typedefs: the file stays unparsed. Data members: each name is a property. |
 | Export macros | sds 0 of 3 headers, fmt 1 of 26 | 10% in one repository | No `macros` setting. |
 | Array-reference parameters | 0 files | record only | No change. |
 | Nested C++ scope key | 0 symbols changed in fmt (6 of 26 headers parse) | always | Fixed. |
@@ -304,6 +314,10 @@ Each rule existed before the data, and no threshold changed after the measuremen
 | Ruby `:nodoc:` | 11 marks in rack | 5 marks | Read. `:nodoc: all` also hides the members. |
 
 The macro and member counts of fmt come from its 6 parsed headers only.
+
+The first version of `triage` had two counting defects. It counted a macro as a function, and
+it did not read an access specifier in a struct. Both are fixed. A rerun on the final build
+gives the same counts: 18 macros and 18 members of 96 header functions.
 
 ## Residuals
 
