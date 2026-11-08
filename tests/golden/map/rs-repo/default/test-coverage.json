@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "totalSourceFiles": 5,
+    "totalTestFiles": 0,
+    "testedCount": 0,
+    "untestedCount": 5,
+    "coveragePercent": "0.0",
+    "effectiveCoverage": {
+      "policyLoaded": false,
+      "activeFiles": 5,
+      "testedActive": 0,
+      "activeUntested": 5,
+      "excludedTotal": 0,
+      "percent": "0.0",
+      "breakdown": {
+        "active_untested": 5
+      }
+    }
+  },
+  "untestedFiles": [
+    "src/lib.rs",
+    "src/main.rs",
+    "src/net/mod.rs",
+    "src/net/wire.rs",
+    "src/util.rs"
+  ],
+  "testedFiles": [],
+  "coverageMap": {
+    "src/lib.rs": [],
+    "src/main.rs": [],
+    "src/net/mod.rs": [],
+    "src/net/wire.rs": [],
+    "src/util.rs": []
+  },
+  "testToSourceMap": {},
+  "classifiedUntested": [
+    {
+      "file": "src/lib.rs",
+      "category": null
+    },
+    {
+      "file": "src/main.rs",
+      "category": null
+    },
+    {
+      "file": "src/net/mod.rs",
+      "category": null
+    },
+    {
+      "file": "src/net/wire.rs",
+      "category": null
+    },
+    {
+      "file": "src/util.rs",
+      "category": null
+    }
+  ]
+}

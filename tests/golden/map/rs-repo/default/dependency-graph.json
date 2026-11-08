@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "name": "rs-repo",
+    "schemaVersion": "2.0.0",
+    "language": "rust",
+    "totalFiles": 5,
+    "totalModules": 1,
+    "totalExports": 3
+  },
+  "modules": {
+    "src": {
+      "src/lib.rs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/net/mod.rs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/util.rs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "net",
+          "run"
+        ]
+      },
+      "src/main.rs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": []
+      },
+      "src/net/mod.rs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/net/wire.rs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "send"
+        ]
+      },
+      "src/net/wire.rs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": []
+      },
+      "src/util.rs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": []
+      }
+    }
+  },
+  "statistics": {
+    "totalTypeScriptFiles": 5,
+    "totalSourceFiles": 5,
+    "totalModules": 1,
+    "totalLinesOfCode": 25,
+    "totalExports": 3,
+    "entryRoots": 2,
+    "reachableFiles": 5,
+    "dormantFiles": 0,
+    "orphanedFiles": 0,
+    "testOnlyFiles": 0,
+    "runtimeCircularDeps": 0,
+    "typeOnlyCircularDeps": 0,
+    "totalTypeOnlyImports": 0,
+    "noImporterFileCount": 0,
+    "unusedExportsCount": 3,
+    "circularDepsTruncated": false,
+    "runtimeCyclicComponents": 0,
+    "typeOnlyCyclicComponents": 0,
+    "runtimeFilesInCycles": 0,
+    "typeOnlyFilesInCycles": 0
+  },
+  "reachability": {
+    "roots": [
+      "src/lib.rs",
+      "src/main.rs"
+    ],
+    "reachableCount": 5,
+    "dormantCount": 0,
+    "orphaned": [],
+    "testOnly": []
+  },
+  "warnings": []
+}

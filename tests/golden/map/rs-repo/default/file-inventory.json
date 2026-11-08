@@ -1,0 +1,61 @@
+{
+  "totalFiles": 5,
+  "byDisposition": {
+    "reachable": 3,
+    "build-entry": 2,
+    "test-only": 0,
+    "orphan": 0,
+    "test": 0,
+    "tool": 0,
+    "config": 0,
+    "bench": 0,
+    "example": 0
+  },
+  "byArea": {
+    "src": 5
+  },
+  "byPackage": {
+    "(root)": 5
+  },
+  "files": [
+    {
+      "file": "src/lib.rs",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 9
+    },
+    {
+      "file": "src/main.rs",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 3
+    },
+    {
+      "file": "src/net/mod.rs",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 6
+    },
+    {
+      "file": "src/net/wire.rs",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 3
+    },
+    {
+      "file": "src/util.rs",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 4
+    }
+  ],
+  "skippedLinks": [],
+  "warnings": [
+    "emit_file_inventory: no readable package.json at the root -- package derivation skipped, every file reports '(root)'"
+  ]
+}

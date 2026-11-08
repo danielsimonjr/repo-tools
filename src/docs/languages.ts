@@ -3,9 +3,11 @@
  * Discovery, analysis, the stub writer, the help text and the refusal of an unreadable repository
  * read this list. No other module of `docs` names a language.
  */
-import { suffixOf } from "../map/discovery.ts";
+import { CSHARP_SKIP_DIRS, suffixOf } from "../map/discovery.ts";
+import { analyseCSharp, parsesAsCSharp } from "./csharp.ts";
 import type { FileReport } from "./model.ts";
 import { analysePython, parsesAsPython } from "./python.ts";
+import { analyseRust, parsesAsRust } from "./rust.ts";
 import { analyseTypeScript, parsesAsTypeScript } from "./typescript.ts";
 
 /** One language that `docs` reads. */
@@ -16,6 +18,12 @@ export interface LanguageSpec {
   names: readonly string[];
   /** The file suffixes of the language, with the dot. Two languages never share a suffix. */
   suffixes: ReadonlySet<string>;
+  /**
+   * The folders that hold generated files of this language only, for example `obj` and `bin` of a
+   * C# build. A file of the language below such a folder is not source. The list does not apply
+   * to the files of other languages: a `bin/` folder of Python scripts is source.
+   */
+  skipDirs: ReadonlySet<string>;
   /** Analyses one file. */
   analyse: (path: string, source: string) => Promise<FileReport>;
   /** True when `text` still parses as the language. The stub writer calls `parses` on each result. */
@@ -34,6 +42,7 @@ export const LANGUAGES: readonly LanguageSpec[] = [
     id: "typescript",
     names: ["TypeScript", "JavaScript"],
     suffixes: new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]),
+    skipDirs: new Set(),
     analyse: analyseTypeScript,
     parses: parsesAsTypeScript,
     stubPosition: "above",
@@ -44,11 +53,34 @@ export const LANGUAGES: readonly LanguageSpec[] = [
     id: "python",
     names: ["Python"],
     suffixes: new Set([".py"]),
+    skipDirs: new Set(),
     analyse: analysePython,
     parses: (_path, text) => parsesAsPython(text),
     stubPosition: "inside",
     styles: ["google", "numpy", "rest"],
     defaultStyle: "google",
+  },
+  {
+    id: "csharp",
+    names: ["C#"],
+    suffixes: new Set([".cs"]),
+    skipDirs: CSHARP_SKIP_DIRS,
+    analyse: analyseCSharp,
+    parses: parsesAsCSharp,
+    stubPosition: "above",
+    styles: ["xmldoc"],
+    defaultStyle: "xmldoc",
+  },
+  {
+    id: "rust",
+    names: ["Rust"],
+    suffixes: new Set([".rs"]),
+    skipDirs: new Set(),
+    analyse: analyseRust,
+    parses: parsesAsRust,
+    stubPosition: "above",
+    styles: ["rustdoc"],
+    defaultStyle: "rustdoc",
   },
 ];
 

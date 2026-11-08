@@ -1,19 +1,19 @@
 {
   "metadata": {
-    "totalSourceFiles": 88,
-    "totalTestFiles": 142,
-    "testedCount": 71,
-    "untestedCount": 17,
-    "coveragePercent": "80.7",
+    "totalSourceFiles": 91,
+    "totalTestFiles": 144,
+    "testedCount": 73,
+    "untestedCount": 18,
+    "coveragePercent": "80.2",
     "effectiveCoverage": {
       "policyLoaded": false,
-      "activeFiles": 88,
-      "testedActive": 71,
-      "activeUntested": 17,
+      "activeFiles": 91,
+      "testedActive": 73,
+      "activeUntested": 18,
       "excludedTotal": 0,
-      "percent": "80.7",
+      "percent": "80.2",
       "breakdown": {
-        "active_untested": 17
+        "active_untested": 18
       }
     }
   },
@@ -27,6 +27,7 @@
     "src/clones/index.ts",
     "src/clones/report.ts",
     "src/depgraph/exclude.ts",
+    "src/docs/comments.ts",
     "src/docs/rules.ts",
     "src/map/package-field.ts",
     "src/map/python-stdlib.ts",
@@ -72,12 +73,14 @@
     "src/depgraph/types.ts",
     "src/depgraph/workspaces.ts",
     "src/docs/analyse.ts",
+    "src/docs/csharp.ts",
     "src/docs/discovery.ts",
     "src/docs/index.ts",
     "src/docs/languages.ts",
     "src/docs/model.ts",
     "src/docs/python.ts",
     "src/docs/report.ts",
+    "src/docs/rust.ts",
     "src/docs/stub.ts",
     "src/docs/styles.ts",
     "src/docs/typescript.ts",
@@ -287,6 +290,10 @@
     "src/docs/analyse.ts": [
       "tests/unit/docs-discovery.test.ts"
     ],
+    "src/docs/comments.ts": [],
+    "src/docs/csharp.ts": [
+      "tests/unit/docs-csharp.test.ts"
+    ],
     "src/docs/discovery.ts": [
       "tests/unit/docs-discovery.test.ts"
     ],
@@ -298,8 +305,10 @@
     ],
     "src/docs/model.ts": [
       "tests/unit/docs-command.test.ts",
+      "tests/unit/docs-csharp.test.ts",
       "tests/unit/docs-python.test.ts",
       "tests/unit/docs-report.test.ts",
+      "tests/unit/docs-rust.test.ts",
       "tests/unit/docs-stub.test.ts",
       "tests/unit/docs-styles.test.ts",
       "tests/unit/docs-typescript.test.ts"
@@ -314,7 +323,12 @@
       "tests/unit/docs-report.test.ts"
     ],
     "src/docs/rules.ts": [],
+    "src/docs/rust.ts": [
+      "tests/unit/docs-rust.test.ts"
+    ],
     "src/docs/stub.ts": [
+      "tests/unit/docs-csharp.test.ts",
+      "tests/unit/docs-rust.test.ts",
       "tests/unit/docs-stub.test.ts",
       "tests/unit/docs-styles.test.ts"
     ],
@@ -398,6 +412,7 @@
       "tests/unit/shared-helpers.test.ts"
     ],
     "src/map/grammars.ts": [
+      "tests/unit/build.test.ts",
       "tests/unit/clones-units.test.ts",
       "tests/unit/map-parsing-py.test.ts",
       "tests/unit/map-parsing-ts.test.ts",
@@ -513,7 +528,9 @@
     "tests/unit/api-surface.test.ts": [
       "src/depgraph/api-surface.ts"
     ],
-    "tests/unit/build.test.ts": [],
+    "tests/unit/build.test.ts": [
+      "src/map/grammars.ts"
+    ],
     "tests/unit/check-claims.test.ts": [
       "src/check/claims.ts"
     ],
@@ -752,6 +769,11 @@
     "tests/unit/docs-command.test.ts": [
       "src/docs/model.ts"
     ],
+    "tests/unit/docs-csharp.test.ts": [
+      "src/docs/csharp.ts",
+      "src/docs/model.ts",
+      "src/docs/stub.ts"
+    ],
     "tests/unit/docs-discovery.test.ts": [
       "src/docs/analyse.ts",
       "src/docs/discovery.ts"
@@ -773,6 +795,11 @@
     "tests/unit/docs-review.test.ts": [
       "src/docs/python.ts",
       "src/docs/typescript.ts"
+    ],
+    "tests/unit/docs-rust.test.ts": [
+      "src/docs/model.ts",
+      "src/docs/rust.ts",
+      "src/docs/stub.ts"
     ],
     "tests/unit/docs-stub.test.ts": [
       "src/docs/model.ts",
@@ -1015,6 +1042,10 @@
     },
     {
       "file": "src/depgraph/exclude.ts",
+      "category": null
+    },
+    {
+      "file": "src/docs/comments.ts",
       "category": null
     },
     {

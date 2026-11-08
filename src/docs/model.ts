@@ -1,12 +1,23 @@
 /**
- * The data model of `repo-tools docs`. One `DocSymbol` per documentable declaration. Both language
- * analysers produce this shape, so the report, the stub writer and the gate know one shape only.
+ * The data model of `repo-tools docs`. One `DocSymbol` per documentable declaration. Every language
+ * analyser produces this shape, so the report, the stub writer and the gate know one shape only.
  *
  * Ported from `code_docs/model.py` of the code-docs skill.
  */
 
 /** The kinds of declaration that an analyser reports. */
-export type Kind = "function" | "method" | "class" | "interface" | "type" | "const" | "module";
+export type Kind =
+  | "function"
+  | "method"
+  | "class"
+  | "interface"
+  | "type"
+  | "const"
+  | "module"
+  | "struct"
+  | "enum"
+  | "trait"
+  | "property";
 
 /**
  * The marker that `stub` writes into every placeholder, and that `check` fails on (rule M4). The
@@ -53,10 +64,19 @@ export interface DocSymbol {
   hasDoc: boolean;
   /** The parameter names of the signature. Rule M3 compares the doc against them. */
   params: string[];
+  /**
+   * False when the declaration gives no value back (a `void` method, a constructor, a Rust `fn`
+   * with no return type), so the stub writes no return line. Absent means unknown, and the stub
+   * then writes the return line for a function or a method. The field is not in `coverage.json`.
+   */
+  returnsValue?: boolean;
   /** The parameter names that the doc comment names. */
   docParams: string[];
   summary: string;
-  /** `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, or an empty string when the doc has no marker. */
+  /**
+   * The style id that the doc shows evidence of (`google`, `numpy`, `rest`, `tsdoc`, `jsdoc`,
+   * `xmldoc`, `rustdoc`), or an empty string when the doc has no marker.
+   */
   dialect: string;
   issues: Issue[];
 }
@@ -64,7 +84,7 @@ export interface DocSymbol {
 /** The results for one file. `error` is set when the analyser could not read the file. */
 export interface FileReport {
   path: string;
-  /** `python`, `typescript`, or an empty string. */
+  /** The registry id of the language (`python`, `typescript`, `csharp`, `rust`), or "". */
   language: string;
   symbols: DocSymbol[];
   dialects: Set<string>;

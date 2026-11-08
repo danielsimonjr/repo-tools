@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join } from "node:path";
 import pkg from "../../package.json" with { type: "json" };
 import { scanText } from "../../scripts/privacy-check.ts";
+import { GRAMMAR_NAMES } from "../../src/map/grammars.ts";
 import { makeTempDir } from "./temp.ts";
 
 const root = join(import.meta.dir, "../..");
@@ -46,7 +47,9 @@ describe("node bundle (design 11.1)", () => {
     const refs = [...readFileSync(bundle, "utf8").matchAll(/["']\.\/([\w.-]+\.wasm)["']/g)].map(
       (m) => m[1] as string,
     );
-    expect(refs.length).toBe(4);
+    // One asset per grammar of the registry, and the runtime (design 14.6). The count comes from
+    // the list of names, not from the table of files that the bundle reads.
+    expect(refs.length).toBe(GRAMMAR_NAMES.length + 1);
     for (const name of refs) expect(existsSync(join(dirname(bundle), name))).toBe(true);
   });
 

@@ -9,7 +9,7 @@ import { type DocSymbol, STUB_MARKER } from "./model.ts";
 export interface Style {
   /** The style id used with `--style=`. */
   id: string;
-  /** The registry id of the language: "python" or "typescript". */
+  /** The registry id of the language, for example "python" or "csharp". */
   language: string;
   /**
    * The lines of the stub, without line ends. `indent` starts every non-empty line. For python
@@ -79,6 +79,29 @@ const renderJsdoc = (sym: DocSymbol, I: string): string[] =>
     `@returns {${M} type} ${RETURNS}`,
   );
 
+/** True when the stub of `sym` needs a line for the value that it gives back. */
+const givesValue = (sym: DocSymbol): boolean =>
+  (sym.kind === "function" || sym.kind === "method") && sym.returnsValue !== false;
+
+/** The C# XML doc comment: `<summary>`, one `<param>` per parameter, and `<returns>`. */
+function renderXmldoc(sym: DocSymbol, I: string): string[] {
+  const lines = [`${I}/// <summary>`, `${I}/// ${SUMMARY}`, `${I}/// </summary>`];
+  for (const p of sym.params) lines.push(`${I}/// <param name="${p}">${PARAM}</param>`);
+  if (givesValue(sym)) lines.push(`${I}/// <returns>${RETURNS}</returns>`);
+  return lines;
+}
+
+/** The Rust doc comment: the summary, then the `# Arguments` and `# Returns` sections. */
+function renderRustdoc(sym: DocSymbol, I: string): string[] {
+  const lines = [`${I}/// ${SUMMARY}`];
+  if (sym.params.length > 0) {
+    lines.push(`${I}///`, `${I}/// # Arguments`, `${I}///`);
+    for (const p of sym.params) lines.push(`${I}/// * \`${p}\` - ${PARAM}`);
+  }
+  if (givesValue(sym)) lines.push(`${I}///`, `${I}/// # Returns`, `${I}///`, `${I}/// ${RETURNS}`);
+  return lines;
+}
+
 /** True when `id` names a style of the registry. A name of an object property is not a style. */
 export function isStyle(id: string): boolean {
   return Object.hasOwn(STYLES, id);
@@ -91,4 +114,6 @@ export const STYLES: Readonly<Record<string, Style>> = {
   rest: { id: "rest", language: "python", render: renderRest },
   tsdoc: { id: "tsdoc", language: "typescript", render: renderTsdoc },
   jsdoc: { id: "jsdoc", language: "typescript", render: renderJsdoc },
+  xmldoc: { id: "xmldoc", language: "csharp", render: renderXmldoc },
+  rustdoc: { id: "rustdoc", language: "rust", render: renderRustdoc },
 };

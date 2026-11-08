@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 304
+  totalFiles: 309
   totalModules: 4
-  totalExports: 754
+  totalExports: 764
 modules:
   tools:
     scripts/build.ts:
@@ -1399,6 +1399,62 @@ modules:
         - analyseFile
         - RepoAnalysis
         - analyseRepo
+    src/docs/comments.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - GrammarName
+            - loadGrammar
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+            - FileReport
+            - Kind
+            - newReport
+          typeOnly: false
+        - file: src/docs/rules.ts
+          imports:
+            - applyRules
+          typeOnly: false
+      exports:
+        - DocText
+        - Reader
+        - parsesClean
+        - firstProse
+        - analyseWith
+    src/docs/csharp.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - parsesAsCSharp
+        - analyseCSharp
     src/docs/discovery.ts:
       externalDependencies: []
       nodeDependencies:
@@ -1505,7 +1561,13 @@ modules:
       internalDependencies:
         - file: src/map/discovery.ts
           imports:
+            - CSHARP_SKIP_DIRS
             - suffixOf
+          typeOnly: false
+        - file: src/docs/csharp.ts
+          imports:
+            - analyseCSharp
+            - parsesAsCSharp
           typeOnly: false
         - file: src/docs/model.ts
           imports:
@@ -1515,6 +1577,11 @@ modules:
           imports:
             - analysePython
             - parsesAsPython
+          typeOnly: false
+        - file: src/docs/rust.ts
+          imports:
+            - analyseRust
+            - parsesAsRust
           typeOnly: false
         - file: src/docs/typescript.ts
           imports:
@@ -1619,6 +1686,35 @@ modules:
         - isTestFile
         - RuleOptions
         - applyRules
+    src/docs/rust.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - parsesAsRust
+        - analyseRust
     src/docs/stub.ts:
       externalDependencies: []
       nodeDependencies: []
@@ -2052,7 +2148,16 @@ modules:
         - discover
     src/map/grammars.ts:
       externalDependencies:
+        - '@tree-sitter-grammars/tree-sitter-kotlin/tree-sitter-kotlin.wasm'
+        - tree-sitter-c-sharp/tree-sitter-c_sharp.wasm
+        - tree-sitter-c/tree-sitter-c.wasm
+        - tree-sitter-cpp/tree-sitter-cpp.wasm
+        - tree-sitter-go/tree-sitter-go.wasm
+        - tree-sitter-java/tree-sitter-java.wasm
+        - tree-sitter-php/tree-sitter-php.wasm
         - tree-sitter-python/tree-sitter-python.wasm
+        - tree-sitter-ruby/tree-sitter-ruby.wasm
+        - tree-sitter-rust/tree-sitter-rust.wasm
         - tree-sitter-typescript/tree-sitter-tsx.wasm
         - tree-sitter-typescript/tree-sitter-typescript.wasm
         - web-tree-sitter
@@ -2063,6 +2168,7 @@ modules:
         - node:url
       internalDependencies: []
       exports:
+        - GRAMMAR_NAMES
         - GrammarName
         - loadGrammar
         - grammarFor
@@ -3323,6 +3429,10 @@ modules:
         - file: scripts/privacy-check.ts
           imports:
             - scanText
+          typeOnly: false
+        - file: src/map/grammars.ts
+          imports:
+            - GRAMMAR_NAMES
           typeOnly: false
         - file: tests/unit/temp.ts
           imports:
@@ -4833,6 +4943,28 @@ modules:
             - tree
           typeOnly: false
       exports: []
+    tests/unit/docs-csharp.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/csharp.ts
+          imports:
+            - analyseCSharp
+            - parsesAsCSharp
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+          typeOnly: true
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+      exports: []
     tests/unit/docs-discovery.test.ts:
       externalDependencies:
         - bun:test
@@ -4980,6 +5112,28 @@ modules:
             - removeTrees
             - trackAll
             - tree
+          typeOnly: false
+      exports: []
+    tests/unit/docs-rust.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+          typeOnly: true
+        - file: src/docs/rust.ts
+          imports:
+            - analyseRust
+            - parsesAsRust
+          typeOnly: false
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - Insertion
+            - planTypeScript
+            - splitLines
           typeOnly: false
       exports: []
     tests/unit/docs-stub.test.ts:
@@ -6139,37 +6293,37 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 304
-  totalSourceFiles: 304
+  totalTypeScriptFiles: 309
+  totalSourceFiles: 309
   totalModules: 4
-  totalLinesOfCode: 45672
-  totalExports: 754
+  totalLinesOfCode: 46687
+  totalExports: 764
   entryRoots: 1
-  reachableFiles: 87
+  reachableFiles: 90
   dormantFiles: 2
   orphanedFiles: 2
   testOnlyFiles: 0
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
-  totalTypeOnlyImports: 67
+  totalTypeOnlyImports: 71
   noImporterFileCount: 2
-  unusedExportsCount: 119
+  unusedExportsCount: 117
   circularDepsTruncated: false
   runtimeCyclicComponents: 1
   typeOnlyCyclicComponents: 4
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 8
   totalClasses: 15
-  totalInterfaces: 146
-  totalFunctions: 432
+  totalInterfaces: 148
+  totalFunctions: 439
   totalTypeGuards: 20
   totalEnums: 4
-  totalConstants: 104
+  totalConstants: 105
   totalReExports: 12
 reachability:
   roots:
     - src/cli.ts
-  reachableCount: 87
+  reachableCount: 90
   dormantCount: 2
   orphaned:
     - src/assets.d.ts

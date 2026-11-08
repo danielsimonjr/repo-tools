@@ -171,9 +171,11 @@ describe("docs check: the gate on the whole repository", () => {
         const run = await cli(["docs", action, repo(swift())]);
         expect(run.code).toBe(1);
         expect(run.err).toContain(
-          "this repo is swift: 3 swift file(s) against 1 TypeScript, JavaScript or Python file(s)",
+          "this repo is swift: 3 swift file(s) against 1 TypeScript, JavaScript, Python, C# or Rust file(s)",
         );
-        expect(run.err).toContain("repo-tools docs reads TypeScript, JavaScript and Python only");
+        expect(run.err).toContain(
+          "repo-tools docs reads TypeScript, JavaScript, Python, C# and Rust only",
+        );
         expect(run.out).not.toContain("PASS");
       });
     }
@@ -531,9 +533,9 @@ describe("stub --style", () => {
   });
 
   test("an unknown style exits 2 when no file needs a stub", async () => {
-    const run = await cli(["docs", "stub", repo({ "a.ts": DOC }), "--style=xmldoc"]);
+    const run = await cli(["docs", "stub", repo({ "a.ts": DOC }), "--style=nosuch"]);
     expect(run.code).toBe(2);
-    expect(run.err).toContain("unknown style 'xmldoc'");
+    expect(run.err).toContain("unknown style 'nosuch'");
   });
 
   test("a name of an object property is not a style", async () => {

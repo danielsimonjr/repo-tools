@@ -1,0 +1,9 @@
+{
+  "surfaces": {
+    "src/lib.rs": [
+      "net",
+      "run"
+    ]
+  },
+  "note": "Each key is a library crate root (lib.rs). The names are its pub items and the names of its plain pub use statements; a glob gives <path>::*. The items of a pub mod are not listed; the mod name is. A binary root (main.rs, bin/) has no public API and is not listed."
+}

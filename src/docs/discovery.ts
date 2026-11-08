@@ -103,7 +103,9 @@ export function languageOf(path: string): string {
 function isSource(path: string): boolean {
   if (path.split("/").some((part) => SKIP_DIRS.has(part))) return false;
   if (SKIP_SUFFIXES.some((suffix) => path.endsWith(suffix))) return false;
-  return languageOf(path) !== "";
+  const spec = specForPath(path);
+  if (!spec) return false;
+  return !path.split("/").some((part) => spec.skipDirs.has(part));
 }
 
 /** The output of `git ls-files` with `args`, or null when git fails. */

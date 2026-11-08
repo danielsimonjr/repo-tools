@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "name": "rs-repo",
+    "version": "unknown",
+    "schemaVersion": "2.0.0",
+    "language": "rust"
+  },
+  "entryPoints": [],
+  "modules": {
+    "root": {
+      "src/lib.rs": {
+        "description": "lib.rs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./net/mod.rs",
+            "imports": []
+          },
+          {
+            "file": "./util.rs",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "net",
+          "run"
+        ]
+      },
+      "src/main.rs": {
+        "description": "main.rs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/util.rs": {
+        "description": "util.rs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      }
+    },
+    "net": {
+      "src/net/mod.rs": {
+        "description": "mod.rs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./wire.rs",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "send"
+        ]
+      },
+      "src/net/wire.rs": {
+        "description": "wire.rs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": []
+      }
+    }
+  },
+  "cyclicComponents": {
+    "runtime": [],
+    "typeOnly": []
+  },
+  "layers": [
+    {
+      "name": "Root",
+      "files": [
+        "src/lib.rs",
+        "src/main.rs",
+        "src/util.rs"
+      ]
+    },
+    {
+      "name": "Net",
+      "files": [
+        "src/net/mod.rs",
+        "src/net/wire.rs"
+      ]
+    }
+  ]
+}

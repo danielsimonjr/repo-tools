@@ -2539,6 +2539,111 @@
           "analyseRepo"
         ]
       },
+      "src/docs/comments.ts": {
+        "description": "The driver that the tree-sitter analysers of C# and Rust share. A grammar keeps a comment as a",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node",
+              "Parser"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "GrammarName",
+              "loadGrammar"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "FileReport",
+              "Kind",
+              "newReport"
+            ]
+          },
+          {
+            "file": "./rules.ts",
+            "imports": [
+              "applyRules"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "parsesClean",
+          "firstProse",
+          "analyseWith"
+        ],
+        "interfaces": [
+          "DocText",
+          "Reader"
+        ],
+        "functions": [
+          "parsesClean",
+          "firstProse",
+          "analyseWith"
+        ]
+      },
+      "src/docs/csharp.ts": {
+        "description": "The C# analyser of `repo-tools docs`, built on tree-sitter.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "parsesAsCSharp",
+          "analyseCSharp"
+        ],
+        "functions": [
+          "parsesAsCSharp",
+          "analyseCSharp"
+        ]
+      },
       "src/docs/discovery.ts": {
         "description": "Source discovery for `repo-tools docs`.",
         "externalDependencies": [],
@@ -2747,7 +2852,15 @@
           {
             "file": "../map/discovery.ts",
             "imports": [
+              "CSHARP_SKIP_DIRS",
               "suffixOf"
+            ]
+          },
+          {
+            "file": "./csharp.ts",
+            "imports": [
+              "analyseCSharp",
+              "parsesAsCSharp"
             ]
           },
           {
@@ -2762,6 +2875,13 @@
             "imports": [
               "analysePython",
               "parsesAsPython"
+            ]
+          },
+          {
+            "file": "./rust.ts",
+            "imports": [
+              "analyseRust",
+              "parsesAsRust"
             ]
           },
           {
@@ -2792,7 +2912,7 @@
         ]
       },
       "src/docs/model.ts": {
-        "description": "The data model of `repo-tools docs`. One `DocSymbol` per documentable declaration. Both language",
+        "description": "The data model of `repo-tools docs`. One `DocSymbol` per documentable declaration. Every language",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -2959,6 +3079,59 @@
         "functions": [
           "isTestFile",
           "applyRules"
+        ]
+      },
+      "src/docs/rust.ts": {
+        "description": "The Rust analyser of `repo-tools docs`, built on tree-sitter.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "parsesAsRust",
+          "analyseRust"
+        ],
+        "functions": [
+          "parsesAsRust",
+          "analyseRust"
         ]
       },
       "src/docs/stub.ts": {
@@ -3716,7 +3889,61 @@
         "description": "The tree-sitter grammars of the map engine: loaded lazily, once each, from the `.wasm` files",
         "externalDependencies": [
           {
+            "package": "@tree-sitter-grammars/tree-sitter-kotlin/tree-sitter-kotlin.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-c/tree-sitter-c.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-c-sharp/tree-sitter-c_sharp.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-cpp/tree-sitter-cpp.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-go/tree-sitter-go.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-java/tree-sitter-java.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-php/tree-sitter-php.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
             "package": "tree-sitter-python/tree-sitter-python.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-ruby/tree-sitter-ruby.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-rust/tree-sitter-rust.wasm",
             "imports": [
               "default"
             ]
@@ -3770,6 +3997,7 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": [
+          "GRAMMAR_NAMES",
           "loadGrammar",
           "grammarFor",
           "parserFor"
@@ -3778,6 +4006,9 @@
           "loadGrammar",
           "grammarFor",
           "parserFor"
+        ],
+        "constants": [
+          "GRAMMAR_NAMES"
         ]
       },
       "src/map/graph.ts": {
@@ -5225,6 +5456,8 @@
       "name": "Docs",
       "files": [
         "src/docs/analyse.ts",
+        "src/docs/comments.ts",
+        "src/docs/csharp.ts",
         "src/docs/discovery.ts",
         "src/docs/index.ts",
         "src/docs/languages.ts",
@@ -5232,6 +5465,7 @@
         "src/docs/python.ts",
         "src/docs/report.ts",
         "src/docs/rules.ts",
+        "src/docs/rust.ts",
         "src/docs/stub.ts",
         "src/docs/styles.ts",
         "src/docs/typescript.ts"

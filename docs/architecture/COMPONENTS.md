@@ -218,7 +218,8 @@ export function expandUsePath(raw: string): string[]
 ```
 
 `loadGrammar` loads a grammar once and `parserFor` returns the cached parser. A call to
-`parserFor` before the matching `loadGrammar` is an error. The four `.wasm` files load through the
+`parserFor` before the matching `loadGrammar` is an error. `GRAMMAR_NAMES` lists each grammar.
+One `.wasm` file for each grammar, and one for the runtime, load through the
 Bun file loader, and `src/assets.d.ts` types the import.
 
 `ParsedModule` holds the imports (`RawImport`), the named exports and the default export. It also
@@ -513,7 +514,7 @@ pair. The command writes `inventory.jsonl` and `clones.json` only when `--out` o
 ## 8. Docs (`src/docs/`)
 
 The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`stub`) and gates
-(`check`) for the languages of its registry: TypeScript, JavaScript and Python.
+(`check`) for the languages of its registry: TypeScript, JavaScript, Python, C# and Rust.
 
 | File | Purpose |
 |---|---|
@@ -523,10 +524,13 @@ The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`s
 | `analyse.ts` | Runs the analyser that matches the file. |
 | `typescript.ts` | Reads doc comments of TypeScript and JavaScript through tree-sitter. |
 | `python.ts` | Reads docstrings of Python and detects the dialect. |
+| `csharp.ts` | The C# rules: declarations, accessibility, `///` and `/** */` docs, `<param>` names. |
+| `rust.ts` | The Rust rules: items, the bare `pub`, outer doc comments, `# Arguments` names. |
+| `comments.ts` | The driver of the C# and Rust analysers: parse, the doc run above a declaration, the rules. |
 | `rules.ts` | Applies the MUST and SHOULD rules to one symbol. |
 | `model.ts` | The types: `Kind`, `Tier`, `Issue`, `DocSymbol`, `FileReport`, `Stats`. |
 | `stub.ts` | Plans and applies the skeleton comments. |
-| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`. |
+| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, `xmldoc`, `rustdoc`. |
 | `report.ts` | Writes `COVERAGE.md` and `coverage.json`. |
 
 ```ts
@@ -540,6 +544,9 @@ export async function analyseFile(root: string, rel: string): Promise<FileReport
 export async function analyseRepo(root: string): Promise<RepoAnalysis>
 export async function analyseTypeScript(path: string, source: string): Promise<FileReport>
 export async function analysePython(path: string, source: string): Promise<FileReport>
+export function analyseCSharp(path: string, source: string): Promise<FileReport>
+export function analyseRust(path: string, source: string): Promise<FileReport>
+export async function analyseWith(reader: Reader, path: string, source: string): Promise<FileReport>
 export function applyRules(sym: DocSymbol, doc: string, path: string, options: RuleOptions): void
 export const STUB_MARKER = "TODO:";
 export const LANGUAGES: readonly LanguageSpec[]
@@ -674,9 +681,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 304 | dependency-graph.json |
-| totalFunctions | 432 | dependency-graph.json |
-| totalInterfaces | 146 | dependency-graph.json |
+| totalSourceFiles | 309 | dependency-graph.json |
+| totalFunctions | 439 | dependency-graph.json |
+| totalInterfaces | 148 | dependency-graph.json |
 | totalClasses | 15 | dependency-graph.json |
-| totalExports | 754 | dependency-graph.json |
+| totalExports | 764 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
