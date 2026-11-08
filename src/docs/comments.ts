@@ -53,6 +53,13 @@ export interface Reader {
   /** The name of the symbol. The default is the field `name` of the declaration. */
   nameOf?: (node: Node) => string;
   /**
+   * The declarators of a declaration that declares several names (`int a, b;`), or an empty list.
+   * Each declarator gives its own symbol, with the name that `nameOf` gives for the declarator.
+   * The symbols share the doc, the anchor and the other fields of the declaration. The default is
+   * one symbol per declaration.
+   */
+  declaratorsOf?: (node: Node) => Node[];
+  /**
    * The identity key of a symbol that the file can declare twice, or null. When a documented
    * symbol and an undocumented symbol share a key, the driver clears the export flag and the
    * issues of the undocumented one. The default is no key.
@@ -150,28 +157,33 @@ export async function analyseWith(
       const doc = run.map((n) => n.text).join("\n");
       const text = run.length > 0 ? reader.read(run, node) : NO_DOC;
       const anchor = reader.anchorOf(node);
-      const sym: DocSymbol = {
-        file: path,
-        line: node.startPosition.row + 1,
-        anchorLine: anchor.startPosition.row + 1,
-        anchorColumn: anchor.startPosition.column,
-        name: reader.nameOf?.(node) ?? node.childForFieldName("name")?.text ?? "<anonymous>",
-        kind: reader.kindOf(node),
-        exported: reader.isExported(node),
-        hasDoc: run.length > 0,
-        params: reader.paramsOf(node),
-        docParams: text.docParams,
-        summary: text.summary,
-        dialect: text.dialect,
-        issues: [],
-      };
-      const returnsValue = reader.returnsValueOf(node);
-      if (returnsValue !== undefined) sym.returnsValue = returnsValue;
-      applyRules(sym, doc, path, { noun: "doc comment", restatesType: null, prose: text.prose });
-      report.symbols.push(sym);
-      if (sym.dialect) report.dialects.add(sym.dialect);
-      const key = reader.shadowKeyOf?.(node) ?? null;
-      if (key !== null) keys.set(sym, key);
+      const parts = reader.declaratorsOf?.(node) ?? [];
+      const nameNodes = parts.length > 0 ? parts : [node];
+      for (const nameNode of nameNodes) {
+        const sym: DocSymbol = {
+          file: path,
+          line: node.startPosition.row + 1,
+          anchorLine: anchor.startPosition.row + 1,
+          anchorColumn: anchor.startPosition.column,
+          name:
+            reader.nameOf?.(nameNode) ?? nameNode.childForFieldName("name")?.text ?? "<anonymous>",
+          kind: reader.kindOf(node),
+          exported: reader.isExported(node),
+          hasDoc: run.length > 0,
+          params: reader.paramsOf(node),
+          docParams: text.docParams,
+          summary: text.summary,
+          dialect: text.dialect,
+          issues: [],
+        };
+        const returnsValue = reader.returnsValueOf(node);
+        if (returnsValue !== undefined) sym.returnsValue = returnsValue;
+        applyRules(sym, doc, path, { noun: "doc comment", restatesType: null, prose: text.prose });
+        report.symbols.push(sym);
+        if (sym.dialect) report.dialects.add(sym.dialect);
+        const key = reader.shadowKeyOf?.(node) ?? null;
+        if (key !== null) keys.set(sym, key);
+      }
     }
     dropShadowed(keys);
   } finally {

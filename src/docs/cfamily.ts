@@ -403,8 +403,8 @@ function reports(node: Node): boolean {
     return functionDeclaratorOf(node) !== null;
   }
   if (type === "field_declaration") {
-    // A data member with several names (`int a, b;`) is not reported: the report keeps one name.
-    return !isDataMember(node) || node.childrenForFieldName("declarator").length === 1;
+    // A data member with several names (`int a, b;`) gives one symbol per name (declaratorsOf).
+    return true;
   }
   if (
     type === "struct_specifier" ||
@@ -434,12 +434,25 @@ function isDataMember(node: Node): boolean {
 }
 
 /**
+ * Return the declarators of a data member with several names (`int a, *b;`), or an empty list.
+ *
+ * Only a data member gives one symbol per name. Other declarations keep one name.
+ */
+function declaratorsOf(node: Node): Node[] {
+  if (node.type !== "field_declaration" || !isDataMember(node)) {
+    return [];
+  }
+  const declarators = node.childrenForFieldName("declarator") ?? [];
+  return declarators.length > 1 ? declarators : [];
+}
+
+/**
  * Return the symbol kind of a reported declaration.
  */
 function kindOf(node: Node): Kind {
   const type = node.type;
   const inFieldList = wrapperOf(node).parent?.type === "field_declaration_list";
-  if (type === "function_definition") {
+  if (type === "function_definition" || type === "preproc_function_def") {
     return inFieldList ? "method" : "function";
   }
   if (type === "field_declaration" && isDataMember(node)) {
@@ -481,6 +494,10 @@ function kindOf(node: Node): Kind {
  */
 function nameOf(node: Node): string {
   const type = node.type;
+  if (type.endsWith("_declarator") || type === "field_identifier") {
+    // One declarator of a data member with several names.
+    return leafName(leafOf(node));
+  }
   if (type === "function_definition" || type === "declaration" || type === "field_declaration") {
     const declarator = functionDeclaratorOf(node) ?? node.childForFieldName("declarator");
     return declarator ? leafName(leafOf(declarator)) : "<anonymous>";
@@ -878,6 +895,7 @@ function cFamilyReader(grammar: "c" | "cpp", header: boolean): Reader {
     kindOf,
     isExported: (node) => isExported(node, header),
     nameOf,
+    declaratorsOf,
     paramsOf,
     returnsValueOf,
     read,

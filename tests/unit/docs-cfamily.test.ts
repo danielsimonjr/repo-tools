@@ -459,7 +459,33 @@ describe("docs cfamily macros and data members", () => {
     expect(byName(all, "i").exported).toBe(true);
     expect(byName(all, "hidden").exported).toBe(false);
     expect(byName(all, "count").exported).toBe(true);
-    // A member line with several names is not reported, because the report keeps one name.
-    expect(all.some((s) => s.name === "a" || s.name === "b")).toBe(false);
+    // A member line with several names gives one property per name, on the line of the member.
+    for (const name of ["a", "b"]) {
+      const member = byName(all, name);
+      expect(member.kind).toBe("property");
+      expect(member.exported).toBe(true);
+      expect(member.line).toBe(11);
+    }
+  });
+
+  test("shares the doc comment and the anchor of a member line with several names", async () => {
+    const source = ["struct Q {", "  /** The corners. */", "  int a, *b;", "};", ""].join("\n");
+    const all = await symbols("a.h", source);
+    const a = byName(all, "a");
+    const b = byName(all, "b");
+    for (const member of [a, b]) {
+      expect(member.kind).toBe("property");
+      expect(member.hasDoc).toBe(true);
+      expect(member.summary).toBe("The corners.");
+      expect(member.anchorLine).toBe(3);
+    }
+  });
+
+  test("reports a function-like macro in a class body as a method", async () => {
+    const source = ["class K {", " public:", "#define M(x) (x)", "};", ""].join("\n");
+    const all = await symbols("a.h", source);
+    expect(byName(all, "M").kind).toBe("method");
+    const free = await symbols("a.h", "#define SQ(x) ((x) * (x))\n");
+    expect(byName(free, "SQ").kind).toBe("function");
   });
 });
