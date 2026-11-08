@@ -799,7 +799,10 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   tree-sitter-grammars/tree-sitter-kotlin#10 and #12. The grammar also reads a class body after a
   delegation (`class A : B by c { }`) as a call with a trailing lambda, and gives no error node.
   The analyser finds a call with a lambda in an `explicit_delegation` node. A file with such a
-  node is an unparsed file.
+  node is an unparsed file. The check also matches a delegate that is itself a call with a
+  trailing lambda (`class A : B by lazy { x }`). That file is valid Kotlin, but the analyser
+  reports it as unparsed. An unparsed report is an error that a reader sees, and a silent pass is
+  not.
 
 A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file needs the TSX grammar, and a `.ts` file needs the
 TypeScript grammar. The wrong grammar gives a tree of error nodes and not an exception. Thus a file
