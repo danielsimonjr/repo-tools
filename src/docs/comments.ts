@@ -1,5 +1,5 @@
 /**
- * The driver that the tree-sitter analysers of C#, Rust, Go, Java and Kotlin share. A grammar keeps a comment as a
+ * The driver that the tree-sitter analysers share. A grammar keeps a comment as a
  * sibling node of the declaration after the comment. Thus the doc of a declaration is a run of
  * sibling nodes above the declaration. Each language gives a `Reader`: its node types and its
  * rules. The driver parses the file, walks the declarations and applies the rules of the spec.
@@ -45,6 +45,11 @@ export interface Reader {
    * result is the parse error text, or null for a correct tree. The file is then unparsed.
    */
   misread?: (root: Node) => string | null;
+  /**
+   * False for a node of a declaration type that is not a symbol: a C variable, a struct without a
+   * body. The driver skips the node. The default is true for every node.
+   */
+  reports?: (node: Node) => boolean;
   /** The name of the symbol. The default is the field `name` of the declaration. */
   nameOf?: (node: Node) => string;
   /** The node that `stub` writes above. */
@@ -122,6 +127,7 @@ export async function analyseWith(
       return report;
     }
     for (const node of tree.rootNode.descendantsOfType([...reader.declarations])) {
+      if (reader.reports && !reader.reports(node)) continue;
       const run = docRunAbove(reader.docSiteOf?.(node) ?? node, reader);
       const doc = run.map((n) => n.text).join("\n");
       const text = run.length > 0 ? reader.read(run, node) : NO_DOC;

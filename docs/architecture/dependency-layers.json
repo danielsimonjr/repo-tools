@@ -2540,7 +2540,7 @@
         ]
       },
       "src/docs/comments.ts": {
-        "description": "The driver that the tree-sitter analysers of C#, Rust, Go, Java and Kotlin share. A grammar keeps a comment as a",
+        "description": "The driver that the tree-sitter analysers share. A grammar keeps a comment as a",
         "externalDependencies": [
           {
             "package": "web-tree-sitter",
@@ -4081,7 +4081,19 @@
             ]
           },
           {
+            "package": "tree-sitter-c/tree-sitter-c.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
             "package": "tree-sitter-c-sharp/tree-sitter-c_sharp.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-cpp/tree-sitter-cpp.wasm",
             "imports": [
               "default"
             ]
@@ -4099,7 +4111,19 @@
             ]
           },
           {
+            "package": "tree-sitter-php/tree-sitter-php.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
             "package": "tree-sitter-python/tree-sitter-python.wasm",
+            "imports": [
+              "default"
+            ]
+          },
+          {
+            "package": "tree-sitter-ruby/tree-sitter-ruby.wasm",
             "imports": [
               "default"
             ]

@@ -17,6 +17,11 @@ All notable changes to this project are recorded in this file. The format follow
   and 2.11 MB for Ruby. The PHP grammar is `tree-sitter-php.wasm`, which reads a file that mixes
   HTML and PHP. `map` still refuses a repository of these languages. For a C or C++ repository it
   now counts `.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` and `.hxx` files as `cpp`.
+- The doc driver of the tree-sitter analysers takes a fourth optional hook, `reports`. A reader
+  uses it to skip a node of a declaration type that is not a symbol, for example a variable
+  declaration. `stub` has three new styles: `doxygen` (a `@brief` summary line, `@param` and
+  `@return`), `phpdoc` (`@param $name`, with no type) and `yard` (`#` lines with `@param name` and
+  `@return`, with no type bracket). The styles need the analysers of their languages, which follow.
 - `repo-tools docs` reads Go (`.go`), Java (`.java`) and Kotlin (`.kt`, `.kts`). A Go name is
   exported when its first letter is upper case; a Go doc is the `//` run with no blank line above
   the declaration. A Java declaration is exported when it is `public` or `protected`, or is a

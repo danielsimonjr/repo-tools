@@ -983,7 +983,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/docs/comments.ts` - The driver that the tree-sitter analysers of C#, Rust, Go, Java and Kotlin share. A grammar keeps a comment as a
+### `src/docs/comments.ts` - The driver that the tree-sitter analysers share. A grammar keeps a comment as a
 
 **External Dependencies:**
 | Package | Import |
@@ -1466,10 +1466,14 @@ The codebase is organized into the following modules:
 | Package | Import |
 |---------|--------|
 | `@tree-sitter-grammars/tree-sitter-kotlin/tree-sitter-kotlin.wasm` | `default` |
+| `tree-sitter-c/tree-sitter-c.wasm` | `default` |
 | `tree-sitter-c-sharp/tree-sitter-c_sharp.wasm` | `default` |
+| `tree-sitter-cpp/tree-sitter-cpp.wasm` | `default` |
 | `tree-sitter-go/tree-sitter-go.wasm` | `default` |
 | `tree-sitter-java/tree-sitter-java.wasm` | `default` |
+| `tree-sitter-php/tree-sitter-php.wasm` | `default` |
 | `tree-sitter-python/tree-sitter-python.wasm` | `default` |
+| `tree-sitter-ruby/tree-sitter-ruby.wasm` | `default` |
 | `tree-sitter-rust/tree-sitter-rust.wasm` | `default` |
 | `tree-sitter-typescript/tree-sitter-tsx.wasm` | `default` |
 | `tree-sitter-typescript/tree-sitter-typescript.wasm` | `default` |
@@ -2182,7 +2186,7 @@ graph TD
 |----------|-------|
 | Total Source Files | 316 |
 | Subsystems | 10 |
-| Total Lines of Code | 48407 |
+| Total Lines of Code | 48540 |
 | Total Exports | 772 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |

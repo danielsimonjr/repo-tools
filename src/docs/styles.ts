@@ -59,10 +59,16 @@ const givesValue = (sym: DocSymbol): boolean =>
 
 /**
  * A block comment: the summary line, the parameter lines after a ` *` line, the return line for a
- * function or a method, and the closing line.
+ * function or a method, and the closing line. `summary` is the text of the first line.
  */
-function blockDoc(sym: DocSymbol, I: string, param: (p: string) => string, returns: string) {
-  const lines = [`${I}/**`, `${I} * ${SUMMARY}`];
+function blockDoc(
+  sym: DocSymbol,
+  I: string,
+  param: (p: string) => string,
+  returns: string,
+  summary = SUMMARY,
+) {
+  const lines = [`${I}/**`, `${I} * ${summary}`];
   if (sym.params.length > 0) lines.push(`${I} *`, ...sym.params.map((p) => `${I} * ${param(p)}`));
   if (givesValue(sym)) lines.push(`${I} * ${returns}`);
   lines.push(`${I} */`);
@@ -109,6 +115,22 @@ const renderGodoc = (sym: DocSymbol, I: string): string[] => [`${I}// ${sym.name
 const renderJavadoc = (sym: DocSymbol, I: string): string[] =>
   blockDoc(sym, I, (p) => `@param ${p} ${PARAM}`, `@return ${RETURNS}`);
 
+// Doxygen opens with `@brief`. The tags `@param` and `@return` follow the Javadoc form.
+const renderDoxygen = (sym: DocSymbol, I: string): string[] =>
+  blockDoc(sym, I, (p) => `@param ${p} ${PARAM}`, `@return ${RETURNS}`, `@brief ${SUMMARY}`);
+
+// PHPDoc writes the `$` of the parameter. The stub has no type slot (rule S5).
+const renderPhpdoc = (sym: DocSymbol, I: string): string[] =>
+  blockDoc(sym, I, (p) => `@param $${p} ${PARAM}`, `@return ${RETURNS}`);
+
+/** The YARD doc comment: `#` lines, `@param name` with no type bracket, and `@return`. */
+function renderYard(sym: DocSymbol, I: string): string[] {
+  const lines = [`${I}# ${SUMMARY}`];
+  for (const p of sym.params) lines.push(`${I}# @param ${p} ${PARAM}`);
+  if (givesValue(sym)) lines.push(`${I}# @return ${RETURNS}`);
+  return lines;
+}
+
 /** True when `id` names a style of the registry. A name of an object property is not a style. */
 export function isStyle(id: string): boolean {
   return Object.hasOwn(STYLES, id);
@@ -126,4 +148,7 @@ export const STYLES: Readonly<Record<string, Style>> = {
   godoc: { id: "godoc", language: "go", render: renderGodoc },
   javadoc: { id: "javadoc", language: "java", render: renderJavadoc },
   kdoc: { id: "kdoc", language: "kotlin", render: renderJavadoc },
+  doxygen: { id: "doxygen", language: "cpp", render: renderDoxygen },
+  phpdoc: { id: "phpdoc", language: "php", render: renderPhpdoc },
+  yard: { id: "yard", language: "ruby", render: renderYard },
 };
