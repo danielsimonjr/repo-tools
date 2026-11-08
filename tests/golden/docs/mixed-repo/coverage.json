@@ -1,0 +1,480 @@
+{
+  "summary": {
+    "files_scanned": 6,
+    "files_parsed": 6,
+    "files_unparsed": 0,
+    "symbols": 21,
+    "exported_symbols": 18,
+    "exported_documented": 10,
+    "exported_documented_pct": 55.6,
+    "must_issues": 10,
+    "should_issues": 1,
+    "files_mixed_dialect": 1
+  },
+  "provenance": "git ls-files",
+  "files": [
+    {
+      "path": "pkg/google_style.py",
+      "language": "python",
+      "error": "",
+      "dialects": [
+        "google"
+      ],
+      "symbols": [
+        {
+          "file": "pkg/google_style.py",
+          "line": 4,
+          "name": "scale",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "value",
+            "factor"
+          ],
+          "doc_params": [
+            "value",
+            "factor"
+          ],
+          "summary": "Multiply the value by the factor.",
+          "dialect": "google",
+          "issues": []
+        },
+        {
+          "file": "pkg/google_style.py",
+          "line": 17,
+          "name": "undocumented",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "a",
+            "b"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no docstring"
+            }
+          ]
+        },
+        {
+          "file": "pkg/google_style.py",
+          "line": 21,
+          "name": "Store",
+          "kind": "class",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "Hold named values.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "pkg/google_style.py",
+          "line": 24,
+          "name": "put",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "key",
+            "value"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no docstring"
+            }
+          ]
+        },
+        {
+          "file": "pkg/google_style.py",
+          "line": 28,
+          "name": "get",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "key"
+          ],
+          "doc_params": [
+            "key",
+            "stale"
+          ],
+          "summary": "Return the value for the key.",
+          "dialect": "google",
+          "issues": [
+            {
+              "rule": "M3",
+              "tier": "MUST",
+              "detail": "documents parameter 'stale' which is not in the signature"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "pkg/numpy_style.py",
+      "language": "python",
+      "error": "",
+      "dialects": [
+        "numpy"
+      ],
+      "symbols": [
+        {
+          "file": "pkg/numpy_style.py",
+          "line": 4,
+          "name": "mean",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "values"
+          ],
+          "doc_params": [
+            "values"
+          ],
+          "summary": "Return the mean of the values.",
+          "dialect": "numpy",
+          "issues": []
+        },
+        {
+          "file": "pkg/numpy_style.py",
+          "line": 20,
+          "name": "missing",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "x"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no docstring"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "pkg/rest_style.py",
+      "language": "python",
+      "error": "",
+      "dialects": [
+        "rest"
+      ],
+      "symbols": [
+        {
+          "file": "pkg/rest_style.py",
+          "line": 4,
+          "name": "clamp",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "x",
+            "low",
+            "high"
+          ],
+          "doc_params": [
+            "x",
+            "low",
+            "high"
+          ],
+          "summary": "Clamp x into the range.",
+          "dialect": "rest",
+          "issues": []
+        },
+        {
+          "file": "pkg/rest_style.py",
+          "line": 15,
+          "name": "todo_left",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "y"
+          ],
+          "doc_params": [],
+          "summary": "TODO: state what this does.",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M4",
+              "tier": "MUST",
+              "detail": "unfilled stub marker left by `stub`"
+            }
+          ]
+        },
+        {
+          "file": "pkg/rest_style.py",
+          "line": 20,
+          "name": "_private",
+          "kind": "function",
+          "exported": false,
+          "has_doc": false,
+          "params": [
+            "z"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": []
+        }
+      ]
+    },
+    {
+      "path": "src/jsdoc.js",
+      "language": "typescript",
+      "error": "",
+      "dialects": [
+        "jsdoc"
+      ],
+      "symbols": [
+        {
+          "file": "src/jsdoc.js",
+          "line": 8,
+          "name": "join",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "left",
+            "right"
+          ],
+          "doc_params": [
+            "left",
+            "right"
+          ],
+          "summary": "Joins two strings.",
+          "dialect": "jsdoc",
+          "issues": []
+        },
+        {
+          "file": "src/jsdoc.js",
+          "line": 12,
+          "name": "split",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "text",
+            "sep"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/mixed.ts",
+      "language": "typescript",
+      "error": "",
+      "dialects": [
+        "jsdoc",
+        "tsdoc"
+      ],
+      "symbols": [
+        {
+          "file": "src/mixed.ts",
+          "line": 6,
+          "name": "first",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "x"
+          ],
+          "doc_params": [
+            "x"
+          ],
+          "summary": "Uses the TSDoc form.",
+          "dialect": "tsdoc",
+          "issues": []
+        },
+        {
+          "file": "src/mixed.ts",
+          "line": 15,
+          "name": "second",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "y"
+          ],
+          "doc_params": [
+            "y"
+          ],
+          "summary": "Uses the JSDoc form.",
+          "dialect": "jsdoc",
+          "issues": [
+            {
+              "rule": "S5",
+              "tier": "SHOULD",
+              "detail": "@param restates a type already in the TypeScript signature"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/tsdoc.ts",
+      "language": "typescript",
+      "error": "",
+      "dialects": [
+        "tsdoc"
+      ],
+      "symbols": [
+        {
+          "file": "src/tsdoc.ts",
+          "line": 8,
+          "name": "add",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "a",
+            "b"
+          ],
+          "doc_params": [
+            "a",
+            "b"
+          ],
+          "summary": "Adds two numbers.",
+          "dialect": "tsdoc",
+          "issues": []
+        },
+        {
+          "file": "src/tsdoc.ts",
+          "line": 12,
+          "name": "sub",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "a",
+            "b"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "src/tsdoc.ts",
+          "line": 16,
+          "name": "Counter",
+          "kind": "class",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "src/tsdoc.ts",
+          "line": 19,
+          "name": "increment",
+          "kind": "method",
+          "exported": false,
+          "has_doc": false,
+          "params": [
+            "step"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "src/tsdoc.ts",
+          "line": 24,
+          "name": "Shape",
+          "kind": "interface",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "src/tsdoc.ts",
+          "line": 28,
+          "name": "Id",
+          "kind": "type",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "src/tsdoc.ts",
+          "line": 32,
+          "name": "hidden",
+          "kind": "function",
+          "exported": false,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": []
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,14 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Added
+
+- Golden tests for `repo-tools docs` (`tests/golden/docs`, `tests/unit/docs-golden.test.ts`). They
+  record the `scan` reports, the output of a dry-run and an applied `stub`, and each stubbed
+  source file of the `mixed-repo` fixture (Google, NumPy, reST, TSDoc and JSDoc files). Rewrite
+  them with `bun scripts/update-docs-goldens.ts`. The goldens hold the 2.5.0 result, so a later
+  change to `docs` output shows as a golden diff.
+
 ## [2.5.0] - 2026-11-05
 
 ### Added
