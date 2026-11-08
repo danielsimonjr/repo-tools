@@ -16,7 +16,9 @@ All notable changes to this project are recorded in this file. The format follow
   `stub` writes the three styles (`godoc` is one line that starts with the name; `javadoc` and
   `kdoc` write `@param` and `@return`). The Kotlin grammar 1.1.0 gives an error node for a class
   body that closes on the line of its last member (`class C { fun f() {} }`), so `docs` reports
-  such a file as unparsed (tree-sitter-grammars/tree-sitter-kotlin#10 and #12).
+  such a file as unparsed (tree-sitter-grammars/tree-sitter-kotlin#10 and #12). The grammar also
+  reads a class body after a delegation (`class A : B by c { }`) as a trailing lambda, with no
+  error node, so `docs` reports such a file as unparsed too.
 - `repo-tools docs` reads C# (`.cs`) and Rust (`.rs`). Each language has a tree-sitter analyser
   with its own exported rule: C# `public` or `protected` on the declaration and each enclosing
   type; Rust the bare `pub` on the item and each enclosing module. The doc of a C# declaration is
