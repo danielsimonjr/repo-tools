@@ -407,3 +407,13 @@ data. Other findings are filed here.
 - [x] `map` updates the Verification values of the Markdown documents in its report folder and logs each change.
 - [x] Review, simplify, clones, full suite, doc gates, help text and `docs/design.md`, CHANGELOG. Review fixes: the BOM is kept, an unreadable document only warns, only a rewritable cell is reported.
 - 2026-11-05 five-axis: speed - map reuses its own reports, no second graph build; stability - 9 tests incl. BOM, CRLF, non-UTF-8, U+2028; reliability - a bad document warns, the gates and hooks still run; security - n/a; maintainability - one `judge` and one `walkRows` for check and map. clones 0, 0, 1 before and after; declined: `statsJson`/`symbolJson` in `src/docs/report.ts` (JSON shapes differ).
+
+## docs: more languages and docstring formats (from mintlify/writer, MIT)
+
+- [ ] L0 Language registry for `docs`: one analyser and one grammar entry per language. `analyse.ts`, `index.ts` and `discovery.ts` stop branching on `python`.
+- [ ] L1 Grammars: bundle nine tree-sitter grammars (C#, Rust, Go, Java, C, C++, PHP, Ruby, Kotlin). Each loads from source, the Node bundle and the compiled executable. Dart dropped: its npm package does not load under web-tree-sitter 0.27.0 and names no repository.
+- [ ] L2 C# and Rust analysers first (map reads both; docs refuses them today). Exported rule, doc-comment form, parameters, stub anchor, dialect.
+- [ ] L3 Go, Java, Kotlin analysers. L4 C, C++, PHP, Ruby analysers; drop a language whose exported rule cannot be decided, with the reason.
+- [ ] F1 Docstring formats for `docs stub --style=`: port the writer templates as plain TypeScript, without type slots where the signature has types. Every stub keeps `STUB_MARKER`.
+- [ ] F2 Widen dialect detection and M5. Compare old and new detection over a real corpus; the five existing dialect results must not change.
+- [ ] N1 Mintlify MIT copyright notice for ported code. Update `docs/parity-docs.md`, `docs/design.md`, README. Measure the package size growth for the PR body.
