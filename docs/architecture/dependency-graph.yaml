@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 292
+  totalFiles: 300
   totalModules: 4
-  totalExports: 724
+  totalExports: 746
 modules:
   tools:
     scripts/build.ts:
@@ -169,6 +169,21 @@ modules:
         - GOLDEN_FLAGS
         - API_SURFACE_FILE
         - maskGolden
+    scripts/update-docs-goldens.ts:
+      externalDependencies: []
+      nodeDependencies:
+        - node:child_process
+        - node:fs
+        - node:os
+        - node:path
+      internalDependencies:
+        - file: src/cli.ts
+          imports:
+            - main
+          typeOnly: false
+      exports:
+        - DOCS_GOLDEN_FIXTURES
+        - docsGolden
     scripts/update-map-goldens.ts:
       externalDependencies: []
       nodeDependencies:
@@ -3056,6 +3071,31 @@ modules:
       internalDependencies: []
       exports:
         - pad
+    tests/fixtures/docs/mixed-repo/src/jsdoc.js:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - join
+        - split
+    tests/fixtures/docs/mixed-repo/src/mixed.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - first
+        - second
+    tests/fixtures/docs/mixed-repo/src/tsdoc.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - add
+        - sub
+        - Counter
+        - Shape
+        - Id
+        - twice
     tests/fixtures/extension/probe.mjs:
       externalDependencies: []
       nodeDependencies:
@@ -3177,6 +3217,31 @@ modules:
         - Item
         - total
         - names
+    tests/golden/docs/mixed-repo/sources/src/jsdoc.js:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - join
+        - split
+    tests/golden/docs/mixed-repo/sources/src/mixed.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - first
+        - second
+    tests/golden/docs/mixed-repo/sources/src/tsdoc.ts:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - add
+        - sub
+        - Counter
+        - Shape
+        - Id
+        - twice
     tests/unit/api-surface.test.ts:
       externalDependencies:
         - bun:test
@@ -4740,6 +4805,19 @@ modules:
             - tree
           typeOnly: false
       exports: []
+    tests/unit/docs-golden.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: scripts/update-docs-goldens.ts
+          imports:
+            - DOCS_GOLDEN_FIXTURES
+            - docsGolden
+          typeOnly: false
+      exports: []
     tests/unit/docs-helpers.ts:
       externalDependencies: []
       nodeDependencies:
@@ -5953,11 +6031,11 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 292
-  totalSourceFiles: 292
+  totalTypeScriptFiles: 300
+  totalSourceFiles: 300
   totalModules: 4
-  totalLinesOfCode: 44879
-  totalExports: 724
+  totalLinesOfCode: 45194
+  totalExports: 746
   entryRoots: 1
   reachableFiles: 85
   dormantFiles: 2
@@ -5973,12 +6051,12 @@ statistics:
   typeOnlyCyclicComponents: 4
   runtimeFilesInCycles: 2
   typeOnlyFilesInCycles: 8
-  totalClasses: 13
-  totalInterfaces: 142
-  totalFunctions: 415
+  totalClasses: 15
+  totalInterfaces: 144
+  totalFunctions: 428
   totalTypeGuards: 19
   totalEnums: 4
-  totalConstants: 99
+  totalConstants: 102
   totalReExports: 12
 reachability:
   roots:

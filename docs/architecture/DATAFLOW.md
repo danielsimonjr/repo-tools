@@ -313,6 +313,6 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 292 | dependency-graph.json |
+| totalSourceFiles | 300 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | totalModules | 4 | dependency-graph.json |

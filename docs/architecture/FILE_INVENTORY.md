@@ -8,7 +8,7 @@ This report lists each source file that the map census finds, with a disposition
 
 **Language**: typescript
 
-**Total files**: 292
+**Total files**: 300
 
 ## Disposition counts
 
@@ -18,12 +18,12 @@ This report lists each source file that the map census finds, with a disposition
 | `build-entry` | 1 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
 | `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
-| `test` | 194 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
-| `tool` | 10 | A file in a `tools/` or `scripts/` folder outside `src/`. |
+| `test` | 201 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
+| `tool` | 11 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 1 | A `*.config.*` file of TypeScript or JavaScript. |
 | `example` | 0 | A file in `examples/` or `docs/`. |
 | `bench` | 0 | A file in `bench/` or `benchmarks/`, or a `*.bench.*` file. |
-| **Total** | **292** | |
+| **Total** | **300** | |
 
 ## Per-area counts
 
@@ -31,14 +31,14 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --: |
 | `config` | 1 |
 | `src` | 87 |
-| `tests` | 194 |
-| `tools` | 10 |
+| `tests` | 201 |
+| `tools` | 11 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 205 |
+| `(root)` | 213 |
 | `@danielsimonjr/repo-tools` | 87 |
 
 ## All files
@@ -54,6 +54,7 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/privacy-hash.ts` | (root) | tools | tool | 53 |
 | `scripts/smoke.ts` | (root) | tools | tool | 390 |
 | `scripts/update-depgraph-goldens.ts` | (root) | tools | tool | 19 |
+| `scripts/update-docs-goldens.ts` | (root) | tools | tool | 107 |
 | `scripts/update-map-goldens.ts` | (root) | tools | tool | 79 |
 | `src/assets.d.ts` | @danielsimonjr/repo-tools | src | orphan | 5 |
 | `src/bin.ts` | @danielsimonjr/repo-tools | src | orphan | 8 |
@@ -106,7 +107,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/docs/python.ts` | @danielsimonjr/repo-tools | src | reachable | 460 |
 | `src/docs/report.ts` | @danielsimonjr/repo-tools | src | reachable | 197 |
 | `src/docs/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
-| `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 193 |
+| `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 206 |
 | `src/docs/typescript.ts` | @danielsimonjr/repo-tools | src | reachable | 404 |
 | `src/io-types.ts` | @danielsimonjr/repo-tools | src | reachable | 10 |
 | `src/io.ts` | @danielsimonjr/repo-tools | src | reachable | 47 |
@@ -177,6 +178,9 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/fixtures/depgraph/pnpm-repo/apps/web/tests/index.test.ts` | (root) | tests | test | 3 |
 | `tests/fixtures/depgraph/pnpm-repo/packages/core/src/index.ts` | (root) | tests | test | 6 |
 | `tests/fixtures/depgraph/pnpm-repo/packages/util/src/index.ts` | (root) | tests | test | 4 |
+| `tests/fixtures/docs/mixed-repo/src/jsdoc.js` | (root) | tests | test | 14 |
+| `tests/fixtures/docs/mixed-repo/src/mixed.ts` | (root) | tests | test | 17 |
+| `tests/fixtures/docs/mixed-repo/src/tsdoc.ts` | (root) | tests | test | 32 |
 | `tests/fixtures/extension/probe.mjs` | (root) | tests | test | 15 |
 | `tests/golden/chunk/typescript/chunks/001-imports.ts` | (root) | tests | test | 8 |
 | `tests/golden/chunk/typescript/chunks/002-function-render.ts` | (root) | tests | test | 9 |
@@ -195,6 +199,9 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/golden/compress/ts.aggressive.compact.ts` | (root) | tests | test | 1 |
 | `tests/golden/compress/ts.light.compact.ts` | (root) | tests | test | 27 |
 | `tests/golden/compress/ts.medium.compact.ts` | (root) | tests | test | 17 |
+| `tests/golden/docs/mixed-repo/sources/src/jsdoc.js` | (root) | tests | test | 21 |
+| `tests/golden/docs/mixed-repo/sources/src/mixed.ts` | (root) | tests | test | 17 |
+| `tests/golden/docs/mixed-repo/sources/src/tsdoc.ts` | (root) | tests | test | 48 |
 | `tests/unit/api-surface.test.ts` | (root) | tests | test | 297 |
 | `tests/unit/build.test.ts` | (root) | tests | test | 241 |
 | `tests/unit/check-claims.test.ts` | (root) | tests | test | 120 |
@@ -276,11 +283,12 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/design-refs.test.ts` | (root) | tests | test | 148 |
 | `tests/unit/docs-command.test.ts` | (root) | tests | test | 459 |
 | `tests/unit/docs-discovery.test.ts` | (root) | tests | test | 213 |
+| `tests/unit/docs-golden.test.ts` | (root) | tests | test | 35 |
 | `tests/unit/docs-helpers.ts` | (root) | tests | test | 88 |
 | `tests/unit/docs-python.test.ts` | (root) | tests | test | 369 |
 | `tests/unit/docs-report.test.ts` | (root) | tests | test | 158 |
 | `tests/unit/docs-review.test.ts` | (root) | tests | test | 249 |
-| `tests/unit/docs-stub.test.ts` | (root) | tests | test | 264 |
+| `tests/unit/docs-stub.test.ts` | (root) | tests | test | 275 |
 | `tests/unit/docs-typescript.test.ts` | (root) | tests | test | 606 |
 | `tests/unit/dynamic-imports.ts` | (root) | tests | test | 25 |
 | `tests/unit/entry-roots-build-configs.test.ts` | (root) | tests | test | 115 |
