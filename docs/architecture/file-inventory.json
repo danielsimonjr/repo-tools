@@ -447,7 +447,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 472
+      "loc": 475
     },
     {
       "file": "src/docs/report.ts",
@@ -468,7 +468,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 184
+      "loc": 185
     },
     {
       "file": "src/docs/styles.ts",
@@ -1728,7 +1728,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 374
+      "loc": 380
     },
     {
       "file": "tests/unit/docs-report.test.ts",
@@ -1749,7 +1749,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 275
+      "loc": 281
     },
     {
       "file": "tests/unit/docs-styles.test.ts",

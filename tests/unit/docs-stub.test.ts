@@ -110,6 +110,12 @@ describe("planPython", () => {
     expect(parsesAsPython(out)).toBe(true);
   });
 
+  test("a comment line above the body does not set the indent of the docstring", async () => {
+    const out = await stubPython("def f(a):\n        # note\n    return a\n");
+    expect(out).toContain(`def f(a):\n    """${STUB_MARKER}`);
+    expect(parsesAsPython(out)).toBe(true);
+  });
+
   test("a symbol with a docstring gets no stub", async () => {
     const src = 'def f(a):\n    """Do it."""\n    return a\n';
     const report = await analysePython("a.py", src);
