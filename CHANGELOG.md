@@ -116,6 +116,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- `docs-compare triage` counts header functions without the rows of function-like macros, reads
+  the access specifiers of a struct or a union as well as a class (a struct starts public), and
+  blanks the `extern "C"` guards before the parse, as the analyser does. A header tree with an
+  error node is skipped.
 - `docs` no longer reads a NumPy description line as a parameter. A line such as `Note: x` under
   an entry of the Parameters section gave a parameter named `Note`, so rule M3 failed a correct
   docstring. The entries are now the lines at the smallest indent of the section. Each entry is

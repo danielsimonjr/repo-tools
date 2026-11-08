@@ -9,12 +9,14 @@ import {
   delegationLambdaHoldsDeclaration,
   diffCoverage,
   filesByLanguage,
+  headerFunctionCount,
   isEmpty,
   parseArgs,
   renderDiff,
   rewriteCppMacros,
   rewriteKotlinOneLineBody,
   summaryRow,
+  triageHeaderTree,
   unparsedByError,
 } from "../../scripts/docs-compare.ts";
 import { parsesAsCFamily } from "../../src/docs/cfamily.ts";
@@ -255,6 +257,46 @@ describe("countCppHeaderShapes", () => {
     } finally {
       tree.delete();
     }
+  });
+});
+
+describe("triage header counts", () => {
+  test("struct members follow access specifiers; class starts private", async () => {
+    const source =
+      "struct S { int a; private: int b; public: int c; };\n" +
+      "class C { int d; public: int e; };\n";
+    const parser = await loadGrammar("cpp");
+    const tree = parser.parse(source);
+    if (!tree) throw new Error("parse failed");
+    try {
+      expect(countCppHeaderShapes(tree.rootNode).members).toBe(3);
+    } finally {
+      tree.delete();
+    }
+  });
+
+  test("a function-like macro symbol is not counted as a function", async () => {
+    const source = "#define SQ(x) ((x)*(x))\nint f(void);\n";
+    const parser = await loadGrammar("cpp");
+    const tree = parser.parse(source);
+    if (!tree) throw new Error("parse failed");
+    try {
+      const symbols = [
+        makeSymbol({ file: "a.h", line: 1, name: "SQ", kind: "function" }),
+        makeSymbol({ file: "a.h", line: 2, name: "f", kind: "function" }),
+      ];
+      expect(headerFunctionCount(tree.rootNode, symbols)).toBe(1);
+    } finally {
+      tree.delete();
+    }
+  });
+
+  test("guards are blanked and an error tree is skipped", async () => {
+    const guarded =
+      '#ifdef __cplusplus\nextern "C" {\n#endif\nextern int n;\n#ifdef __cplusplus\n}\n#endif\n';
+    const ok = await triageHeaderTree(guarded, []);
+    expect(ok).toEqual({ functions: 0, macros: 0, externs: 1, members: 0 });
+    expect(await triageHeaderTree("int f( {{{\n", [])).toBeNull();
   });
 });
 
