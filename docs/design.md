@@ -528,9 +528,8 @@ browser-safety commands serve TypeScript/JavaScript only.
 ### 14.6 Assets
 
 The Node bundle needs one tree-sitter `.wasm` file for the runtime and one for each grammar in
-`GRAMMAR_NAMES` of `src/map/grammars.ts`: TypeScript, TSX, Python, C# and Rust. A grammar ships
-only with the analyser that reads it, because each grammar adds to the size of the package. The
-build writes them next to
+`GRAMMAR_NAMES` of `src/map/grammars.ts`: TypeScript, TSX, Python, C#, Rust, Go, Java and Kotlin. Each grammar adds to
+the size of the package. The build writes them next to
 `dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
 system. A relative asset path resolves against the URL of its module, never against the working
 folder.

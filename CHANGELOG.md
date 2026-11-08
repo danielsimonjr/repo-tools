@@ -18,8 +18,8 @@ All notable changes to this project are recorded in this file. The format follow
   `trait` and `property`.
 - The npm package and the executables carry the tree-sitter grammars of C# and Rust. The unpacked
   package grows from about 4.4 MB to 10.9 MB. A grammar ships only with the analyser that reads it.
-- The lockfile pins the Go, Java and Kotlin tree-sitter grammars as development dependencies, ahead
-  of the analysers that read them. The Kotlin grammar is the community build 1.1.0.
+- The npm package and the executables also carry the tree-sitter grammars of Go, Java and Kotlin,
+  which the analysers of the next commits read. The Kotlin grammar is the community build 1.1.0.
 - `NOTICE` holds the MIT licence of mintlify/writer, from which the node kinds, the default doc
   forms and the stub templates derive. The npm package ships it.
 - Golden sets `cs-repo` and `rs-repo` for `repo-tools map`. They fix the output of the C# and Rust
