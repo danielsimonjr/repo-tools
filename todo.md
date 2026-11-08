@@ -127,7 +127,7 @@
   the subsections (no release step, publish from the CI tarball after a hash check, no token in
   CI) or point the comments at section 11. Add a check that fails on a dangling section
   reference.
-- [ ] `docs` C/C++ scope key: a nested qualified name `S::Inner::in` keys on `S` only. A documented
+- [x] `docs` C/C++ scope key: a nested qualified name `S::Inner::in` keys on `S` only. A documented
   `S::Inner::in` can hide an undocumented `void in(int)` in a namespace `S`. Key on the full
   qualifier chain.
 - [ ] `docs` C/C++ multi-declarator declarations make the file unparsed. Measure on `antirez/sds`

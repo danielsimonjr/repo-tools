@@ -810,12 +810,14 @@ function scopeOf(node: Node): string {
   }
   const declarator = functionDeclaratorOf(node);
   if (declarator) {
-    const leaf = leafOf(declarator);
-    if (leaf.type === "qualified_identifier") {
+    // `S::Inner::in` nests: the scope `S` holds the name `Inner::in`. Walk every level.
+    let leaf: Node | null = leafOf(declarator);
+    while (leaf?.type === "qualified_identifier") {
       const scope = leaf.childForFieldName("scope");
       if (scope) {
         names.push(scope.text.replace(/\s+/g, ""));
       }
+      leaf = leaf.childForFieldName("name");
     }
   }
   return names.join("::");
