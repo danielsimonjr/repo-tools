@@ -114,9 +114,9 @@ Prerequisites: Bun 1.4.2 or later, and a clone of this repository.
 
    | Target | File | Size (about) |
    |---|---|---|
-   | `bun-windows-x64` | `bin/repo-tools-windows-x64.exe` | 86 MB |
-   | `bun-linux-x64` | `bin/repo-tools-linux-x64` | 82 MB |
-   | `bun-darwin-arm64` | `bin/repo-tools-darwin-arm64` | 62 MB |
+   | `bun-windows-x64` | `bin/repo-tools-windows-x64.exe` | 108 MB |
+   | `bun-linux-x64` | `bin/repo-tools-linux-x64` | 103 MB |
+   | `bun-darwin-arm64` | `bin/repo-tools-darwin-arm64` | 84 MB |
 
 3. Run the executable:
 

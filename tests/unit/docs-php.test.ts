@@ -167,6 +167,9 @@ test("marks the phpdoc dialect for psalm and phpstan tags", async () => {
 });
 
 test("gives an empty summary to an inline-tag-only doc", async () => {
-  const sym = await byName("<?php\nclass B {\n  /** {@inheritDoc} */\n  public function get() {}\n}\n", "get");
+  const sym = await byName(
+    "<?php\nclass B {\n  /** {@inheritDoc} */\n  public function get() {}\n}\n",
+    "get",
+  );
   expect(sym.summary).toBe("");
 });
