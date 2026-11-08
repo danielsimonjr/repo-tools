@@ -1,6 +1,7 @@
 {
   "surfaces": {
     "src/lib.rs": [
+      "model",
       "net",
       "run"
     ]

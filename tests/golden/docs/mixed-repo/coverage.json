@@ -1,18 +1,145 @@
 {
   "summary": {
-    "files_scanned": 6,
-    "files_parsed": 6,
+    "files_scanned": 8,
+    "files_parsed": 8,
     "files_unparsed": 0,
-    "symbols": 21,
-    "exported_symbols": 18,
-    "exported_documented": 10,
-    "exported_documented_pct": 55.6,
-    "must_issues": 10,
+    "symbols": 27,
+    "exported_symbols": 24,
+    "exported_documented": 12,
+    "exported_documented_pct": 50,
+    "must_issues": 14,
     "should_issues": 1,
     "files_mixed_dialect": 1
   },
   "provenance": "git ls-files",
   "files": [
+    {
+      "path": "Box.cs",
+      "language": "csharp",
+      "error": "",
+      "dialects": [
+        "xmldoc"
+      ],
+      "symbols": [
+        {
+          "file": "Box.cs",
+          "line": 2,
+          "name": "Box",
+          "kind": "class",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "Holds a value.",
+          "dialect": "xmldoc",
+          "issues": []
+        },
+        {
+          "file": "Box.cs",
+          "line": 4,
+          "name": "Get",
+          "kind": "method",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "key"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "Box.cs",
+          "line": 7,
+          "name": "Clear",
+          "kind": "method",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "model.rs",
+      "language": "rust",
+      "error": "",
+      "dialects": [],
+      "symbols": [
+        {
+          "file": "model.rs",
+          "line": 4,
+          "name": "Foo",
+          "kind": "struct",
+          "exported": true,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "model.rs",
+          "line": 7,
+          "name": "send",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "b"
+          ],
+          "doc_params": [],
+          "summary": "Sends a byte.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "model.rs",
+          "line": 11,
+          "name": "put",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "a",
+            "b"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        }
+      ]
+    },
     {
       "path": "pkg/google_style.py",
       "language": "python",

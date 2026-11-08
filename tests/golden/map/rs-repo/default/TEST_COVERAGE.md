@@ -8,21 +8,22 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 5 |
+| Total Source Files | 6 |
 | Total Test Files | 0 |
 | Source Files with Tests | 0 |
-| Source Files without Tests | 5 |
+| Source Files without Tests | 6 |
 | Coverage (raw, direct-import) | **0.0%** |
 ---
 
 ## Source Files Not Imported By A Test
 
-The following 5 source files are not directly imported by any test file:
+The following 6 source files are not directly imported by any test file:
 
 ### root/
 
 - `src/lib.rs`
 - `src/main.rs`
+- `src/model.rs`
 - `src/util.rs`
 
 ### net/

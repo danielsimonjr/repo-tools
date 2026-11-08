@@ -1,6 +1,8 @@
 exit 0
+  wrote Box.cs: inserted 2 stub(s)
+  wrote model.rs: inserted 2 stub(s)
   wrote pkg/google_style.py: inserted 2 stub(s)
   wrote pkg/numpy_style.py: inserted 1 stub(s)
   wrote src/jsdoc.js: inserted 1 stub(s)
   wrote src/tsdoc.ts: inserted 4 stub(s)
-APPLIED: 8 stub(s) planned across 6 file(s); 4 file(s) modified
+APPLIED: 12 stub(s) planned across 8 file(s); 6 file(s) modified

@@ -100,6 +100,18 @@ describe("analyseRust", () => {
     expect(f?.line).toBe(3);
   });
 
+  test("the stub anchor steps over a plain comment inside the attribute run", async () => {
+    const src =
+      '#[derive(Debug)]\n// why the next attribute exists\n#[serde(rename_all = "camelCase")]\npub struct Foo;\n';
+    const [foo] = await symbols(src);
+    expect(foo?.hasDoc).toBe(false);
+    expect(foo?.anchorLine).toBe(1);
+    const plan = planTypeScript(foo as DocSymbol, splitLines(src), "rustdoc");
+    const done = applyInsertions(src, plan ? [plan] : [], (text) => parsesAsRust("a.rs", text));
+    expect(done.ok).toBe(true);
+    expect(done.text.endsWith(src)).toBe(true);
+  });
+
   test("//// and // are not doc comments; /** */ is", async () => {
     expect((await symbols("//// Not doc.\npub fn f() {}\n"))[0]?.hasDoc).toBe(false);
     expect((await symbols("// Not doc.\npub fn f() {}\n"))[0]?.hasDoc).toBe(false);

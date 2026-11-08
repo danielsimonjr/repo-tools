@@ -1,7 +1,7 @@
 {
-  "totalFiles": 5,
+  "totalFiles": 6,
   "byDisposition": {
-    "reachable": 3,
+    "reachable": 4,
     "build-entry": 2,
     "test-only": 0,
     "orphan": 0,
@@ -12,10 +12,10 @@
     "example": 0
   },
   "byArea": {
-    "src": 5
+    "src": 6
   },
   "byPackage": {
-    "(root)": 5
+    "(root)": 6
   },
   "files": [
     {
@@ -23,7 +23,7 @@
       "package": "(root)",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 9
+      "loc": 10
     },
     {
       "file": "src/main.rs",
@@ -31,6 +31,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 3
+    },
+    {
+      "file": "src/model.rs",
+      "package": "(root)",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 4
     },
     {
       "file": "src/net/mod.rs",

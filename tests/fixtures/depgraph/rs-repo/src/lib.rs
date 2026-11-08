@@ -1,5 +1,6 @@
 //! The crate root.
 
+pub mod model;
 pub mod net;
 mod util;
 

@@ -2,15 +2,18 @@ metadata:
   name: rs-repo
   schemaVersion: 2.0.0
   language: rust
-  totalFiles: 5
+  totalFiles: 6
   totalModules: 1
-  totalExports: 3
+  totalExports: 5
 modules:
   src:
     src/lib.rs:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: src/model.rs
+          imports: []
+          typeOnly: false
         - file: src/net/mod.rs
           imports: []
           typeOnly: false
@@ -18,6 +21,7 @@ modules:
           imports: []
           typeOnly: false
       exports:
+        - model
         - net
         - run
     src/main.rs:
@@ -25,6 +29,12 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       exports: []
+    src/model.rs:
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Foo
     src/net/mod.rs:
       externalDependencies: []
       nodeDependencies: []
@@ -45,13 +55,13 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 5
-  totalSourceFiles: 5
+  totalTypeScriptFiles: 6
+  totalSourceFiles: 6
   totalModules: 1
-  totalLinesOfCode: 25
-  totalExports: 3
+  totalLinesOfCode: 30
+  totalExports: 5
   entryRoots: 2
-  reachableFiles: 5
+  reachableFiles: 6
   dormantFiles: 0
   orphanedFiles: 0
   testOnlyFiles: 0
@@ -59,7 +69,7 @@ statistics:
   typeOnlyCircularDeps: 0
   totalTypeOnlyImports: 0
   noImporterFileCount: 0
-  unusedExportsCount: 3
+  unusedExportsCount: 5
   circularDepsTruncated: false
   runtimeCyclicComponents: 0
   typeOnlyCyclicComponents: 0
@@ -69,7 +79,7 @@ reachability:
   roots:
     - src/lib.rs
     - src/main.rs
-  reachableCount: 5
+  reachableCount: 6
   dormantCount: 0
   orphaned: []
   testOnly: []

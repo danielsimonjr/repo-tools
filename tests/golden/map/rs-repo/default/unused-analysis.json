@@ -8,15 +8,19 @@
     "A `pub` item with no user inside this crate is normally PUBLIC API, not dead code. `unused-analysis` sees only the repository. A library crate's public surface exists for DOWNSTREAM consumers. These consumers are not in the graph. Therefore, 'no importer here' is the expected state for most public items. The state is not a finding. Measured on one real crate: 2,635 of 2,739 exports (96%) had no in-crate user, and essentially all of them were live API. Treat this list as 'candidates to check against the crate's intended surface', never as a deletion list."
   ],
   "summary": {
-    "unusedExportCount": 3,
-    "unreferencedAnywhereCount": 2,
+    "unusedExportCount": 5,
+    "unreferencedAnywhereCount": 4,
     "referencedInModuleCount": 1,
     "unclassifiedExportCount": 0,
     "noImporterFileCount": 0
   },
   "unreferencedAnywhere": {
     "src/lib.rs": [
+      "model",
       "run"
+    ],
+    "src/model.rs": [
+      "Foo"
     ],
     "src/net/mod.rs": [
       "send"
@@ -24,7 +28,11 @@
   },
   "unreferencedAnywhereNotes": {
     "src/lib.rs": {
+      "model": "Checked for a dynamic import() call with a LITERAL string specifier resolving to 'src/lib.rs' across the whole repo and found none. This scan can only see import() calls with a literal string specifier -- a dynamic import built from a variable or template literal (e.g. import(`./cmds/${name}.js`)) is invisible to it, so 'found none' means no LITERAL match was found, NOT that nothing imports this. 'model' may still be consumed via such a call. Also verify against consumption this scan cannot see at all (docs examples, published API surface, a runtime-built path/`new Worker(...)`) before deleting.",
       "run": "Checked for a dynamic import() call with a LITERAL string specifier resolving to 'src/lib.rs' across the whole repo and found none. This scan can only see import() calls with a literal string specifier -- a dynamic import built from a variable or template literal (e.g. import(`./cmds/${name}.js`)) is invisible to it, so 'found none' means no LITERAL match was found, NOT that nothing imports this. 'run' may still be consumed via such a call. Also verify against consumption this scan cannot see at all (docs examples, published API surface, a runtime-built path/`new Worker(...)`) before deleting."
+    },
+    "src/model.rs": {
+      "Foo": "Checked for a dynamic import() call with a LITERAL string specifier resolving to 'src/model.rs' across the whole repo and found none. This scan can only see import() calls with a literal string specifier -- a dynamic import built from a variable or template literal (e.g. import(`./cmds/${name}.js`)) is invisible to it, so 'found none' means no LITERAL match was found, NOT that nothing imports this. 'Foo' may still be consumed via such a call. Also verify against consumption this scan cannot see at all (docs examples, published API surface, a runtime-built path/`new Worker(...)`) before deleting."
     },
     "src/net/mod.rs": {
       "send": "Checked for a dynamic import() call with a LITERAL string specifier resolving to 'src/net/mod.rs' across the whole repo and found none. This scan can only see import() calls with a literal string specifier -- a dynamic import built from a variable or template literal (e.g. import(`./cmds/${name}.js`)) is invisible to it, so 'found none' means no LITERAL match was found, NOT that nothing imports this. 'send' may still be consumed via such a call. Also verify against consumption this scan cannot see at all (docs examples, published API surface, a runtime-built path/`new Worker(...)`) before deleting."

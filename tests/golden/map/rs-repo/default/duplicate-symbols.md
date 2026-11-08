@@ -10,7 +10,7 @@
 
 **Duplicated names**: 0
 
-**Names in the census**: 3
+**Names in the census**: 5
 
 ## Names defined by two or more files
 

@@ -122,10 +122,16 @@ function docParamsOf(lines: string[]): string[] {
   return names;
 }
 
-/** The node that `stub` writes above: the first attribute of the unbroken run above the item. */
+/**
+ * The node that `stub` writes above: the first attribute above the item. The walk steps over the
+ * attributes and the plain comments between them, as the doc walk does. Thus a stub never goes
+ * inside the attribute run. A plain comment above the first attribute keeps its place.
+ */
 function stubAnchor(node: Node): Node {
   let first = node;
-  while (first.previousSibling?.type === "attribute_item") first = first.previousSibling;
+  for (let prev = node.previousSibling; prev && isSkipped(prev); prev = prev.previousSibling) {
+    if (prev.type === "attribute_item") first = prev;
+  }
   return first;
 }
 
