@@ -2013,14 +2013,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total Source Files | 292 |
+| Total Source Files | 300 |
 | Subsystems | 10 |
-| Total Lines of Code | 44879 |
-| Total Exports | 724 |
+| Total Lines of Code | 45194 |
+| Total Exports | 746 |
 | Total Re-exports | 12 |
-| Total Classes | 13 |
-| Total Interfaces | 142 |
-| Total Functions | 415 |
+| Total Classes | 15 |
+| Total Interfaces | 144 |
+| Total Functions | 428 |
 | Total Type Guards | 19 |
 | Total Enums | 4 |
 | Type-only Imports | 65 |

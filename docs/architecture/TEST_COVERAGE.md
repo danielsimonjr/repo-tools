@@ -9,7 +9,7 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 86 |
-| Total Test Files | 139 |
+| Total Test Files | 140 |
 | Source Files with Tests | 68 |
 | Source Files without Tests | 18 |
 | Coverage (raw, direct-import) | **79.1%** |
@@ -229,6 +229,7 @@ The following 18 source files are not directly imported by any test file:
 | `unit/design-refs.test.ts` | 0 files |
 | `unit/docs-command.test.ts` | 1 files |
 | `unit/docs-discovery.test.ts` | 2 files |
+| `unit/docs-golden.test.ts` | 0 files |
 | `unit/docs-python.test.ts` | 2 files |
 | `unit/docs-report.test.ts` | 2 files |
 | `unit/docs-review.test.ts` | 2 files |

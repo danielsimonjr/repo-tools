@@ -1,24 +1,24 @@
 {
-  "totalFiles": 292,
+  "totalFiles": 300,
   "byDisposition": {
     "reachable": 84,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 194,
-    "tool": 10,
+    "test": 201,
+    "tool": 11,
     "config": 1,
     "bench": 0,
     "example": 0
   },
   "byArea": {
-    "tools": 10,
+    "tools": 11,
     "src": 87,
-    "tests": 194,
+    "tests": 201,
     "config": 1
   },
   "byPackage": {
-    "(root)": 205,
+    "(root)": 213,
     "@danielsimonjr/repo-tools": 87
   },
   "files": [
@@ -84,6 +84,13 @@
       "area": "tools",
       "disposition": "tool",
       "loc": 19
+    },
+    {
+      "file": "scripts/update-docs-goldens.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 107
     },
     {
       "file": "scripts/update-map-goldens.ts",
@@ -454,7 +461,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 193
+      "loc": 206
     },
     {
       "file": "src/docs/typescript.ts",
@@ -947,6 +954,27 @@
       "loc": 4
     },
     {
+      "file": "tests/fixtures/docs/mixed-repo/src/jsdoc.js",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 14
+    },
+    {
+      "file": "tests/fixtures/docs/mixed-repo/src/mixed.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 17
+    },
+    {
+      "file": "tests/fixtures/docs/mixed-repo/src/tsdoc.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 32
+    },
+    {
       "file": "tests/fixtures/extension/probe.mjs",
       "package": "(root)",
       "area": "tests",
@@ -1071,6 +1099,27 @@
       "area": "tests",
       "disposition": "test",
       "loc": 17
+    },
+    {
+      "file": "tests/golden/docs/mixed-repo/sources/src/jsdoc.js",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 21
+    },
+    {
+      "file": "tests/golden/docs/mixed-repo/sources/src/mixed.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 17
+    },
+    {
+      "file": "tests/golden/docs/mixed-repo/sources/src/tsdoc.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 48
     },
     {
       "file": "tests/unit/api-surface.test.ts",
@@ -1640,6 +1689,13 @@
       "loc": 213
     },
     {
+      "file": "tests/unit/docs-golden.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
+    },
+    {
       "file": "tests/unit/docs-helpers.ts",
       "package": "(root)",
       "area": "tests",
@@ -1672,7 +1728,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 264
+      "loc": 275
     },
     {
       "file": "tests/unit/docs-typescript.test.ts",
