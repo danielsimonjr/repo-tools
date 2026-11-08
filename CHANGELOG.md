@@ -116,6 +116,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- Ruby: `private_constant "K"` and `private_constant 'K'` hide `K`, as the symbol form does. The
+  string form also counts for `private`, `protected` and `private_class_method`. A `:nodoc:` mark
+  counts only at the start of the comment (`# :nodoc:`), so a `:nodoc:` later in the prose does
+  not hide the declaration.
 - Python, NumPy dialect: a bare entry `x:` with no description and no deeper next line gives the
   name `x` again, as 2.5.0 did. A combined entry `x, y : int` gives both names.
 - C and C++: a data member with several names (`int a, *b;`) gives one `property` symbol per

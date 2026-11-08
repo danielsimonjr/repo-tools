@@ -197,4 +197,37 @@ describe("Ruby analyser", () => {
     expect((await byName(source, "C")).exported).toBe(false);
     expect((await byName(source, "m2")).exported).toBe(true);
   });
+
+  it("hides a constant that private_constant names with a string", async () => {
+    const source = [
+      "module M",
+      "  class Str; end",
+      "  class Single; end",
+      "  class Kept; end",
+      '  private_constant "Str"',
+      "  private_constant 'Single'",
+      "end",
+      "",
+    ].join("\n");
+    expect((await byName(source, "Str")).exported).toBe(false);
+    expect((await byName(source, "Single")).exported).toBe(false);
+    expect((await byName(source, "Kept")).exported).toBe(true);
+    const methods = ["class A", "  def m; end", "  def n; end", '  private "m"', "end", ""];
+    expect((await byName(methods.join("\n"), "m")).exported).toBe(false);
+    expect((await byName(methods.join("\n"), "n")).exported).toBe(true);
+  });
+
+  it("reads :nodoc: only at the start of the comment", async () => {
+    const source = [
+      "class A",
+      "  def kept # see :nodoc: in the guide",
+      "  end",
+      "  def hidden #  :nodoc:",
+      "  end",
+      "end",
+      "",
+    ].join("\n");
+    expect((await byName(source, "kept")).exported).toBe(true);
+    expect((await byName(source, "hidden")).exported).toBe(false);
+  });
 });

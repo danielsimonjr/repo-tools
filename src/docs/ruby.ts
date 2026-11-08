@@ -143,9 +143,19 @@ function hidesName(body: Node, name: string, methodNames: ReadonlySet<string>): 
       if (arg?.type === "simple_symbol" && arg.text === `:${name}`) {
         return true;
       }
+      if (arg?.type === "string" && plainStringText(arg) === name) {
+        return true;
+      }
     }
   }
   return false;
+}
+
+/** Returns the text of a string literal with no interpolation (`"K"`, `'K'`), or null. */
+function plainStringText(node: Node): string | null {
+  const parts = node.namedChildren;
+  if (parts.length !== 1 || parts[0]?.type !== "string_content") return null;
+  return parts[0].text;
 }
 
 /** Returns the declared name of a node. */
@@ -160,7 +170,8 @@ function nodocOf(node: Node): "" | "nodoc" | "all" {
     // One pass over the comments of the tree, so each declaration costs one lookup.
     rows = new Map();
     for (const comment of node.tree.rootNode.descendantsOfType(["comment"])) {
-      const match = comment.text.match(/:nodoc:(\s+all\b)?/);
+      // The mark opens the comment. A `:nodoc:` later in the text is prose.
+      const match = comment.text.match(/^#\s*:nodoc:(\s+all\b)?/);
       if (match) rows.set(comment.startPosition.row, match[1] ? "all" : "nodoc");
     }
     NODOC_ROWS.set(node.tree, rows);
