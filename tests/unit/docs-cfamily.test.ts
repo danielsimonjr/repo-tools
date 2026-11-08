@@ -288,6 +288,26 @@ describe("docs cfamily review fixes", () => {
     expect(second?.hasDoc).toBe(false);
   });
 
+  test("keys a nested qualified definition on its full scope chain", async () => {
+    const source = [
+      "namespace S {",
+      "namespace Inner {",
+      "void in(int x);",
+      "}",
+      "void in(int x);",
+      "}",
+      "/** Does in. */",
+      "void S::Inner::in(int x) {}",
+      "",
+    ].join("\n");
+    const declared = (await symbols("a.h", source)).filter((s) => s.name === "in");
+    // The prototype in S::Inner is shadowed by its documented definition.
+    expect(declared[0]?.exported).toBe(false);
+    // The decoy in S keeps its export flag and its M1 issue.
+    expect(declared[1]?.exported).toBe(true);
+    expect(declared[1]?.issues.map((i) => i.rule)).toContain("M1");
+  });
+
   test("drops the export flag of an out-of-class method only for the declared one", async () => {
     const source = [
       "struct S {",

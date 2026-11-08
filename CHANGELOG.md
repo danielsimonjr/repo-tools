@@ -92,7 +92,8 @@ All notable changes to this project are recorded in this file. The format follow
   a pointer name (`typedef struct Point {..} *PointPtr;`). The check runs for the C grammar too.
   The report keeps one name per declaration, so a second name would leave the gate silently.
 - The C and C++ reader clears the export flag of an undocumented copy only for a free function
-  with the same scope, name and parameters. The driver gains the optional `shadowKeyOf` hook.
+  with the same scope, name and parameters. The driver gains the optional `shadowKeyOf` hook. The
+  scope holds every level of a nested qualified name (`S::Inner::in` keys on `S::Inner`).
 - The C and C++ reader skips anonymous enums, structs and unions, and function-pointer variables
   and data members (`int (*hook)(int);`). `void (*signal(int, void (*)(int)))(int)` is a function
   with the parameters `sig` and `func` and a return value.
