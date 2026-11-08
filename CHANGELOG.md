@@ -8,6 +8,9 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
+- `scripts/docs-compare.ts` (`bun run compare:docs`) compares two `docs scan` reports (`diff`, exit 1 on
+  any difference), writes one row of the parity table (`summary`), and gives a cause to each
+  unparsed file (`triage`). The `triage` rewrites are measurement heuristics and change no report.
 - Four development dependencies, pinned to exact versions: `tree-sitter-c` 0.24.1,
   `tree-sitter-cpp` 0.23.4, `tree-sitter-php` 0.24.2 and `tree-sitter-ruby` 0.23.1. They hold the
   grammar files of the C, C++, PHP and Ruby readers. The lockfile also names `tree-sitter-c` 0.23.6
