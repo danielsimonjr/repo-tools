@@ -96,6 +96,19 @@ function headerEnd(lines: string[], start: number): number {
 }
 
 /**
+ * The indent of the body of the definition that starts at line `start` and whose signature ends at
+ * line `end`. It is the indent of the first non-blank line after `end`, when that line is deeper
+ * than the `def` line. Otherwise it is the `def` indent and four spaces. A continuation line of the
+ * signature can align its arguments at any column, so it never sets the indent.
+ */
+function bodyIndent(lines: string[], start: number, end: number): string {
+  const head = indentOf(lines[start] ?? "");
+  const next = lines.slice(end + 1).find((l) => l.trim() !== "");
+  const indent = next === undefined ? "" : indentOf(next);
+  return indent.length > head.length ? indent : `${head}    `;
+}
+
+/**
  * Returns the insertion that documents `sym`, or null when `sym` has a doc. The Python docstring
  * goes inside the body, on the line after the end of the signature.
  */
@@ -104,7 +117,7 @@ export function planPython(sym: DocSymbol, lines: string[]): Insertion | null {
   const start = sym.line - 1;
   if (start >= lines.length) return null;
   const end = headerEnd(lines, start);
-  const body = `${indentOf(lines[end] ?? "")}    `;
+  const body = bodyIndent(lines, start, end);
   const out = [`${body}"""${STUB_MARKER} state what this does, in one active-voice sentence.`];
   if (sym.params.length > 0 || sym.kind === "function") out.push("");
   if (sym.params.length > 0) {

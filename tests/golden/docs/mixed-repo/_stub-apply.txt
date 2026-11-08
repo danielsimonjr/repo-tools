@@ -1,6 +1,6 @@
 exit 0
-  SKIPPED pkg/google_style.py: REVERTED: the file would no longer parse after insertion
+  wrote pkg/google_style.py: inserted 2 stub(s)
   wrote pkg/numpy_style.py: inserted 1 stub(s)
   wrote src/jsdoc.js: inserted 1 stub(s)
   wrote src/tsdoc.ts: inserted 4 stub(s)
-APPLIED: 8 stub(s) planned across 6 file(s); 3 file(s) modified
+APPLIED: 8 stub(s) planned across 6 file(s); 4 file(s) modified

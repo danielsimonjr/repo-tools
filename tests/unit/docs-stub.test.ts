@@ -99,6 +99,17 @@ describe("planPython", () => {
     expect(parsesAsPython(out)).toBe(true);
   });
 
+  test("a continuation line of the signature does not set the indent of the docstring", async () => {
+    // The last signature line is indented to align the arguments. The body indent comes from the
+    // `def` line, so the docstring stays at the indent of the body and the file still parses.
+    const out = await stubPython(
+      "class C:\n    def put(self, key,\n            value):\n        self.k = key\n",
+    );
+    expect(out).toContain(`\n        """${STUB_MARKER} state what this does`);
+    expect(out).toContain("\n            key: ");
+    expect(parsesAsPython(out)).toBe(true);
+  });
+
   test("a symbol with a docstring gets no stub", async () => {
     const src = 'def f(a):\n    """Do it."""\n    return a\n';
     const report = await analysePython("a.py", src);

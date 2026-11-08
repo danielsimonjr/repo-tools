@@ -6,6 +6,13 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `docs stub --apply` no longer reverts a Python file whose function signature continues on an
+  aligned line. The stub took its indent from the last line of the signature, so the docstring
+  landed deeper than the body and the file no longer parsed. The stub now takes the indent of the
+  first body line, or the `def` indent and four spaces.
+
 ### Added
 
 - Golden tests for `repo-tools docs` (`tests/golden/docs`, `tests/unit/docs-golden.test.ts`). They
