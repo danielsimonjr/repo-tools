@@ -59,7 +59,7 @@ function makeFile(overrides: Partial<CoverageFile> = {}): CoverageFile {
   return {
     path: "src/a.ts",
     language: "ts",
-    error: null,
+    error: "",
     dialects: ["ts"],
     symbols: [],
     ...overrides,
@@ -135,12 +135,12 @@ describe("diffCoverage", () => {
   });
 
   test("finds file error and dialect changes", () => {
-    const base = makeCoverage([makeFile({ error: null, dialects: ["ts"] })]);
+    const base = makeCoverage([makeFile({ error: "", dialects: ["ts"] })]);
     const next = makeCoverage([makeFile({ error: "bad parse", dialects: ["tsx"] })]);
     const diff = diffCoverage(base, next);
     expect(diff.fileChanges).toEqual([
       'src/a.ts dialects: ["ts"] -> ["tsx"]',
-      'src/a.ts error: null -> "bad parse"',
+      'src/a.ts error: "" -> "bad parse"',
     ]);
   });
 
@@ -167,7 +167,7 @@ describe("file counts", () => {
       makeFile({ path: "a.ts", error: "e1" }),
       makeFile({ path: "b.ts", error: "e1" }),
       makeFile({ path: "c.kt", language: "kotlin", error: "e2" }),
-      makeFile({ path: "d.kt", language: "kotlin", error: null }),
+      makeFile({ path: "d.kt", language: "kotlin", error: "" }),
     ]);
     expect([...unparsedByError(coverage).entries()]).toEqual([
       ["e1", 2],
