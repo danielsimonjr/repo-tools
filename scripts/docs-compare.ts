@@ -87,7 +87,8 @@ export interface CoverageSymbol {
 export interface CoverageFile {
   path: string;
   language: string;
-  error: string | null;
+  /** The parse error text. An empty text marks a parsed file. */
+  error: string;
   dialects: string[];
   symbols: CoverageSymbol[];
 }
@@ -239,7 +240,7 @@ function countBy(files: CoverageFile[], keyOf: (f: CoverageFile) => string | nul
 
 /** Counts the unparsed files of a report by their error text. */
 export function unparsedByError(coverage: Coverage): Map<string, number> {
-  return countBy(coverage.files, (f) => f.error);
+  return countBy(coverage.files, (f) => f.error || null);
 }
 
 /** Counts the files of a report by their language. */
@@ -392,7 +393,7 @@ async function triage(coverage: Coverage, root: string, json: boolean): Promise<
   const totals = { headers: 0, functions: 0, macros: 0, externs: 0, members: 0 };
   for (const file of coverage.files) {
     const isHeader = hasSuffix(file.path, HEADER_SUFFIXES);
-    if (file.error === null && !isHeader) continue;
+    if (!file.error && !isHeader) continue;
     let text: string;
     try {
       text = await readFile(join(root, file.path), "utf8");
@@ -400,7 +401,7 @@ async function triage(coverage: Coverage, root: string, json: boolean): Promise<
       console.error(`cannot read ${join(root, file.path)}`);
       return 2;
     }
-    if (file.error !== null) {
+    if (file.error) {
       const cause = await classifyUnparsed(file.path, file.error, text);
       causes.set(cause, (causes.get(cause) ?? 0) + 1);
       continue;
