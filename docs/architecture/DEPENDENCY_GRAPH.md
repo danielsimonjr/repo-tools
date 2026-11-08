@@ -42,7 +42,7 @@ The codebase is organized into the following modules:
 - **clones**: 6 files
 - **compress**: 3 files
 - **depgraph**: 22 files
-- **docs**: 9 files
+- **docs**: 11 files
 - **map**: 18 files
 - **query**: 6 files
 - **ste**: 5 files
@@ -79,6 +79,7 @@ The codebase is organized into the following modules:
 | `./clones/index.ts` | `CLONES_HELP, run` | Import |
 | `./compress/index.ts` | `HELP, run` | Import |
 | `./docs/index.ts` | `DOCS_HELP, run` | Import |
+| `./docs/languages.ts` | `languageNames` | Import |
 | `./io-types.ts` | `Io` | Import (type-only) |
 | `./map/command.ts` | `DEPGRAPH_DEPRECATION, MAP_HELP, runMap` | Import |
 | `./query/index.ts` | `QUERY_HELP, run` | Import |
@@ -973,9 +974,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./discovery.ts` | `discover, languageOf` | Import |
+| `./languages.ts` | `specOf` | Import |
 | `./model.ts` | `FileReport, newReport` | Import |
-| `./python.ts` | `analysePython` | Import |
-| `./typescript.ts` | `analyseTypeScript` | Import |
 
 **Exports:**
 - Interfaces: `RepoAnalysis`
@@ -995,8 +995,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../map/discovery.ts` | `countLanguages, suffixOf` | Import |
+| `../map/discovery.ts` | `countLanguages` | Import |
 | `../sort.ts` | `sortCodeUnits` | Import |
+| `./languages.ts` | `LANGUAGES, languageNames, specForPath` | Import |
 
 **Exports:**
 - Classes: `ConfigError`, `UnreadableRepoLanguage`
@@ -1023,15 +1024,32 @@ The codebase is organized into the following modules:
 | `../map/command.ts` | `isDirectory` | Import |
 | `./analyse.ts` | `analyseRepo` | Import |
 | `./discovery.ts` | `assertReadableLanguage, CONFIG_NAME, languageOf, UnreadableRepoLanguage` | Import |
+| `./languages.ts` | `LANGUAGES, LanguageSpec, languageNames, specOf` | Import |
 | `./model.ts` | `FileReport, isParsed` | Import |
-| `./python.ts` | `parsesAsPython` | Import |
 | `./report.ts` | `pctText, summarise, writeOutputs` | Import |
 | `./stub.ts` | `applyInsertions, Insertion, planPython, planTypeScript, splitLines, startsItsLine` | Import |
-| `./typescript.ts` | `parsesAsTypeScript` | Import |
+| `./styles.ts` | `isStyle, STYLES` | Import |
 
 **Exports:**
 - Functions: `unquoteGitPath`, `run`
 - Constants: `DOCS_HELP`
+
+---
+
+### `src/docs/languages.ts` - The language registry of `repo-tools docs`: one entry for each language that the command reads.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../map/discovery.ts` | `suffixOf` | Import |
+| `./model.ts` | `FileReport` | Import (type-only) |
+| `./python.ts` | `analysePython, parsesAsPython` | Import |
+| `./typescript.ts` | `analyseTypeScript, parsesAsTypeScript` | Import |
+
+**Exports:**
+- Interfaces: `LanguageSpec`
+- Functions: `specOf`, `specForPath`, `languageNames`
+- Constants: `LANGUAGES`
 
 ---
 
@@ -1105,11 +1123,26 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../py.ts` | `pyLstrip` | Import |
-| `./model.ts` | `DocSymbol, STUB_MARKER` | Import |
+| `./model.ts` | `DocSymbol` | Import (type-only) |
+| `./styles.ts` | `isStyle, STYLES, Style` | Import |
 
 **Exports:**
 - Interfaces: `Insertion`, `Applied`
 - Functions: `splitLines`, `planPython`, `startsItsLine`, `planTypeScript`, `applyInsertions`
+
+---
+
+### `src/docs/styles.ts` - The docstring styles of `docs stub --style=`. Each style writes the marker on every line that
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./model.ts` | `DocSymbol, STUB_MARKER` | Import |
+
+**Exports:**
+- Interfaces: `Style`
+- Functions: `isStyle`
+- Constants: `STYLES`
 
 ---
 
@@ -1762,27 +1795,26 @@ The codebase is organized into the following modules:
 | `src/map/reports` | 10 files | 3 files |
 | `src/clones/index` | 11 files | 1 file |
 | `src/docs/index` | 11 files | 1 file |
+| `src/cli` | 10 files | 1 file |
 | `src/depgraph/analysis` | 7 files | 4 files |
 | `src/io` | 0 files | 11 files |
 | `src/map/layers` | 9 files | 2 files |
 | `src/py` | 0 files | 11 files |
 | `src/query/commands` | 10 files | 1 file |
 | `src/check/index` | 9 files | 1 file |
-| `src/cli` | 9 files | 1 file |
 | `src/depgraph/duplicates` | 4 files | 6 files |
 | `src/depgraph/roots` | 5 files | 5 files |
 | `src/io-types` | 0 files | 10 files |
 | `src/map/surfaces` | 9 files | 1 file |
 | `src/depgraph/resolver` | 2 files | 7 files |
 | `src/depgraph/workspaces` | 4 files | 5 files |
+| `src/docs/model` | 0 files | 9 files |
 | `src/map/coverage` | 8 files | 1 file |
+| `src/map/discovery` | 3 files | 6 files |
 | `src/map/schema` | 0 files | 9 files |
 | `src/depgraph/cycles` | 4 files | 4 files |
+| `src/docs/languages` | 4 files | 4 files |
 | `src/map/adapter` | 4 files | 4 files |
-| `src/map/discovery` | 3 files | 5 files |
-| `src/docs/model` | 0 files | 7 files |
-| `src/docs/python` | 5 files | 2 files |
-| `src/docs/typescript` | 5 files | 2 files |
 | `src/map/markdown` | 6 files | 1 file |
 | `src/query/index` | 6 files | 1 file |
 | `src/check/verify` | 1 file | 5 files |
@@ -1790,8 +1822,9 @@ The codebase is organized into the following modules:
 | `src/depgraph/dirlist` | 1 file | 5 files |
 | `src/depgraph/reporters/json` | 4 files | 2 files |
 | `src/depgraph/reporters/markdown` | 5 files | 1 file |
+| `src/docs/python` | 5 files | 1 file |
+| `src/docs/typescript` | 5 files | 1 file |
 | `src/map/resolvers` | 4 files | 2 files |
-| `src/ste/index` | 5 files | 1 file |
 
 ---
 
@@ -1890,43 +1923,45 @@ graph TD
         N38[analyse]
         N39[discovery]
         N40[index]
-        N41[model]
-        N42[python]
-        N43[report]
-        N44[rules]
-        N45[stub]
-        N46[typescript]
+        N41[languages]
+        N42[model]
+        N43[python]
+        N44[report]
+        N45[rules]
+        N46[stub]
+        N47[styles]
+        N48[...1 more]
     end
 
     subgraph Map
-        N47[adapter]
-        N48[artifacts]
-        N49[command]
-        N50[coverage]
-        N51[cycles]
-        N52[discovery]
-        N53[grammars]
-        N54[graph]
-        N55[layers]
-        N56[markdown]
-        N57[...8 more]
+        N49[adapter]
+        N50[artifacts]
+        N51[command]
+        N52[coverage]
+        N53[cycles]
+        N54[discovery]
+        N55[grammars]
+        N56[graph]
+        N57[layers]
+        N58[markdown]
+        N59[...8 more]
     end
 
     subgraph Query
-        N58[args]
-        N59[commands]
-        N60[graph]
-        N61[index]
-        N62[load]
-        N63[safety]
+        N60[args]
+        N61[commands]
+        N62[graph]
+        N63[index]
+        N64[load]
+        N65[safety]
     end
 
     subgraph Ste
-        N64[index]
-        N65[markdown]
-        N66[prose]
-        N67[rules]
-        N68[since]
+        N66[index]
+        N67[markdown]
+        N68[prose]
+        N69[rules]
+        N70[since]
     end
 
     N1 --> N2
@@ -1935,14 +1970,14 @@ graph TD
     N11 --> N3
     N11 --> N29
     N11 --> N4
-    N11 --> N49
+    N11 --> N51
     N11 --> N9
     N11 --> N10
     N11 --> N13
     N11 --> N14
     N12 --> N14
-    N13 --> N48
-    N13 --> N49
+    N13 --> N50
+    N13 --> N51
     N13 --> N12
     N13 --> N14
     N14 --> N9
@@ -1958,17 +1993,18 @@ graph TD
     N2 --> N19
     N2 --> N25
     N2 --> N40
+    N2 --> N41
     N2 --> N4
-    N2 --> N49
-    N2 --> N61
-    N2 --> N64
+    N2 --> N51
+    N2 --> N63
+    N2 --> N66
     N18 --> N23
     N19 --> N3
     N19 --> N5
     N19 --> N4
-    N19 --> N49
-    N19 --> N52
-    N19 --> N53
+    N19 --> N51
+    N19 --> N54
+    N19 --> N55
     N19 --> N18
     N19 --> N21
     N19 --> N22
@@ -1991,7 +2027,7 @@ graph TD
     N27 --> N31
     N27 --> N34
     N29 --> N3
-    N31 --> N51
+    N31 --> N53
     N31 --> N8
     N32 --> N6
     N33 --> N8
@@ -2003,7 +2039,6 @@ graph TD
     N36 --> N6
     N38 --> N39
     N38 --> N41
-    N38 --> N42
 ```
 
 ---
@@ -2013,17 +2048,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total Source Files | 300 |
+| Total Source Files | 304 |
 | Subsystems | 10 |
-| Total Lines of Code | 45194 |
-| Total Exports | 746 |
+| Total Lines of Code | 45656 |
+| Total Exports | 754 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |
-| Total Interfaces | 144 |
-| Total Functions | 428 |
-| Total Type Guards | 19 |
+| Total Interfaces | 146 |
+| Total Functions | 432 |
+| Total Type Guards | 20 |
 | Total Enums | 4 |
-| Type-only Imports | 65 |
+| Type-only Imports | 67 |
 | Runtime Cyclic Components | 1 |
 | Type-only Cyclic Components | 4 |
 | Files in Runtime Cycles | 2 |

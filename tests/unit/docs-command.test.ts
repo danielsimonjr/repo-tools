@@ -159,41 +159,46 @@ describe("docs check: the gate on the whole repository", () => {
   // `map` refuses a repository that is mostly of a language it cannot read. `docs` printed
   // `PASS -- 0/0` for a Rust repository that held one Python file, so the gate said nothing true.
   describe("a repository that is mostly of a language that docs cannot read", () => {
-    const rust = (): Record<string, string> => ({
-      "src/a.rs": "/// One.\npub fn a() {}\n",
-      "src/b.rs": "/// Two.\npub fn b() {}\n",
-      "src/c.rs": "/// Three.\npub fn c() {}\n",
+    // Swift is the control: docs reads no Swift, now or after the other languages land.
+    const swift = (): Record<string, string> => ({
+      "src/a.swift": "/// One.\npublic func a() {}\n",
+      "src/b.swift": "/// Two.\npublic func b() {}\n",
+      "src/c.swift": "/// Three.\npublic func c() {}\n",
       "scripts/tool.py": '"""Tool."""\n',
     });
     for (const action of ["check", "scan", "stub"]) {
       test(`${action} fails, names the language and counts the files`, async () => {
-        const run = await cli(["docs", action, repo(rust())]);
+        const run = await cli(["docs", action, repo(swift())]);
         expect(run.code).toBe(1);
         expect(run.err).toContain(
-          "this repo is rust: 3 rust file(s) against 1 TypeScript, JavaScript or Python file(s)",
+          "this repo is swift: 3 swift file(s) against 1 TypeScript, JavaScript or Python file(s)",
         );
         expect(run.err).toContain("repo-tools docs reads TypeScript, JavaScript and Python only");
         expect(run.out).not.toContain("PASS");
       });
     }
 
-    test("a repository of only Go files fails the same way", async () => {
-      const run = await cli(["docs", "check", repo({ "main.go": "package main\n" })]);
+    test("a repository of only Swift files fails the same way", async () => {
+      const run = await cli(["docs", "check", repo({ "main.swift": "let x = 1\n" })]);
       expect(run.code).toBe(1);
-      expect(run.err).toContain("this repo is go: 1 go file(s) against 0 TypeScript");
+      expect(run.err).toContain("this repo is swift: 1 swift file(s) against 0 TypeScript");
     });
 
     test("a tie between an unreadable language and a readable one is measured", async () => {
-      const run = await cli(["docs", "check", repo({ "a.ts": DOC, "x.rs": "pub fn x() {}\n" })]);
+      const run = await cli([
+        "docs",
+        "check",
+        repo({ "a.ts": DOC, "x.swift": "public func x() {}\n" }),
+      ]);
       expect(run.code).toBe(0);
       expect(run.out).toContain("PASS -- 1/1 exported symbols documented, 0 MUST issues");
     });
 
-    test("a TypeScript repository with one Rust file is still measured", async () => {
+    test("a TypeScript repository with one Swift file is still measured", async () => {
       const run = await cli([
         "docs",
         "check",
-        repo({ "a.ts": DOC, "b.ts": DOC, "native/x.rs": "pub fn x() {}\n" }),
+        repo({ "a.ts": DOC, "b.ts": DOC, "native/x.swift": "public func x() {}\n" }),
       ]);
       expect(run.code).toBe(0);
       expect(run.out).toContain("PASS -- 2/2 exported symbols documented, 0 MUST issues");
@@ -455,5 +460,92 @@ describe("docs stub", () => {
     const root = repo({ "v.tsx": "export function V() {\n  return <i/>;\n}\n" });
     const run = await cli(["docs", "stub", root, "--apply"]);
     expect(run.out).toContain("  wrote v.tsx: inserted 1 stub(s)\n");
+  });
+});
+
+describe("stub --style", () => {
+  const NUMPY_DOC =
+    'def g(x):\n    """Do g.\n\n    Parameters\n    ----------\n    x : int\n        The x.\n    """\n    return x\n';
+
+  test("--style=numpy writes the NumPy form into a Python file", async () => {
+    const root = repo({ "a.py": "def f(a):\n    return a\n" });
+    const run = await cli(["docs", "stub", root, "--apply", "--style=numpy"]);
+    expect(run.code).toBe(0);
+    expect(read(root, "a.py")).toContain("    Parameters\n    ----------\n    a\n");
+  });
+
+  test("no flag keeps the Google form, even in a NumPy file", async () => {
+    const root = repo({ "a.py": `def f(a):\n    return a\n\n\n${NUMPY_DOC}` });
+    await cli(["docs", "stub", root, "--apply"]);
+    expect(read(root, "a.py")).toContain("    Args:\n");
+  });
+
+  test("--style=auto follows the one dialect of the file", async () => {
+    const root = repo({ "a.py": `def f(a):\n    return a\n\n\n${NUMPY_DOC}` });
+    await cli(["docs", "stub", root, "--apply", "--style=auto"]);
+    const text = read(root, "a.py");
+    expect(text).not.toContain("Args:");
+    expect(text).toContain(`def f(a):\n    """${STUB_MARKER}`);
+    expect(text).toContain("    Parameters\n    ----------\n    a\n");
+    const check = await cli(["docs", "scan", root, `--out=${join(root, "_o")}`]);
+    expect(check.code).toBe(0);
+    expect(readFileSync(join(root, "_o", "coverage.json"), "utf8")).toContain(
+      '"files_mixed_dialect": 0',
+    );
+  });
+
+  test("--style=auto keeps a TypeScript file with JSDoc in one dialect", async () => {
+    const root = repo({
+      "a.ts":
+        "/**\n * Does f.\n *\n * @param {number} a The a.\n */\nexport function f(a: number) {\n  return a;\n}\n\n" +
+        "export function g(b: number) {\n  return b;\n}\n",
+    });
+    await cli(["docs", "stub", root, "--apply", "--style=auto"]);
+    expect(read(root, "a.ts")).toContain(`@param {${STUB_MARKER} type} b`);
+    await cli(["docs", "scan", root, `--out=${join(root, "_o")}`]);
+    expect(readFileSync(join(root, "_o", "coverage.json"), "utf8")).toContain(
+      '"files_mixed_dialect": 0',
+    );
+  });
+
+  test("--style=auto takes the default when the file has no dialect", async () => {
+    const root = repo({ "a.ts": "export function f(a: number) {\n  return a;\n}\n" });
+    await cli(["docs", "stub", root, "--apply", "--style=auto"]);
+    expect(read(root, "a.ts")).toContain(" * @param a - ");
+  });
+
+  test("a style of another language exits 2 and names the file and the styles", async () => {
+    const root = repo({ "a.ts": "export function f(a: number) {\n  return a;\n}\n" });
+    const run = await cli(["docs", "stub", root, "--apply", "--style=numpy"]);
+    expect(run.code).toBe(2);
+    expect(run.err).toContain("a.ts");
+    expect(run.err).toContain("tsdoc");
+    expect(read(root, "a.ts")).not.toContain(STUB_MARKER);
+  });
+
+  test("an unknown style exits 2 and lists the styles", async () => {
+    const root = repo({ "a.py": "def f(a):\n    return a\n" });
+    const run = await cli(["docs", "stub", root, "--style=xmldoc"]);
+    expect(run.code).toBe(2);
+    expect(run.err).toContain("google");
+  });
+
+  test("an unknown style exits 2 when no file needs a stub", async () => {
+    const run = await cli(["docs", "stub", repo({ "a.ts": DOC }), "--style=xmldoc"]);
+    expect(run.code).toBe(2);
+    expect(run.err).toContain("unknown style 'xmldoc'");
+  });
+
+  test("a name of an object property is not a style", async () => {
+    const root = repo({ "a.py": "def f(a):\n    return a\n" });
+    const run = await cli(["docs", "stub", root, "--style=constructor"]);
+    expect(run.code).toBe(2);
+    expect(run.err).toContain("unknown style 'constructor'");
+  });
+
+  test("--style applies to stub only", async () => {
+    const run = await cli(["docs", "check", repo({ "a.ts": DOC }), "--style=tsdoc"]);
+    expect(run.code).toBe(2);
+    expect(run.err).toContain("applies to 'stub' only");
   });
 });

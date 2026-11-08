@@ -513,11 +513,12 @@ pair. The command writes `inventory.jsonl` and `clones.json` only when `--out` o
 ## 8. Docs (`src/docs/`)
 
 The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`stub`) and gates
-(`check`) for TypeScript, JavaScript and Python files.
+(`check`) for the languages of its registry: TypeScript, JavaScript and Python.
 
 | File | Purpose |
 |---|---|
-| `index.ts` | The `docs` subcommand: actions, flags, git path decoding. |
+| `index.ts` | The `docs` subcommand: actions, flags, git path decoding, the style of each stub. |
+| `languages.ts` | The language registry: suffixes, analyser, parse check, stub position and styles of each language. |
 | `discovery.ts` | Finds the files. Reads `.code-docs.json`. Refuses a repository of another language. |
 | `analyse.ts` | Runs the analyser that matches the file. |
 | `typescript.ts` | Reads doc comments of TypeScript and JavaScript through tree-sitter. |
@@ -525,6 +526,7 @@ The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`s
 | `rules.ts` | Applies the MUST and SHOULD rules to one symbol. |
 | `model.ts` | The types: `Kind`, `Tier`, `Issue`, `DocSymbol`, `FileReport`, `Stats`. |
 | `stub.ts` | Plans and applies the skeleton comments. |
+| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`. |
 | `report.ts` | Writes `COVERAGE.md` and `coverage.json`. |
 
 ```ts
@@ -540,8 +542,14 @@ export async function analyseTypeScript(path: string, source: string): Promise<F
 export async function analysePython(path: string, source: string): Promise<FileReport>
 export function applyRules(sym: DocSymbol, doc: string, path: string, options: RuleOptions): void
 export const STUB_MARKER = "TODO:";
-export function planPython(sym: DocSymbol, lines: string[]): Insertion | null
-export function planTypeScript(sym: DocSymbol, lines: string[]): Insertion | null
+export const LANGUAGES: readonly LanguageSpec[]
+export function specOf(id: string): LanguageSpec | undefined
+export function specForPath(path: string): LanguageSpec | undefined
+export function languageNames(conjunction: "and" | "or" = "and"): string
+export const STYLES: Readonly<Record<string, Style>>
+export function isStyle(id: string): boolean
+export function planPython(sym: DocSymbol, lines: string[], style: string): Insertion | null
+export function planTypeScript(sym: DocSymbol, lines: string[], style: string): Insertion | null
 export function applyInsertions(original: string, insertions: Insertion[], verify: (text: string) => boolean): Applied
 export function summarise(reports: FileReport[]): Stats
 export function writeOutputs(outDir: string, reports: FileReport[], stats: Stats, provenance: string, rootName: string): { markdown: string; json: string }
@@ -550,6 +558,8 @@ export function writeOutputs(outDir: string, reports: FileReport[], stats: Stats
 The MUST rules M1 to M5 decide the exit code of `check`. The SHOULD rules S2, S5 and S6 are
 reported only. `applyInsertions` calls `verify` on the changed text. A file that would not parse
 after the change is not written. The `docs` module imports `src/ste/prose.ts` for rule S6.
+Discovery, analysis, the stub writer and the help text read `LANGUAGES`. A new language is one
+entry of the registry and one analyser.
 
 ---
 
@@ -664,9 +674,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 300 | dependency-graph.json |
-| totalFunctions | 428 | dependency-graph.json |
-| totalInterfaces | 144 | dependency-graph.json |
+| totalSourceFiles | 304 | dependency-graph.json |
+| totalFunctions | 432 | dependency-graph.json |
+| totalInterfaces | 146 | dependency-graph.json |
 | totalClasses | 15 | dependency-graph.json |
-| totalExports | 746 | dependency-graph.json |
+| totalExports | 754 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |

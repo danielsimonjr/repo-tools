@@ -72,6 +72,12 @@
             ]
           },
           {
+            "file": "./docs/languages.ts",
+            "imports": [
+              "languageNames"
+            ]
+          },
+          {
             "file": "./io-types.ts",
             "imports": [
               "Io"
@@ -2505,22 +2511,16 @@
             ]
           },
           {
+            "file": "./languages.ts",
+            "imports": [
+              "specOf"
+            ]
+          },
+          {
             "file": "./model.ts",
             "imports": [
               "FileReport",
               "newReport"
-            ]
-          },
-          {
-            "file": "./python.ts",
-            "imports": [
-              "analysePython"
-            ]
-          },
-          {
-            "file": "./typescript.ts",
-            "imports": [
-              "analyseTypeScript"
             ]
           }
         ],
@@ -2570,14 +2570,21 @@
           {
             "file": "../map/discovery.ts",
             "imports": [
-              "countLanguages",
-              "suffixOf"
+              "countLanguages"
             ]
           },
           {
             "file": "../sort.ts",
             "imports": [
               "sortCodeUnits"
+            ]
+          },
+          {
+            "file": "./languages.ts",
+            "imports": [
+              "LANGUAGES",
+              "languageNames",
+              "specForPath"
             ]
           }
         ],
@@ -2676,16 +2683,19 @@
             ]
           },
           {
+            "file": "./languages.ts",
+            "imports": [
+              "LANGUAGES",
+              "LanguageSpec",
+              "languageNames",
+              "specOf"
+            ]
+          },
+          {
             "file": "./model.ts",
             "imports": [
               "FileReport",
               "isParsed"
-            ]
-          },
-          {
-            "file": "./python.ts",
-            "imports": [
-              "parsesAsPython"
             ]
           },
           {
@@ -2708,9 +2718,10 @@
             ]
           },
           {
-            "file": "./typescript.ts",
+            "file": "./styles.ts",
             "imports": [
-              "parsesAsTypeScript"
+              "isStyle",
+              "STYLES"
             ]
           }
         ],
@@ -2726,6 +2737,58 @@
         ],
         "constants": [
           "DOCS_HELP"
+        ]
+      },
+      "src/docs/languages.ts": {
+        "description": "The language registry of `repo-tools docs`: one entry for each language that the command reads.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/discovery.ts",
+            "imports": [
+              "suffixOf"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./python.ts",
+            "imports": [
+              "analysePython",
+              "parsesAsPython"
+            ]
+          },
+          {
+            "file": "./typescript.ts",
+            "imports": [
+              "analyseTypeScript",
+              "parsesAsTypeScript"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "LANGUAGES",
+          "specOf",
+          "specForPath",
+          "languageNames"
+        ],
+        "interfaces": [
+          "LanguageSpec"
+        ],
+        "functions": [
+          "specOf",
+          "specForPath",
+          "languageNames"
+        ],
+        "constants": [
+          "LANGUAGES"
         ]
       },
       "src/docs/model.ts": {
@@ -2912,8 +2975,16 @@
           {
             "file": "./model.ts",
             "imports": [
-              "DocSymbol",
-              "STUB_MARKER"
+              "DocSymbol"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./styles.ts",
+            "imports": [
+              "isStyle",
+              "STYLES",
+              "Style"
             ]
           }
         ],
@@ -2935,6 +3006,34 @@
           "startsItsLine",
           "planTypeScript",
           "applyInsertions"
+        ]
+      },
+      "src/docs/styles.ts": {
+        "description": "The docstring styles of `docs stub --style=`. Each style writes the marker on every line that",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./model.ts",
+            "imports": [
+              "DocSymbol",
+              "STUB_MARKER"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "isStyle",
+          "STYLES"
+        ],
+        "interfaces": [
+          "Style"
+        ],
+        "functions": [
+          "isStyle"
+        ],
+        "constants": [
+          "STYLES"
         ]
       },
       "src/docs/typescript.ts": {
@@ -5128,11 +5227,13 @@
         "src/docs/analyse.ts",
         "src/docs/discovery.ts",
         "src/docs/index.ts",
+        "src/docs/languages.ts",
         "src/docs/model.ts",
         "src/docs/python.ts",
         "src/docs/report.ts",
         "src/docs/rules.ts",
         "src/docs/stub.ts",
+        "src/docs/styles.ts",
         "src/docs/typescript.ts"
       ]
     },

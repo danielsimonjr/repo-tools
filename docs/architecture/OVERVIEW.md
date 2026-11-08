@@ -39,7 +39,7 @@ the rows that the drift gate checks.
 | Runtime import cycles | 1 | repo-wide | `dependency-graph.json`, `runtimeCircularDeps` |
 | Type-only import cycles | 4 | repo-wide | `dependency-graph.json`, `typeOnlyCircularDeps` |
 | Subcommands | 9 | `src/cli.ts` | A direct read of the registry in `src/cli.ts`. It is not a `repo-tools map` metric. |
-| Unit test files | 136 | `tests/unit/` | A direct count of the `*.test.ts` files in `tests/unit/`. It is not a `repo-tools map` metric. |
+| Unit test files | 138 | `tests/unit/` | A direct count of the `*.test.ts` files in `tests/unit/`. It is not a `repo-tools map` metric. |
 
 The counts of source files, functions and exports cover TypeScript only. The test fixtures under
 `tests/fixtures/` hold source files that the census counts as test area files. The scope column
@@ -67,7 +67,7 @@ repo-tools/
 │   ├── ste/                5 files, 770 lines. Simplified Technical English checker.
 │   └── check/              4 files, 536 lines. The drift gate of the architecture documents.
 ├── tests/                  193 files, 22216 lines. Unit tests, fixtures and golden files.
-│   ├── unit/               136 test files. Run with `bun test`.
+│   ├── unit/               138 test files. Run with `bun test`.
 │   ├── fixtures/           Input repositories and files for the tests.
 │   └── golden/             Expected output, compared byte for byte.
 ├── scripts/                10 files, 2791 lines. Build, smoke test, privacy check, audits.
@@ -155,11 +155,11 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 300 | dependency-graph.json |
-| totalLinesOfCode | 45194 | dependency-graph.json |
-| totalExports | 746 | dependency-graph.json |
-| totalFunctions | 428 | dependency-graph.json |
-| totalInterfaces | 144 | dependency-graph.json |
+| totalSourceFiles | 304 | dependency-graph.json |
+| totalLinesOfCode | 45656 | dependency-graph.json |
+| totalExports | 754 | dependency-graph.json |
+| totalFunctions | 432 | dependency-graph.json |
+| totalInterfaces | 146 | dependency-graph.json |
 | totalClasses | 15 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |

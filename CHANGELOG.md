@@ -6,23 +6,30 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
-### Fixed
-
-- `docs` no longer reads a NumPy description line as a parameter. A line such as `Note: x` under
-  an entry of the Parameters section gave a parameter named `Note`, so rule M3 failed a correct
-  docstring. The entries are now the lines at the indent of the first entry.
-- `docs stub --apply` no longer reverts a Python file whose function signature continues on an
-  aligned line. The stub took its indent from the last line of the signature, so the docstring
-  landed deeper than the body and the file no longer parsed. The stub now takes the indent of the
-  first body line, or the `def` indent and four spaces.
-
 ### Added
 
+- `repo-tools docs stub --style=<style>` selects the docstring form: `tsdoc` or `jsdoc` for
+  TypeScript and JavaScript, `google`, `numpy` or `rest` for Python. `--style=auto` follows the one
+  dialect of each file. With no flag the stubs are the 2.5.0 forms, byte for byte (the docs goldens
+  hold this). A style of another language exits 2 before any file is written. The templates follow
+  mintlify/writer (MIT).
+- A language registry (`src/docs/languages.ts`) for `repo-tools docs`. Discovery, analysis, the
+  stub writer, the help text and the refusal message read it, so a new language is one entry.
 - Golden tests for `repo-tools docs` (`tests/golden/docs`, `tests/unit/docs-golden.test.ts`). They
   record the `scan` reports, the output of a dry-run and an applied `stub`, and each stubbed
   source file of the `mixed-repo` fixture (Google, NumPy, reST, TSDoc and JSDoc files). Rewrite
   them with `bun scripts/update-docs-goldens.ts`. The goldens hold the 2.5.0 result, so a later
   change to `docs` output shows as a golden diff.
+
+### Fixed
+
+- `docs` no longer reads a NumPy description line as a parameter. A line such as `Note: x` under
+  an entry of the Parameters section gave a parameter named `Note`, so rule M3 failed a correct
+  docstring. The entries are now the lines at the smallest indent of the section.
+- `docs stub --apply` no longer reverts a Python file whose function signature continues on an
+  aligned line. The stub took its indent from the last line of the signature, so the docstring
+  landed deeper than the body and the file no longer parsed. The stub now takes the indent of the
+  first body line, or the `def` indent and four spaces.
 
 ## [2.5.0] - 2026-11-05
 

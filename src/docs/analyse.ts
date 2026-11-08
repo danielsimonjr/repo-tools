@@ -7,9 +7,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { discover, languageOf } from "./discovery.ts";
+import { specOf } from "./languages.ts";
 import { type FileReport, newReport } from "./model.ts";
-import { analysePython } from "./python.ts";
-import { analyseTypeScript } from "./typescript.ts";
 
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
@@ -40,7 +39,10 @@ export async function analyseFile(root: string, rel: string): Promise<FileReport
     report.error = `unreadable: ${readFailure(error)}`;
     return report;
   }
-  return language === "python" ? analysePython(rel, source) : analyseTypeScript(rel, source);
+  const spec = specOf(language);
+  if (spec === undefined)
+    throw new Error(`no analyser for ${rel}: discovery listed a file it cannot read`);
+  return spec.analyse(rel, source);
 }
 
 /** The result of a run over a root. */

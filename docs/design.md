@@ -641,7 +641,7 @@ attach a comment to the declaration below it.
 
 ```
 repo-tools docs scan  [root] [--out=<dir>]
-repo-tools docs stub  [root] [--apply] [--path=<path>]
+repo-tools docs stub  [root] [--apply] [--path=<path>] [--style=<style>]
 repo-tools docs check [root] [--paths <path>... | --paths-from=<file>]
 ```
 
@@ -654,7 +654,7 @@ repo-tools docs check [root] [--paths <path>... | --paths-from=<file>]
   A dry run prints one line for each planned stub and writes nothing. `--apply` writes the stubs.
   `--path=<path>` limits the stubs to one file, or to the files below one folder. The root itself
   (`.`, `./` or the absolute root) selects every file. A path that matches no file plans no stub
-  and is not an error.
+  and is not an error. `--style=<style>` selects the docstring form (section 16.5).
 - `check` is the gate. On success it prints `PASS` and exits 0. On a failure it prints `FAIL` and
   one line for each MUST issue, up to 100 lines, and exits 1. A file that does not parse is a MUST
   issue.
@@ -680,9 +680,9 @@ The exit codes are:
 A root with no source file is a failed gate and not a pass. A gate that measures nothing has the
 look of enforcement and none of the substance. The rule holds for `scan`, `check` and `stub`.
 
-A root has the same result when a language that the command cannot read has more files than
-TypeScript, JavaScript and Python together. The command names that language and the two counts, and
-it exits 1. A tie is measured. The count is the file walk of `map`, so `map` and `docs` give the
+A root can have more files of an unreadable language than of all the languages of the registry
+(section 16.2). Such a root has the same result. The command names that language and the two
+counts, and the command exits 1. A tie is measured. The count is the file walk of `map`, so `map` and `docs` give the
 same repository the same language. A pass over the few readable files of a Rust repository would
 describe the wrong files.
 
@@ -693,11 +693,13 @@ describe the wrong files.
 | `src/docs/index.ts` | The command: the flags, the three actions and the exit codes. |
 | `src/docs/model.ts` | The shapes `DocSymbol`, `FileReport` and `Stats`, and the `TODO:` marker. |
 | `src/docs/discovery.ts` | The source files, the skip lists, and the exclusions of `.code-docs.json`. |
+| `src/docs/languages.ts` | The language registry: for each language, its suffixes, analyser, parse check, stub position and styles. Discovery, the stub writer and the help text read the registry and name no language. |
 | `src/docs/analyse.ts` | Reads each file and calls the analyser of its language. |
 | `src/docs/python.ts`, `typescript.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
 | `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Both analysers call one function. |
 | `src/docs/report.ts` | The counts, `COVERAGE.md` and `coverage.json`. |
 | `src/docs/stub.ts` | Plans the skeleton comments and applies them. |
+| `src/docs/styles.ts` | The docstring styles of `stub --style`. Each style renders the lines of one stub. |
 
 The analysers use the tree-sitter loader of `repo-tools map` (section 14.1). The S6 rule calls the
 prose check of `repo-tools ste`.
@@ -835,6 +837,22 @@ round, square and curly brackets. The line is the first line at depth 0 that end
 signature on many lines, a bracket in a default string and a comment after the colon all work. A
 TypeScript stub goes above the outermost `export` statement, and thus above each decorator.
 
+The style of a stub comes from `--style`. Each language of the registry has a list of styles and a
+default:
+
+| Language | Styles | Default |
+|---|---|---|
+| TypeScript, JavaScript | `tsdoc`, `jsdoc` | `tsdoc` |
+| Python | `google`, `numpy`, `rest` | `google` |
+
+With no flag, each file gets the default of its language. `--style=auto` takes the one dialect of
+a file (section 16.4). A file with no dialect, or with two, gets the default. A named style must
+belong to the language of each file that gets a stub. Otherwise the command exits 2 before the
+command writes a file. The message names the file and its styles. Only the `jsdoc` style writes a
+type slot, and the slot holds the marker. In a TypeScript file, rule S5 reports a filled type
+slot, and the writer decides. The `jsdoc` style stays a TypeScript style, because `auto` must keep a
+file in JSDoc in one dialect (rule M5). The templates follow `mintlify/writer` (MIT).
+
 ### 16.6 Differences from the Python tool
 
 `docs/parity-docs.md` gives the measurement. The table lists each difference.
@@ -868,7 +886,7 @@ TypeScript stub goes above the outermost `export` statement, and thus above each
 | JSDoc name with `$` or brackets | `foo$bar` gives `foo`, so M3 fails a correct doc. `[name]` is not read, so a stale optional parameter passes. | Reads both forms. |
 | Parameter named `abstract` | M3 fails a correct doc. | Reads the name from the original source. |
 | Binding pattern | `{ opts: { b } }` gives no `b`, so M3 fails a correct doc. `{ a = fallback }` gives `fallback`. | Gives the bound names: `b` and `a`. |
-| NumPy description with a colon | A description line such as `Note: x` under a parameter gives a parameter `Note`, so M3 fails a correct doc. | Reads the entry lines only: the lines at the indent of the first entry. |
+| NumPy description with a colon | A description line such as `Note: x` under a parameter gives a parameter `Note`, so M3 fails a correct doc. | Reads the entry lines only: the lines at the smallest indent of the section. |
 | Stub of a signature over several lines | Takes the indent from the last signature line. An aligned argument line gives a file that does not parse, and the write is reverted. | Takes the indent of the first body line. |
 
 ## 17. The clones subcommand

@@ -9,11 +9,9 @@
 import { spawnSync } from "node:child_process";
 import { type Dirent, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { countLanguages, suffixOf } from "../map/discovery.ts";
+import { countLanguages } from "../map/discovery.ts";
 import { sortCodeUnits } from "../sort.ts";
-
-const PYTHON_SUFFIXES = new Set([".py"]);
-const TYPESCRIPT_SUFFIXES = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
+import { LANGUAGES, languageNames, specForPath } from "./languages.ts";
 
 /**
  * Folders that no run reads. `bundle`, `dist` and `build` hold generated output. A stub in a
@@ -66,21 +64,22 @@ export class UnreadableRepoLanguage extends Error {
 
 /**
  * Throws `UnreadableRepoLanguage` when a language that `docs` cannot read has more files below
- * `root` than TypeScript, JavaScript and Python together. A tie is measured. The count is the walk
+ * `root` than the languages of the registry together. A tie is measured. The count is the walk
  * of `map`, so `docs` and `map` call the same repository by the same language. The language with
  * the most files is named; a tie between two of them goes to the first name in code-unit order.
  */
 export function assertReadableLanguage(root: string): void {
   const counts = countLanguages(root);
-  const readable = (counts.typescript ?? 0) + (counts.python ?? 0);
+  const ids = new Set(LANGUAGES.map((spec) => spec.id));
+  const readable = [...ids].reduce((sum, id) => sum + (counts[id] ?? 0), 0);
   const unreadable = Object.entries(counts)
-    .filter(([language]) => language !== "typescript" && language !== "python")
+    .filter(([language]) => !ids.has(language))
     .sort(([a, x], [b, y]) => y - x || (a < b ? -1 : a > b ? 1 : 0));
   const [language, n] = unreadable[0] ?? ["", 0];
   if (n > readable) {
     throw new UnreadableRepoLanguage(
-      `this repo is ${language}: ${n} ${language} file(s) against ${readable} TypeScript, ` +
-        "JavaScript or Python file(s). repo-tools docs reads TypeScript, JavaScript and Python " +
+      `this repo is ${language}: ${n} ${language} file(s) against ${readable} ` +
+        `${languageNames("or")} file(s). repo-tools docs reads ${languageNames("and")} ` +
         "only, so a PASS here would describe the wrong files. It fails rather than print a gate " +
         "that measured nothing.",
     );
@@ -95,12 +94,9 @@ export interface Discovery {
   provenance: string;
 }
 
-/** Returns `python`, `typescript`, or an empty string when the file is not analysable. */
-export function languageOf(path: string): "python" | "typescript" | "" {
-  const suffix = suffixOf(path.slice(path.lastIndexOf("/") + 1));
-  if (PYTHON_SUFFIXES.has(suffix)) return "python";
-  if (TYPESCRIPT_SUFFIXES.has(suffix)) return "typescript";
-  return "";
+/** Returns the registry id of the language of `path`, or an empty string when `docs` cannot read it. */
+export function languageOf(path: string): string {
+  return specForPath(path)?.id ?? "";
 }
 
 /** True for a source file that the tool measures. */

@@ -225,6 +225,7 @@ repo-tools docs scan .                      # writes docs/code-docs/COVERAGE.md 
 repo-tools docs check .                     # the gate: exit 1 on a MUST issue
 repo-tools docs stub . --path=src/api       # a dry run: lists the stubs and writes nothing
 repo-tools docs stub . --path=src/api --apply
+repo-tools docs stub . --style=numpy --apply  # Python: google (default), numpy, rest
 ```
 
 The rules are:
@@ -242,13 +243,17 @@ The rules are:
 
 Only a MUST issue changes the exit code of `check`. A file that does not parse is also a failure,
 because an unknown file is not a clean file. A repository with no source file fails too. So does a
-repository with more files of another language (Rust or Go, for example) than TypeScript, JavaScript
+repository with more files of another language (Swift, for example) than TypeScript, JavaScript
 and Python together. The command names the language and exits 1.
 
 `stub` is a dry run until you pass `--apply`. Each stub holds the marker `TODO:`, so `check` fails
 until you replace the stub with real prose. The command parses a file again after the change.
 A file that would no longer parse stays unchanged. The command skips a file that is a link or
 resolves outside the root, and it names the skipped file.
+
+`--style=<style>` selects the form of the stubs: `tsdoc` (default) or `jsdoc` for TypeScript and
+JavaScript, `google` (default), `numpy` or `rest` for Python. `--style=auto` follows the one dialect
+of each file.
 
 To gate a pull request and not the whole backlog, give `check` the changed files:
 

@@ -8,16 +8,16 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 86 |
-| Total Test Files | 140 |
-| Source Files with Tests | 68 |
-| Source Files without Tests | 18 |
-| Coverage (raw, direct-import) | **79.1%** |
+| Total Source Files | 88 |
+| Total Test Files | 142 |
+| Source Files with Tests | 71 |
+| Source Files without Tests | 17 |
+| Coverage (raw, direct-import) | **80.7%** |
 ---
 
 ## Source Files Not Imported By A Test
 
-The following 18 source files are not directly imported by any test file:
+The following 17 source files are not directly imported by any test file:
 
 ### root/
 
@@ -45,7 +45,6 @@ The following 18 source files are not directly imported by any test file:
 
 ### docs/
 
-- `src/docs/index.ts` → Expected test: `tests/unit/docs/index.test.ts`
 - `src/docs/rules.ts` → Expected test: `tests/unit/docs/rules.test.ts`
 
 ### map/
@@ -106,11 +105,14 @@ The following 18 source files are not directly imported by any test file:
 | `depgraph/workspaces.ts` | `depgraph-f13.test.ts`, `depgraph-f34.test.ts`, `depgraph-f36.test.ts`, `depgraph-scan.test.ts` |
 | `docs/analyse.ts` | `docs-discovery.test.ts` |
 | `docs/discovery.ts` | `docs-discovery.test.ts` |
-| `docs/model.ts` | `docs-command.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-stub.test.ts`, `docs-typescript.test.ts` |
-| `docs/python.ts` | `docs-python.test.ts`, `docs-review.test.ts`, `docs-stub.test.ts` |
+| `docs/index.ts` | `docs-languages.test.ts` |
+| `docs/languages.ts` | `docs-languages.test.ts` |
+| `docs/model.ts` | `docs-command.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
+| `docs/python.ts` | `docs-python.test.ts`, `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/report.ts` | `docs-report.test.ts` |
-| `docs/stub.ts` | `docs-stub.test.ts` |
-| `docs/typescript.ts` | `docs-review.test.ts`, `docs-stub.test.ts`, `docs-typescript.test.ts` |
+| `docs/stub.ts` | `docs-stub.test.ts`, `docs-styles.test.ts` |
+| `docs/styles.ts` | `docs-languages.test.ts`, `docs-styles.test.ts` |
+| `docs/typescript.ts` | `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
 | `src/io-types.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `depgraph-report.test.ts`, `map-command.test.ts`, `map-verification.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
 | `src/io.ts` | `io.test.ts`, `shared-helpers.test.ts` |
 | `map/adapter.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `map-adapter.test.ts` |
@@ -230,10 +232,12 @@ The following 18 source files are not directly imported by any test file:
 | `unit/docs-command.test.ts` | 1 files |
 | `unit/docs-discovery.test.ts` | 2 files |
 | `unit/docs-golden.test.ts` | 0 files |
+| `unit/docs-languages.test.ts` | 3 files |
 | `unit/docs-python.test.ts` | 2 files |
 | `unit/docs-report.test.ts` | 2 files |
 | `unit/docs-review.test.ts` | 2 files |
 | `unit/docs-stub.test.ts` | 4 files |
+| `unit/docs-styles.test.ts` | 5 files |
 | `unit/docs-typescript.test.ts` | 2 files |
 | `unit/entry-roots-build-configs.test.ts` | 3 files |
 | `unit/fix-ledger-audit.test.ts` | 0 files |
