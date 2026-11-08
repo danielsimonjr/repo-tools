@@ -10,7 +10,12 @@
 import { readFileSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
+import kotlinWasm from "@tree-sitter-grammars/tree-sitter-kotlin/tree-sitter-kotlin.wasm" with {
+  type: "file",
+};
 import csharpWasm from "tree-sitter-c-sharp/tree-sitter-c_sharp.wasm" with { type: "file" };
+import goWasm from "tree-sitter-go/tree-sitter-go.wasm" with { type: "file" };
+import javaWasm from "tree-sitter-java/tree-sitter-java.wasm" with { type: "file" };
 import pythonWasm from "tree-sitter-python/tree-sitter-python.wasm" with { type: "file" };
 import rustWasm from "tree-sitter-rust/tree-sitter-rust.wasm" with { type: "file" };
 import tsxWasm from "tree-sitter-typescript/tree-sitter-tsx.wasm" with { type: "file" };
@@ -24,7 +29,16 @@ import runtimeWasm from "web-tree-sitter/web-tree-sitter.wasm" with { type: "fil
  * Every grammar that the engine can load. `tsx` reads JSX, which `typescript` cannot, and
  * `typescript` reads the angle-bracket type assertion, which `tsx` cannot.
  */
-export const GRAMMAR_NAMES = ["typescript", "tsx", "python", "csharp", "rust"] as const;
+export const GRAMMAR_NAMES = [
+  "typescript",
+  "tsx",
+  "python",
+  "csharp",
+  "rust",
+  "go",
+  "java",
+  "kotlin",
+] as const;
 
 /** A grammar that the engine can load. */
 export type GrammarName = (typeof GRAMMAR_NAMES)[number];
@@ -35,6 +49,9 @@ const WASM: Readonly<Record<GrammarName, string>> = {
   python: pythonWasm,
   csharp: csharpWasm,
   rust: rustWasm,
+  go: goWasm,
+  java: javaWasm,
+  kotlin: kotlinWasm,
 };
 
 /** The bytes of a bundled asset. A relative path is relative to this module, not the cwd. */
