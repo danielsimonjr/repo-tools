@@ -17,7 +17,8 @@
  *    The gate fails on a surviving marker (rule M4), so a skeleton cannot become the finished doc.
  */
 import { pyLstrip } from "../py.ts";
-import { type DocSymbol, STUB_MARKER } from "./model.ts";
+import type { DocSymbol } from "./model.ts";
+import { isStyle, STYLES, type Style } from "./styles.ts";
 
 /** One planned stub: its text, and the 0-based line that it goes above. */
 export interface Insertion {
@@ -108,30 +109,23 @@ function bodyIndent(lines: string[], start: number, end: number): string {
   return indent.length > head.length ? indent : `${head}    `;
 }
 
+/** The style `id` of the registry. An unknown id is an error of the caller. */
+function styleOf(id: string): Style {
+  if (!isStyle(id)) throw new Error(`unknown style '${id}'`);
+  return STYLES[id] as Style;
+}
+
 /**
- * Returns the insertion that documents `sym`, or null when `sym` has a doc. The Python docstring
- * goes inside the body, on the line after the end of the signature.
+ * Returns the insertion that documents `sym` in `style`, or null when `sym` has a doc. The Python
+ * docstring goes inside the body, on the line after the end of the signature.
  */
-export function planPython(sym: DocSymbol, lines: string[]): Insertion | null {
+export function planPython(sym: DocSymbol, lines: string[], style: string): Insertion | null {
   if (sym.hasDoc) return null;
   const start = sym.line - 1;
   if (start >= lines.length) return null;
   const end = headerEnd(lines, start);
   const body = bodyIndent(lines, start, end);
-  const out = [`${body}"""${STUB_MARKER} state what this does, in one active-voice sentence.`];
-  if (sym.params.length > 0 || sym.kind === "function") out.push("");
-  if (sym.params.length > 0) {
-    out.push(`${body}Args:`);
-    // The entry holds no type: the signature has it (rule S5).
-    for (const p of sym.params) {
-      out.push(`${body}    ${p}: ${STUB_MARKER} state what it is. Do not repeat the type.`);
-    }
-    out.push("");
-  }
-  if (sym.kind === "function") {
-    out.push(`${body}Returns:`, `${body}    ${STUB_MARKER} state what the caller gets back.`);
-  }
-  out.push(`${body}"""`);
+  const out = styleOf(style).render(sym, body);
   return { lineIndex: end + 1, text: `${out.join("\n")}\n`, symbol: sym.name };
 }
 
@@ -147,32 +141,16 @@ export function startsItsLine(sym: DocSymbol, lines: string[]): boolean {
 }
 
 /**
- * Returns the TSDoc block that documents `sym`, or null when `sym` has a doc. The block goes above
- * the anchor line of the symbol: the first line of its export statement, above any decorator and
- * above any tool directive that stands directly above it.
+ * Returns the block comment in `style` that documents `sym`, or null when `sym` has a doc. The
+ * block goes above the anchor line of the symbol: the first line of its export statement, above
+ * any decorator and above any tool directive that stands directly above it.
  */
-export function planTypeScript(sym: DocSymbol, lines: string[]): Insertion | null {
+export function planTypeScript(sym: DocSymbol, lines: string[], style: string): Insertion | null {
   if (sym.hasDoc) return null;
   const index = sym.anchorLine - 1;
   if (index >= lines.length) return null;
   const indent = indentOf(lines[index] ?? "");
-  const out = [
-    `${indent}/**`,
-    `${indent} * ${STUB_MARKER} state what this does, in one active-voice sentence.`,
-  ];
-  if (sym.params.length > 0) {
-    out.push(`${indent} *`);
-    // The TSDoc form is `@param name - text`, with no `{type}` brace (rule S5).
-    for (const p of sym.params) {
-      out.push(
-        `${indent} * @param ${p} - ${STUB_MARKER} state what it is. Do not repeat the type.`,
-      );
-    }
-  }
-  if (sym.kind === "function" || sym.kind === "method") {
-    out.push(`${indent} * @returns ${STUB_MARKER} state what the caller gets back.`);
-  }
-  out.push(`${indent} */`);
+  const out = styleOf(style).render(sym, indent);
   return { lineIndex: index, text: `${out.join("\n")}\n`, symbol: sym.name };
 }
 

@@ -1,11 +1,11 @@
 {
-  "totalFiles": 300,
+  "totalFiles": 304,
   "byDisposition": {
-    "reachable": 84,
+    "reachable": 86,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 201,
+    "test": 203,
     "tool": 11,
     "config": 1,
     "bench": 0,
@@ -13,13 +13,13 @@
   },
   "byArea": {
     "tools": 11,
-    "src": 87,
-    "tests": 201,
+    "src": 89,
+    "tests": 203,
     "config": 1
   },
   "byPackage": {
-    "(root)": 213,
-    "@danielsimonjr/repo-tools": 87
+    "(root)": 215,
+    "@danielsimonjr/repo-tools": 89
   },
   "files": [
     {
@@ -181,7 +181,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 137
+      "loc": 138
     },
     {
       "file": "src/clones/detect.ts",
@@ -412,21 +412,28 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 58
+      "loc": 60
     },
     {
       "file": "src/docs/discovery.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 242
+      "loc": 238
     },
     {
       "file": "src/docs/index.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 494
+      "loc": 542
+    },
+    {
+      "file": "src/docs/languages.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 73
     },
     {
       "file": "src/docs/model.ts",
@@ -440,7 +447,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 460
+      "loc": 472
     },
     {
       "file": "src/docs/report.ts",
@@ -461,7 +468,14 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 206
+      "loc": 184
+    },
+    {
+      "file": "src/docs/styles.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 94
     },
     {
       "file": "src/docs/typescript.ts",
@@ -1679,7 +1693,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 459
+      "loc": 551
     },
     {
       "file": "tests/unit/docs-discovery.test.ts",
@@ -1703,11 +1717,18 @@
       "loc": 88
     },
     {
+      "file": "tests/unit/docs-languages.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 50
+    },
+    {
       "file": "tests/unit/docs-python.test.ts",
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 369
+      "loc": 374
     },
     {
       "file": "tests/unit/docs-report.test.ts",
@@ -1729,6 +1750,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 275
+    },
+    {
+      "file": "tests/unit/docs-styles.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 111
     },
     {
       "file": "tests/unit/docs-typescript.test.ts",

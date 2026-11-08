@@ -22,8 +22,8 @@ import {
   languageOf,
   UnreadableRepoLanguage,
 } from "./discovery.ts";
+import { LANGUAGES, type LanguageSpec, languageNames, specOf } from "./languages.ts";
 import { type FileReport, isParsed } from "./model.ts";
-import { parsesAsPython } from "./python.ts";
 import { pctText, summarise, writeOutputs } from "./report.ts";
 import {
   applyInsertions,
@@ -33,19 +33,26 @@ import {
   splitLines,
   startsItsLine,
 } from "./stub.ts";
-import { parsesAsTypeScript } from "./typescript.ts";
+import { isStyle, STYLES } from "./styles.ts";
+
+/** One help line per language: its styles, the default first. */
+const STYLE_HELP = LANGUAGES.map((spec) => {
+  const rest = spec.styles.filter((s) => s !== spec.defaultStyle);
+  const names = spec.names.join(", ");
+  return `                       ${names}: ${spec.defaultStyle} (default), ${rest.join(", ")}`;
+}).join("\n");
 
 /** The help text of `repo-tools docs`. */
 export const DOCS_HELP = `Usage: repo-tools docs scan  [root] [--out=<dir>]
-       repo-tools docs stub  [root] [--apply] [--path=<path>]
+       repo-tools docs stub  [root] [--apply] [--path=<path>] [--style=<style>]
        repo-tools docs check [root] [--paths <path>... | --paths-from=<file>]
 
-Measure, stub and gate the documentation comments of the TypeScript, JavaScript
-and Python files of a repository. The files are the files that git tracks. A
+Measure, stub and gate the documentation comments of the ${languageNames("and")}
+files of a repository. The files are the files that git tracks. A
 file in a skipped folder (node_modules, dist, build, bundle, out, vendor) or
 with a generated name (.d.ts, .min.js, _pb2.py) is not read. A repository with
-more files of another language (for example Rust or Go) than TypeScript,
-JavaScript and Python together is refused: the run names the language and exits 1.
+more files of another language (for example Swift) than the languages above
+together is refused: the run names the language and exits 1.
 
 Actions:
   scan   Measure the coverage. Write COVERAGE.md and coverage.json.
@@ -64,6 +71,9 @@ Options:
                        the change is not changed.
   --path=<path>        stub: only this file, or the files below this folder. The
                        root itself ('.') selects every file.
+  --style=<style>      stub: the docstring form. 'auto' takes the one dialect of
+                       each file, or the default when the file has none or two.
+${STYLE_HELP}
   --paths <path>...    check: gate only these files, for example the files of a
                        pull request. Put the root before this flag. The flag
                        takes every argument up to the next flag. No path means
@@ -106,6 +116,8 @@ interface DocsOptions {
   /** The paths to gate. Undefined means that the gate checks the whole repository. */
   paths: string[] | undefined;
   pathsFrom: string | undefined;
+  /** The `--style` of `stub`: a style id, `auto`, or undefined for the default of each language. */
+  style: string | undefined;
 }
 
 /** The flags that take a value, and the action that each one belongs to. */
@@ -114,6 +126,7 @@ const VALUE_FLAGS: Readonly<Record<string, Action | "all">> = {
   "--out": "scan",
   "--path": "stub",
   "--paths-from": "check",
+  "--style": "stub",
 };
 
 /** Parses the arguments. A strict parser: an unknown flag, a missing value or a repeat throws. */
@@ -134,6 +147,7 @@ function parseDocsArgs(argv: readonly string[]): DocsOptions {
     path: undefined,
     paths: undefined,
     pathsFrom: undefined,
+    style: undefined,
   };
   let rootSet = false;
   const setRoot = (value: string): void => {
@@ -178,6 +192,7 @@ function parseDocsArgs(argv: readonly string[]): DocsOptions {
       if (name === "--root") setRoot(value);
       else if (name === "--out") options.out = value;
       else if (name === "--path") options.path = value;
+      else if (name === "--style") options.style = value;
       else options.pathsFrom = value;
     } else {
       throw new Error(`unknown flag '${name}' (see repo-tools docs --help)`);
@@ -267,7 +282,7 @@ function shown(root: string, path: string): string {
 class NothingToMeasure extends Error {
   constructor(provenance: string) {
     super(
-      "no TypeScript, JavaScript or Python source file was found below <root> " +
+      `no ${languageNames("or")} source file was found below <root> ` +
         `(${provenance}) -- nothing to measure. This is a failure, not a pass: check the path, ` +
         "or add the files to git.",
     );
@@ -303,8 +318,37 @@ function inScope(report: FileReport, scope: string): boolean {
   return report.path.startsWith(prefix) || report.path === scope;
 }
 
+/**
+ * The style of the stubs of `report`. With no `requested` style it is the default of the language.
+ * `auto` takes the one dialect of the file when the language has a style of that name, and the
+ * default otherwise. A named style must belong to the language of the file. `styleFor` throws
+ * before the command writes a file, so a wrong style changes nothing.
+ */
+function styleFor(report: FileReport, requested: string | undefined): string {
+  const spec = specOf(report.language) as LanguageSpec;
+  if (requested === undefined) return spec.defaultStyle;
+  if (requested === "auto") {
+    const [only, second] = [...report.dialects];
+    return only !== undefined && second === undefined && spec.styles.includes(only)
+      ? only
+      : spec.defaultStyle;
+  }
+  if (!spec.styles.includes(requested)) {
+    throw new Error(
+      `style ${requested} does not apply to ${report.path} (${spec.names.join(", ")}): ` +
+        `use auto or one of ${spec.styles.join(", ")}, or select files with --path`,
+    );
+  }
+  return requested;
+}
+
 /** `stub`: plans the skeleton comments, and writes them only with `--apply`. */
 async function runStub(root: string, options: DocsOptions, io: Io): Promise<number> {
+  // An unknown style is a usage error, whatever the files hold.
+  const requested = options.style;
+  if (requested !== undefined && requested !== "auto" && !isStyle(requested)) {
+    throw new Error(`unknown style '${requested}': use auto, ${Object.keys(STYLES).join(", ")}`);
+  }
   const analysis = await analyseRepo(root);
   // The check comes before the `--path` filter: a root with no source is a failure, as in `scan`.
   if (analysis.reports.length === 0) throw new NothingToMeasure(analysis.provenance);
@@ -315,6 +359,12 @@ async function runStub(root: string, options: DocsOptions, io: Io): Promise<numb
     scope === undefined || scope === "" || scope === "."
       ? analysis.reports
       : analysis.reports.filter((r) => inScope(r, scope));
+  // Each file that gets a stub needs a style of its language. The check runs before any write.
+  const needsStub = (r: FileReport): boolean =>
+    isParsed(r) && r.symbols.some((s) => s.issues.some((i) => i.rule === "M1"));
+  const styles = new Map(
+    reports.filter(needsStub).map((r) => [r.path, styleFor(r, options.style)]),
+  );
   let planned = 0;
   let changed = 0;
   for (const report of reports) {
@@ -337,19 +387,21 @@ async function runStub(root: string, options: DocsOptions, io: Io): Promise<numb
       continue;
     }
     const lines = splitLines(raw);
-    const python = report.language === "python";
+    const spec = specOf(report.language) as LanguageSpec;
+    const above = spec.stubPosition === "above";
+    const style = styles.get(report.path) as string;
     const insertions: Insertion[] = [];
     for (const symbol of targets) {
-      // A TypeScript block goes above the line of the declaration. A token before the declaration
-      // on that line (the end of a template, a second declaration) makes that place unsafe.
-      if (!python && !startsItsLine(symbol, lines)) {
+      // A block above the declaration goes above its line. A token before the declaration on that
+      // line (the end of a template, a second declaration) makes that place unsafe.
+      if (above && !startsItsLine(symbol, lines)) {
         io.stdout(
           `  cannot place a stub for ${report.path}:${symbol.anchorLine} ${symbol.name}: ` +
             "another token precedes the declaration on its line\n",
         );
         continue;
       }
-      const insertion = (python ? planPython : planTypeScript)(symbol, lines);
+      const insertion = (above ? planTypeScript : planPython)(symbol, lines, style);
       if (insertion !== null) insertions.push(insertion);
     }
     planned += insertions.length;
@@ -359,11 +411,7 @@ async function runStub(root: string, options: DocsOptions, io: Io): Promise<numb
       }
       continue;
     }
-    const verify =
-      report.language === "python"
-        ? parsesAsPython
-        : (text: string): boolean => parsesAsTypeScript(report.path, text);
-    const result = applyInsertions(raw, insertions, verify);
+    const result = applyInsertions(raw, insertions, (text) => spec.parses(report.path, text));
     if (result.ok) writeFileSync(file, result.text);
     io.stdout(`  ${result.ok ? "wrote" : "SKIPPED"} ${report.path}: ${result.message}\n`);
     if (result.ok) changed += 1;

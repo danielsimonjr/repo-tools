@@ -157,7 +157,7 @@ Run `map` first.
 | Action | Meaning |
 |---|---|
 | `scan [--out=<dir>]` | Measures the coverage. Writes `COVERAGE.md` and `coverage.json`. The default folder is `docs/code-docs`. |
-| `stub [--apply] [--path=<path>]` | Plans a skeleton comment for each exported symbol that has none. A dry run is the default. Each stub holds `TODO:`. |
+| `stub [--apply] [--path=<path>] [--style=<style>]` | Plans a skeleton comment for each exported symbol that has none. A dry run is the default. Each stub holds `TODO:`. `--style` selects the form: `tsdoc` (default) or `jsdoc` for TypeScript and JavaScript, `google` (default), `numpy` or `rest` for Python, or `auto`. A style of another language exits 2. |
 | `check [--paths <path>... \| --paths-from=<file>]` | The gate. Exit 1 on a MUST issue or a file that does not parse. |
 
 The MUST rules decide the exit code. The SHOULD rules are reported only.
@@ -414,7 +414,7 @@ A document that the gate reads ends with a `## Verification` section. The sectio
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 300 | dependency-graph.json |
+| totalSourceFiles | 304 | dependency-graph.json |
 ```
 
 The gate reads the `Claim` and `Value` columns. The `Source` column is for the reader. A claim name
@@ -428,7 +428,7 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 300 | dependency-graph.json |
-| totalTypeScriptFiles | 300 | dependency-graph.json |
+| totalSourceFiles | 304 | dependency-graph.json |
+| totalTypeScriptFiles | 304 | dependency-graph.json |
 | totalModules | 4 | dependency-graph.json |
-| totalExports | 746 | dependency-graph.json |
+| totalExports | 754 | dependency-graph.json |

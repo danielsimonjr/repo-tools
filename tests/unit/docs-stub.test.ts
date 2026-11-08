@@ -21,7 +21,7 @@ async function stubPython(source: string): Promise<string> {
   const report = await analysePython("a.py", source);
   const lines = splitLines(source);
   const plans = report.symbols
-    .map((s) => planPython(s, lines))
+    .map((s) => planPython(s, lines, "google"))
     .filter((p): p is Insertion => p !== null);
   const done = applyInsertions(source, plans, parsesAsPython);
   expect(done.message).toMatch(/^inserted \d+ stub/);
@@ -33,7 +33,7 @@ async function stubTypeScript(source: string, path = "a.ts"): Promise<string> {
   const report = await analyseTypeScript(path, source);
   const lines = splitLines(source);
   const plans = report.symbols
-    .map((s) => planTypeScript(s, lines))
+    .map((s) => planTypeScript(s, lines, "tsdoc"))
     .filter((p): p is Insertion => p !== null);
   const done = applyInsertions(source, plans, (text) => parsesAsTypeScript(path, text));
   expect(done.message).toMatch(/^inserted \d+ stub/);
@@ -113,7 +113,7 @@ describe("planPython", () => {
   test("a symbol with a docstring gets no stub", async () => {
     const src = 'def f(a):\n    """Do it."""\n    return a\n';
     const report = await analysePython("a.py", src);
-    expect(planPython(only(report.symbols), splitLines(src))).toBeNull();
+    expect(planPython(only(report.symbols), splitLines(src), "google")).toBeNull();
   });
 
   test("the stubbed file has no M1, has M4 on every stub, and has no M3", async () => {
@@ -215,7 +215,7 @@ describe("planTypeScript", () => {
   test("a symbol with a doc comment gets no stub", async () => {
     const src = "/** Done. */\nexport function f() {}\n";
     const report = await analyseTypeScript("a.ts", src);
-    expect(planTypeScript(only(report.symbols), splitLines(src))).toBeNull();
+    expect(planTypeScript(only(report.symbols), splitLines(src), "tsdoc")).toBeNull();
   });
 });
 

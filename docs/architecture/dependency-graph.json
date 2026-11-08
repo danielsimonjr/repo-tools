@@ -3,9 +3,9 @@
     "name": "@danielsimonjr/repo-tools",
     "schemaVersion": "2.0.0",
     "language": "typescript",
-    "totalFiles": 300,
+    "totalFiles": 304,
     "totalModules": 4,
-    "totalExports": 746
+    "totalExports": 754
   },
   "modules": {
     "tools": {
@@ -702,6 +702,13 @@
             "imports": [
               "DOCS_HELP",
               "run"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/languages.ts",
+            "imports": [
+              "languageNames"
             ],
             "typeOnly": false
           },
@@ -1960,24 +1967,17 @@
             "typeOnly": false
           },
           {
+            "file": "src/docs/languages.ts",
+            "imports": [
+              "specOf"
+            ],
+            "typeOnly": false
+          },
+          {
             "file": "src/docs/model.ts",
             "imports": [
               "FileReport",
               "newReport"
-            ],
-            "typeOnly": false
-          },
-          {
-            "file": "src/docs/python.ts",
-            "imports": [
-              "analysePython"
-            ],
-            "typeOnly": false
-          },
-          {
-            "file": "src/docs/typescript.ts",
-            "imports": [
-              "analyseTypeScript"
             ],
             "typeOnly": false
           }
@@ -2000,8 +2000,7 @@
           {
             "file": "src/map/discovery.ts",
             "imports": [
-              "countLanguages",
-              "suffixOf"
+              "countLanguages"
             ],
             "typeOnly": false
           },
@@ -2009,6 +2008,15 @@
             "file": "src/sort.ts",
             "imports": [
               "sortCodeUnits"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/languages.ts",
+            "imports": [
+              "LANGUAGES",
+              "languageNames",
+              "specForPath"
             ],
             "typeOnly": false
           }
@@ -2078,17 +2086,20 @@
             "typeOnly": false
           },
           {
-            "file": "src/docs/model.ts",
+            "file": "src/docs/languages.ts",
             "imports": [
-              "FileReport",
-              "isParsed"
+              "LANGUAGES",
+              "LanguageSpec",
+              "languageNames",
+              "specOf"
             ],
             "typeOnly": false
           },
           {
-            "file": "src/docs/python.ts",
+            "file": "src/docs/model.ts",
             "imports": [
-              "parsesAsPython"
+              "FileReport",
+              "isParsed"
             ],
             "typeOnly": false
           },
@@ -2114,9 +2125,10 @@
             "typeOnly": false
           },
           {
-            "file": "src/docs/typescript.ts",
+            "file": "src/docs/styles.ts",
             "imports": [
-              "parsesAsTypeScript"
+              "isStyle",
+              "STYLES"
             ],
             "typeOnly": false
           }
@@ -2125,6 +2137,49 @@
           "DOCS_HELP",
           "unquoteGitPath",
           "run"
+        ]
+      },
+      "src/docs/languages.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/map/discovery.ts",
+            "imports": [
+              "suffixOf"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/model.ts",
+            "imports": [
+              "FileReport"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "src/docs/python.ts",
+            "imports": [
+              "analysePython",
+              "parsesAsPython"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/typescript.ts",
+            "imports": [
+              "analyseTypeScript",
+              "parsesAsTypeScript"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "LanguageSpec",
+          "LANGUAGES",
+          "specOf",
+          "specForPath",
+          "languageNames"
         ]
       },
       "src/docs/model.ts": {
@@ -2273,8 +2328,16 @@
           {
             "file": "src/docs/model.ts",
             "imports": [
-              "DocSymbol",
-              "STUB_MARKER"
+              "DocSymbol"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "src/docs/styles.ts",
+            "imports": [
+              "isStyle",
+              "STYLES",
+              "Style"
             ],
             "typeOnly": false
           }
@@ -2287,6 +2350,25 @@
           "startsItsLine",
           "planTypeScript",
           "applyInsertions"
+        ]
+      },
+      "src/docs/styles.ts": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/docs/model.ts",
+            "imports": [
+              "DocSymbol",
+              "STUB_MARKER"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "Style",
+          "isStyle",
+          "STYLES"
         ]
       },
       "src/docs/typescript.ts": {
@@ -7149,6 +7231,38 @@
           "read"
         ]
       },
+      "tests/unit/docs-languages.test.ts": {
+        "externalDependencies": [
+          "bun:test"
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/docs/index.ts",
+            "imports": [
+              "DOCS_HELP"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/languages.ts",
+            "imports": [
+              "LANGUAGES",
+              "specForPath",
+              "specOf"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/styles.ts",
+            "imports": [
+              "STYLES"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": []
+      },
       "tests/unit/docs-python.test.ts": {
         "externalDependencies": [
           "bun:test"
@@ -7292,6 +7406,57 @@
             "file": "tests/unit/docs-helpers.ts",
             "imports": [
               "only"
+            ],
+            "typeOnly": false
+          }
+        ],
+        "exports": []
+      },
+      "tests/unit/docs-styles.test.ts": {
+        "externalDependencies": [
+          "bun:test"
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/docs/model.ts",
+            "imports": [
+              "DocSymbol",
+              "STUB_MARKER"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/python.ts",
+            "imports": [
+              "analysePython",
+              "parsesAsPython"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/stub.ts",
+            "imports": [
+              "applyInsertions",
+              "Insertion",
+              "planPython",
+              "planTypeScript",
+              "splitLines"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/styles.ts",
+            "imports": [
+              "STYLES"
+            ],
+            "typeOnly": false
+          },
+          {
+            "file": "src/docs/typescript.ts",
+            "imports": [
+              "analyseTypeScript",
+              "parsesAsTypeScript"
             ],
             "typeOnly": false
           }
@@ -9017,19 +9182,19 @@
     }
   },
   "statistics": {
-    "totalTypeScriptFiles": 300,
-    "totalSourceFiles": 300,
+    "totalTypeScriptFiles": 304,
+    "totalSourceFiles": 304,
     "totalModules": 4,
-    "totalLinesOfCode": 45194,
-    "totalExports": 746,
+    "totalLinesOfCode": 45656,
+    "totalExports": 754,
     "entryRoots": 1,
-    "reachableFiles": 85,
+    "reachableFiles": 87,
     "dormantFiles": 2,
     "orphanedFiles": 2,
     "testOnlyFiles": 0,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 4,
-    "totalTypeOnlyImports": 65,
+    "totalTypeOnlyImports": 67,
     "noImporterFileCount": 2,
     "unusedExportsCount": 119,
     "circularDepsTruncated": false,
@@ -9038,18 +9203,18 @@
     "runtimeFilesInCycles": 2,
     "typeOnlyFilesInCycles": 8,
     "totalClasses": 15,
-    "totalInterfaces": 144,
-    "totalFunctions": 428,
-    "totalTypeGuards": 19,
+    "totalInterfaces": 146,
+    "totalFunctions": 432,
+    "totalTypeGuards": 20,
     "totalEnums": 4,
-    "totalConstants": 102,
+    "totalConstants": 104,
     "totalReExports": 12
   },
   "reachability": {
     "roots": [
       "src/cli.ts"
     ],
-    "reachableCount": 85,
+    "reachableCount": 87,
     "dormantCount": 2,
     "orphaned": [
       "src/assets.d.ts",

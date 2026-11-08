@@ -10,6 +10,7 @@ import { CHUNK_HELP, run as runChunk } from "./chunk/index.ts";
 import { CLONES_HELP, run as runClones } from "./clones/index.ts";
 import { HELP as compressHelp, run as compressRun } from "./compress/index.ts";
 import { DOCS_HELP, run as runDocs } from "./docs/index.ts";
+import { languageNames } from "./docs/languages.ts";
 import type { Io } from "./io-types.ts";
 import { DEPGRAPH_DEPRECATION, MAP_HELP, runMap } from "./map/command.ts";
 import { QUERY_HELP, run as runQuery } from "./query/index.ts";
@@ -45,7 +46,7 @@ ${MAP_HELP}`,
     run: runCheck,
   },
   docs: {
-    summary: "Measure, stub and gate the doc comments of TypeScript, JavaScript and Python source.",
+    summary: `Measure, stub and gate the doc comments of ${languageNames("and")} source.`,
     help: DOCS_HELP,
     run: runDocs,
   },
