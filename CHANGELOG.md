@@ -116,6 +116,11 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- C and C++: a data member with several names (`int a, *b;`) gives one `property` symbol per
+  name. The symbols share the doc comment and the anchor of the member line. Before, the line gave
+  no symbol. The shared driver takes a new optional hook, `declaratorsOf`, for this case. A
+  function or typedef with several names still makes the file unparsed. A function-like macro in
+  a class or struct body now has the kind `method`, not `function`.
 - `docs-compare diff` keeps a repeated symbol key or file path: the second copy gets the suffix
   ` #2`, the third ` #3`, and so on. Before, the later copy replaced the earlier one. Every mode
   exits 2 on a file record without a `path` text, a `symbols` list, or an `error` text or null.
