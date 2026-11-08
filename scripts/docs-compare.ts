@@ -147,7 +147,7 @@ function symbolKey(s: CoverageSymbol): string {
   return `${s.file}:${s.line} ${s.name} ${s.kind}`;
 }
 
-/** Gives each repeated key a numbered suffix (` #2`, ` #3`...), so no entry is collapsed. */
+/** Gives each repeated key a numbered suffix (` #2`, ` #3`...), so the diff keeps each entry. */
 function keyedUnique<T>(items: Iterable<T>, keyOf: (item: T) => string): Map<string, T> {
   const map = new Map<string, T>();
   const seen = new Map<string, number>();
@@ -399,8 +399,8 @@ export function headerFunctionCount(root: Node, symbols: CoverageSymbol[]): numb
 }
 
 /**
- * Counts the shapes and the functions of one parsed header. The text has its `extern "C"` guards
- * blanked first, as the analyser does. Returns null for a tree with an error node.
+ * Counts the shapes and the functions of one parsed header. The function first blanks the
+ * `extern "C"` guards of the text, as the analyser does. Returns null for a tree with an error node.
  */
 export async function triageHeaderTree(
   text: string,
@@ -457,7 +457,10 @@ const ROW_FIELDS = [
   "files_unparsed",
 ] as const;
 
-/** Returns the first summary field of the parity row that is not a finite number, or null. */
+/**
+ * Returns the first summary field of the parity row that is not a finite number. Returns null
+ * when every field is a finite number.
+ */
 export function badSummaryField(summary: CoverageSummary): string | null {
   const record = summary as unknown as Record<string, unknown>;
   for (const field of ROW_FIELDS) {

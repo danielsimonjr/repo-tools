@@ -126,7 +126,7 @@ All notable changes to this project are recorded in this file. The format follow
   name `x` again, as 2.5.0 did. A combined entry `x, y : int` gives both names.
 - C and C++: a data member with several names (`int a, *b;`) gives one `property` symbol per
   name. The symbols share the doc comment and the anchor of the member line. Before, the line gave
-  no symbol. The shared driver takes a new optional hook, `declaratorsOf`, for this case. A
+  no symbol. The shared driver takes a new optional hook, `declaratorsOf`, for such a member. A
   function or typedef with several names still makes the file unparsed. A function-like macro in
   a class or struct body now has the kind `method`, not `function`.
 - `docs-compare diff` keeps a repeated symbol key or file path: the second copy gets the suffix
@@ -135,8 +135,8 @@ All notable changes to this project are recorded in this file. The format follow
   `summary` exits 2 when a field of the parity row is not a number.
 - `docs-compare triage` counts header functions without the rows of function-like macros, reads
   the access specifiers of a struct or a union as well as a class (a struct starts public), and
-  blanks the `extern "C"` guards before the parse, as the analyser does. A header tree with an
-  error node is skipped.
+  blanks the `extern "C"` guards before the parse, as the analyser does. `triage` skips a header tree
+  with an error node.
 - `docs` no longer reads a NumPy description line as a parameter. A line such as `Note: x` under
   an entry of the Parameters section gave a parameter named `Note`, so rule M3 failed a correct
   docstring. The entries are now the lines at the smallest indent of the section. Each entry is

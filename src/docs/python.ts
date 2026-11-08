@@ -23,7 +23,7 @@ const REST = new RegExp(`^${S}*:param${S}+${REST_TYPE}\\*{0,2}${W}+${S}*:`, "mu"
 
 // The optional "(type)" group does not capture, so each match yields the name alone.
 const GOOGLE_PARAM = new RegExp(`^${S}{1,8}(\\*{0,2}${W}+)${S}*(?:\\([^)]*\\))?${S}*:`, "gmu");
-// A NumPy entry line: one name or several names split by commas (`x, y : int`), then a colon.
+// A NumPy entry line: one name, or several names with a comma between them (`x, y : int`), then a colon.
 // The type after the colon is optional, so a bare `x:` is an entry too.
 const NUMPY_ENTRY = new RegExp(`^${S}*(\\*{0,2}${W}+(?:${S}*,${S}*\\*{0,2}${W}+)*)${S}*:`, "u");
 const REST_PARAM = new RegExp(`^${S}*:param${S}+${REST_TYPE}(\\*{0,2}${W}+)${S}*:`, "gmu");
@@ -95,7 +95,7 @@ function numpyNames(block: string): string[] {
   const lines = block.split("\n").filter((l) => pyStrip(l) !== "" && !isRule(l));
   const depth = (l: string): number => l.length - l.trimStart().length;
   const top = Math.min(...lines.map(depth));
-  // Each entry line at the top depth is matched alone. A deeper line is a description.
+  // The reader matches each entry line at the top depth alone. A deeper line is a description.
   return lines.flatMap((line) => {
     if (depth(line) !== top) return [];
     const names = line.match(NUMPY_ENTRY)?.[1];
