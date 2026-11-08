@@ -1,11 +1,11 @@
 {
-  "totalFiles": 316,
+  "totalFiles": 322,
   "byDisposition": {
     "reachable": 92,
     "build-entry": 1,
-    "test-only": 0,
+    "test-only": 3,
     "orphan": 2,
-    "test": 209,
+    "test": 212,
     "tool": 11,
     "config": 1,
     "bench": 0,
@@ -13,13 +13,13 @@
   },
   "byArea": {
     "tools": 11,
-    "src": 95,
-    "tests": 209,
+    "src": 98,
+    "tests": 212,
     "config": 1
   },
   "byPackage": {
-    "(root)": 221,
-    "@danielsimonjr/repo-tools": 95
+    "(root)": 224,
+    "@danielsimonjr/repo-tools": 98
   },
   "files": [
     {
@@ -415,6 +415,13 @@
       "loc": 60
     },
     {
+      "file": "src/docs/cfamily.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "test-only",
+      "loc": 755
+    },
+    {
       "file": "src/docs/comments.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
@@ -478,6 +485,13 @@
       "loc": 121
     },
     {
+      "file": "src/docs/php.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "test-only",
+      "loc": 218
+    },
+    {
       "file": "src/docs/python.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
@@ -490,6 +504,13 @@
       "area": "src",
       "disposition": "reachable",
       "loc": 197
+    },
+    {
+      "file": "src/docs/ruby.ts",
+      "package": "@danielsimonjr/repo-tools",
+      "area": "src",
+      "disposition": "test-only",
+      "loc": 297
     },
     {
       "file": "src/docs/rules.ts",
@@ -1731,6 +1752,13 @@
       "loc": 148
     },
     {
+      "file": "tests/unit/docs-cfamily.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 254
+    },
+    {
       "file": "tests/unit/docs-command.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -1801,6 +1829,13 @@
       "loc": 57
     },
     {
+      "file": "tests/unit/docs-php.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 160
+    },
+    {
       "file": "tests/unit/docs-python.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -1820,6 +1855,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 249
+    },
+    {
+      "file": "tests/unit/docs-ruby.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 144
     },
     {
       "file": "tests/unit/docs-rust.test.ts",

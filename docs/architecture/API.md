@@ -414,7 +414,7 @@ A document that the gate reads ends with a `## Verification` section. The sectio
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 316 | dependency-graph.json |
+| totalSourceFiles | 322 | dependency-graph.json |
 ```
 
 The gate reads the `Claim` and `Value` columns. The `Source` column is for the reader. A claim name
@@ -428,7 +428,7 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 316 | dependency-graph.json |
-| totalTypeScriptFiles | 316 | dependency-graph.json |
+| totalSourceFiles | 322 | dependency-graph.json |
+| totalTypeScriptFiles | 322 | dependency-graph.json |
 | totalModules | 4 | dependency-graph.json |
-| totalExports | 772 | dependency-graph.json |
+| totalExports | 779 | dependency-graph.json |

@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 316
+  totalFiles: 322
   totalModules: 4
-  totalExports: 772
+  totalExports: 779
 modules:
   tools:
     scripts/build.ts:
@@ -1399,6 +1399,36 @@ modules:
         - analyseFile
         - RepoAnalysis
         - analyseRepo
+    src/docs/cfamily.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - sanitiseGuards
+        - analyseCFamily
+        - parsesAsCFamily
     src/docs/comments.ts:
       externalDependencies:
         - web-tree-sitter
@@ -1712,6 +1742,35 @@ modules:
         - isParsed
         - newReport
         - Stats
+    src/docs/php.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - analysePhp
+        - parsesAsPhp
     src/docs/python.ts:
       externalDependencies:
         - web-tree-sitter
@@ -1773,6 +1832,35 @@ modules:
         - pctText
         - renderMarkdown
         - writeOutputs
+    src/docs/ruby.ts:
+      externalDependencies:
+        - web-tree-sitter
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/map/grammars.ts
+          imports:
+            - parserFor
+          typeOnly: false
+        - file: src/ste/prose.ts
+          imports:
+            - proseOf
+          typeOnly: false
+        - file: src/docs/comments.ts
+          imports:
+            - analyseWith
+            - DocText
+            - firstProse
+            - parsesClean
+            - Reader
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - FileReport
+            - Kind
+          typeOnly: true
+      exports:
+        - analyseRuby
+        - parsesAsRuby
     src/docs/rules.ts:
       externalDependencies: []
       nodeDependencies: []
@@ -5027,6 +5115,28 @@ modules:
             - makeTempDir
           typeOnly: false
       exports: []
+    tests/unit/docs-cfamily.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/cfamily.ts
+          imports:
+            - analyseCFamily
+            - parsesAsCFamily
+            - sanitiseGuards
+          typeOnly: false
+        - file: src/docs/model.ts
+          imports:
+            - DocSymbol
+          typeOnly: true
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+      exports: []
     tests/unit/docs-command.test.ts:
       externalDependencies:
         - bun:test
@@ -5232,6 +5342,23 @@ modules:
             - STYLES
           typeOnly: false
       exports: []
+    tests/unit/docs-php.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/php.ts
+          imports:
+            - analysePhp
+            - parsesAsPhp
+          typeOnly: false
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - planTypeScript
+            - splitLines
+          typeOnly: false
+      exports: []
     tests/unit/docs-python.test.ts:
       externalDependencies:
         - bun:test
@@ -5295,6 +5422,23 @@ modules:
             - removeTrees
             - trackAll
             - tree
+          typeOnly: false
+      exports: []
+    tests/unit/docs-ruby.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
+        - file: src/docs/ruby.ts
+          imports:
+            - analyseRuby
+            - parsesAsRuby
+          typeOnly: false
+        - file: src/docs/stub.ts
+          imports:
+            - applyInsertions
+            - planTypeScript
+            - splitLines
           typeOnly: false
       exports: []
     tests/unit/docs-rust.test.ts:
@@ -6492,19 +6636,19 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 316
-  totalSourceFiles: 316
+  totalTypeScriptFiles: 322
+  totalSourceFiles: 322
   totalModules: 4
-  totalLinesOfCode: 48540
-  totalExports: 772
+  totalLinesOfCode: 50368
+  totalExports: 779
   entryRoots: 1
   reachableFiles: 93
-  dormantFiles: 2
+  dormantFiles: 5
   orphanedFiles: 2
-  testOnlyFiles: 0
+  testOnlyFiles: 3
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
-  totalTypeOnlyImports: 77
+  totalTypeOnlyImports: 81
   noImporterFileCount: 2
   unusedExportsCount: 119
   circularDepsTruncated: false
@@ -6514,7 +6658,7 @@ statistics:
   typeOnlyFilesInCycles: 8
   totalClasses: 15
   totalInterfaces: 148
-  totalFunctions: 443
+  totalFunctions: 450
   totalTypeGuards: 20
   totalEnums: 4
   totalConstants: 109
@@ -6523,9 +6667,12 @@ reachability:
   roots:
     - src/cli.ts
   reachableCount: 93
-  dormantCount: 2
+  dormantCount: 5
   orphaned:
     - src/assets.d.ts
     - src/bin.ts
-  testOnly: []
+  testOnly:
+    - src/docs/cfamily.ts
+    - src/docs/php.ts
+    - src/docs/ruby.ts
 warnings: []

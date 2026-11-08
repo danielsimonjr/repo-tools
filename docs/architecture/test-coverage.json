@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "totalSourceFiles": 94,
-    "totalTestFiles": 148,
-    "testedCount": 77,
+    "totalSourceFiles": 97,
+    "totalTestFiles": 151,
+    "testedCount": 80,
     "untestedCount": 17,
-    "coveragePercent": "81.9",
+    "coveragePercent": "82.5",
     "effectiveCoverage": {
       "policyLoaded": false,
-      "activeFiles": 94,
-      "testedActive": 77,
+      "activeFiles": 97,
+      "testedActive": 80,
       "activeUntested": 17,
       "excludedTotal": 0,
-      "percent": "81.9",
+      "percent": "82.5",
       "breakdown": {
         "active_untested": 17
       }
@@ -72,6 +72,7 @@
     "src/depgraph/types.ts",
     "src/depgraph/workspaces.ts",
     "src/docs/analyse.ts",
+    "src/docs/cfamily.ts",
     "src/docs/comments.ts",
     "src/docs/csharp.ts",
     "src/docs/discovery.ts",
@@ -81,8 +82,10 @@
     "src/docs/kotlin.ts",
     "src/docs/languages.ts",
     "src/docs/model.ts",
+    "src/docs/php.ts",
     "src/docs/python.ts",
     "src/docs/report.ts",
+    "src/docs/ruby.ts",
     "src/docs/rust.ts",
     "src/docs/stub.ts",
     "src/docs/styles.ts",
@@ -293,6 +296,9 @@
     "src/docs/analyse.ts": [
       "tests/unit/docs-discovery.test.ts"
     ],
+    "src/docs/cfamily.ts": [
+      "tests/unit/docs-cfamily.test.ts"
+    ],
     "src/docs/comments.ts": [
       "tests/unit/docs-comments.test.ts"
     ],
@@ -321,6 +327,7 @@
       "tests/unit/docs-languages.test.ts"
     ],
     "src/docs/model.ts": [
+      "tests/unit/docs-cfamily.test.ts",
       "tests/unit/docs-command.test.ts",
       "tests/unit/docs-csharp.test.ts",
       "tests/unit/docs-go.test.ts",
@@ -333,6 +340,9 @@
       "tests/unit/docs-styles.test.ts",
       "tests/unit/docs-typescript.test.ts"
     ],
+    "src/docs/php.ts": [
+      "tests/unit/docs-php.test.ts"
+    ],
     "src/docs/python.ts": [
       "tests/unit/docs-python.test.ts",
       "tests/unit/docs-review.test.ts",
@@ -342,15 +352,21 @@
     "src/docs/report.ts": [
       "tests/unit/docs-report.test.ts"
     ],
+    "src/docs/ruby.ts": [
+      "tests/unit/docs-ruby.test.ts"
+    ],
     "src/docs/rules.ts": [],
     "src/docs/rust.ts": [
       "tests/unit/docs-rust.test.ts"
     ],
     "src/docs/stub.ts": [
+      "tests/unit/docs-cfamily.test.ts",
       "tests/unit/docs-csharp.test.ts",
       "tests/unit/docs-go.test.ts",
       "tests/unit/docs-java.test.ts",
       "tests/unit/docs-kotlin.test.ts",
+      "tests/unit/docs-php.test.ts",
+      "tests/unit/docs-ruby.test.ts",
       "tests/unit/docs-rust.test.ts",
       "tests/unit/docs-stub.test.ts",
       "tests/unit/docs-styles.test.ts"
@@ -789,6 +805,11 @@
     ],
     "tests/unit/depgraph-tsx.test.ts": [],
     "tests/unit/design-refs.test.ts": [],
+    "tests/unit/docs-cfamily.test.ts": [
+      "src/docs/cfamily.ts",
+      "src/docs/model.ts",
+      "src/docs/stub.ts"
+    ],
     "tests/unit/docs-command.test.ts": [
       "src/docs/model.ts"
     ],
@@ -825,6 +846,10 @@
       "src/docs/languages.ts",
       "src/docs/styles.ts"
     ],
+    "tests/unit/docs-php.test.ts": [
+      "src/docs/php.ts",
+      "src/docs/stub.ts"
+    ],
     "tests/unit/docs-python.test.ts": [
       "src/docs/model.ts",
       "src/docs/python.ts"
@@ -836,6 +861,10 @@
     "tests/unit/docs-review.test.ts": [
       "src/docs/python.ts",
       "src/docs/typescript.ts"
+    ],
+    "tests/unit/docs-ruby.test.ts": [
+      "src/docs/ruby.ts",
+      "src/docs/stub.ts"
     ],
     "tests/unit/docs-rust.test.ts": [
       "src/docs/model.ts",

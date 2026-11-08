@@ -42,7 +42,7 @@ The codebase is organized into the following modules:
 - **clones**: 6 files
 - **compress**: 3 files
 - **depgraph**: 22 files
-- **docs**: 17 files
+- **docs**: 20 files
 - **map**: 18 files
 - **query**: 6 files
 - **ste**: 5 files
@@ -983,6 +983,26 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/docs/cfamily.ts` - Analyse C and C++ translation units for documentation coverage.
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `web-tree-sitter` | `Node` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../map/grammars.ts` | `parserFor` | Import |
+| `../ste/prose.ts` | `proseOf` | Import |
+| `./comments.ts` | `analyseWith, DocText, firstProse, parsesClean, Reader` | Import |
+| `./model.ts` | `FileReport, Kind` | Import (type-only) |
+
+**Exports:**
+- Functions: `sanitiseGuards`, `analyseCFamily`, `parsesAsCFamily`
+
+---
+
 ### `src/docs/comments.ts` - The driver that the tree-sitter analysers share. A grammar keeps a comment as a
 
 **External Dependencies:**
@@ -1169,6 +1189,26 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/docs/php.ts` - Analyse PHP sources for the `repo-tools docs` command.
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `web-tree-sitter` | `Node` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../map/grammars.ts` | `parserFor` | Import |
+| `../ste/prose.ts` | `proseOf` | Import |
+| `./comments.ts` | `analyseWith, DocText, firstProse, parsesClean, Reader` | Import |
+| `./model.ts` | `FileReport, Kind` | Import (type-only) |
+
+**Exports:**
+- Functions: `analysePhp`, `parsesAsPhp`
+
+---
+
 ### `src/docs/python.ts` - The Python analyser of `repo-tools docs`, built on the tree-sitter Python grammar.
 
 **External Dependencies:**
@@ -1206,6 +1246,26 @@ The codebase is organized into the following modules:
 **Exports:**
 - Functions: `percent`, `summarise`, `renderMarkdown`, `writeOutputs`
 - Constants: `pctText`
+
+---
+
+### `src/docs/ruby.ts` - ruby module
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `web-tree-sitter` | `Node` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../map/grammars.ts` | `parserFor` | Import |
+| `../ste/prose.ts` | `proseOf` | Import |
+| `./comments.ts` | `analyseWith, DocText, firstProse, parsesClean, Reader` | Import |
+| `./model.ts` | `FileReport, Kind` | Import (type-only) |
+
+**Exports:**
+- Functions: `analyseRuby`, `parsesAsRuby`
 
 ---
 
@@ -1923,24 +1983,25 @@ The codebase is organized into the following modules:
 |------|--------------|------------|
 | `src/map/command` | 21 files | 5 files |
 | `src/sort` | 0 files | 21 files |
+| `src/docs/model` | 0 files | 18 files |
 | `src/map/artifacts` | 14 files | 4 files |
 | `src/config` | 5 files | 11 files |
 | `src/depgraph/paths` | 0 files | 16 files |
 | `src/depgraph/types` | 0 files | 16 files |
-| `src/docs/model` | 0 files | 15 files |
 | `src/map/graph` | 13 files | 2 files |
+| `src/map/grammars` | 0 files | 14 files |
+| `src/ste/prose` | 2 files | 12 files |
 | `src/docs/languages` | 9 files | 4 files |
 | `src/map/reports` | 10 files | 3 files |
 | `src/clones/index` | 11 files | 1 file |
 | `src/docs/index` | 11 files | 1 file |
 | `src/cli` | 10 files | 1 file |
 | `src/depgraph/analysis` | 7 files | 4 files |
+| `src/docs/comments` | 3 files | 8 files |
 | `src/io` | 0 files | 11 files |
-| `src/map/grammars` | 0 files | 11 files |
 | `src/map/layers` | 9 files | 2 files |
 | `src/py` | 0 files | 11 files |
 | `src/query/commands` | 10 files | 1 file |
-| `src/ste/prose` | 2 files | 9 files |
 | `src/check/index` | 9 files | 1 file |
 | `src/depgraph/duplicates` | 4 files | 6 files |
 | `src/depgraph/roots` | 5 files | 5 files |
@@ -1952,7 +2013,6 @@ The codebase is organized into the following modules:
 | `src/map/discovery` | 3 files | 6 files |
 | `src/map/schema` | 0 files | 9 files |
 | `src/depgraph/cycles` | 4 files | 4 files |
-| `src/docs/comments` | 3 files | 5 files |
 | `src/map/adapter` | 4 files | 4 files |
 | `src/map/markdown` | 6 files | 1 file |
 | `src/query/index` | 6 files | 1 file |
@@ -2057,16 +2117,16 @@ graph TD
 
     subgraph Docs
         N38[analyse]
-        N39[comments]
-        N40[csharp]
-        N41[discovery]
-        N42[go]
-        N43[index]
-        N44[java]
-        N45[kotlin]
-        N46[languages]
-        N47[model]
-        N48[...7 more]
+        N39[cfamily]
+        N40[comments]
+        N41[csharp]
+        N42[discovery]
+        N43[go]
+        N44[index]
+        N45[java]
+        N46[kotlin]
+        N47[languages]
+        N48[...10 more]
     end
 
     subgraph Map
@@ -2128,8 +2188,8 @@ graph TD
     N2 --> N15
     N2 --> N19
     N2 --> N25
-    N2 --> N43
-    N2 --> N46
+    N2 --> N44
+    N2 --> N47
     N2 --> N4
     N2 --> N51
     N2 --> N63
@@ -2173,8 +2233,8 @@ graph TD
     N36 --> N3
     N36 --> N5
     N36 --> N6
-    N38 --> N41
-    N38 --> N46
+    N38 --> N42
+    N38 --> N47
 ```
 
 ---
@@ -2184,17 +2244,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total Source Files | 316 |
+| Total Source Files | 322 |
 | Subsystems | 10 |
-| Total Lines of Code | 48540 |
-| Total Exports | 772 |
+| Total Lines of Code | 50368 |
+| Total Exports | 779 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |
 | Total Interfaces | 148 |
-| Total Functions | 443 |
+| Total Functions | 450 |
 | Total Type Guards | 20 |
 | Total Enums | 4 |
-| Type-only Imports | 77 |
+| Type-only Imports | 81 |
 | Runtime Cyclic Components | 1 |
 | Type-only Cyclic Components | 4 |
 | Files in Runtime Cycles | 2 |

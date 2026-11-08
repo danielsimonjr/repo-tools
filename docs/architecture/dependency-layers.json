@@ -2539,6 +2539,61 @@
           "analyseRepo"
         ]
       },
+      "src/docs/cfamily.ts": {
+        "description": "Analyse C and C++ translation units for documentation coverage.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "sanitiseGuards",
+          "analyseCFamily",
+          "parsesAsCFamily"
+        ],
+        "functions": [
+          "sanitiseGuards",
+          "analyseCFamily",
+          "parsesAsCFamily"
+        ]
+      },
       "src/docs/comments.ts": {
         "description": "The driver that the tree-sitter analysers share. A grammar keeps a comment as a",
         "externalDependencies": [
@@ -3122,6 +3177,59 @@
           "STUB_MARKER"
         ]
       },
+      "src/docs/php.ts": {
+        "description": "Analyse PHP sources for the `repo-tools docs` command.",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "analysePhp",
+          "parsesAsPhp"
+        ],
+        "functions": [
+          "analysePhp",
+          "parsesAsPhp"
+        ]
+      },
       "src/docs/python.ts": {
         "description": "The Python analyser of `repo-tools docs`, built on the tree-sitter Python grammar.",
         "externalDependencies": [
@@ -3233,6 +3341,59 @@
         ],
         "constants": [
           "pctText"
+        ]
+      },
+      "src/docs/ruby.ts": {
+        "description": "ruby module",
+        "externalDependencies": [
+          {
+            "package": "web-tree-sitter",
+            "imports": [
+              "Node"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../map/grammars.ts",
+            "imports": [
+              "parserFor"
+            ]
+          },
+          {
+            "file": "../ste/prose.ts",
+            "imports": [
+              "proseOf"
+            ]
+          },
+          {
+            "file": "./comments.ts",
+            "imports": [
+              "analyseWith",
+              "DocText",
+              "firstProse",
+              "parsesClean",
+              "Reader"
+            ]
+          },
+          {
+            "file": "./model.ts",
+            "imports": [
+              "FileReport",
+              "Kind"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "analyseRuby",
+          "parsesAsRuby"
+        ],
+        "functions": [
+          "analyseRuby",
+          "parsesAsRuby"
         ]
       },
       "src/docs/rules.ts": {
@@ -5642,6 +5803,7 @@
       "name": "Docs",
       "files": [
         "src/docs/analyse.ts",
+        "src/docs/cfamily.ts",
         "src/docs/comments.ts",
         "src/docs/csharp.ts",
         "src/docs/discovery.ts",
@@ -5651,8 +5813,10 @@
         "src/docs/kotlin.ts",
         "src/docs/languages.ts",
         "src/docs/model.ts",
+        "src/docs/php.ts",
         "src/docs/python.ts",
         "src/docs/report.ts",
+        "src/docs/ruby.ts",
         "src/docs/rules.ts",
         "src/docs/rust.ts",
         "src/docs/stub.ts",
