@@ -10,7 +10,8 @@
  * round trip (12.1 step 4), a JSON round trip through `compress` and `compress -d` (12.1 step 5),
  * a `map` run that loads the fixture extension (12.1 step 7), the drift gate: `check` passes
  * a matching claim and fails a drifting one, each in a temp folder, the doc gate: `docs check`
- * passes documented TypeScript, TSX and Python and fails an undocumented export, and the clone
+ * passes one documented file of each language it reads (TypeScript, TSX, Python, C#, Rust, Go,
+ * Java and Kotlin) and fails an undocumented export, and the clone
  * finder: `clones` groups a renamed copy and leaves a function of another shape alone.
  */
 import {
@@ -267,6 +268,9 @@ const DOCUMENTED: Readonly<Record<string, string>> = {
   "c.py": 'def c():\n    """Returns one."""\n',
   "D.cs": "/// <summary>Holds one.</summary>\npublic class D {}\n",
   "e.rs": "/// Returns one.\npub fn e() {}\n",
+  "f.go": "package p\n\n// F returns one.\nfunc F() {}\n",
+  "G.java": "/** Holds one. */\npublic class G {}\n",
+  "h.kt": "/** Returns one. */\nfun h() {}\n",
 };
 
 function docsGate(command: string[]): string | undefined {

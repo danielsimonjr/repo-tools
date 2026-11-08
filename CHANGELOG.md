@@ -8,10 +8,15 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Added
 
-- The `repo-tools docs` command gains tree-sitter analysers for Go, Java and Kotlin. A Go name is
-  exported when its first letter is upper case. A Java declaration is exported when it is `public`
-  or `protected`, or is a member of an interface. A Kotlin declaration is exported unless it is
-  `private` or `internal`. The registry entries follow in the next commit.
+- `repo-tools docs` reads Go (`.go`), Java (`.java`) and Kotlin (`.kt`, `.kts`). A Go name is
+  exported when its first letter is upper case; a Go doc is the `//` run with no blank line above
+  the declaration. A Java declaration is exported when it is `public` or `protected`, or is a
+  member of an interface, and each enclosing type is exported too. A Kotlin declaration is exported
+  unless it is `private` or `internal`. The new dialects are `godoc`, `javadoc` and `kdoc`, and
+  `stub` writes the three styles (`godoc` is one line that starts with the name; `javadoc` and
+  `kdoc` write `@param` and `@return`). The Kotlin grammar 1.1.0 gives an error node for a class
+  body that closes on the line of its last member (`class C { fun f() {} }`), so `docs` reports
+  such a file as unparsed (tree-sitter-grammars/tree-sitter-kotlin#10 and #12).
 - `repo-tools docs` reads C# (`.cs`) and Rust (`.rs`). Each language has a tree-sitter analyser
   with its own exported rule: C# `public` or `protected` on the declaration and each enclosing
   type; Rust the bare `pub` on the item and each enclosing module. The doc of a C# declaration is
@@ -20,14 +25,12 @@ All notable changes to this project are recorded in this file. The format follow
   new dialects are `xmldoc` and `rustdoc`, and `stub` writes both styles. A `.cs` file below `obj`
   or `bin` is generated and is not read. `coverage.json` can now hold the kinds `struct`, `enum`,
   `trait` and `property`.
-- The npm package and the executables carry the tree-sitter grammars of C# and Rust. The unpacked
-  package grows from about 4.4 MB to 10.9 MB. A grammar ships only with the analyser that reads it.
-- The npm package and the executables also carry the tree-sitter grammars of Go, Java and Kotlin,
-  which the analysers of the next commits read. The Kotlin grammar is the community build 1.1.0.
+- The npm package and the executables carry the tree-sitter grammars of C#, Rust, Go, Java and
+  Kotlin. The unpacked package grows from about 4.4 MB to 15.0 MB (`npm pack --dry-run`). A grammar
+  ships only with the analyser that reads it. The Kotlin grammar is the community build 1.1.0.
 - The doc driver of the tree-sitter analysers takes three optional hooks (`docSiteOf`, `adjacentDoc`,
   `nameOf`), and `read` gets the declaration. The hooks serve Go, Java and Kotlin. C# and Rust use
-  none, and their output does not change. `stub` gains the styles `godoc` (one line that starts
-  with the name), `javadoc` and `kdoc` (`@param` and `@return`). No language selects them yet.
+  none, and their output does not change.
 - `NOTICE` holds the MIT licence of mintlify/writer, from which the node kinds, the default doc
   forms and the stub templates derive. The npm package ships it.
 - Golden sets `cs-repo` and `rs-repo` for `repo-tools map`. They fix the output of the C# and Rust

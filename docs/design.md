@@ -528,8 +528,9 @@ browser-safety commands serve TypeScript/JavaScript only.
 ### 14.6 Assets
 
 The Node bundle needs one tree-sitter `.wasm` file for the runtime and one for each grammar in
-`GRAMMAR_NAMES` of `src/map/grammars.ts`: TypeScript, TSX, Python, C#, Rust, Go, Java and Kotlin. Each grammar adds to
-the size of the package. The build writes them next to
+`GRAMMAR_NAMES` of `src/map/grammars.ts`: TypeScript, TSX, Python, C#, Rust, Go, Java and Kotlin. A grammar ships
+only with the analyser that reads it, because each grammar adds to the size of the package. The
+build writes them next to
 `dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
 system. A relative asset path resolves against the URL of its module, never against the working
 folder.
@@ -634,7 +635,7 @@ On success the check prints one line on standard output.
 
 `repo-tools docs` measures the documentation comments of the source files, plans the missing
 comments, and gates the result. The command is a port of `code_docs.py` of the code-docs skill. It
-reads TypeScript, JavaScript, Python, C# and Rust. Tree-sitter parses each file. A regular expression cannot
+reads TypeScript, JavaScript, Python, C#, Rust, Go, Java and Kotlin. Tree-sitter parses each file. A regular expression cannot
 tell an exported declaration from the word "export" in a string. A regular expression also cannot
 attach a comment to the declaration below it.
 
@@ -696,8 +697,8 @@ describe the wrong files.
 | `src/docs/discovery.ts` | The source files, the skip lists, and the exclusions of `.code-docs.json`. |
 | `src/docs/languages.ts` | The language registry: for each language, its suffixes, analyser, parse check, stub position and styles. Discovery, the stub writer and the help text read the registry and name no language. |
 | `src/docs/analyse.ts` | Reads each file and calls the analyser of its language. |
-| `src/docs/python.ts`, `typescript.ts`, `csharp.ts`, `rust.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
-| `src/docs/comments.ts` | The helpers of the C# and Rust analysers: the run of doc comments above a declaration, and the parse check. |
+| `src/docs/python.ts`, `typescript.ts`, `csharp.ts`, `rust.ts`, `go.ts`, `java.ts`, `kotlin.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
+| `src/docs/comments.ts` | The driver of the tree-sitter analysers (all but Python and TypeScript): the run of doc comments above a declaration, the optional hooks `docSiteOf`, `adjacentDoc` and `nameOf`, and the parse check. |
 | `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Every analyser calls one function. |
 | `src/docs/report.ts` | The counts, `COVERAGE.md` and `coverage.json`. |
 | `src/docs/stub.ts` | Plans the skeleton comments and applies them. |
@@ -709,7 +710,7 @@ prose check of `repo-tools ste`.
 ### 16.3 What the tool measures
 
 **The files.** The files are the files that git tracks with the suffix `.py`, `.ts`, `.tsx`,
-`.js`, `.jsx`, `.mjs`, `.cjs`, `.cs` or `.rs`. A `.cs` file below a folder named `obj` or `bin` is
+`.js`, `.jsx`, `.mjs`, `.cjs`, `.cs`, `.rs`, `.go`, `.java`, `.kt` or `.kts`. A `.cs` file below a folder named `obj` or `bin` is
 not read, because a C# build writes generated code there. That rule applies to C# files only: a
 `bin` folder of Python scripts is source. A file below a folder named `node_modules`, `dist`, `build`,
 `bundle`, `out`, `coverage`, `vendor` or `target` is not read. The same holds for the other
@@ -765,6 +766,37 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   outer doc comments (`///`, but not `////`, or `/** */`) above the item. Attributes, plain comments
   and blank lines between the doc and the item do not detach the doc, as in rustc. An inner doc
   comment (`//!`) documents the enclosing module and stops the walk.
+- In Go: functions, methods, type specs, constants and variables. A type spec is a struct when its
+  type is a struct, an interface when its type is an interface, and a type otherwise. A variable
+  has the kind `const`, as a Rust static does. A spec with many names (`var V, W int`) is one
+  symbol with the first name; the tool does not gate the other names. A name is exported when its
+  first letter is an upper-case letter (any script). A method is exported by its own name.
+  `go/doc` also requires that the receiver type is exported. The tool does not apply that second
+  condition, so the rule needs only the declaration. A declaration in a function body is not
+  exported. The doc is the run of `//` lines, or the `/* */` block, with no blank line between the
+  run and the declaration. A blank line detaches the doc, as in `go/doc`. A directive comment
+  (`//go:noinline`) joins the run and gives no text. The doc of a type, constant or variable
+  outside a group stands above the keyword (`type`, `const`, `var`). In a group the doc stands
+  above the spec, and the stub goes there.
+- In Java: classes, interfaces, enums, records, annotation types, methods and constructors. A
+  field is not a symbol. A declaration is exported when its modifiers hold `public` or
+  `protected`, or when it is a member of an interface with no modifier, and each type that
+  encloses it is exported too. A package-private or `private` declaration is not exported. A local
+  class, an anonymous class and the body of an enum constant are not exported. The doc is the
+  `/** */` block above the declaration. A blank line or a plain comment between the doc and the
+  declaration does not detach the doc, as in `javac`. An annotation is part of the declaration in
+  the grammar, so the doc stands above the annotations.
+- In Kotlin: classes, interfaces, enum classes, objects, functions, type aliases and properties.
+  A function in a class body is a method. A property is reported at file scope and in a class
+  body, and a local `val` is not reported. A companion object and a secondary constructor are not
+  symbols. A declaration is public unless it has `private` or `internal`, and each type that
+  encloses it must be public too. A declaration in a function body is not exported. The doc is the
+  `/** */` block above the declaration. As in Java, a blank line or a plain comment does not
+  detach the doc, and an annotation is part of the declaration. The tool did not check this
+  against the Kotlin compiler. The grammar `1.1.0` gives an error node for a class body whose last
+  member ends on the line of the closing brace, with no semicolon (`class C { fun f() {} }`). A
+  file with such a body is an unparsed file. The upstream issues are
+  tree-sitter-grammars/tree-sitter-kotlin#10 and #12.
 
 A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file needs the TSX grammar, and a `.ts` file needs the
 TypeScript grammar. The wrong grammar gives a tree of error nodes and not an exception. Thus a file
@@ -802,6 +834,15 @@ parses again.
 - A Rust parameter gives the names that its pattern binds: `(a, b): (i32, i32)` gives `a` and `b`.
   `self` and `_` give no name. A Rust doc names a parameter with a bullet `` * `x` `` or
   `` - `x` `` below a `# Arguments` or `# Parameters` heading.
+- A Go parameter gives every name of its declaration: `a, b int` gives `a` and `b`. A variadic
+  parameter gives its name. A parameter with no name, and `_`, give none. A receiver and a type
+  parameter are not parameters. GoDoc has no parameter tag, so the doc names no parameter and rule
+  M3 has nothing to compare.
+- A Java parameter gives its name, also for a varargs parameter. A record and a compact
+  constructor give the components of the record. A Javadoc `@param x` names a parameter. An
+  `@param <T>` names a type parameter and is not a name.
+- A Kotlin parameter gives its name, also with a default value or `vararg`. A class gives the
+  names of its primary constructor. A KDoc `@param x` or `@property x` names a parameter.
 
 The coverage percentage is the exported symbols with a doc, divided by all exported symbols. The
 count includes the symbols of test files. A report with no exported symbol shows 100.
@@ -826,9 +867,12 @@ doc is wrong in a test file too, so M3, M4 and M5 still apply. A symbol with an 
 other issue, because every other rule reads the doc.
 
 The dialects are `google`, `numpy` and `rest` for Python, `tsdoc` and `jsdoc` for TypeScript,
-`xmldoc` for C# and `rustdoc` for Rust. A C# doc with an XML tag such as `<summary>` or `<param>` is
+`xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java and `kdoc` for Kotlin. A C#
+doc with an XML tag such as `<summary>` or `<param>` is
 `xmldoc`. A Rust doc with a section heading such as `# Arguments`, `# Panics` or `# Examples` is
-`rustdoc`. A comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
+`rustdoc`. A Go doc whose first words are the name of the symbol, with an optional `A`, `An` or
+`The` before it, is `godoc`. A Java doc with a tag such as `@param`, `@return` or `{@link}` is
+`javadoc`. A Kotlin doc with a tag such as `@param`, `@property` or `@return` is `kdoc`. A comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
 `{type}` after a tag and TSDoc never does. Thus the `{type}` form is the evidence of JSDoc. M5
 shows the dialects as a list in the Python style, for example `['jsdoc', 'tsdoc']`.
 
@@ -865,8 +909,12 @@ round, square and curly brackets. The line is the first line at depth 0 that end
 signature on many lines, a bracket in a default string and a comment after the colon all work. A
 TypeScript stub goes above the outermost `export` statement, and thus above each decorator. A C#
 stub goes above the declaration and thus above its attributes. A Rust stub goes above the first
-attribute of the item. A C# or Rust stub writes no return line for a declaration that gives no
-value back: a `void` method, a constructor, or a Rust function with no return type.
+attribute of the item. A Go stub goes above the declaration, or above the spec in a group, with the
+indent of that line. A Java or Kotlin stub goes above the declaration and thus above its
+annotations. A stub of these languages writes no return line for a declaration that gives no value
+back: a `void` method, a constructor, a Rust function with no return type, a Go function with no
+result, or a Kotlin function with a block body and no return type. A Go stub is one line and has
+no parameter section.
 
 The style of a stub comes from `--style`. Each language of the registry has a list of styles and a
 default:
@@ -877,6 +925,9 @@ default:
 | Python | `google`, `numpy`, `rest` | `google` |
 | C# | `xmldoc` | `xmldoc` |
 | Rust | `rustdoc` | `rustdoc` |
+| Go | `godoc` | `godoc` |
+| Java | `javadoc` | `javadoc` |
+| Kotlin | `kdoc` | `kdoc` |
 
 With no flag, each file gets the default of its language. `--style=auto` takes the one dialect of
 a file (section 16.4). A file with no dialect, or with two, gets the default. A named style must

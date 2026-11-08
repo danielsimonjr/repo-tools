@@ -102,8 +102,8 @@ field names the choice, and a reader must check it before trusting a count.
 
 **Decision.** `src/map/grammars.ts` loads the grammars from one `.wasm` file for the runtime and
 one for each name in `GRAMMAR_NAMES`. `map` parses TypeScript, JavaScript and Python with them.
-The C# and Rust readers of `map` use text rules in `src/map/parsing.ts`. `docs` parses C# and Rust
-with the grammars, because a doc rule needs the comments and the parameter lists.
+The C# and Rust readers of `map` use text rules in `src/map/parsing.ts`. `docs` parses C#, Rust, Go, Java and
+Kotlin with the grammars, because a doc rule needs the comments and the parameter lists.
 
 **Rationale.** A grammar parse sees the import forms that a regular expression misses. A text rule
 is enough for the C# `using` and the Rust `mod` and `use` forms that decide the edges.
@@ -224,9 +224,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 309 | dependency-graph.json |
+| totalSourceFiles | 316 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
 | typeOnlyCircularDeps | 4 | dependency-graph.json |
-| unusedExportsCount | 117 | dependency-graph.json |
+| unusedExportsCount | 119 | dependency-graph.json |
 | orphanedFiles | 2 | dependency-graph.json |

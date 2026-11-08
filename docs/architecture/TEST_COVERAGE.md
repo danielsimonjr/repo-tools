@@ -8,16 +8,16 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 91 |
-| Total Test Files | 144 |
-| Source Files with Tests | 73 |
-| Source Files without Tests | 18 |
-| Coverage (raw, direct-import) | **80.2%** |
+| Total Source Files | 94 |
+| Total Test Files | 148 |
+| Source Files with Tests | 77 |
+| Source Files without Tests | 17 |
+| Coverage (raw, direct-import) | **81.9%** |
 ---
 
 ## Source Files Not Imported By A Test
 
-The following 18 source files are not directly imported by any test file:
+The following 17 source files are not directly imported by any test file:
 
 ### root/
 
@@ -45,7 +45,6 @@ The following 18 source files are not directly imported by any test file:
 
 ### docs/
 
-- `src/docs/comments.ts` → Expected test: `tests/unit/docs/comments.test.ts`
 - `src/docs/rules.ts` → Expected test: `tests/unit/docs/rules.test.ts`
 
 ### map/
@@ -105,15 +104,19 @@ The following 18 source files are not directly imported by any test file:
 | `depgraph/types.ts` | `depgraph-analysis.test.ts`, `depgraph-f22.test.ts`, `depgraph-f26.test.ts`, `depgraph-f27.test.ts`, `depgraph-parse.test.ts`, `depgraph-report.test.ts`, `depgraph-scan.test.ts`, `map-adapter.test.ts`, `shared-helpers.test.ts` |
 | `depgraph/workspaces.ts` | `depgraph-f13.test.ts`, `depgraph-f34.test.ts`, `depgraph-f36.test.ts`, `depgraph-scan.test.ts` |
 | `docs/analyse.ts` | `docs-discovery.test.ts` |
+| `docs/comments.ts` | `docs-comments.test.ts` |
 | `docs/csharp.ts` | `docs-csharp.test.ts` |
 | `docs/discovery.ts` | `docs-discovery.test.ts` |
+| `docs/go.ts` | `docs-go.test.ts`, `docs-styles.test.ts` |
 | `docs/index.ts` | `docs-languages.test.ts` |
+| `docs/java.ts` | `docs-java.test.ts`, `docs-styles.test.ts` |
+| `docs/kotlin.ts` | `docs-kotlin.test.ts`, `docs-styles.test.ts` |
 | `docs/languages.ts` | `docs-languages.test.ts` |
-| `docs/model.ts` | `docs-command.test.ts`, `docs-csharp.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
+| `docs/model.ts` | `docs-command.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
 | `docs/python.ts` | `docs-python.test.ts`, `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/report.ts` | `docs-report.test.ts` |
 | `docs/rust.ts` | `docs-rust.test.ts` |
-| `docs/stub.ts` | `docs-csharp.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
+| `docs/stub.ts` | `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/styles.ts` | `docs-languages.test.ts`, `docs-styles.test.ts` |
 | `docs/typescript.ts` | `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
 | `src/io-types.ts` | `check-command.test.ts`, `chunk.test.ts`, `cli.test.ts`, `depgraph-report.test.ts`, `map-command.test.ts`, `map-verification.test.ts`, `query-args.test.ts`, `query-load.test.ts`, `ste-cli.test.ts`, `ste-options.test.ts` |
@@ -233,16 +236,20 @@ The following 18 source files are not directly imported by any test file:
 | `unit/depgraph-tsx.test.ts` | 0 files |
 | `unit/design-refs.test.ts` | 0 files |
 | `unit/docs-command.test.ts` | 1 files |
+| `unit/docs-comments.test.ts` | 1 files |
 | `unit/docs-csharp.test.ts` | 3 files |
 | `unit/docs-discovery.test.ts` | 2 files |
+| `unit/docs-go.test.ts` | 3 files |
 | `unit/docs-golden.test.ts` | 0 files |
+| `unit/docs-java.test.ts` | 3 files |
+| `unit/docs-kotlin.test.ts` | 3 files |
 | `unit/docs-languages.test.ts` | 3 files |
 | `unit/docs-python.test.ts` | 2 files |
 | `unit/docs-report.test.ts` | 2 files |
 | `unit/docs-review.test.ts` | 2 files |
 | `unit/docs-rust.test.ts` | 3 files |
 | `unit/docs-stub.test.ts` | 4 files |
-| `unit/docs-styles.test.ts` | 5 files |
+| `unit/docs-styles.test.ts` | 8 files |
 | `unit/docs-typescript.test.ts` | 2 files |
 | `unit/entry-roots-build-configs.test.ts` | 3 files |
 | `unit/fix-ledger-audit.test.ts` | 0 files |

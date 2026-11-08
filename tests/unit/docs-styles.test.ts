@@ -3,7 +3,10 @@
  * needs text, and the analyser reads the stub back as the dialect of the style.
  */
 import { describe, expect, test } from "bun:test";
-import { type DocSymbol, STUB_MARKER } from "../../src/docs/model.ts";
+import { analyseGo, parsesAsGo } from "../../src/docs/go.ts";
+import { analyseJava, parsesAsJava } from "../../src/docs/java.ts";
+import { analyseKotlin, parsesAsKotlin } from "../../src/docs/kotlin.ts";
+import { type DocSymbol, type FileReport, STUB_MARKER } from "../../src/docs/model.ts";
 import { analysePython, parsesAsPython } from "../../src/docs/python.ts";
 import {
   applyInsertions,
@@ -151,4 +154,65 @@ describe("godoc, javadoc and kdoc", () => {
       expect(none).toContain("@param a");
     });
   }
+});
+
+describe("godoc, javadoc and kdoc are read back as their dialect", () => {
+  /** Stubs the symbol `name` of `source` in `style`, applies the stub and analyses the result. */
+  async function readBack(
+    name: string,
+    path: string,
+    source: string,
+    style: string,
+    analyse: (path: string, source: string) => Promise<FileReport>,
+    parses: (path: string, text: string) => boolean,
+  ): Promise<{ out: string; report: FileReport }> {
+    const first = (await analyse(path, source)).symbols.find((s) => s.name === name);
+    if (!first) throw new Error(`no symbol ${name}`);
+    const plan = planTypeScript(first, splitLines(source), style);
+    if (!plan) throw new Error("no stub");
+    const done = applyInsertions(source, [plan], (t) => parses(path, t));
+    expect(done.ok).toBe(true);
+    return { out: done.text, report: await analyse(path, done.text) };
+  }
+
+  test("godoc", async () => {
+    const { out, report } = await readBack(
+      "Run",
+      "a.go",
+      "package p\n\nfunc Run(n int) int {\n\treturn n\n}\n",
+      "godoc",
+      analyseGo,
+      parsesAsGo,
+    );
+    expect(out).toContain(`// Run ${STUB_MARKER}`);
+    expect([...report.dialects]).toEqual(["godoc"]);
+  });
+
+  test("javadoc", async () => {
+    const { out, report } = await readBack(
+      "run",
+      "A.java",
+      "public class A {\n  public int run(int n) {\n    return n;\n  }\n}\n",
+      "javadoc",
+      analyseJava,
+      parsesAsJava,
+    );
+    expect(out).toContain(` * @param n ${STUB_MARKER}`);
+    expect([...report.dialects]).toEqual(["javadoc"]);
+    expect(report.symbols.find((s) => s.name === "run")?.docParams).toEqual(["n"]);
+  });
+
+  test("kdoc", async () => {
+    const { out, report } = await readBack(
+      "run",
+      "a.kt",
+      "fun run(n: Int): Int {\n    return n\n}\n",
+      "kdoc",
+      analyseKotlin,
+      parsesAsKotlin,
+    );
+    expect(out).toContain(` * @return ${STUB_MARKER}`);
+    expect([...report.dialects]).toEqual(["kdoc"]);
+    expect(report.symbols[0]?.docParams).toEqual(["n"]);
+  });
 });

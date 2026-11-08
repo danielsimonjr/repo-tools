@@ -20,6 +20,10 @@ describe("languageOf", () => {
     expect(languageOf("a.py")).toBe("python");
     expect(languageOf("a.cs")).toBe("csharp");
     expect(languageOf("a.rs")).toBe("rust");
+    expect(languageOf("a.go")).toBe("go");
+    expect(languageOf("a.java")).toBe("java");
+    expect(languageOf("a.kt")).toBe("kotlin");
+    expect(languageOf("build.gradle.kts")).toBe("kotlin");
     for (const name of ["a.ts", "a.tsx", "a.js", "a.jsx", "a.mjs", "a.cjs"]) {
       expect(languageOf(`src/${name}`)).toBe("typescript");
     }

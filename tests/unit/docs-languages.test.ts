@@ -25,16 +25,8 @@ describe("the registry", () => {
     }
   });
 
-  // The styles of these languages land before their analysers. The set shrinks to nothing as each
-  // language joins the registry.
-  const PENDING = new Set(["go", "java", "kotlin"]);
-
   test("every style belongs to one language of the registry", () => {
     for (const style of Object.values(STYLES)) {
-      if (PENDING.has(style.language)) {
-        expect(specOf(style.language)).toBeUndefined();
-        continue;
-      }
       expect(specOf(style.language)?.styles).toContain(style.id);
     }
   });
@@ -53,8 +45,6 @@ describe("the registry", () => {
 
   test("the help text names every language and every style", () => {
     for (const name of LANGUAGES.flatMap((s) => s.names)) expect(DOCS_HELP).toContain(name);
-    for (const [id, style] of Object.entries(STYLES)) {
-      if (!PENDING.has(style.language)) expect(DOCS_HELP).toContain(id);
-    }
+    for (const id of Object.keys(STYLES)) expect(DOCS_HELP).toContain(id);
   });
 });
