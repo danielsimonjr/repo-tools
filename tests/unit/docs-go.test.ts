@@ -186,3 +186,10 @@ describe("docs go", () => {
     expect(report.symbols).toEqual([]);
   });
 });
+
+describe("go review findings", () => {
+  test("sets the godoc dialect for a non-ASCII name", async () => {
+    const list = await symbols("package p\n\n// \u00c4 does x.\nvar \u00c4 int\n");
+    expect(byName(list, "\u00c4").dialect).toBe("godoc");
+  });
+});

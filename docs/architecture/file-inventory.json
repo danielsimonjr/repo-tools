@@ -419,7 +419,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 146
+      "loc": 156
     },
     {
       "file": "src/docs/csharp.ts",
@@ -461,7 +461,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 251
+      "loc": 274
     },
     {
       "file": "src/docs/languages.ts",
@@ -1763,7 +1763,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 188
+      "loc": 195
     },
     {
       "file": "tests/unit/docs-golden.test.ts",
@@ -1791,7 +1791,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 258
+      "loc": 302
     },
     {
       "file": "tests/unit/docs-languages.test.ts",

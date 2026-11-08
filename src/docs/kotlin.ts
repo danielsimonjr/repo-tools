@@ -4,6 +4,8 @@
  * Declarations are public by default.
  * `private` or `internal` is not the public surface.
  * The grammar gives a parse error for a class body that closes on the line of its last member.
+ * The grammar reads a class body after a delegation (`class A : B by c { }`) as a trailing lambda.
+ * The analyser reports such a file as unparsed.
  */
 import type { Node } from "web-tree-sitter";
 import { parserFor } from "../map/grammars.ts";
@@ -125,6 +127,7 @@ const isExportedKotlin = (node: Node): boolean => {
       case "block":
       case "lambda_literal":
       case "anonymous_function":
+      case "object_literal":
         return false;
       case "class_declaration":
       case "object_declaration":
@@ -169,12 +172,31 @@ const paramsOfKotlin = (node: Node): string[] => {
  */
 const returnsValueOfKotlin = (node: Node): boolean | undefined => {
   if (node.type !== "function_declaration") return undefined;
-  const type = node.children.find((child) => RETURN_TYPES.has(child.type));
-  if (type !== undefined) return type.text !== "Unit";
+  const children = node.children;
+  const start = children.findIndex((child) => child.type === "function_value_parameters");
+  const type = children.slice(start + 1).find((child) => RETURN_TYPES.has(child.type));
+  if (type !== undefined) return type.text.replace(/^kotlin\./, "") !== "Unit";
   const body = directChildOfType(node, "function_body");
   if (body === undefined) return undefined;
   return body.children.some((child) => child.type === "block") ? false : undefined;
 };
+
+/**
+ * Returns a parse error when a delegation holds a call with a trailing lambda, or null.
+ * The grammar reads the class body after `B by c` as that lambda, so each member looks local.
+ */
+const misreadKotlin = (root: Node): string | null =>
+  root
+    .descendantsOfType("explicit_delegation")
+    .some((delegation) =>
+      delegation.children.some(
+        (child) =>
+          child.type === "call_expression" &&
+          child.children.some((part) => part.type === "annotated_lambda"),
+      ),
+    )
+    ? "parse error (the grammar reads the class body after a delegation as a lambda)"
+    : null;
 
 /**
  * Splits a KDoc comment into cleaned lines.
@@ -190,7 +212,7 @@ const docLinesOf = (text: string): string[] => {
 const docParamsOf = (lines: readonly string[]): string[] => {
   const names: string[] = [];
   for (const line of lines) {
-    for (const match of line.matchAll(/@(?:param|property)\s*\[?([\w$]+)\]?/g)) {
+    for (const match of line.matchAll(/@(?:param|property)(?=\s|\[)\s*\[?([\w$]+)\]?/g)) {
       const name = match[1];
       if (name !== undefined) names.push(name);
     }
@@ -236,6 +258,7 @@ export const KOTLIN: Reader = {
   paramsOf: paramsOfKotlin,
   returnsValueOf: returnsValueOfKotlin,
   read: readKotlin,
+  misread: misreadKotlin,
 };
 
 /**

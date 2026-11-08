@@ -128,7 +128,7 @@ function commentLines(text: string): string[] {
 /** `godoc` when the summary opens with the symbol name, an empty string otherwise. */
 function dialectOf(summary: string, name: string): string {
   if (!summary || !name) return "";
-  const pattern = new RegExp(`^(?:(?:A|An|The)\\s+)?${escapeRegex(name)}\\b`, "u");
+  const pattern = new RegExp(`^(?:(?:A|An|The)\\s+)?${escapeRegex(name)}(?![\\p{L}\\p{N}_])`, "u");
   return pattern.test(summary) ? "godoc" : "";
 }
 

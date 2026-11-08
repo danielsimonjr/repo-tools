@@ -796,7 +796,10 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   against the Kotlin compiler. The grammar `1.1.0` gives an error node for a class body whose last
   member ends on the line of the closing brace, with no semicolon (`class C { fun f() {} }`). A
   file with such a body is an unparsed file. The upstream issues are
-  tree-sitter-grammars/tree-sitter-kotlin#10 and #12.
+  tree-sitter-grammars/tree-sitter-kotlin#10 and #12. The grammar also reads a class body after a
+  delegation (`class A : B by c { }`) as a call with a trailing lambda, and gives no error node.
+  The analyser finds a call with a lambda in an `explicit_delegation` node. A file with such a
+  node is an unparsed file.
 
 A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file needs the TSX grammar, and a `.ts` file needs the
 TypeScript grammar. The wrong grammar gives a tree of error nodes and not an exception. Thus a file

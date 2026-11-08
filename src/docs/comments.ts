@@ -37,9 +37,14 @@ export interface Reader {
   /**
    * True when `comment` belongs to `below`, the node under it: the declaration, or the comment
    * that the walk accepted before. The walk stops at the first false. The default is true, and the
-   * doc then crosses blank lines. Go and Kotlin ask for a comment with no blank line below it.
+   * doc then crosses blank lines. Go asks for a comment with no blank line below it.
    */
   adjacentDoc?: (comment: Node, below: Node) => boolean;
+  /**
+   * Finds a tree that parses with no error node but that the grammar reads wrongly. The
+   * result is the parse error text, or null for a correct tree. The file is then unparsed.
+   */
+  misread?: (root: Node) => string | null;
   /** The name of the symbol. The default is the field `name` of the declaration. */
   nameOf?: (node: Node) => string;
   /** The node that `stub` writes above. */
@@ -109,6 +114,11 @@ export async function analyseWith(
     if (tree.rootNode.hasError) {
       // The error is a field of the report. The file is unknown, and it does not count as clean.
       report.error = "parse error (tree-sitter reported ERROR nodes)";
+      return report;
+    }
+    const misread = reader.misread?.(tree.rootNode) ?? null;
+    if (misread !== null) {
+      report.error = misread;
       return report;
     }
     for (const node of tree.rootNode.descendantsOfType([...reader.declarations])) {

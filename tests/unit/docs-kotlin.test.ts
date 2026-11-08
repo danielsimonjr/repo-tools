@@ -256,3 +256,47 @@ describe("parse errors", () => {
     expect(report.symbols).toEqual([]);
   });
 });
+
+describe("review findings", () => {
+  test("K22: reports a delegation followed by a class body as unparsed", async () => {
+    for (const src of [
+      "class A : B by c {\n    val v = 1\n}\n",
+      "class A :\n    B by c\n{\n    val v = 1\n}\n",
+      "class A : Runnable by Runnable { } {\n val v = 1\n}\n",
+    ]) {
+      const report = await analyseKotlin("a.kt", src);
+      expect(report.error ?? "").toMatch(/^parse error \(/);
+      expect(report.symbols).toEqual([]);
+    }
+  });
+
+  test("K22: keeps a delegation with no body, a plain class and a top-level trailing lambda", async () => {
+    for (const src of [
+      "class A : B by c\n",
+      "class A {\n    val v = 1\n}\n",
+      "val x = foo { }\n",
+    ]) {
+      const report = await analyseKotlin("a.kt", src);
+      expect(report.error ?? "").toBe("");
+      expect(report.symbols.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("reads an extension receiver as no return type", async () => {
+    expect(byName(await symbols("fun String.x() {}\n"), "x").returnsValue).toBe(false);
+  });
+
+  test("reads kotlin.Unit as no return value", async () => {
+    expect(byName(await symbols("fun f(): kotlin.Unit {\n}\n"), "f").returnsValue).toBe(false);
+  });
+
+  test("does not export the members of an anonymous object", async () => {
+    const list = await symbols("val x = object : Runnable {\n    override fun run() {}\n}\n");
+    expect(byName(list, "run").exported).toBe(false);
+  });
+
+  test("does not read @parameter as a @param tag", async () => {
+    const list = await symbols("/**\n * Does f.\n * @parameter x\n */\nfun f() {}\n");
+    expect(byName(list, "f").docParams).toEqual([]);
+  });
+});
