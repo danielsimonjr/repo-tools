@@ -34,6 +34,7 @@
     "privacy": "bun scripts/privacy-check.ts",
     "build": "bun scripts/build.ts",
     "compile": "bun scripts/build.ts --compile",
+    "compare:docs": "bun scripts/docs-compare.ts",
     "smoke": "bun scripts/smoke.ts",
     "audit:ledger": "bun scripts/fix-ledger-audit.ts",
     "check:design": "bun scripts/design-refs.ts"
