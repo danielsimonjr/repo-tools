@@ -1401,15 +1401,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@tree-sitter-grammars/tree-sitter-kotlin/tree-sitter-kotlin.wasm` | `default` |
-| `tree-sitter-c/tree-sitter-c.wasm` | `default` |
 | `tree-sitter-c-sharp/tree-sitter-c_sharp.wasm` | `default` |
-| `tree-sitter-cpp/tree-sitter-cpp.wasm` | `default` |
-| `tree-sitter-go/tree-sitter-go.wasm` | `default` |
-| `tree-sitter-java/tree-sitter-java.wasm` | `default` |
-| `tree-sitter-php/tree-sitter-php.wasm` | `default` |
 | `tree-sitter-python/tree-sitter-python.wasm` | `default` |
-| `tree-sitter-ruby/tree-sitter-ruby.wasm` | `default` |
 | `tree-sitter-rust/tree-sitter-rust.wasm` | `default` |
 | `tree-sitter-typescript/tree-sitter-tsx.wasm` | `default` |
 | `tree-sitter-typescript/tree-sitter-typescript.wasm` | `default` |
@@ -2122,7 +2115,7 @@ graph TD
 |----------|-------|
 | Total Source Files | 309 |
 | Subsystems | 10 |
-| Total Lines of Code | 46687 |
+| Total Lines of Code | 46675 |
 | Total Exports | 764 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |

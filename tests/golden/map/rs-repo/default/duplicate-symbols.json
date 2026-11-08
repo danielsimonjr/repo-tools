@@ -3,7 +3,7 @@
   "classificationNote": "The classified lists (runtime, types) cover TypeScript only. This repository reads as rust. The duplicates list above is the name-only grouping.",
   "summary": {
     "duplicateCount": 0,
-    "totalSymbols": 3
+    "totalSymbols": 5
   },
   "duplicates": {}
 }

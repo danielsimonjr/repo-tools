@@ -110,7 +110,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/docs/python.ts` | @danielsimonjr/repo-tools | src | reachable | 475 |
 | `src/docs/report.ts` | @danielsimonjr/repo-tools | src | reachable | 197 |
 | `src/docs/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
-| `src/docs/rust.ts` | @danielsimonjr/repo-tools | src | reachable | 173 |
+| `src/docs/rust.ts` | @danielsimonjr/repo-tools | src | reachable | 179 |
 | `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 185 |
 | `src/docs/styles.ts` | @danielsimonjr/repo-tools | src | reachable | 119 |
 | `src/docs/typescript.ts` | @danielsimonjr/repo-tools | src | reachable | 404 |
@@ -122,7 +122,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/map/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 85 |
 | `src/map/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
 | `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 463 |
-| `src/map/grammars.ts` | @danielsimonjr/repo-tools | src | reachable | 121 |
+| `src/map/grammars.ts` | @danielsimonjr/repo-tools | src | reachable | 91 |
 | `src/map/graph.ts` | @danielsimonjr/repo-tools | src | reachable | 659 |
 | `src/map/layers.ts` | @danielsimonjr/repo-tools | src | reachable | 76 |
 | `src/map/markdown.ts` | @danielsimonjr/repo-tools | src | reachable | 232 |
@@ -295,7 +295,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/docs-python.test.ts` | (root) | tests | test | 380 |
 | `tests/unit/docs-report.test.ts` | (root) | tests | test | 158 |
 | `tests/unit/docs-review.test.ts` | (root) | tests | test | 249 |
-| `tests/unit/docs-rust.test.ts` | (root) | tests | test | 198 |
+| `tests/unit/docs-rust.test.ts` | (root) | tests | test | 210 |
 | `tests/unit/docs-stub.test.ts` | (root) | tests | test | 281 |
 | `tests/unit/docs-styles.test.ts` | (root) | tests | test | 111 |
 | `tests/unit/docs-typescript.test.ts` | (root) | tests | test | 606 |

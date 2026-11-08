@@ -8,13 +8,13 @@ This report lists each source file that the map census finds, with a disposition
 
 **Language**: rust
 
-**Total files**: 5
+**Total files**: 6
 
 ## Disposition counts
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 3 | A `src`-area file that an entry root reaches. |
+| `reachable` | 4 | A `src`-area file that an entry root reaches. |
 | `build-entry` | 2 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
 | `orphan` | 0 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
@@ -23,26 +23,27 @@ This report lists each source file that the map census finds, with a disposition
 | `config` | 0 | A `*.config.*` file of TypeScript or JavaScript. |
 | `example` | 0 | A file in `examples/` or `docs/`. |
 | `bench` | 0 | A file in `bench/` or `benchmarks/`, or a `*.bench.*` file. |
-| **Total** | **5** | |
+| **Total** | **6** | |
 
 ## Per-area counts
 
 | Area | Files |
 | --- | --: |
-| `src` | 5 |
+| `src` | 6 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 5 |
+| `(root)` | 6 |
 
 ## All files
 
 | File | Package | Area | Disposition | Lines |
 | --- | --- | --- | --- | --: |
-| `src/lib.rs` | (root) | src | build-entry | 9 |
+| `src/lib.rs` | (root) | src | build-entry | 10 |
 | `src/main.rs` | (root) | src | build-entry | 3 |
+| `src/model.rs` | (root) | src | reachable | 4 |
 | `src/net/mod.rs` | (root) | src | reachable | 6 |
 | `src/net/wire.rs` | (root) | src | reachable | 3 |
 | `src/util.rs` | (root) | src | reachable | 4 |

@@ -14,6 +14,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./model.rs",
+            "imports": []
+          },
+          {
             "file": "./net/mod.rs",
             "imports": []
           },
@@ -24,6 +28,7 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "model",
           "net",
           "run"
         ]
@@ -35,6 +40,16 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": []
+      },
+      "src/model.rs": {
+        "description": "model.rs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "Foo"
+        ]
       },
       "src/util.rs": {
         "description": "util.rs module",
@@ -81,6 +96,7 @@
       "files": [
         "src/lib.rs",
         "src/main.rs",
+        "src/model.rs",
         "src/util.rs"
       ]
     },

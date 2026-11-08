@@ -3889,55 +3889,13 @@
         "description": "The tree-sitter grammars of the map engine: loaded lazily, once each, from the `.wasm` files",
         "externalDependencies": [
           {
-            "package": "@tree-sitter-grammars/tree-sitter-kotlin/tree-sitter-kotlin.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
-            "package": "tree-sitter-c/tree-sitter-c.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
             "package": "tree-sitter-c-sharp/tree-sitter-c_sharp.wasm",
             "imports": [
               "default"
             ]
           },
           {
-            "package": "tree-sitter-cpp/tree-sitter-cpp.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
-            "package": "tree-sitter-go/tree-sitter-go.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
-            "package": "tree-sitter-java/tree-sitter-java.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
-            "package": "tree-sitter-php/tree-sitter-php.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
             "package": "tree-sitter-python/tree-sitter-python.wasm",
-            "imports": [
-              "default"
-            ]
-          },
-          {
-            "package": "tree-sitter-ruby/tree-sitter-ruby.wasm",
             "imports": [
               "default"
             ]

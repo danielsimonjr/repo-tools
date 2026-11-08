@@ -16,9 +16,8 @@ All notable changes to this project are recorded in this file. The format follow
   new dialects are `xmldoc` and `rustdoc`, and `stub` writes both styles. A `.cs` file below `obj`
   or `bin` is generated and is not read. `coverage.json` can now hold the kinds `struct`, `enum`,
   `trait` and `property`.
-- The npm package and the executables carry nine more tree-sitter grammars: C#, Rust, Go, Java,
-  Kotlin, C, C++, PHP and Ruby. The unpacked package grows from about 4.4 MB to 22.2 MB. Go, Java,
-  Kotlin, C, C++, PHP and Ruby have no analyser yet; their grammars load and wait for one.
+- The npm package and the executables carry the tree-sitter grammars of C# and Rust. The unpacked
+  package grows from about 4.4 MB to 10.9 MB. A grammar ships only with the analyser that reads it.
 - `NOTICE` holds the MIT licence of mintlify/writer, from which the node kinds, the default doc
   forms and the stub templates derive. The npm package ships it.
 - Golden sets `cs-repo` and `rs-repo` for `repo-tools map`. They fix the output of the C# and Rust

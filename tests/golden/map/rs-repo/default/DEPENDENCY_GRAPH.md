@@ -28,7 +28,7 @@ This document provides a comprehensive dependency graph of all files, components
 
 The codebase is organized into the following modules:
 
-- **root**: 3 files
+- **root**: 4 files
 - **net**: 2 files
 
 ---
@@ -42,6 +42,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `./model.rs` | `` | Import |
 | `./net/mod.rs` | `` | Import |
 | `./util.rs` | `` | Import |
 
@@ -50,6 +51,12 @@ The codebase is organized into the following modules:
 ---
 
 ### `src/main.rs` - main.rs module
+
+---
+
+### `src/model.rs` - model.rs module
+
+**Exports:**
 
 ---
 
@@ -83,8 +90,9 @@ The codebase is organized into the following modules:
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `src/lib.rs` | 2 files | 0 files |
+| `src/lib.rs` | 3 files | 0 files |
 | `src/net/mod.rs` | 1 file | 1 file |
+| `src/model.rs` | 0 files | 1 file |
 | `src/net/wire.rs` | 0 files | 1 file |
 | `src/util.rs` | 0 files | 1 file |
 | `src/main.rs` | 0 files | 0 files |
@@ -105,17 +113,19 @@ graph TD
     subgraph Root
         N0[lib.rs]
         N1[main.rs]
-        N2[util.rs]
+        N2[model.rs]
+        N3[util.rs]
     end
 
     subgraph Net
-        N3[mod.rs]
-        N4[wire.rs]
+        N4[mod.rs]
+        N5[wire.rs]
     end
 
-    N0 --> N3
     N0 --> N2
-    N3 --> N4
+    N0 --> N4
+    N0 --> N3
+    N4 --> N5
 ```
 
 ---
@@ -125,10 +135,10 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total Source Files | 5 |
+| Total Source Files | 6 |
 | Subsystems | 2 |
-| Total Lines of Code | 25 |
-| Total Exports | 3 |
+| Total Lines of Code | 30 |
+| Total Exports | 5 |
 | Type-only Imports | 0 |
 | Runtime Cyclic Components | 0 |
 | Type-only Cyclic Components | 0 |

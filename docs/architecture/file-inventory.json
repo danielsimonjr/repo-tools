@@ -482,7 +482,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 173
+      "loc": 179
     },
     {
       "file": "src/docs/stub.ts",
@@ -566,7 +566,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 121
+      "loc": 91
     },
     {
       "file": "src/map/graph.ts",
@@ -1777,7 +1777,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 198
+      "loc": 210
     },
     {
       "file": "tests/unit/docs-stub.test.ts",

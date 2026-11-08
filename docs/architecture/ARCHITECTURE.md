@@ -108,7 +108,8 @@ with the grammars, because a doc rule needs the comments and the parameter lists
 **Rationale.** A grammar parse sees the import forms that a regular expression misses. A text rule
 is enough for the C# `using` and the Rust `mod` and `use` forms that decide the edges.
 
-**Trade-offs.** The package ships the binary grammar files next to the bundle, about 18 MB.
+**Trade-offs.** The package ships the binary grammar files next to the bundle. A grammar ships
+only with the analyser that reads it.
 Two readers exist for C# and for Rust. The golden sets `cs-repo` and `rs-repo` fix the output of
 the `map` readers. A grammar loads in
 asynchronous code, so `buildGraph` is asynchronous.

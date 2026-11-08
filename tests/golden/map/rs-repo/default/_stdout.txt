@@ -1,4 +1,4 @@
-Language: rust; 5 source files; 2 roots
+Language: rust; 6 source files; 2 roots
 Created output directory: docs/architecture
 Written: docs/architecture/dependency-graph.json
 Written: docs/architecture/file-inventory.json
@@ -14,4 +14,4 @@ Written: docs/architecture/unused-analysis.md
 Written: docs/architecture/TEST_COVERAGE.md
 Written: docs/architecture/test-coverage.json
 Written: docs/architecture/package-export-surfaces.json
-census passed: 5 files
+census passed: 6 files
