@@ -104,7 +104,7 @@ The following 17 source files are not directly imported by any test file:
 | `depgraph/types.ts` | `depgraph-analysis.test.ts`, `depgraph-f22.test.ts`, `depgraph-f26.test.ts`, `depgraph-f27.test.ts`, `depgraph-parse.test.ts`, `depgraph-report.test.ts`, `depgraph-scan.test.ts`, `map-adapter.test.ts`, `shared-helpers.test.ts` |
 | `depgraph/workspaces.ts` | `depgraph-f13.test.ts`, `depgraph-f34.test.ts`, `depgraph-f36.test.ts`, `depgraph-scan.test.ts` |
 | `docs/analyse.ts` | `docs-discovery.test.ts` |
-| `docs/cfamily.ts` | `docs-cfamily.test.ts` |
+| `docs/cfamily.ts` | `docs-cfamily.test.ts`, `docs-styles.test.ts` |
 | `docs/comments.ts` | `docs-comments.test.ts` |
 | `docs/csharp.ts` | `docs-csharp.test.ts` |
 | `docs/discovery.ts` | `docs-discovery.test.ts` |
@@ -114,10 +114,10 @@ The following 17 source files are not directly imported by any test file:
 | `docs/kotlin.ts` | `docs-kotlin.test.ts`, `docs-styles.test.ts` |
 | `docs/languages.ts` | `docs-languages.test.ts` |
 | `docs/model.ts` | `docs-cfamily.test.ts`, `docs-command.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-python.test.ts`, `docs-report.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts`, `docs-typescript.test.ts` |
-| `docs/php.ts` | `docs-php.test.ts` |
+| `docs/php.ts` | `docs-php.test.ts`, `docs-styles.test.ts` |
 | `docs/python.ts` | `docs-python.test.ts`, `docs-review.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/report.ts` | `docs-report.test.ts` |
-| `docs/ruby.ts` | `docs-ruby.test.ts` |
+| `docs/ruby.ts` | `docs-ruby.test.ts`, `docs-styles.test.ts` |
 | `docs/rust.ts` | `docs-rust.test.ts` |
 | `docs/stub.ts` | `docs-cfamily.test.ts`, `docs-csharp.test.ts`, `docs-go.test.ts`, `docs-java.test.ts`, `docs-kotlin.test.ts`, `docs-php.test.ts`, `docs-ruby.test.ts`, `docs-rust.test.ts`, `docs-stub.test.ts`, `docs-styles.test.ts` |
 | `docs/styles.ts` | `docs-languages.test.ts`, `docs-styles.test.ts` |
@@ -255,7 +255,7 @@ The following 17 source files are not directly imported by any test file:
 | `unit/docs-ruby.test.ts` | 2 files |
 | `unit/docs-rust.test.ts` | 3 files |
 | `unit/docs-stub.test.ts` | 4 files |
-| `unit/docs-styles.test.ts` | 8 files |
+| `unit/docs-styles.test.ts` | 11 files |
 | `unit/docs-typescript.test.ts` | 2 files |
 | `unit/entry-roots-build-configs.test.ts` | 3 files |
 | `unit/fix-ledger-audit.test.ts` | 0 files |

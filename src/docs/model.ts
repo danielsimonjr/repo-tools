@@ -85,7 +85,7 @@ export interface DocSymbol {
 /** The results for one file. `error` is set when the analyser could not read the file. */
 export interface FileReport {
   path: string;
-  /** The registry id of the language (`python`, `typescript`, `csharp`, `rust`, `go`, `java`, `kotlin`), or "". */
+  /** The registry id of the language (`python`, `typescript`, `csharp`, `rust`, `go`, `java`, `kotlin`, `cpp`, `php`, `ruby`), or "". */
   language: string;
   symbols: DocSymbol[];
   dialects: Set<string>;

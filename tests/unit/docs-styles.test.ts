@@ -3,11 +3,14 @@
  * needs text, and the analyser reads the stub back as the dialect of the style.
  */
 import { describe, expect, test } from "bun:test";
+import { analyseCFamily, parsesAsCFamily } from "../../src/docs/cfamily.ts";
 import { analyseGo, parsesAsGo } from "../../src/docs/go.ts";
 import { analyseJava, parsesAsJava } from "../../src/docs/java.ts";
 import { analyseKotlin, parsesAsKotlin } from "../../src/docs/kotlin.ts";
 import { type DocSymbol, type FileReport, STUB_MARKER } from "../../src/docs/model.ts";
+import { analysePhp, parsesAsPhp } from "../../src/docs/php.ts";
 import { analysePython, parsesAsPython } from "../../src/docs/python.ts";
+import { analyseRuby, parsesAsRuby } from "../../src/docs/ruby.ts";
 import {
   applyInsertions,
   type Insertion,
@@ -220,7 +223,7 @@ describe("doxygen, phpdoc and yard", () => {
   });
 });
 
-describe("godoc, javadoc and kdoc are read back as their dialect", () => {
+describe("godoc, javadoc, kdoc, doxygen, phpdoc and yard are read back as their dialect", () => {
   /** Stubs the symbol `name` of `source` in `style`, applies the stub and analyses the result. */
   async function readBack(
     name: string,
@@ -277,6 +280,49 @@ describe("godoc, javadoc and kdoc are read back as their dialect", () => {
     );
     expect(out).toContain(` * @return ${STUB_MARKER}`);
     expect([...report.dialects]).toEqual(["kdoc"]);
+    expect(report.symbols[0]?.docParams).toEqual(["n"]);
+  });
+
+  test("doxygen", async () => {
+    const { out, report } = await readBack(
+      "run",
+      "a.h",
+      "int run(int n);\n",
+      "doxygen",
+      analyseCFamily,
+      parsesAsCFamily,
+    );
+    expect(out).toContain(` * @brief ${STUB_MARKER}`);
+    expect(out).toContain(` * @param n ${STUB_MARKER}`);
+    expect([...report.dialects]).toEqual(["doxygen"]);
+    expect(report.symbols[0]?.docParams).toEqual(["n"]);
+  });
+
+  test("phpdoc", async () => {
+    const { out, report } = await readBack(
+      "run",
+      "a.php",
+      "<?php\nfunction run(int $n): int {\n    return $n;\n}\n",
+      "phpdoc",
+      analysePhp,
+      parsesAsPhp,
+    );
+    expect(out).toContain(` * @param $n ${STUB_MARKER}`);
+    expect([...report.dialects]).toEqual(["phpdoc"]);
+    expect(report.symbols[0]?.docParams).toEqual(["n"]);
+  });
+
+  test("yard", async () => {
+    const { out, report } = await readBack(
+      "run",
+      "a.rb",
+      "def run(n)\n  n\nend\n",
+      "yard",
+      analyseRuby,
+      parsesAsRuby,
+    );
+    expect(out).toContain(`# @param n ${STUB_MARKER}`);
+    expect([...report.dialects]).toEqual(["yard"]);
     expect(report.symbols[0]?.docParams).toEqual(["n"]);
   });
 });

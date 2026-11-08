@@ -4,12 +4,15 @@
  * read this list. No other module of `docs` names a language.
  */
 import { CSHARP_SKIP_DIRS, suffixOf } from "../map/discovery.ts";
+import { analyseCFamily, parsesAsCFamily } from "./cfamily.ts";
 import { analyseCSharp, parsesAsCSharp } from "./csharp.ts";
 import { analyseGo, parsesAsGo } from "./go.ts";
 import { analyseJava, parsesAsJava } from "./java.ts";
 import { analyseKotlin, parsesAsKotlin } from "./kotlin.ts";
 import type { FileReport } from "./model.ts";
+import { analysePhp, parsesAsPhp } from "./php.ts";
 import { analysePython, parsesAsPython } from "./python.ts";
+import { analyseRuby, parsesAsRuby } from "./ruby.ts";
 import { analyseRust, parsesAsRust } from "./rust.ts";
 import { analyseTypeScript, parsesAsTypeScript } from "./typescript.ts";
 
@@ -117,6 +120,40 @@ export const LANGUAGES: readonly LanguageSpec[] = [
     stubPosition: "above",
     styles: ["kdoc"],
     defaultStyle: "kdoc",
+  },
+  {
+    // One entry reads C and C++: a style names one language id, so the two cannot be two entries.
+    id: "cpp",
+    names: ["C", "C++"],
+    suffixes: new Set([".c", ".h", ".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx"]),
+    skipDirs: new Set(),
+    analyse: analyseCFamily,
+    parses: parsesAsCFamily,
+    stubPosition: "above",
+    styles: ["doxygen"],
+    defaultStyle: "doxygen",
+  },
+  {
+    id: "php",
+    names: ["PHP"],
+    suffixes: new Set([".php"]),
+    skipDirs: new Set(),
+    analyse: analysePhp,
+    parses: parsesAsPhp,
+    stubPosition: "above",
+    styles: ["phpdoc"],
+    defaultStyle: "phpdoc",
+  },
+  {
+    id: "ruby",
+    names: ["Ruby"],
+    suffixes: new Set([".rb"]),
+    skipDirs: new Set(),
+    analyse: analyseRuby,
+    parses: parsesAsRuby,
+    stubPosition: "above",
+    styles: ["yard"],
+    defaultStyle: "yard",
   },
 ];
 

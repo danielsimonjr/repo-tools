@@ -3077,6 +3077,13 @@
             ]
           },
           {
+            "file": "./cfamily.ts",
+            "imports": [
+              "analyseCFamily",
+              "parsesAsCFamily"
+            ]
+          },
+          {
             "file": "./csharp.ts",
             "imports": [
               "analyseCSharp",
@@ -3112,10 +3119,24 @@
             "typeOnly": true
           },
           {
+            "file": "./php.ts",
+            "imports": [
+              "analysePhp",
+              "parsesAsPhp"
+            ]
+          },
+          {
             "file": "./python.ts",
             "imports": [
               "analysePython",
               "parsesAsPython"
+            ]
+          },
+          {
+            "file": "./ruby.ts",
+            "imports": [
+              "analyseRuby",
+              "parsesAsRuby"
             ]
           },
           {

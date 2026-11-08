@@ -1,11 +1,14 @@
 exit 0
   wrote Box.cs: inserted 2 stub(s)
   wrote Shape.java: inserted 1 stub(s)
+  wrote Shape.php: inserted 1 stub(s)
+  wrote geom.h: inserted 1 stub(s)
   wrote model.rs: inserted 2 stub(s)
   wrote pkg/google_style.py: inserted 2 stub(s)
   wrote pkg/numpy_style.py: inserted 1 stub(s)
+  wrote shape.rb: inserted 1 stub(s)
   wrote shapes.go: inserted 2 stub(s)
   wrote src/jsdoc.js: inserted 1 stub(s)
   wrote src/tsdoc.ts: inserted 4 stub(s)
   wrote tool.kt: inserted 2 stub(s)
-APPLIED: 17 stub(s) planned across 11 file(s); 9 file(s) modified
+APPLIED: 20 stub(s) planned across 15 file(s); 12 file(s) modified

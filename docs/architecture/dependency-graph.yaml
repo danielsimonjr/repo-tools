@@ -1683,6 +1683,11 @@ modules:
             - CSHARP_SKIP_DIRS
             - suffixOf
           typeOnly: false
+        - file: src/docs/cfamily.ts
+          imports:
+            - analyseCFamily
+            - parsesAsCFamily
+          typeOnly: false
         - file: src/docs/csharp.ts
           imports:
             - analyseCSharp
@@ -1707,10 +1712,20 @@ modules:
           imports:
             - FileReport
           typeOnly: true
+        - file: src/docs/php.ts
+          imports:
+            - analysePhp
+            - parsesAsPhp
+          typeOnly: false
         - file: src/docs/python.ts
           imports:
             - analysePython
             - parsesAsPython
+          typeOnly: false
+        - file: src/docs/ruby.ts
+          imports:
+            - analyseRuby
+            - parsesAsRuby
           typeOnly: false
         - file: src/docs/rust.ts
           imports:
@@ -5500,6 +5515,11 @@ modules:
         - bun:test
       nodeDependencies: []
       internalDependencies:
+        - file: src/docs/cfamily.ts
+          imports:
+            - analyseCFamily
+            - parsesAsCFamily
+          typeOnly: false
         - file: src/docs/go.ts
           imports:
             - analyseGo
@@ -5521,10 +5541,20 @@ modules:
             - FileReport
             - STUB_MARKER
           typeOnly: false
+        - file: src/docs/php.ts
+          imports:
+            - analysePhp
+            - parsesAsPhp
+          typeOnly: false
         - file: src/docs/python.ts
           imports:
             - analysePython
             - parsesAsPython
+          typeOnly: false
+        - file: src/docs/ruby.ts
+          imports:
+            - analyseRuby
+            - parsesAsRuby
           typeOnly: false
         - file: src/docs/stub.ts
           imports:
@@ -6639,13 +6669,13 @@ statistics:
   totalTypeScriptFiles: 322
   totalSourceFiles: 322
   totalModules: 4
-  totalLinesOfCode: 50368
+  totalLinesOfCode: 50463
   totalExports: 779
   entryRoots: 1
-  reachableFiles: 93
-  dormantFiles: 5
+  reachableFiles: 96
+  dormantFiles: 2
   orphanedFiles: 2
-  testOnlyFiles: 3
+  testOnlyFiles: 0
   runtimeCircularDeps: 1
   typeOnlyCircularDeps: 4
   totalTypeOnlyImports: 81
@@ -6666,13 +6696,10 @@ statistics:
 reachability:
   roots:
     - src/cli.ts
-  reachableCount: 93
-  dormantCount: 5
+  reachableCount: 96
+  dormantCount: 2
   orphaned:
     - src/assets.d.ts
     - src/bin.ts
-  testOnly:
-    - src/docs/cfamily.ts
-    - src/docs/php.ts
-    - src/docs/ruby.ts
+  testOnly: []
 warnings: []

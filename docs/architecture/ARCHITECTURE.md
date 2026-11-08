@@ -102,8 +102,7 @@ field names the choice, and a reader must check it before trusting a count.
 
 **Decision.** `src/map/grammars.ts` loads the grammars from one `.wasm` file for the runtime and
 one for each name in `GRAMMAR_NAMES`. `map` parses TypeScript, JavaScript and Python with them.
-The C# and Rust readers of `map` use text rules in `src/map/parsing.ts`. `docs` parses C#, Rust, Go, Java and
-Kotlin with the grammars, because a doc rule needs the comments and the parameter lists.
+The C# and Rust readers of `map` use text rules in `src/map/parsing.ts`. `docs` parses all of its languages with the grammars, because a doc rule needs the comments and the parameter lists.
 
 **Rationale.** A grammar parse sees the import forms that a regular expression misses. A text rule
 is enough for the C# `using` and the Rust `mod` and `use` forms that decide the edges.

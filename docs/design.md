@@ -527,9 +527,12 @@ browser-safety commands serve TypeScript/JavaScript only.
 
 ### 14.6 Assets
 
-The Node bundle needs one tree-sitter `.wasm` file for the runtime and one for each grammar in
-`GRAMMAR_NAMES` of `src/map/grammars.ts`: TypeScript, TSX, Python, C#, Rust, Go, Java and Kotlin. A grammar ships
-only with the analyser that reads it, because each grammar adds to the size of the package. The
+The Node bundle needs one tree-sitter `.wasm` file for the runtime. It needs one more for each
+grammar in `GRAMMAR_NAMES` of `src/map/grammars.ts`. The 12 grammars are TypeScript, TSX, Python,
+C#, Rust, Go, Java, Kotlin, C, C++, PHP and Ruby. A grammar ships only with the analyser that
+reads it, because each grammar adds to the size of the package. The C++ grammar is the largest,
+with 3.4 MB. The PHP grammar is `tree-sitter-php.wasm`, which reads HTML around the PHP code. The
+grammar `tree-sitter-php_only.wasm` cannot read that HTML, and does not ship. The
 build writes them next to
 `dist/cli.js`, and the npm package holds them. The compiled executable holds them in its file
 system. A relative asset path resolves against the URL of its module, never against the working
@@ -635,7 +638,7 @@ On success the check prints one line on standard output.
 
 `repo-tools docs` measures the documentation comments of the source files, plans the missing
 comments, and gates the result. The command is a port of `code_docs.py` of the code-docs skill. It
-reads TypeScript, JavaScript, Python, C#, Rust, Go, Java and Kotlin. Tree-sitter parses each file. A regular expression cannot
+reads TypeScript, JavaScript, Python, C#, Rust, Go, Java, Kotlin, C, C++, PHP and Ruby. Tree-sitter parses each file. A regular expression cannot
 tell an exported declaration from the word "export" in a string. A regular expression also cannot
 attach a comment to the declaration below it.
 
@@ -697,8 +700,8 @@ describe the wrong files.
 | `src/docs/discovery.ts` | The source files, the skip lists, and the exclusions of `.code-docs.json`. |
 | `src/docs/languages.ts` | The language registry: for each language, its suffixes, analyser, parse check, stub position and styles. Discovery, the stub writer and the help text read the registry and name no language. |
 | `src/docs/analyse.ts` | Reads each file and calls the analyser of its language. |
-| `src/docs/python.ts`, `typescript.ts`, `csharp.ts`, `rust.ts`, `go.ts`, `java.ts`, `kotlin.ts` | One analyser for each language. Each finds the declarations and the doc of each one. |
-| `src/docs/comments.ts` | The driver of the tree-sitter analysers (all but Python and TypeScript): the run of doc comments above a declaration, the optional hooks `docSiteOf`, `adjacentDoc` and `nameOf`, and the parse check. |
+| `src/docs/python.ts`, `typescript.ts`, `csharp.ts`, `rust.ts`, `go.ts`, `java.ts`, `kotlin.ts`, `cfamily.ts`, `php.ts`, `ruby.ts` | One analyser for each language. Each finds the declarations and the doc of each one. `cfamily.ts` reads both C and C++. |
+| `src/docs/comments.ts` | The driver of the tree-sitter analysers (all but Python and TypeScript): the run of doc comments above a declaration, the optional hooks `docSiteOf`, `adjacentDoc`, `nameOf` and `reports`, and the parse check. The hook `reports` skips a node of a declaration type that is not a symbol, for example a C variable. |
 | `src/docs/rules.ts` | The rules M1 to M4, S2, S5 and S6. Every analyser calls one function. |
 | `src/docs/report.ts` | The counts, `COVERAGE.md` and `coverage.json`. |
 | `src/docs/stub.ts` | Plans the skeleton comments and applies them. |
@@ -709,8 +712,11 @@ prose check of `repo-tools ste`.
 
 ### 16.3 What the tool measures
 
-**The files.** The files are the files that git tracks with the suffix `.py`, `.ts`, `.tsx`,
-`.js`, `.jsx`, `.mjs`, `.cjs`, `.cs`, `.rs`, `.go`, `.java`, `.kt` or `.kts`. A `.cs` file below a folder named `obj` or `bin` is
+**The files.** The files are the files that git tracks with a suffix of the registry. The suffix
+`.py` is for Python. The suffixes `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` and `.cjs` are for TypeScript
+and JavaScript. The suffixes `.cs`, `.rs`, `.go`, `.java`, `.kt` and `.kts` are for C#, Rust, Go,
+Java and Kotlin. C and C++ use `.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh` and `.hxx`. PHP
+uses `.php`, and Ruby uses `.rb`. A `.cs` file below a folder named `obj` or `bin` is
 not read, because a C# build writes generated code there. That rule applies to C# files only: a
 `bin` folder of Python scripts is source. A file below a folder named `node_modules`, `dist`, `build`,
 `bundle`, `out`, `coverage`, `vendor` or `target` is not read. The same holds for the other
@@ -803,6 +809,58 @@ without a reason, or a wrong shape exits 2. A broken config would hide files.
   trailing lambda (`class A : B by lazy { x }`). That file is valid Kotlin, but the analyser
   reports it as unparsed. An unparsed report is an error that a reader sees, and a silent pass is
   not.
+- In C and C++: functions, methods, classes, structs, unions, enums, type definitions, `using`
+  aliases, concepts and named namespaces. One registry entry, `cpp`, reads both languages, because
+  a style names one language id. A `.c` file reports the language `cpp` in `coverage.json`, and
+  `map` calls a C repository `cpp`. A `.c` file uses the C grammar. Every other suffix, `.h`
+  included, uses the C++ grammar, which reads C too. The tool reports no macro, no file-scope
+  variable and no data member. It also reports no enumerator, no `using` declaration and no
+  `friend` declaration. It reports no forward declaration and nothing in a function body. A type definition of a struct, union or enum with
+  a body is one symbol: `typedef struct Point {..} Point;` gives `Point`. A declaration is
+  exported when it is in a header (`.h`, `.hpp`, `.hh`, `.hxx`) and none of these cases holds:
+  - `static` at file scope.
+  - A private member. A class starts private, a struct starts public, and an access specifier
+    changes the state.
+  - A declaration in an anonymous namespace or in a function body.
+  - An out-of-class definition such as `A::f`.
+
+  A template declaration is one symbol with its wrapper. The doc and the stub stand above the
+  `template` line. A doc is a Doxygen comment above the declaration: `/** */`, `/*! */`, a run of
+  `///` or a run of `//!`. The after-member forms (`/**<`, `///<`) and a
+  comment with four slashes are not docs. A comment that holds `@file`, `@defgroup`, `@name` or a
+  group brace is not a doc. A plain comment is not a doc. A blank line or a plain comment between the doc and the declaration does
+  not detach the doc. The tool did not check this against Doxygen. A header can hold a definition
+  and a declaration of one function. When an undocumented definition has the same name, kind and
+  parameters as a documented declaration in the same file, the definition is not exported. This
+  serves a single-header library.
+- In PHP: functions, methods, classes, interfaces, traits and enums. A property, a constant, an
+  enum case, a closure and an arrow function are not symbols. A `private` method is not exported.
+  A declaration in a function body or in an anonymous class is not exported. A declaration is not
+  exported when its enclosing type is not exported. A method with no visibility word is public. A
+  function in a braced namespace is exported. The doc is a `/** */` block above the declaration.
+  PHP keeps only the last doc comment, so of two blocks only the nearer one is the doc. A plain
+  comment or a blank line does not detach the doc. The doc stands above the attribute list
+  (`#[Attr]`). A doc written between the attribute list and the declaration is a child of the
+  declaration in the grammar. The tool does not find it, and rule M1 reports a symbol with such a
+  doc. The grammar `tree-sitter-php.wasm` reads a file that mixes HTML and PHP.
+- In Ruby: classes, modules, methods and singleton methods. A method at the top level is a
+  function. A constant, an attribute and a `define_method` call are not symbols. The doc is the run
+  of `#` lines, or the `=begin`/`=end` block, directly above the declaration. A blank line detaches
+  the doc. A comment on the line of a previous statement is not a doc. A directive comment such as
+  `# frozen_string_literal: true` joins the run and gives no text. The grammar moves a comment above
+  the first statement of a body (a class, a module, a method or a block) to the parent node. The
+  analyser reads the doc of that first statement from the body node. Visibility is a convention
+  scan, not an evaluation. A class and a module are exported unless a method encloses them. A
+  method is not exported in these cases:
+  - A bare `private` or `protected` above it in the same body.
+  - `private def x`.
+  - `private :x` or `private_class_method :x` in the same body.
+  - A block, for example `Struct.new do .. end`.
+  - Another method that encloses it.
+
+  `public` and `module_function` make the methods below them exported again. A bare `private`
+  does not reach `def self.x`. The calls `private_constant`, `public_class_method`, `attr_*` and
+  `define_method` are not read.
 
 A `.tsx`, `.jsx`, `.js`, `.mjs` or `.cjs` file needs the TSX grammar, and a `.ts` file needs the
 TypeScript grammar. The wrong grammar gives a tree of error nodes and not an exception. Thus a file
@@ -849,6 +907,41 @@ parses again.
   `@param <T>` names a type parameter and is not a name.
 - A Kotlin parameter gives its name, also with a default value or `vararg`. A class gives the
   names of its primary constructor. A KDoc `@param x` or `@property x` names a parameter.
+- A C or C++ parameter gives the name at the end of its declarator chain: `const char *name`,
+  `int arr[]`, `int (*cb)(int)` and `Args&&... args` give `name`, `arr`, `cb` and `args`. A
+  parameter with no name, `void` and `...` give none. A K&R parameter list gives the identifiers.
+  A Doxygen doc names a parameter with `@param x`, `@param[in] x` or `\param x`.
+- A PHP parameter gives its name without the `$`, also for a by-reference, variadic or promoted
+  constructor parameter. A PHPDoc `@param type $x` names a parameter. The type can hold spaces.
+- A Ruby parameter gives its name: a required, optional, splat, keyword, hash-splat or block
+  parameter, and each name of a destructured parameter. An anonymous `*`, `**` and `&`, and `...`,
+  give none. A YARD `@param x [Type]` or `@param [Type] x` names a parameter.
+
+**A source file of C or C++ exports nothing.**
+
+- Decision: a file with the suffix `.c`, `.cpp`, `.cc` or `.cxx` has no exported symbol. The
+  symbols are in the report. The gate does not measure them.
+- Rationale: the header is the contract of a C or C++ library. A caller reads the header, and a
+  definition in a source file is an implementation detail. A rule that gated both would ask for the
+  same doc twice.
+- Trade-offs: a C program with no header gates nothing. The rule is one line in `cfamily.ts`
+  (`isExported` returns the flag of the header). A later measurement of `antirez/sds` and
+  `fmtlib/fmt` can decide whether to flip it.
+
+**Limits of the C and C++ reader.**
+
+- A guard of the form `#ifdef __cplusplus` / `extern "C" {` / `#endif` makes an error node, because
+  the brace crosses a preprocessor branch. The analyser writes a space over each character of such
+  a guard before the parse, and keeps every line and column. A guard region that holds any other
+  line stays as written. The parse then gives an error, and the file is unparsed.
+- An export macro before the type (`EXPORT_API int f(int a);`) is an error node in both grammars.
+  The file is unparsed. A rewrite would need the names of the macros.
+- The C++ grammar reads `void g(int (&arr)[3]);` as a variable with an initialiser and gives no
+  error node. The function would disappear without a notice. The analyser finds that shape and
+  reports the file as unparsed.
+- An Objective-C `.h` file reads as C++. It reports a parse error, which is the honest result.
+- The Ruby heredoc, the PHP heredoc and nowdoc, and the C++ templates and concepts parse with no
+  error node.
 
 The coverage percentage is the exported symbols with a doc, divided by all exported symbols. The
 count includes the symbols of test files. A report with no exported symbol shows 100.
@@ -872,13 +965,17 @@ named `test_*`, `*_test.*`, `*.test.*` or `*.spec.*`. A test file is exempt from
 doc is wrong in a test file too, so M3, M4 and M5 still apply. A symbol with an M1 issue gets no
 other issue, because every other rule reads the doc.
 
-The dialects are `google`, `numpy` and `rest` for Python, `tsdoc` and `jsdoc` for TypeScript,
-`xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java and `kdoc` for Kotlin. A C#
+The dialects are `google`, `numpy` and `rest` for Python. TypeScript has `tsdoc` and `jsdoc`. The
+dialect is `xmldoc` for C#, `rustdoc` for Rust, `godoc` for Go, `javadoc` for Java and `kdoc` for
+Kotlin. C and C++ use `doxygen`, PHP uses `phpdoc` and Ruby uses `yard`. A C#
 doc with an XML tag such as `<summary>` or `<param>` is
 `xmldoc`. A Rust doc with a section heading such as `# Arguments`, `# Panics` or `# Examples` is
 `rustdoc`. A Go doc whose first words are the name of the symbol, with an optional `A`, `An` or
 `The` before it, is `godoc`. A Java doc with a tag such as `@param`, `@return` or `{@link}` is
-`javadoc`. A Kotlin doc with a tag such as `@param`, `@property` or `@return` is `kdoc`. A comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
+`javadoc`. A Kotlin doc with a tag such as `@param`, `@property` or `@return` is `kdoc`. A C or C++ doc with a Doxygen tag
+such as `@brief`, `@param` or `@return` is `doxygen`. A PHP doc with a tag such as `@param`, `@return`,
+`@var` or `{@inheritdoc}` is `phpdoc`. A Ruby doc with a YARD tag such as `@param`, `@return`, `@option` or `@raise`
+is `yard`. A comment with no marker of a dialect has none, and it never makes a file mixed. JSDoc puts a
 `{type}` after a tag and TSDoc never does. Thus the `{type}` form is the evidence of JSDoc. M5
 shows the dialects as a list in the Python style, for example `['jsdoc', 'tsdoc']`.
 
@@ -917,7 +1014,8 @@ TypeScript stub goes above the outermost `export` statement, and thus above each
 stub goes above the declaration and thus above its attributes. A Rust stub goes above the first
 attribute of the item. A Go stub goes above the declaration, or above the spec in a group, with the
 indent of that line. A Java or Kotlin stub goes above the declaration and thus above its
-annotations. A stub of these languages writes no return line for a declaration that gives no value
+annotations. A C or C++ stub goes above the declaration, and above the `template` line of a template.
+A PHP stub goes above the attribute list. A Ruby stub goes above the `def`, `class` or `module` line. A stub of these languages writes no return line for a declaration that gives no value
 back: a `void` method, a constructor, a Rust function with no return type, a Go function with no
 result, or a Kotlin function with a block body and no return type. A Go stub is one line and has
 no parameter section.
@@ -934,6 +1032,9 @@ default:
 | Go | `godoc` | `godoc` |
 | Java | `javadoc` | `javadoc` |
 | Kotlin | `kdoc` | `kdoc` |
+| C, C++ | `doxygen` | `doxygen` |
+| PHP | `phpdoc` | `phpdoc` |
+| Ruby | `yard` | `yard` |
 
 With no flag, each file gets the default of its language. `--style=auto` takes the one dialect of
 a file (section 16.4). A file with no dialect, or with two, gets the default. A named style must
@@ -941,7 +1042,10 @@ belong to the language of each file that gets a stub. Otherwise the command exit
 command writes a file. The message names the file and its styles. Only the `jsdoc` style writes a
 type slot, and the slot holds the marker. In a TypeScript file, rule S5 reports a filled type
 slot, and the writer decides. The `jsdoc` style stays a TypeScript style, because `auto` must keep a
-file in JSDoc in one dialect (rule M5). The templates follow `mintlify/writer` (MIT); `NOTICE`
+file in JSDoc in one dialect (rule M5). The `phpdoc` style writes `@param $x` with no type, and the `yard` style writes
+`@param x` with no type bracket. The `doxygen` style starts with a `@brief` line. The Ruby entry has one style. An
+`rdoc` style is not built, because no evidence selects it: `--style=auto` could never choose it. The
+templates follow `mintlify/writer` (MIT); `NOTICE`
 holds its licence.
 
 `map` keeps its own regular-expression readers for C# and Rust (section 14). They build the module

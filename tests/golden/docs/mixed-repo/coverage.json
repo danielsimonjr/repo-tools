@@ -1,13 +1,13 @@
 {
   "summary": {
-    "files_scanned": 11,
-    "files_parsed": 11,
+    "files_scanned": 15,
+    "files_parsed": 15,
     "files_unparsed": 0,
-    "symbols": 36,
-    "exported_symbols": 33,
-    "exported_documented": 16,
-    "exported_documented_pct": 48.5,
-    "must_issues": 19,
+    "symbols": 48,
+    "exported_symbols": 41,
+    "exported_documented": 21,
+    "exported_documented_pct": 51.2,
+    "must_issues": 22,
     "should_issues": 1,
     "files_mixed_dialect": 1
   },
@@ -104,6 +104,170 @@
           "has_doc": false,
           "params": [
             "w"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Shape.php",
+      "language": "php",
+      "error": "",
+      "dialects": [
+        "phpdoc"
+      ],
+      "symbols": [
+        {
+          "file": "Shape.php",
+          "line": 6,
+          "name": "Shape",
+          "kind": "class",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "A shape with a width.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "Shape.php",
+          "line": 14,
+          "name": "area",
+          "kind": "method",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "w"
+          ],
+          "doc_params": [
+            "w"
+          ],
+          "summary": "Returns the area.",
+          "dialect": "phpdoc",
+          "issues": []
+        },
+        {
+          "file": "Shape.php",
+          "line": 19,
+          "name": "perimeter",
+          "kind": "method",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "w"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "Shape.php",
+          "line": 24,
+          "name": "secret",
+          "kind": "method",
+          "exported": false,
+          "has_doc": false,
+          "params": [],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": []
+        }
+      ]
+    },
+    {
+      "path": "geom.c",
+      "language": "cpp",
+      "error": "",
+      "dialects": [],
+      "symbols": [
+        {
+          "file": "geom.c",
+          "line": 4,
+          "name": "clamp",
+          "kind": "function",
+          "exported": false,
+          "has_doc": true,
+          "params": [
+            "v"
+          ],
+          "doc_params": [],
+          "summary": "Clamps a value.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "geom.c",
+          "line": 8,
+          "name": "geom_scale",
+          "kind": "function",
+          "exported": false,
+          "has_doc": false,
+          "params": [
+            "v",
+            "k"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": []
+        }
+      ]
+    },
+    {
+      "path": "geom.h",
+      "language": "cpp",
+      "error": "",
+      "dialects": [
+        "doxygen"
+      ],
+      "symbols": [
+        {
+          "file": "geom.h",
+          "line": 14,
+          "name": "geom_add",
+          "kind": "function",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "a",
+            "b"
+          ],
+          "doc_params": [
+            "a",
+            "b"
+          ],
+          "summary": "Adds two numbers.",
+          "dialect": "doxygen",
+          "issues": []
+        },
+        {
+          "file": "geom.h",
+          "line": 16,
+          "name": "geom_scale",
+          "kind": "function",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "v",
+            "k"
           ],
           "doc_params": [],
           "summary": "",
@@ -400,6 +564,80 @@
           "params": [
             "z"
           ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": []
+        }
+      ]
+    },
+    {
+      "path": "shape.rb",
+      "language": "ruby",
+      "error": "",
+      "dialects": [
+        "yard"
+      ],
+      "symbols": [
+        {
+          "file": "shape.rb",
+          "line": 2,
+          "name": "Shape",
+          "kind": "class",
+          "exported": true,
+          "has_doc": true,
+          "params": [],
+          "doc_params": [],
+          "summary": "A shape with a width.",
+          "dialect": "",
+          "issues": []
+        },
+        {
+          "file": "shape.rb",
+          "line": 7,
+          "name": "area",
+          "kind": "method",
+          "exported": true,
+          "has_doc": true,
+          "params": [
+            "w"
+          ],
+          "doc_params": [
+            "w"
+          ],
+          "summary": "Returns the area.",
+          "dialect": "yard",
+          "issues": []
+        },
+        {
+          "file": "shape.rb",
+          "line": 11,
+          "name": "perimeter",
+          "kind": "method",
+          "exported": true,
+          "has_doc": false,
+          "params": [
+            "w"
+          ],
+          "doc_params": [],
+          "summary": "",
+          "dialect": "",
+          "issues": [
+            {
+              "rule": "M1",
+              "tier": "MUST",
+              "detail": "exported symbol has no doc comment"
+            }
+          ]
+        },
+        {
+          "file": "shape.rb",
+          "line": 17,
+          "name": "secret",
+          "kind": "method",
+          "exported": false,
+          "has_doc": false,
+          "params": [],
           "doc_params": [],
           "summary": "",
           "dialect": "",

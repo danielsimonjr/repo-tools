@@ -14,9 +14,9 @@ This report lists each source file that the map census finds, with a disposition
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
-| `reachable` | 92 | A `src`-area file that an entry root reaches. |
+| `reachable` | 95 | A `src`-area file that an entry root reaches. |
 | `build-entry` | 1 | A `src`-area file that is an entry root. |
-| `test-only` | 3 | A `src`-area file that only a test reaches. |
+| `test-only` | 0 | A `src`-area file that only a test reaches. |
 | `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
 | `test` | 212 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
 | `tool` | 11 | A file in a `tools/` or `scripts/` folder outside `src/`. |
@@ -52,7 +52,7 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/lockcheck.ts` | (root) | tools | tool | 128 |
 | `scripts/privacy-check.ts` | (root) | tools | tool | 562 |
 | `scripts/privacy-hash.ts` | (root) | tools | tool | 53 |
-| `scripts/smoke.ts` | (root) | tools | tool | 402 |
+| `scripts/smoke.ts` | (root) | tools | tool | 406 |
 | `scripts/update-depgraph-goldens.ts` | (root) | tools | tool | 19 |
 | `scripts/update-docs-goldens.ts` | (root) | tools | tool | 107 |
 | `scripts/update-map-goldens.ts` | (root) | tools | tool | 83 |
@@ -101,7 +101,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/depgraph/types.ts` | @danielsimonjr/repo-tools | src | reachable | 210 |
 | `src/depgraph/workspaces.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/analyse.ts` | @danielsimonjr/repo-tools | src | reachable | 60 |
-| `src/docs/cfamily.ts` | @danielsimonjr/repo-tools | src | test-only | 755 |
+| `src/docs/cfamily.ts` | @danielsimonjr/repo-tools | src | reachable | 755 |
 | `src/docs/comments.ts` | @danielsimonjr/repo-tools | src | reachable | 162 |
 | `src/docs/csharp.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 240 |
@@ -109,12 +109,12 @@ This report lists each source file that the map census finds, with a disposition
 | `src/docs/index.ts` | @danielsimonjr/repo-tools | src | reachable | 542 |
 | `src/docs/java.ts` | @danielsimonjr/repo-tools | src | reachable | 232 |
 | `src/docs/kotlin.ts` | @danielsimonjr/repo-tools | src | reachable | 274 |
-| `src/docs/languages.ts` | @danielsimonjr/repo-tools | src | reachable | 141 |
+| `src/docs/languages.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
 | `src/docs/model.ts` | @danielsimonjr/repo-tools | src | reachable | 121 |
-| `src/docs/php.ts` | @danielsimonjr/repo-tools | src | test-only | 218 |
+| `src/docs/php.ts` | @danielsimonjr/repo-tools | src | reachable | 218 |
 | `src/docs/python.ts` | @danielsimonjr/repo-tools | src | reachable | 475 |
 | `src/docs/report.ts` | @danielsimonjr/repo-tools | src | reachable | 197 |
-| `src/docs/ruby.ts` | @danielsimonjr/repo-tools | src | test-only | 297 |
+| `src/docs/ruby.ts` | @danielsimonjr/repo-tools | src | reachable | 299 |
 | `src/docs/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
 | `src/docs/rust.ts` | @danielsimonjr/repo-tools | src | reachable | 179 |
 | `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 185 |
@@ -296,21 +296,21 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/docs-command.test.ts` | (root) | tests | test | 553 |
 | `tests/unit/docs-comments.test.ts` | (root) | tests | test | 92 |
 | `tests/unit/docs-csharp.test.ts` | (root) | tests | test | 194 |
-| `tests/unit/docs-discovery.test.ts` | (root) | tests | test | 230 |
+| `tests/unit/docs-discovery.test.ts` | (root) | tests | test | 235 |
 | `tests/unit/docs-go.test.ts` | (root) | tests | test | 195 |
 | `tests/unit/docs-golden.test.ts` | (root) | tests | test | 35 |
 | `tests/unit/docs-helpers.ts` | (root) | tests | test | 88 |
 | `tests/unit/docs-java.test.ts` | (root) | tests | test | 272 |
 | `tests/unit/docs-kotlin.test.ts` | (root) | tests | test | 302 |
-| `tests/unit/docs-languages.test.ts` | (root) | tests | test | 57 |
+| `tests/unit/docs-languages.test.ts` | (root) | tests | test | 50 |
 | `tests/unit/docs-php.test.ts` | (root) | tests | test | 160 |
 | `tests/unit/docs-python.test.ts` | (root) | tests | test | 380 |
 | `tests/unit/docs-report.test.ts` | (root) | tests | test | 158 |
 | `tests/unit/docs-review.test.ts` | (root) | tests | test | 249 |
-| `tests/unit/docs-ruby.test.ts` | (root) | tests | test | 144 |
+| `tests/unit/docs-ruby.test.ts` | (root) | tests | test | 152 |
 | `tests/unit/docs-rust.test.ts` | (root) | tests | test | 210 |
 | `tests/unit/docs-stub.test.ts` | (root) | tests | test | 281 |
-| `tests/unit/docs-styles.test.ts` | (root) | tests | test | 282 |
+| `tests/unit/docs-styles.test.ts` | (root) | tests | test | 328 |
 | `tests/unit/docs-typescript.test.ts` | (root) | tests | test | 606 |
 | `tests/unit/dynamic-imports.ts` | (root) | tests | test | 25 |
 | `tests/unit/entry-roots-build-configs.test.ts` | (root) | tests | test | 115 |

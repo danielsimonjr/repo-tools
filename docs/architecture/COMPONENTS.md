@@ -514,8 +514,8 @@ pair. The command writes `inventory.jsonl` and `clones.json` only when `--out` o
 ## 8. Docs (`src/docs/`)
 
 The doc-comment tool. It measures coverage (`scan`), plans skeleton comments (`stub`) and gates
-(`check`). It reads the languages of its registry: TypeScript, JavaScript, Python, C#, Rust, Go, Java and
-Kotlin.
+(`check`). It reads the languages of its registry: TypeScript, JavaScript, Python, C#, Rust, Go, Java,
+Kotlin, C, C++, PHP and Ruby.
 
 | File | Purpose |
 |---|---|
@@ -530,11 +530,14 @@ Kotlin.
 | `go.ts` | The Go rules: declarations and specs, upper-case names, `//` docs with no blank line, directive comments. |
 | `java.ts` | The Java rules: declarations, `public` and `protected`, implicit interface members, `/** */` docs, `@param` names. |
 | `kotlin.ts` | The Kotlin rules: declarations, public by default, `/** */` docs, `@param` and `@property` names. |
-| `comments.ts` | The driver of the tree-sitter analysers: parse, the doc run above a declaration, the optional hooks `docSiteOf`, `adjacentDoc` and `nameOf`, the rules. |
+| `cfamily.ts` | The C and C++ rules (one language id, `cpp`): the guard sanitiser, declarator names, header exports, Doxygen docs, `@param` names. |
+| `php.ts` | The PHP rules: declarations, `private` methods, `/** */` docs, `@param $x` names. |
+| `ruby.ts` | The Ruby rules: declarations, the visibility convention, `#` docs, the first-statement hoist, `@param` names. |
+| `comments.ts` | The driver of the tree-sitter analysers: parse, the doc run above a declaration, the optional hooks `docSiteOf`, `adjacentDoc`, `nameOf` and `reports`, the rules. |
 | `rules.ts` | Applies the MUST and SHOULD rules to one symbol. |
 | `model.ts` | The types: `Kind`, `Tier`, `Issue`, `DocSymbol`, `FileReport`, `Stats`. |
 | `stub.ts` | Plans and applies the skeleton comments. |
-| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, `xmldoc`, `rustdoc`, `godoc`, `javadoc`, `kdoc`. |
+| `styles.ts` | The docstring styles of `stub --style`: `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, `xmldoc`, `rustdoc`, `godoc`, `javadoc`, `kdoc`, `doxygen`, `phpdoc`, `yard`. |
 | `report.ts` | Writes `COVERAGE.md` and `coverage.json`. |
 
 ```ts
@@ -553,6 +556,11 @@ export function analyseRust(path: string, source: string): Promise<FileReport>
 export function analyseGo(path: string, source: string): Promise<FileReport>
 export function analyseJava(path: string, source: string): Promise<FileReport>
 export function analyseKotlin(path: string, source: string): Promise<FileReport>
+export function analyseCFamily(path: string, source: string): Promise<FileReport>
+export function parsesAsCFamily(path: string, text: string): boolean
+export function sanitiseGuards(source: string): string
+export function analysePhp(path: string, source: string): Promise<FileReport>
+export function analyseRuby(path: string, source: string): Promise<FileReport>
 export async function analyseWith(reader: Reader, path: string, source: string): Promise<FileReport>
 export function applyRules(sym: DocSymbol, doc: string, path: string, options: RuleOptions): void
 export const STUB_MARKER = "TODO:";

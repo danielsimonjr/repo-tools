@@ -2,11 +2,14 @@ exit 0
   would document Box.cs:4 Get
   would document Box.cs:7 Clear
   would document Shape.java:3 area
+  would document Shape.php:19 perimeter
+  would document geom.h:16 geom_scale
   would document model.rs:1 Foo
   would document model.rs:11 put
   would document pkg/google_style.py:18 undocumented
   would document pkg/google_style.py:26 put
   would document pkg/numpy_style.py:21 missing
+  would document shape.rb:11 perimeter
   would document shapes.go:8 Perimeter
   would document shapes.go:18 Size
   would document src/jsdoc.js:12 split
@@ -16,5 +19,5 @@ exit 0
   would document src/tsdoc.ts:28 Id
   would document tool.kt:6 Tool
   would document tool.kt:7 id
-DRY RUN (pass --apply to write): 17 stub(s) planned across 11 file(s); 0 file(s) modified
+DRY RUN (pass --apply to write): 20 stub(s) planned across 15 file(s); 0 file(s) modified
 Every stub carries a TODO: marker, which `check` FAILS on -- fill them in.

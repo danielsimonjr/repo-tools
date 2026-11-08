@@ -280,6 +280,8 @@ const RUBY: Reader = {
   adjacentDoc,
   anchorOf,
   kindOf,
+  // The keywords `class` and `module` are anonymous nodes of the same type as the declarations.
+  reports: (node) => node.isNamed,
   isExported,
   paramsOf,
   returnsValueOf,
