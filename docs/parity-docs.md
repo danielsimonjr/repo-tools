@@ -246,8 +246,8 @@ step 1 above.
 | deepthinking-mcp | `eeb45e5` | +0 -0 | +0 -0 | 0 | 0 |
 
 The first run found 2 changed fields in PITS-MRAS. A NumPy entry such as `n_friction:`, with its
-description on the next line, lost its name. The entry filter of the NumPy reader is now applied
-to each entry alone, and the diff is zero.
+description on the next line, lost its name. The NumPy reader now applies its entry filter to
+each entry alone, and the diff is zero.
 
 ## Result: the new languages
 
@@ -272,20 +272,21 @@ The causes of the unparsed files:
 - **okio (5):** the grammar does not read the soft keyword `final` as a name, or the form
   `internal actual constructor(`. The two rewrites of `triage` do not change the result.
 - **sds (1):** `sds.c` passes a type to a macro (`va_arg(ap, char*)`).
-- **fmt (39):** 1 file parses after the export macros are blanked. Blanking does not repair the
+- **fmt (39):** 1 file parses after the rewrite blanks the export macros. Blanking does not repair the
   other 38, because macros such as `FMT_BEGIN_NAMESPACE` open and close braces.
-- **rack (3):** 2 JavaScript files are test assets, and the Ruby analyser does not read them. The
-  antivirus software of the host removed 1 test file (`test/spec_multipart.rb`) from the work
-  tree, so the report gives it as unreadable.
+- **rack (3):** 2 JavaScript test assets do not parse with the JavaScript grammar. The antivirus
+  software of the host removed 1 test file (`test/spec_multipart.rb`) from the work tree, so the
+  report gives that file as unreadable.
 - **Newtonsoft.Json (66):** the generic error text. This check did not classify these files.
 
 ## Measurements of the open items
 
-`scripts/docs-compare.ts triage` gave these numbers. Its rewrites are measurement heuristics only.
+`scripts/docs-compare.ts triage` gave these numbers. The rewrites of `triage` are measurement
+heuristics only.
 The C and C++ rewrite blanks every upper-case name with an underscore, such as `SIZE_MAX`. That
 rewrite can make a clean file unparsed, so the method can only count too few export-macro files.
 
-Each rule was fixed before the data. The thresholds were not changed after the measurement.
+Each rule existed before the data, and no threshold changed after the measurement.
 
 | Item | Measurement | Rule | Result |
 | --- | --- | --- | --- |
@@ -311,4 +312,4 @@ The macro and member counts of fmt come from its 6 parsed headers only.
   reports such a file as unparsed.
 - The Kotlin grammar does not read `final` as a name or `internal actual constructor(`. The C
   grammar does not read a type as a macro argument. C++ export macros that open and close
-  braces make a file unparsed. Each of these files is unparsed, and the gate fails on it.
+  braces make a file unparsed. The gate fails on each of these unparsed files.

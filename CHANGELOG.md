@@ -13,7 +13,7 @@ All notable changes to this project are recorded in this file. The format follow
   unparsed file (`triage`). The `triage` rewrites are measurement heuristics and change no report.
 - `docs/parity-docs.md` records 2.5.0 against this version (zero differences on nine repositories),
   one public repository per new language, and the measurements that decided the C, C++, Kotlin
-  and Ruby rules.
+  and Ruby rules. The first 2.5.0 run found the NumPy entry regression that this release fixes.
 - Four development dependencies, pinned to exact versions: `tree-sitter-c` 0.24.1,
   `tree-sitter-cpp` 0.23.4, `tree-sitter-php` 0.24.2 and `tree-sitter-ruby` 0.23.1. They hold the
   grammar files of the C, C++, PHP and Ruby readers. The lockfile also names `tree-sitter-c` 0.23.6
