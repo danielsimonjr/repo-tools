@@ -6,6 +6,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- Ruby: a `:nodoc:` mark on the `end` line of a class, module or method now hides the declaration.
+  RDoc does the same. A mark on the line that closes the parameter list of a method also hides the method.
+  Before, the reader read the mark on the first line only.
+
 ## [2.6.0] - 2026-11-08
 
 ### Added

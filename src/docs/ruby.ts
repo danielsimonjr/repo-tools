@@ -166,7 +166,7 @@ function nodeName(node: Node): string {
   return node.childForFieldName("name")?.text ?? "";
 }
 
-/** Returns the `:nodoc:` mark of a comment on the first line of the node. */
+/** Returns the `:nodoc:` mark of a comment on the first line, the end line or the parameter line. */
 function nodocOf(node: Node): "" | "nodoc" | "all" {
   let rows = NODOC_ROWS.get(node.tree);
   if (!rows) {
@@ -179,7 +179,14 @@ function nodocOf(node: Node): "" | "nodoc" | "all" {
     }
     NODOC_ROWS.set(node.tree, rows);
   }
-  return rows.get(node.startPosition.row) ?? "";
+  // RDoc reads the mark on the first line and on the `end` line. RDoc also reads the mark on the
+  // line that closes the parameter list of a method (`arg2) # :nodoc:`).
+  const marks = [node.startPosition.row, node.endPosition.row];
+  const parameters = node.childForFieldName("parameters");
+  if (parameters) marks.push(parameters.endPosition.row);
+  const found = marks.map((row) => rows.get(row) ?? "");
+  if (found.includes("all")) return "all";
+  return found.includes("nodoc") ? "nodoc" : "";
 }
 
 /**

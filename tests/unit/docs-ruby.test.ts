@@ -235,6 +235,54 @@ describe("Ruby analyser", () => {
     expect((await byName(methods.join("\n"), "n")).exported).toBe(true);
   });
 
+  // The cases of the RDoc tests test_class_module_nodoc and test_method_nodoc_stopdoc.
+  it("reads :nodoc: on the end line of a class or module", async () => {
+    const source = [
+      "class Foo # :nodoc:",
+      "end",
+      "",
+      "class Bar",
+      "end # :nodoc:",
+      "",
+      "class Baz; end",
+      "",
+      "class Baz::A; end # :nodoc:",
+      "",
+      "module MBar",
+      "end # :nodoc:",
+      "",
+      "module MBaz; end",
+      "",
+    ].join("\n");
+    expect((await byName(source, "Foo")).exported).toBe(false);
+    expect((await byName(source, "Bar")).exported).toBe(false);
+    expect((await byName(source, "Baz")).exported).toBe(true);
+    expect((await byName(source, "Baz::A")).exported).toBe(false);
+    expect((await byName(source, "MBar")).exported).toBe(false);
+    expect((await byName(source, "MBaz")).exported).toBe(true);
+  });
+
+  it("reads :nodoc: on the end line and the parameter line of a method", async () => {
+    const source = [
+      "class Foo",
+      "  def doc1; end",
+      "  def nodoc1; end # :nodoc:",
+      "  def nodoc3",
+      "  end # :nodoc:",
+      "  def nodoc4(arg1,",
+      "             arg2) # :nodoc:",
+      "  end",
+      "  def doc4; end",
+      "end",
+      "",
+    ].join("\n");
+    expect((await byName(source, "doc1")).exported).toBe(true);
+    expect((await byName(source, "nodoc1")).exported).toBe(false);
+    expect((await byName(source, "nodoc3")).exported).toBe(false);
+    expect((await byName(source, "nodoc4")).exported).toBe(false);
+    expect((await byName(source, "doc4")).exported).toBe(true);
+  });
+
   it("reads :nodoc: only at the start of the comment", async () => {
     const source = [
       "class A",

@@ -517,7 +517,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 353
+      "loc": 360
     },
     {
       "file": "src/docs/rules.ts",
@@ -1875,7 +1875,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 251
+      "loc": 299
     },
     {
       "file": "tests/unit/docs-rust.test.ts",

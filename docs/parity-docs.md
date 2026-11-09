@@ -312,7 +312,7 @@ Each rule existed before the data, and no threshold changed after the measuremen
 | Array-reference parameters | 0 files | record only | No change. |
 | Nested C++ scope key | 0 symbols changed in fmt (6 of 26 headers parse) | always | Fixed. |
 | Ruby `private_constant` | 18 calls in rack | 1 call | Read. |
-| Ruby `:nodoc:` | 11 marks in rack | 5 marks | Read. A bare `:nodoc:` on a class or module also hides the methods directly in the class or module. `:nodoc: all` also hides nested classes and modules. |
+| Ruby `:nodoc:` | 11 marks in rack | 5 marks | Read. A bare `:nodoc:` on a class or module also hides the methods directly in the class or module. `:nodoc: all` also hides nested classes and modules. The mark counts on the first line, on the `end` line and on the parameter line of a method. |
 
 The macro and member counts of fmt come from its 6 parsed headers only.
 

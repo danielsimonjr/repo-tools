@@ -432,6 +432,7 @@ data. Other findings are filed here.
 - [x] F1a Styles for the two current languages (`src/docs/styles.ts`): `google`, `numpy`, `rest`, `tsdoc`, `jsdoc`, and `--style=auto`. No flag keeps the 2.5.0 stubs (the docs goldens hold them). F1 stays open for the styles of each new language.
 - [x] G0 Docs goldens (`tests/golden/docs`), before any change to `docs` output.
 - [ ] F1b The default Google stub in a NumPy or reST file mixes two dialects (M5). `--style=auto` avoids it; the default keeps the 2.5.0 form. Decide in a later minor release whether `auto` becomes the default.
+- [x] Ruby: a `:nodoc:` on the `end` line of a class, module or method does not hide the declaration. A mark on the line that closes the parameter list of a method also does not hide the method. RDoc reads all three (rdoc tests `test_class_module_nodoc` and `test_method_nodoc_stopdoc`). The reader reads the first line only.
 - [ ] Ruby: a trailing `:nodoc:` hides every declaration that starts on the row of the comment (`def a; end; def b; end # :nodoc:` hides `a` and `b`). RDoc applies the mark to the declaration before the comment. A fix needs the column of each declaration and of the comment.
 - [ ] Ruby (low): a top-level `private_constant :B` hides `class A::B`. The check compares the last name segment only. The code is not valid Ruby, so such code is rare.
 - [x] C and C++: a member with no name (an anonymous union or struct member) gave an exported `<anonymous>` property. The member now gives no symbol; the members of the union still give one property each.
