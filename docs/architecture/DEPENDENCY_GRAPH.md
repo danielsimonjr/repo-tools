@@ -4,7 +4,7 @@
 
 # @danielsimonjr/repo-tools - Dependency Graph
 
-**Version**: 2.5.0
+**Version**: 2.6.0
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -2265,4 +2265,4 @@ graph TD
 
 ---
 
-*Version*: 2.5.0
+*Version*: 2.6.0
