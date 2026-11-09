@@ -404,7 +404,8 @@ function reports(node: Node): boolean {
   }
   if (type === "field_declaration") {
     // A data member with several names (`int a, b;`) gives one symbol per name (declaratorsOf).
-    return true;
+    // A member with no name (an anonymous union or struct member) declares no symbol.
+    return node.childForFieldName("declarator") !== null;
   }
   if (
     type === "struct_specifier" ||

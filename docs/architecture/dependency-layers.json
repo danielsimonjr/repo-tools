@@ -3364,7 +3364,7 @@
         ]
       },
       "src/docs/ruby.ts": {
-        "description": "ruby module",
+        "description": "Analyse Ruby sources for the `repo-tools docs` command.",
         "externalDependencies": [
           {
             "package": "web-tree-sitter",

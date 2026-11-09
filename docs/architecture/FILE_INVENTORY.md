@@ -102,7 +102,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/depgraph/types.ts` | @danielsimonjr/repo-tools | src | reachable | 210 |
 | `src/depgraph/workspaces.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/analyse.ts` | @danielsimonjr/repo-tools | src | reachable | 60 |
-| `src/docs/cfamily.ts` | @danielsimonjr/repo-tools | src | reachable | 949 |
+| `src/docs/cfamily.ts` | @danielsimonjr/repo-tools | src | reachable | 950 |
 | `src/docs/comments.ts` | @danielsimonjr/repo-tools | src | reachable | 195 |
 | `src/docs/csharp.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 240 |
@@ -115,7 +115,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/docs/php.ts` | @danielsimonjr/repo-tools | src | reachable | 223 |
 | `src/docs/python.ts` | @danielsimonjr/repo-tools | src | reachable | 483 |
 | `src/docs/report.ts` | @danielsimonjr/repo-tools | src | reachable | 197 |
-| `src/docs/ruby.ts` | @danielsimonjr/repo-tools | src | reachable | 341 |
+| `src/docs/ruby.ts` | @danielsimonjr/repo-tools | src | reachable | 353 |
 | `src/docs/rules.ts` | @danielsimonjr/repo-tools | src | reachable | 79 |
 | `src/docs/rust.ts` | @danielsimonjr/repo-tools | src | reachable | 179 |
 | `src/docs/stub.ts` | @danielsimonjr/repo-tools | src | reachable | 185 |
@@ -293,7 +293,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-scan.test.ts` | (root) | tests | test | 177 |
 | `tests/unit/depgraph-tsx.test.ts` | (root) | tests | test | 52 |
 | `tests/unit/design-refs.test.ts` | (root) | tests | test | 148 |
-| `tests/unit/docs-cfamily.test.ts` | (root) | tests | test | 491 |
+| `tests/unit/docs-cfamily.test.ts` | (root) | tests | test | 498 |
 | `tests/unit/docs-command.test.ts` | (root) | tests | test | 553 |
 | `tests/unit/docs-comments.test.ts` | (root) | tests | test | 92 |
 | `tests/unit/docs-compare.test.ts` | (root) | tests | test | 395 |
@@ -309,7 +309,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/docs-python.test.ts` | (root) | tests | test | 396 |
 | `tests/unit/docs-report.test.ts` | (root) | tests | test | 158 |
 | `tests/unit/docs-review.test.ts` | (root) | tests | test | 249 |
-| `tests/unit/docs-ruby.test.ts` | (root) | tests | test | 233 |
+| `tests/unit/docs-ruby.test.ts` | (root) | tests | test | 251 |
 | `tests/unit/docs-rust.test.ts` | (root) | tests | test | 210 |
 | `tests/unit/docs-stub.test.ts` | (root) | tests | test | 281 |
 | `tests/unit/docs-styles.test.ts` | (root) | tests | test | 328 |

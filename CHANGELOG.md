@@ -107,11 +107,12 @@ All notable changes to this project are recorded in this file. The format follow
   `Args&&... args`, and finds the doc above a single `extern "C" int f(int);`.
 - The C and C++ reader reports a function-like macro of a header (`#define SQ(x) ...`) as a
   function, and a public data member as a property. A function-pointer member
-  (`int (*cb)(int);`) is a property. A member line with several names (`int a, b;`), an
-  object-like macro and an `extern` variable are not reported.
+  (`int (*cb)(int);`) is a property. The reader does not report a member with no name (an
+  anonymous union or struct member), an object-like macro or an `extern` variable.
 - The Ruby reader does not export a class or module that `private_constant` names in the same
-  body, or a declaration whose first line carries `# :nodoc:`. `# :nodoc: all` also hides
-  every member.
+  body, or a declaration whose first line carries `# :nodoc:`. A bare `# :nodoc:` on a class or
+  module also hides the methods directly in the class or module. RDoc does the same. A nested class
+  or module stays exported. `# :nodoc: all` hides every member, nested classes and modules included.
 - The Doxygen dialect also holds `@ingroup`, `@def`, `@var`, `@fn`, `@typedef`, `@struct`, `@enum`
   and `@copydoc`. The PHPDoc dialect also holds `@psalm-*` and `@phpstan-*` tags.
 - A PHPDoc or Javadoc that holds only an inline tag (`/** {@inheritDoc} */`) has an empty summary.
