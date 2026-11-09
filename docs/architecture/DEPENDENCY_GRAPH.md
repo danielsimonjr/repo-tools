@@ -1252,7 +1252,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/docs/ruby.ts` - ruby module
+### `src/docs/ruby.ts` - Analyse Ruby sources for the `repo-tools docs` command.
 
 **External Dependencies:**
 | Package | Import |
@@ -2249,7 +2249,7 @@ graph TD
 |----------|-------|
 | Total Source Files | 324 |
 | Subsystems | 10 |
-| Total Lines of Code | 52050 |
+| Total Lines of Code | 52088 |
 | Total Exports | 802 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |

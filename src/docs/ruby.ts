@@ -1,3 +1,6 @@
+/**
+ * Analyse Ruby sources for the `repo-tools docs` command.
+ */
 import type { Node } from "web-tree-sitter";
 import { parserFor } from "../map/grammars.ts";
 import { proseOf } from "../ste/prose.ts";
@@ -179,19 +182,28 @@ function nodocOf(node: Node): "" | "nodoc" | "all" {
   return rows.get(node.startPosition.row) ?? "";
 }
 
-/** Returns true when a class or module above the node carries `:nodoc: all`. */
-function underNodocAll(node: Node): boolean {
+/**
+ * Returns true when a `:nodoc:` mark on a class or module above the node hides the node.
+ *
+ * RDoc rule: `:nodoc: all` hides everything under the container. A bare `:nodoc:` hides the
+ * methods, constants and attributes directly in the container, but not a nested class or module.
+ */
+function hiddenByContainer(node: Node): boolean {
+  const container = node.type === "class" || node.type === "module";
+  let nearest = true;
   for (let ancestor = node.parent; ancestor; ancestor = ancestor.parent) {
-    if ((ancestor.type === "class" || ancestor.type === "module") && nodocOf(ancestor) === "all") {
-      return true;
-    }
+    if (ancestor.type !== "class" && ancestor.type !== "module") continue;
+    const mark = nodocOf(ancestor);
+    if (mark === "all") return true;
+    if (mark === "nodoc" && nearest && !container) return true;
+    nearest = false;
   }
   return false;
 }
 
 /** Returns true when a Ruby declaration is public. */
 function isExported(node: Node): boolean {
-  if (nodocOf(node) !== "" || underNodocAll(node)) return false;
+  if (nodocOf(node) !== "" || hiddenByContainer(node)) return false;
   if (node.type === "class" || node.type === "module") {
     if (hasAncestorType(node, METHOD_ANCESTORS)) return false;
     const name = nodeName(node).split("::").pop() ?? "";

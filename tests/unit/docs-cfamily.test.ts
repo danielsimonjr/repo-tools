@@ -488,4 +488,11 @@ describe("docs cfamily macros and data members", () => {
     const free = await symbols("a.h", "#define SQ(x) ((x) * (x))\n");
     expect(byName(free, "SQ").kind).toBe("function");
   });
+
+  test("reports no symbol for an anonymous union member of a struct", async () => {
+    const source = ["struct S {", "  union { int a; float b; };", "  int x;", "};", ""].join("\n");
+    const all = await symbols("a.h", source);
+    expect(all.some((symbol) => symbol.name === "<anonymous>")).toBe(false);
+    expect(byName(all, "x").kind).toBe("property");
+  });
 });

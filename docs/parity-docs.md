@@ -275,7 +275,7 @@ these languages port the templates of mintlify/writer (MIT, see `NOTICE`).
 | antirez/sds | C | `5347739` | 4 | 74 | 68 | 0 | 68 | 1 |
 | fmtlib/fmt | C++ | `e7e6e3f` | 79 | 396 | 123 | 6 | 43 | 39 |
 | Seldaek/monolog | PHP | `3bed304` | 228 | 1863 | 1721 | 929 | 725 | 0 |
-| rack/rack | Ruby | `da90464` | 97 | 1001 | 745 | 188 | 447 | 3 |
+| rack/rack | Ruby | `da90464` | 97 | 1001 | 732 | 188 | 434 | 3 |
 | JamesNK/Newtonsoft.Json | C# | `52fa3ae` | 951 | 9601 | 7728 | 836 | 6897 | 66 |
 
 The causes of the unparsed files:
@@ -312,7 +312,7 @@ Each rule existed before the data, and no threshold changed after the measuremen
 | Array-reference parameters | 0 files | record only | No change. |
 | Nested C++ scope key | 0 symbols changed in fmt (6 of 26 headers parse) | always | Fixed. |
 | Ruby `private_constant` | 18 calls in rack | 1 call | Read. |
-| Ruby `:nodoc:` | 11 marks in rack | 5 marks | Read. `:nodoc: all` also hides the members. |
+| Ruby `:nodoc:` | 11 marks in rack | 5 marks | Read. A bare `:nodoc:` on a class or module also hides the methods directly in the class or module. `:nodoc: all` also hides nested classes and modules. |
 
 The macro and member counts of fmt come from its 6 parsed headers only.
 

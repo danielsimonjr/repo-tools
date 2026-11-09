@@ -193,9 +193,27 @@ describe("Ruby analyser", () => {
     expect((await byName(source, "kept")).exported).toBe(true);
     expect((await byName(source, "B")).exported).toBe(false);
     expect((await byName(source, "m")).exported).toBe(false);
-    // A bare :nodoc: hides the class only, not its members.
+    // A bare :nodoc: also hides the members directly in the class (RDoc Context#add_method).
     expect((await byName(source, "C")).exported).toBe(false);
-    expect((await byName(source, "m2")).exported).toBe(true);
+    expect((await byName(source, "m2")).exported).toBe(false);
+  });
+
+  it("keeps a nested class of a bare :nodoc: class, and hides the members of the class", async () => {
+    const source = [
+      "module D # :nodoc:",
+      "  def self.helper",
+      "  end",
+      "  class Inner",
+      "    def shown",
+      "    end",
+      "  end",
+      "end",
+      "",
+    ].join("\n");
+    expect((await byName(source, "helper")).exported).toBe(false);
+    // RDoc documents a nested class or module unless the mark is `:nodoc: all`.
+    expect((await byName(source, "Inner")).exported).toBe(true);
+    expect((await byName(source, "shown")).exported).toBe(true);
   });
 
   it("hides a constant that private_constant names with a string", async () => {
