@@ -11,6 +11,12 @@ All notable changes to this project are recorded in this file. The format follow
 - Ruby: a `:nodoc:` mark on the `end` line of a class, module or method now hides the declaration.
   RDoc does the same. A mark on the line that closes the parameter list of a method also hides the method.
   Before, the reader read the mark on the first line only.
+- `map`: a `tsc -p <cfg>` script command that emits nothing no longer seeds entry roots. A command
+  emits nothing when it has the `--noEmit` flag, or when its config sets `compilerOptions.noEmit`
+  directly or through a relative `extends` chain. Such a command is a typecheck, and its `include`
+  names a compilation set, not entry files. Before, a typecheck config that included `src/**/*`
+  made every source file an entry root. `reachableFiles` then equalled the file count, and
+  `testOnlyFiles` was 0. A build command in the same script still seeds its roots.
 
 ## [2.6.0] - 2026-11-08
 

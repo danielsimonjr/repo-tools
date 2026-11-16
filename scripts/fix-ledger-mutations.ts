@@ -456,7 +456,7 @@ export const MUTATIONS: Mutation[] = [
   fix(
     "F17",
     "The entries of a tsc -p tsconfig are not build roots.",
-    at(ROOTS, '      seedTsconfigEntries(root, pkgDir, m[1] ?? "", addIfExists);', "      void m;"),
+    at(ROOTS, "      seedTsconfigEntries(root, pkgDir, cfg, addIfExists);", "      void cfg;"),
   ),
   fix(
     "F17",

@@ -118,9 +118,47 @@ export function stripJsonc(text: string): string {
 }
 
 /**
+ * The `tsc -p <cfg>` config paths of a script that emit output. The script is split into its
+ * commands at `&&`, `||`, `;` and `|`. A command with the `--noEmit` flag is a typecheck, so its
+ * config is left out. The flag may stand before or after `-p`.
+ */
+function emittingTscConfigs(script: string): string[] {
+  const configs: string[] = [];
+  for (const command of script.split(/&&|\|\||;|\|/)) {
+    if (/(?:^|\s)--noEmit\b/.test(command)) continue;
+    for (const m of command.matchAll(/tsc\s+-p\s+([\w./-]+\.json)/g)) configs.push(m[1] ?? "");
+  }
+  return configs;
+}
+
+/**
+ * True when the tsconfig at `cfgPath` sets `compilerOptions.noEmit` to a boolean `true`. An
+ * explicit value in the file wins. Otherwise a relative `extends` (`./` or `../`) decides, and its
+ * chain is followed. A package-name `extends`, a missing or invalid file and a cycle give false.
+ */
+function tsconfigNoEmit(cfgPath: string, seen: Set<string> = new Set()): boolean {
+  if (seen.has(cfgPath)) return false;
+  seen.add(cfgPath);
+  let cfg: unknown;
+  try {
+    cfg = JSON.parse(stripJsonc(readFileSync(cfgPath, "utf-8")));
+  } catch {
+    return false;
+  }
+  if (!isJsonObject(cfg)) return false;
+  const options = cfg.compilerOptions;
+  if (isJsonObject(options) && typeof options.noEmit === "boolean") return options.noEmit;
+  if (typeof cfg.extends === "string" && /^\.\.?\//.test(cfg.extends)) {
+    return tsconfigNoEmit(join(dirname(cfgPath), cfg.extends), seen);
+  }
+  return false;
+}
+
+/**
  * Adds the entry files of a secondary tsconfig (`tsc -p <cfg>`) with `add`: its `files`, each
  * non-glob `include` path that ends in `.ts`, and every source file under the base directory of
- * a glob `include`. The file may hold comments and trailing commas (JSONC).
+ * a glob `include`. The file may hold comments and trailing commas (JSONC). A config that sets
+ * `noEmit` is a typecheck, so it adds nothing.
  */
 export function seedTsconfigEntries(
   root: string,
@@ -130,6 +168,7 @@ export function seedTsconfigEntries(
 ): void {
   const cfgPath = join(root, pkgDir, cfgRel);
   if (!existsSync(cfgPath)) return;
+  if (tsconfigNoEmit(cfgPath)) return;
   let cfg: { files?: string[]; include?: string[] };
   try {
     cfg = JSON.parse(stripJsonc(readFileSync(cfgPath, "utf-8")));
@@ -206,8 +245,9 @@ export function exportsSubpathEntries(
     )) {
       addIfExists(join(pkgDir, "src", `${(m[1] ?? "").replace(/^src\//, "")}.ts`));
     }
-    for (const m of script.matchAll(/tsc\s+-p\s+([\w./-]+\.json)/g)) {
-      seedTsconfigEntries(root, pkgDir, m[1] ?? "", addIfExists);
+    // A `tsc -p` command with `--noEmit` is a typecheck, so its config seeds no roots.
+    for (const cfg of emittingTscConfigs(script)) {
+      seedTsconfigEntries(root, pkgDir, cfg, addIfExists);
     }
   }
   // Fix F14: a tsup config names build roots whenever it exists. The pre-port generator read it

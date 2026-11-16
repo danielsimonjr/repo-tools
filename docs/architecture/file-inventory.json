@@ -398,7 +398,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 446
+      "loc": 486
     },
     {
       "file": "src/depgraph/types.ts",
