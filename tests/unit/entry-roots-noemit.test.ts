@@ -27,7 +27,10 @@ describe("entry roots and a typecheck-only tsconfig", () => {
     const roots = await rootsOf({
       ...SRC,
       "package.json": pkg("tsc -p tsconfig.check.json"),
-      "tsconfig.check.json": JSON.stringify({ compilerOptions: { noEmit: true }, include: ["src/**/*"] }),
+      "tsconfig.check.json": JSON.stringify({
+        compilerOptions: { noEmit: true },
+        include: ["src/**/*"],
+      }),
     });
     expect(roots).not.toContain("src/unused.ts");
   });
@@ -37,7 +40,10 @@ describe("entry roots and a typecheck-only tsconfig", () => {
       ...SRC,
       "package.json": pkg("tsc -p tsconfig.check.json"),
       "tsconfig.base.json": JSON.stringify({ compilerOptions: { noEmit: true } }),
-      "tsconfig.check.json": JSON.stringify({ extends: "./tsconfig.base.json", include: ["src/**/*"] }),
+      "tsconfig.check.json": JSON.stringify({
+        extends: "./tsconfig.base.json",
+        include: ["src/**/*"],
+      }),
     });
     expect(roots).not.toContain("src/unused.ts");
   });
@@ -55,7 +61,10 @@ describe("entry roots and a typecheck-only tsconfig", () => {
     const roots = await rootsOf({
       ...SRC,
       "package.json": pkg("tsc -p tsconfig.build.json && tsc -p tsconfig.check.json --noEmit"),
-      "tsconfig.build.json": JSON.stringify({ compilerOptions: { outDir: "dist" }, include: ["src/**/*"] }),
+      "tsconfig.build.json": JSON.stringify({
+        compilerOptions: { outDir: "dist" },
+        include: ["src/**/*"],
+      }),
       "tsconfig.check.json": JSON.stringify({ include: ["src/**/*"] }),
     });
     expect(roots).toContain("src/unused.ts");
@@ -65,7 +74,10 @@ describe("entry roots and a typecheck-only tsconfig", () => {
     const roots = await rootsOf({
       ...SRC,
       "package.json": pkg("tsc -p tsconfig.build.json"),
-      "tsconfig.build.json": JSON.stringify({ compilerOptions: { outDir: "dist" }, include: ["src/**/*"] }),
+      "tsconfig.build.json": JSON.stringify({
+        compilerOptions: { outDir: "dist" },
+        include: ["src/**/*"],
+      }),
     });
     expect(roots).toContain("src/unused.ts");
   });

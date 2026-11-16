@@ -17,6 +17,7 @@ All notable changes to this project are recorded in this file. The format follow
   names a compilation set, not entry files. Before, a typecheck config that included `src/**/*`
   made every source file an entry root. `reachableFiles` then equalled the file count, and
   `testOnlyFiles` was 0. A build command in the same script still seeds its roots.
+  `tests/unit/entry-roots-noemit.test.ts` covers each form and an emitting control.
 
 ## [2.6.0] - 2026-11-08
 
