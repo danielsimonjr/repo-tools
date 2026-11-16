@@ -98,7 +98,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/depgraph/reporters/surfaces.ts` | @danielsimonjr/repo-tools | src | reachable | 55 |
 | `src/depgraph/reporters/yaml.ts` | @danielsimonjr/repo-tools | src | reachable | 44 |
 | `src/depgraph/resolver.ts` | @danielsimonjr/repo-tools | src | reachable | 130 |
-| `src/depgraph/roots.ts` | @danielsimonjr/repo-tools | src | reachable | 446 |
+| `src/depgraph/roots.ts` | @danielsimonjr/repo-tools | src | reachable | 486 |
 | `src/depgraph/types.ts` | @danielsimonjr/repo-tools | src | reachable | 210 |
 | `src/depgraph/workspaces.ts` | @danielsimonjr/repo-tools | src | reachable | 174 |
 | `src/docs/analyse.ts` | @danielsimonjr/repo-tools | src | reachable | 60 |
