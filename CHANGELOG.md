@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-11-16
+
 ### Fixed
 
 - The `main input checks` tests of `docs-compare` call `main` in the test process. Before, each case
