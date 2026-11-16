@@ -11,6 +11,7 @@ import {
   filesByLanguage,
   headerFunctionCount,
   isEmpty,
+  main,
   parseArgs,
   renderDiff,
   rewriteCppMacros,
@@ -352,20 +353,26 @@ describe("diffCoverage duplicates", () => {
 });
 
 describe("main input checks", () => {
-  const runIn = (files: Record<string, unknown>, argv: string[]) => {
+  // Each case calls `main` in this process. A subprocess per case took about 170 ms, and the
+  // seven cases of one test passed the 5 s test timeout when the full suite ran under load.
+  const withFiles = async <T>(
+    files: Record<string, unknown>,
+    argv: string[],
+    run: (args: string[]) => Promise<T> | T,
+  ): Promise<T> => {
     const dir = mkdtempSync(join(tmpdir(), `docs-compare-${process.pid}-`));
     try {
       for (const [name, body] of Object.entries(files)) {
         writeFileSync(join(dir, name), JSON.stringify(body));
       }
-      const args = argv.map((a) => (a.endsWith(".json") ? join(dir, a) : a));
-      return Bun.spawnSync([process.execPath, "scripts/docs-compare.ts", ...args]).exitCode;
+      return await run(argv.map((a) => (a.endsWith(".json") ? join(dir, a) : a)));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   };
+  const runIn = (files: Record<string, unknown>, argv: string[]) => withFiles(files, argv, main);
 
-  test("diff exits 2 on a malformed file record", () => {
+  test("diff exits 2 on a malformed file record", async () => {
     const good = { summary: {}, files: [] };
     for (const bad of [
       { error: "", symbols: [] },
@@ -376,20 +383,32 @@ describe("main input checks", () => {
       null,
     ]) {
       const report = { summary: {}, files: [bad] };
-      expect(runIn({ "a.json": good, "b.json": report }, ["diff", "a.json", "b.json"])).toBe(2);
+      expect(await runIn({ "a.json": good, "b.json": report }, ["diff", "a.json", "b.json"])).toBe(
+        2,
+      );
     }
     const nullError = { summary: {}, files: [{ path: "a.ts", error: null, symbols: [] }] };
-    expect(runIn({ "a.json": nullError, "b.json": nullError }, ["diff", "a.json", "b.json"])).toBe(
-      0,
-    );
+    expect(
+      await runIn({ "a.json": nullError, "b.json": nullError }, ["diff", "a.json", "b.json"]),
+    ).toBe(0);
   });
 
-  test("summary exits 2 on a missing or non-numeric field", () => {
+  test("summary exits 2 on a missing or non-numeric field", async () => {
     const report = (summary: unknown) => ({ summary, files: [] });
-    expect(runIn({ "c.json": report(baseSummary) }, ["summary", "c.json"])).toBe(0);
-    expect(runIn({ "c.json": report({}) }, ["summary", "c.json"])).toBe(2);
+    expect(await runIn({ "c.json": report(baseSummary) }, ["summary", "c.json"])).toBe(0);
+    expect(await runIn({ "c.json": report({}) }, ["summary", "c.json"])).toBe(2);
     expect(
-      runIn({ "c.json": report({ ...baseSummary, symbols: "1" }) }, ["summary", "c.json"]),
+      await runIn({ "c.json": report({ ...baseSummary, symbols: "1" }) }, ["summary", "c.json"]),
     ).toBe(2);
+  });
+
+  test("the script sets the process exit code from main", async () => {
+    const bad = { summary: {}, files: [null] };
+    const code = await withFiles(
+      { "a.json": { summary: {}, files: [] }, "b.json": bad },
+      ["diff", "a.json", "b.json"],
+      (args) => Bun.spawnSync([process.execPath, "scripts/docs-compare.ts", ...args]).exitCode,
+    );
+    expect(code).toBe(2);
   });
 });

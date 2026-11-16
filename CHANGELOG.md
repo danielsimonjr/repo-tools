@@ -8,6 +8,10 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Fixed
 
+- The `main input checks` tests of `docs-compare` call `main` in the test process. Before, each case
+  started a `bun` subprocess, about 170 ms each, and the seven cases of one test passed the 5 s
+  test timeout when the full suite ran on a loaded machine. One test still runs the script as a
+  subprocess, so the exit-code wrapper stays covered.
 - Ruby: a `:nodoc:` mark on the `end` line of a class, module or method now hides the declaration.
   RDoc does the same. A mark on the line that closes the parameter list of a method also hides the method.
   Before, the reader read the mark on the first line only.
