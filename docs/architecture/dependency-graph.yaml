@@ -2,9 +2,9 @@ metadata:
   name: '@danielsimonjr/repo-tools'
   schemaVersion: 2.0.0
   language: typescript
-  totalFiles: 324
+  totalFiles: 326
   totalModules: 4
-  totalExports: 802
+  totalExports: 803
 modules:
   tools:
     scripts/build.ts:
@@ -2289,6 +2289,7 @@ modules:
             - NO_SURFACE_REASON
           typeOnly: false
       exports:
+        - CENSUS_GAP_LIST_LIMIT
         - MAP_HELP
         - DEPGRAPH_DEPRECATION
         - isDirectory
@@ -4108,6 +4109,21 @@ modules:
             - runDepgraph
           typeOnly: false
       exports: []
+    tests/unit/depgraph-census-refusal.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies:
+        - node:child_process
+        - node:fs
+        - node:path
+      internalDependencies:
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+            - runDepgraph
+          typeOnly: false
+      exports: []
     tests/unit/depgraph-config-wiring.test.ts:
       externalDependencies:
         - bun:test
@@ -5251,6 +5267,7 @@ modules:
             - filesByLanguage
             - headerFunctionCount
             - isEmpty
+            - main
             - parseArgs
             - renderDiff
             - rewriteCppMacros
@@ -5700,6 +5717,21 @@ modules:
             - seedTsconfigEntries
             - stripJsonc
           typeOnly: false
+        - file: src/map/graph.ts
+          imports:
+            - buildGraph
+          typeOnly: false
+        - file: tests/unit/tree.ts
+          imports:
+            - makeTree
+            - removeTrees
+          typeOnly: false
+      exports: []
+    tests/unit/entry-roots-noemit.test.ts:
+      externalDependencies:
+        - bun:test
+      nodeDependencies: []
+      internalDependencies:
         - file: src/map/graph.ts
           imports:
             - buildGraph
@@ -6753,11 +6785,11 @@ modules:
       internalDependencies: []
       exports: []
 statistics:
-  totalTypeScriptFiles: 324
-  totalSourceFiles: 324
+  totalTypeScriptFiles: 326
+  totalSourceFiles: 326
   totalModules: 4
-  totalLinesOfCode: 52183
-  totalExports: 802
+  totalLinesOfCode: 52429
+  totalExports: 803
   entryRoots: 1
   reachableFiles: 96
   dormantFiles: 2
@@ -6767,7 +6799,7 @@ statistics:
   typeOnlyCircularDeps: 4
   totalTypeOnlyImports: 82
   noImporterFileCount: 2
-  unusedExportsCount: 119
+  unusedExportsCount: 120
   circularDepsTruncated: false
   runtimeCyclicComponents: 1
   typeOnlyCyclicComponents: 4
@@ -6778,7 +6810,7 @@ statistics:
   totalFunctions: 466
   totalTypeGuards: 21
   totalEnums: 4
-  totalConstants: 109
+  totalConstants: 110
   totalReExports: 12
 reachability:
   roots:

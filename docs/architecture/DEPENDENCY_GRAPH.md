@@ -1449,7 +1449,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Functions: `runMap`, `graphOf`
-- Constants: `MAP_HELP`, `DEPGRAPH_DEPRECATION`
+- Constants: `CENSUS_GAP_LIST_LIMIT`, `MAP_HELP`, `DEPGRAPH_DEPRECATION`
 
 ---
 
@@ -2247,10 +2247,10 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total Source Files | 324 |
+| Total Source Files | 326 |
 | Subsystems | 10 |
-| Total Lines of Code | 52183 |
-| Total Exports | 802 |
+| Total Lines of Code | 52429 |
+| Total Exports | 803 |
 | Total Re-exports | 12 |
 | Total Classes | 15 |
 | Total Interfaces | 154 |

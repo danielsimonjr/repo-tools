@@ -376,8 +376,13 @@ export const MUTATIONS: Mutation[] = [
   ),
   fix(
     "F42",
-    "--strict-census does not fail the run.",
-    at(COMMAND, "    if (options.strictCensus) {", "    if (false) {"),
+    "A census gap does not refuse the write of the values.",
+    at(COMMAND, "  if (gaps.length > 0 && !options.censusOk) {", "  if (false) {"),
+  ),
+  fix(
+    "F42",
+    "--strict-census and --census-ok do not conflict.",
+    at(COMMAND, "  if (options.strictCensus && options.censusOk) {", "  if (false) {"),
   ),
   fix(
     "F44",

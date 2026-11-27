@@ -202,6 +202,7 @@ describe("pipeline entry", () => {
       reachableOnly: false,
       strictOrphans: false,
       strictCensus: false,
+      censusOk: false,
       checkCensus: true,
       checkDuplicates: false,
       noRegen: false,

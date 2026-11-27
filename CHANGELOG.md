@@ -6,6 +6,16 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- `map` refuses to write the Verification values while a source file on disk is not in the census
+  (untracked or ignored). Before, it wrote the values and then only warned, so the counts left out
+  the file and `check` failed later in CI. Now `map` exits 1 and writes nothing, and it names each
+  gap file (at most 20, then a count of the rest). This is a behaviour change for existing users: a
+  run that only warned now fails. Run `git add` for the file, or pass the new `--census-ok` flag to
+  write the values anyway; the output then says how many files the counts exclude. `--strict-census`
+  keeps its meaning and cannot be combined with `--census-ok`.
+
 ## [2.6.1] - 2026-11-16
 
 ### Fixed

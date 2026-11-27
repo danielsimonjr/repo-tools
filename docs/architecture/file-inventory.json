@@ -1,11 +1,11 @@
 {
-  "totalFiles": 324,
+  "totalFiles": 326,
   "byDisposition": {
     "reachable": 95,
     "build-entry": 1,
     "test-only": 0,
     "orphan": 2,
-    "test": 213,
+    "test": 215,
     "tool": 12,
     "config": 1,
     "bench": 0,
@@ -14,11 +14,11 @@
   "byArea": {
     "tools": 12,
     "src": 98,
-    "tests": 213,
+    "tests": 215,
     "config": 1
   },
   "byPackage": {
-    "(root)": 226,
+    "(root)": 228,
     "@danielsimonjr/repo-tools": 98
   },
   "files": [
@@ -55,7 +55,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 660
+      "loc": 665
     },
     {
       "file": "scripts/lockcheck.ts",
@@ -279,7 +279,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 243
+      "loc": 247
     },
     {
       "file": "src/depgraph/coverage.ts",
@@ -587,7 +587,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 444
+      "loc": 471
     },
     {
       "file": "src/map/coverage.ts",
@@ -1353,6 +1353,13 @@
       "loc": 65
     },
     {
+      "file": "tests/unit/depgraph-census-refusal.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
+    },
+    {
       "file": "tests/unit/depgraph-config-wiring.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -1644,7 +1651,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 70
+      "loc": 71
     },
     {
       "file": "tests/unit/depgraph-f43.test.ts",
@@ -1735,7 +1742,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 256
+      "loc": 257
     },
     {
       "file": "tests/unit/depgraph-scan.test.ts",
@@ -1784,7 +1791,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 395
+      "loc": 414
     },
     {
       "file": "tests/unit/docs-csharp.test.ts",
@@ -1918,6 +1925,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 115
+    },
+    {
+      "file": "tests/unit/entry-roots-noemit.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 84
     },
     {
       "file": "tests/unit/fix-ledger-audit.test.ts",

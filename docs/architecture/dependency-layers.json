@@ -4028,6 +4028,7 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "CENSUS_GAP_LIST_LIMIT",
           "MAP_HELP",
           "DEPGRAPH_DEPRECATION",
           "isDirectory",
@@ -4039,6 +4040,7 @@
           "graphOf"
         ],
         "constants": [
+          "CENSUS_GAP_LIST_LIMIT",
           "MAP_HELP",
           "DEPGRAPH_DEPRECATION"
         ]
