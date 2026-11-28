@@ -231,6 +231,9 @@ function checkModes(options: DepgraphOptions): void {
   if (options.noRegen && !options.checkDuplicates) {
     throw new Error("flag --no-regen applies with --check-duplicates only");
   }
+  if (options.strictCensus && options.censusOk) {
+    throw new Error("flags --strict-census and --census-ok cannot be used together");
+  }
   const modes = [
     options.checkCensus && "--check-census",
     options.checkDuplicates && "--check-duplicates",

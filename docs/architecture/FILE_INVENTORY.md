@@ -49,7 +49,7 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/design-refs.ts` | (root) | tools | tool | 125 |
 | `scripts/docs-compare.ts` | (root) | tools | tool | 554 |
 | `scripts/fix-ledger-audit.ts` | (root) | tools | tool | 657 |
-| `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 665 |
+| `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 666 |
 | `scripts/lockcheck.ts` | (root) | tools | tool | 128 |
 | `scripts/privacy-check.ts` | (root) | tools | tool | 562 |
 | `scripts/privacy-hash.ts` | (root) | tools | tool | 53 |
@@ -81,7 +81,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/config.ts` | @danielsimonjr/repo-tools | src | reachable | 481 |
 | `src/depgraph/analysis.ts` | @danielsimonjr/repo-tools | src | reachable | 385 |
 | `src/depgraph/api-surface.ts` | @danielsimonjr/repo-tools | src | reachable | 800 |
-| `src/depgraph/args.ts` | @danielsimonjr/repo-tools | src | reachable | 247 |
+| `src/depgraph/args.ts` | @danielsimonjr/repo-tools | src | reachable | 250 |
 | `src/depgraph/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 280 |
 | `src/depgraph/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 114 |
 | `src/depgraph/description.ts` | @danielsimonjr/repo-tools | src | reachable | 76 |
@@ -125,10 +125,10 @@ This report lists each source file that the map census finds, with a disposition
 | `src/io.ts` | @danielsimonjr/repo-tools | src | reachable | 47 |
 | `src/map/adapter.ts` | @danielsimonjr/repo-tools | src | reachable | 166 |
 | `src/map/artifacts.ts` | @danielsimonjr/repo-tools | src | reachable | 702 |
-| `src/map/command.ts` | @danielsimonjr/repo-tools | src | reachable | 471 |
+| `src/map/command.ts` | @danielsimonjr/repo-tools | src | reachable | 467 |
 | `src/map/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 85 |
 | `src/map/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
-| `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 463 |
+| `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 493 |
 | `src/map/grammars.ts` | @danielsimonjr/repo-tools | src | reachable | 120 |
 | `src/map/graph.ts` | @danielsimonjr/repo-tools | src | reachable | 659 |
 | `src/map/layers.ts` | @danielsimonjr/repo-tools | src | reachable | 76 |
@@ -235,7 +235,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-analysis.test.ts` | (root) | tests | test | 187 |
 | `tests/unit/depgraph-api-surface.test.ts` | (root) | tests | test | 142 |
 | `tests/unit/depgraph-args.test.ts` | (root) | tests | test | 65 |
-| `tests/unit/depgraph-census-refusal.test.ts` | (root) | tests | test | 105 |
+| `tests/unit/depgraph-census-refusal.test.ts` | (root) | tests | test | 186 |
 | `tests/unit/depgraph-config-wiring.test.ts` | (root) | tests | test | 266 |
 | `tests/unit/depgraph-duplicate-gate.test.ts` | (root) | tests | test | 246 |
 | `tests/unit/depgraph-duplicates.test.ts` | (root) | tests | test | 293 |

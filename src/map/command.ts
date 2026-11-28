@@ -94,7 +94,7 @@ Options:
   --strict-orphans     Exit 1 when an orphaned source file exists. Without it,
                        an orphan gives a warning. Config: map.strictOrphans.
   --strict-census      Exit 1 when a source file on disk is not in the census
-                       (untracked or ignored). This is the default. It cannot
+                       (untracked and not ignored). This is the default. It cannot
                        be combined with --census-ok.
   --census-ok          Write the values although a source file on disk is not in
                        the census. The output then says how many files the
@@ -224,9 +224,6 @@ async function runPipeline(
   io: Io,
 ): Promise<number> {
   const log = (line: string): void => io.stdout(`${line}\n`);
-  if (options.strictCensus && options.censusOk) {
-    throw new Error("--strict-census and --census-ok cannot be used together");
-  }
   const outDir = resolveUnderRoot(root, config.out);
   const outRel = relativePosix(root, outDir) || ".";
   // The API-surface entry must exist before the run writes anything (design section 14.2).
@@ -253,7 +250,7 @@ async function runPipeline(
   if (gaps.length > 0 && !options.censusOk) {
     const strict = options.strictCensus ? " (--strict-census)" : "";
     io.stderr(
-      `census FAILED${strict}: ${gaps.length} source file(s) on disk are not in the census (untracked or ignored):\n${gapList(gaps)}` +
+      `census FAILED${strict}: ${gaps.length} source file(s) on disk are not in the census (untracked and not ignored):\n${gapList(gaps)}` +
         "Nothing was written. Run git add for each file, or pass --census-ok to write the values without them.\n",
     );
     return 1;
@@ -340,10 +337,9 @@ async function runPipeline(
     io.stderr(
       `Warning: the counts exclude ${gaps.length} untracked source file(s) (--census-ok):\n${gapList(gaps)}`,
     );
-  } else {
-    log(`census passed: ${graph.files.size} files`);
   }
   if (failed) return 1;
+  if (gaps.length === 0) log(`census passed: ${graph.files.size} files`);
   const core: unknown = JSON.parse(readFileSync(corePath, "utf8"));
   await runHook(extensions, "report", reportContext(root, config, outDir, core));
   return 0;

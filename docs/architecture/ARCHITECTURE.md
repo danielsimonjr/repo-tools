@@ -82,7 +82,7 @@ a pruned walk finds the files. The walk skips links.
 
 **Rationale.** A tracked file is a file of the project. Build output, installed packages and
 scratch files stay out, with no ignore list to keep. `map` refuses to write while a source file
-exists on disk and is not in the census.
+exists on disk, is not in the census and is not ignored by git.
 
 **Trade-offs.** An untracked new file does not appear until the author adds it. Map exits 1 and
 writes nothing while such a file exists. `--census-ok` writes the values anyway.

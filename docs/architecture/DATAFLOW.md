@@ -116,9 +116,9 @@ the reports in this order.
 
 The pipeline then prints one `Written:` line for each file. It prints the graph warnings to
 `stderr`. An orphaned source file gives a warning, and `--strict-orphans` makes it an error. A
-source file on disk that the census lacks stops the run before the first write, with exit 1, unless
+source file that git does not track and does not ignore stops the run before the first write, with exit 1, unless
 `--census-ok` is given. With `--census-ok`, the output names the excluded files. A census without
-gaps prints `census passed: N files`. The `report` hook of each
+gaps prints `census passed: N files` when no gate fails. The `report` hook of each
 extension runs last.
 
 Every writer goes through `src/io.ts`, so each file ends with one LF and holds no CR.

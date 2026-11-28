@@ -74,7 +74,7 @@ into the output folder. The census is the set of source files that git tracks.
 | `--api-entry=<path>` | The entry file of the public surface. The default is `src/index.ts`. |
 | `--stability-tags=<a,b>` | Whole-word JSDoc stability tags. The default is `public,internal,experimental,beta,alpha`. |
 | `--strict-orphans` | Exit 1 when an orphaned source file exists. |
-| `--strict-census` | Exit 1 when a source file on disk is not in the census. This is the default. It cannot be combined with `--census-ok`. |
+| `--strict-census` | Exit 1 when a source file on disk is not in the census (untracked and not ignored). This is the default. It cannot be combined with `--census-ok`. |
 | `--census-ok` | Writes the values although a source file on disk is not in the census. The output names the excluded files. Without it, map exits 1 and writes nothing. |
 | `--no-extensions` | Loads no extension. |
 | `--check-census` | Compares the committed `file-inventory.json` with the census. Writes nothing. |

@@ -55,7 +55,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 665
+      "loc": 666
     },
     {
       "file": "scripts/lockcheck.ts",
@@ -279,7 +279,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 247
+      "loc": 250
     },
     {
       "file": "src/depgraph/coverage.ts",
@@ -587,7 +587,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 471
+      "loc": 467
     },
     {
       "file": "src/map/coverage.ts",
@@ -608,7 +608,7 @@
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
       "disposition": "reachable",
-      "loc": 463
+      "loc": 493
     },
     {
       "file": "src/map/grammars.ts",
@@ -1357,7 +1357,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 186
     },
     {
       "file": "tests/unit/depgraph-config-wiring.test.ts",

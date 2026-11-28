@@ -142,8 +142,8 @@ not edit it by hand. Run `repo-tools map` again to update it. Each Markdown repo
 a "GENERATED FILE -- do not edit by hand" banner.
 
 The census is the set of source files that git tracks (outside a git work tree, a pruned walk).
-Map checks the census before it writes a Verification value. A source file on disk that git does
-not track stops `map` with exit 1, and nothing is written. Run `git add` for the file, or pass
+Map checks the census before it writes a Verification value. A source file that git does not track
+and does not ignore stops `map` with exit 1, and nothing is written. Run `git add` for the file, or pass
 `--census-ok` to write the values without it. The output then says how many files the counts
 exclude.
 The language with the most files decides how `map` reads the repository. Input files never come

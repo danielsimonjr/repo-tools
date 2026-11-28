@@ -39,6 +39,7 @@ const RESOLVERS = "src/map/resolvers.ts";
 const ARTIFACTS = "src/map/artifacts.ts";
 const GRAPH = "src/map/graph.ts";
 const COMMAND = "src/map/command.ts";
+const ARGS = "src/depgraph/args.ts";
 const ROOTS = "src/depgraph/roots.ts";
 const COVERAGE = "src/depgraph/coverage.ts";
 const ANALYSIS = "src/depgraph/analysis.ts";
@@ -63,8 +64,8 @@ export const MUTATIONS: Mutation[] = [
     "The discovery returns files in the order of the walk, with no sort after it.",
     at(
       DISCOVERY,
-      "  return found.sort(compareParts);\n}\n\n/**\n * The source files of `language`",
-      "  return found;\n}\n\n/**\n * The source files of `language`",
+      "  return found.sort(compareParts);\n}\n\n/**\n * The paths under `root` that git",
+      "  return found;\n}\n\n/**\n * The paths under `root` that git",
     ),
   ),
   fix(
@@ -382,7 +383,7 @@ export const MUTATIONS: Mutation[] = [
   fix(
     "F42",
     "--strict-census and --census-ok do not conflict.",
-    at(COMMAND, "  if (options.strictCensus && options.censusOk) {", "  if (false) {"),
+    at(ARGS, "  if (options.strictCensus && options.censusOk) {", "  if (false) {"),
   ),
   fix(
     "F44",
