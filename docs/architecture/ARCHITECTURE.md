@@ -81,11 +81,11 @@ text with no child process. The same code runs under Node.js and under Bun.
 a pruned walk finds the files. The walk skips links.
 
 **Rationale.** A tracked file is a file of the project. Build output, installed packages and
-scratch files stay out, with no ignore list to keep. `map --strict-census` fails when a source file
-exists on disk and is not in the census.
+scratch files stay out, with no ignore list to keep. `map` refuses to write while a source file
+exists on disk, is not in the census and is not ignored by git.
 
-**Trade-offs.** An untracked new file does not appear until the author adds it. The census check
-reports the gap as a warning, and it fails with `--strict-census`.
+**Trade-offs.** An untracked new file does not appear until the author adds it. Map exits 1 and
+writes nothing while such a file exists. `--census-ok` writes the values anyway.
 
 ### Decision 4: one language for each repository
 
@@ -223,9 +223,9 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 324 | dependency-graph.json |
+| totalSourceFiles | 326 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 1 | dependency-graph.json |
 | typeOnlyCircularDeps | 4 | dependency-graph.json |
-| unusedExportsCount | 119 | dependency-graph.json |
+| unusedExportsCount | 120 | dependency-graph.json |
 | orphanedFiles | 2 | dependency-graph.json |

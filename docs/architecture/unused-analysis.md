@@ -10,9 +10,9 @@
 - **Dormant files**: 2
   - **Orphaned (reachable from nothing)**: 2
   - **Test-only (only a test reaches them)**: 0
-- **Potentially unused exports**: 119
+- **Potentially unused exports**: 120
   - **Unreferenced anywhere**: 3
-  - **Referenced in their own module**: 116
+  - **Referenced in their own module**: 117
   - **Not classified**: 0
 
 ## Caveats
@@ -97,6 +97,7 @@ No other file imports these names, but their own module uses them.
 - `src/docs/rules.ts`: `RuleOptions`, `isTestFile`
 - `src/docs/stub.ts`: `Applied`
 - `src/map/artifacts.ts`: `DependencyGraphOptions`, `DuplicateSymbolsOptions`, `pyJsonDumps`
+- `src/map/command.ts`: `CENSUS_GAP_LIST_LIMIT`
 - `src/map/coverage.ts`: `TestCoverageOptions`, `isTestFile`
 - `src/map/cycles.ts`: `sccContaining`
 - `src/map/discovery.ts`: `CSHARP_SUFFIXES`, `DiscoveredFile`, `LANGUAGE_SCANS`, `PYTHON_SUFFIXES`, `RUST_SUFFIXES`, `ReachFlags`, `SKIP_DIRS`, `SOURCE_SUFFIXES`, `candidateFiles`, `gitTracked`, `gitTrackedLinks`, `isReparsePoint`

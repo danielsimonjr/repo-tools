@@ -1,7 +1,7 @@
 {
   "metadata": {
     "totalSourceFiles": 97,
-    "totalTestFiles": 152,
+    "totalTestFiles": 154,
     "testedCount": 80,
     "untestedCount": 17,
     "coveragePercent": "82.5",
@@ -435,6 +435,7 @@
       "tests/unit/depgraph-inventory-coverage.test.ts",
       "tests/unit/depgraph-report.test.ts",
       "tests/unit/entry-roots-build-configs.test.ts",
+      "tests/unit/entry-roots-noemit.test.ts",
       "tests/unit/map-adapter.test.ts",
       "tests/unit/map-artifacts-e2e.test.ts",
       "tests/unit/map-artifacts.test.ts",
@@ -469,6 +470,7 @@
       "tests/unit/depgraph-inventory-coverage.test.ts",
       "tests/unit/depgraph-report.test.ts",
       "tests/unit/entry-roots-build-configs.test.ts",
+      "tests/unit/entry-roots-noemit.test.ts",
       "tests/unit/map-adapter.test.ts",
       "tests/unit/map-artifacts-e2e.test.ts",
       "tests/unit/map-artifacts.test.ts",
@@ -652,6 +654,7 @@
     "tests/unit/depgraph-args.test.ts": [
       "src/depgraph/args.ts"
     ],
+    "tests/unit/depgraph-census-refusal.test.ts": [],
     "tests/unit/depgraph-config-wiring.test.ts": [
       "src/config.ts",
       "src/depgraph/args.ts"
@@ -907,6 +910,10 @@
     ],
     "tests/unit/entry-roots-build-configs.test.ts": [
       "src/depgraph/roots.ts",
+      "src/map/graph.ts",
+      "src/map/cycles.ts"
+    ],
+    "tests/unit/entry-roots-noemit.test.ts": [
       "src/map/graph.ts",
       "src/map/cycles.ts"
     ],

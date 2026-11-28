@@ -9,7 +9,7 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 97 |
-| Total Test Files | 152 |
+| Total Test Files | 154 |
 | Source Files with Tests | 80 |
 | Source Files without Tests | 17 |
 | Coverage (raw, direct-import) | **82.5%** |
@@ -128,10 +128,10 @@ The following 17 source files are not directly imported by any test file:
 | `map/artifacts.ts` | `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-reports.test.ts` |
 | `map/command.ts` | `depgraph-exit.test.ts`, `depgraph-f1.test.ts`, `depgraph-f2.test.ts`, `depgraph-f3.test.ts`, `depgraph-r1.test.ts`, `depgraph-report.test.ts`, `map-golden.test.ts`, `map-reports-ste.test.ts` |
 | `map/coverage.ts` | `map-coverage.test.ts` |
-| `map/cycles.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
+| `map/cycles.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `entry-roots-noemit.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
 | `map/discovery.ts` | `depgraph-inventory-coverage.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-discovery.test.ts`, `map-graph-e2e.test.ts`, `shared-helpers.test.ts` |
 | `map/grammars.ts` | `build.test.ts`, `clones-units.test.ts`, `docs-compare.test.ts`, `map-parsing-py.test.ts`, `map-parsing-ts.test.ts`, `map-parsing-tsx.test.ts` |
-| `map/graph.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
+| `map/graph.ts` | `depgraph-analysis.test.ts`, `depgraph-duplicates.test.ts`, `depgraph-inventory-coverage.test.ts`, `depgraph-report.test.ts`, `entry-roots-build-configs.test.ts`, `entry-roots-noemit.test.ts`, `map-adapter.test.ts`, `map-artifacts-e2e.test.ts`, `map-artifacts.test.ts`, `map-coverage.test.ts`, `map-graph-e2e.test.ts`, `map-graph.test.ts`, `map-layers.test.ts`, `map-markdown.test.ts`, `map-query.test.ts`, `map-reports.test.ts`, `map-surfaces.test.ts` |
 | `map/layers.ts` | `map-layers.test.ts` |
 | `map/markdown.ts` | `map-markdown.test.ts` |
 | `map/parsing.ts` | `depgraph-f38.test.ts`, `depgraph-f40.test.ts`, `map-parsing-py.test.ts`, `map-parsing-regex.test.ts`, `map-parsing-ts.test.ts`, `map-parsing-tsx.test.ts`, `map-resolvers.test.ts` |
@@ -180,6 +180,7 @@ The following 17 source files are not directly imported by any test file:
 | `unit/depgraph-analysis.test.ts` | 6 files |
 | `unit/depgraph-api-surface.test.ts` | 3 files |
 | `unit/depgraph-args.test.ts` | 1 files |
+| `unit/depgraph-census-refusal.test.ts` | 0 files |
 | `unit/depgraph-config-wiring.test.ts` | 2 files |
 | `unit/depgraph-duplicate-gate.test.ts` | 3 files |
 | `unit/depgraph-duplicates.test.ts` | 6 files |
@@ -259,6 +260,7 @@ The following 17 source files are not directly imported by any test file:
 | `unit/docs-styles.test.ts` | 11 files |
 | `unit/docs-typescript.test.ts` | 2 files |
 | `unit/entry-roots-build-configs.test.ts` | 3 files |
+| `unit/entry-roots-noemit.test.ts` | 2 files |
 | `unit/fix-ledger-audit.test.ts` | 0 files |
 | `unit/golden-depgraph.test.ts` | 1 files |
 | `unit/io.test.ts` | 1 files |

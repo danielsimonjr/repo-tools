@@ -23,6 +23,8 @@ export interface DepgraphOptions {
   strictOrphans: boolean;
   /** Fix F42: a census gap fails the census self-check. */
   strictCensus: boolean;
+  /** A census gap does not stop the write of the Verification values; the output names the gap. */
+  censusOk: boolean;
   checkCensus: boolean;
   /** The duplicate gate: exit 1 on a TRUE_DUPLICATE name that the baseline does not hold. */
   checkDuplicates: boolean;
@@ -78,6 +80,7 @@ const BOOLEAN_FLAGS: Readonly<Record<string, BooleanKey>> = {
   "--reachable-only": "reachableOnly",
   "--strict-orphans": "strictOrphans",
   "--strict-census": "strictCensus",
+  "--census-ok": "censusOk",
   "--check-census": "checkCensus",
   "--check-duplicates": "checkDuplicates",
   "--no-regen": "noRegen",
@@ -164,6 +167,7 @@ export function parseDepgraphArgs(
     reachableOnly: false,
     strictOrphans: false,
     strictCensus: false,
+    censusOk: false,
     checkCensus: false,
     checkDuplicates: false,
     noRegen: false,
@@ -226,6 +230,9 @@ export function parseDepgraphArgs(
 function checkModes(options: DepgraphOptions): void {
   if (options.noRegen && !options.checkDuplicates) {
     throw new Error("flag --no-regen applies with --check-duplicates only");
+  }
+  if (options.strictCensus && options.censusOk) {
+    throw new Error("flags --strict-census and --census-ok cannot be used together");
   }
   const modes = [
     options.checkCensus && "--check-census",

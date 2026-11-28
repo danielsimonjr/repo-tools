@@ -355,16 +355,46 @@ export function candidateFiles(
 }
 
 /**
- * The source files of `language` that a pruned walk of `root` finds, with no git filter,
- * root-relative and in code-unit order. The census gate compares this list with the census: a
- * file here and not in the census is on disk but untracked or ignored.
+ * The paths under `root` that git does not track and does not ignore, relative to `root`, or
+ * null when git cannot list them. Git does not list the files of a submodule or a nested
+ * repository.
+ */
+function gitUntracked(root: string): string[] | null {
+  const r = spawnSync("git", ["-C", root, "ls-files", "-z", "--others", "--exclude-standard"], {
+    stdio: ["ignore", "pipe", "ignore"],
+    timeout: 60_000,
+    maxBuffer: 1 << 30,
+  });
+  if (r.error || r.status !== 0 || !r.stdout) return null;
+  return new TextDecoder("utf-8")
+    .decode(r.stdout)
+    .split("\0")
+    .filter((p) => p !== "");
+}
+
+/**
+ * The source files of `language` on disk that the census can leave out, root-relative and in
+ * code-unit order. In a git work tree, these are the untracked files that git does not ignore,
+ * with the suffix filter and skip set of the census. Outside git, a pruned walk finds them.
  */
 export function walkedSourceFiles(root: string, language: Language): string[] {
   const [suffixes, extraSkip] = LANGUAGE_SCANS[language];
+  const skip = new Set([...SKIP_DIRS, ...extraSkip]);
   const found: string[][] = [];
-  walk(root, new Set([...SKIP_DIRS, ...extraSkip]), (parts, name) => {
-    if (suffixes.has(suffixOf(name))) found.push([...parts, name]);
-  });
+  if (gitTracked(root) !== null) {
+    const untracked = gitUntracked(root);
+    if (untracked === null)
+      throw new Error("git ls-files --others failed; the census gaps are unknown");
+    for (const rel of untracked) {
+      const parts = rel.split("/");
+      if (parts.slice(0, -1).some((p) => skip.has(p))) continue;
+      if (suffixes.has(suffixOf(parts.at(-1) as string))) found.push(parts);
+    }
+  } else {
+    walk(root, skip, (parts, name) => {
+      if (suffixes.has(suffixOf(name))) found.push([...parts, name]);
+    });
+  }
   return found.sort(compareParts).map((parts) => parts.join("/"));
 }
 

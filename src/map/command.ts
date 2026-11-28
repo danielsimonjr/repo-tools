@@ -64,6 +64,9 @@ import { emitSubsystemReports } from "./reports.ts";
 import type { RepoGraph } from "./schema.ts";
 import { emitApiSurface, emitExportSurfaces, NO_SURFACE_REASON } from "./surfaces.ts";
 
+/** The most census-gap files that one message names. The rest are counted. */
+export const CENSUS_GAP_LIST_LIMIT = 20;
+
 /** The help text of `repo-tools map`. */
 export const MAP_HELP = `Usage: repo-tools map [options] [project-root]
 
@@ -91,7 +94,12 @@ Options:
   --strict-orphans     Exit 1 when an orphaned source file exists. Without it,
                        an orphan gives a warning. Config: map.strictOrphans.
   --strict-census      Exit 1 when a source file on disk is not in the census
-                       (untracked or ignored). Without it, a warning.
+                       (untracked and not ignored). This is the default. It cannot
+                       be combined with --census-ok.
+  --census-ok          Write the values although a source file on disk is not in
+                       the census. The output then says how many files the
+                       counts exclude. Without it, map exits 1 and writes
+                       nothing while such a file exists.
   --no-extensions      Load no extension of map.extensions. Without it, each
                        .mjs module there (relative to the root) loads in config
                        order: its preflight hook runs before the first write,
@@ -121,7 +129,8 @@ them, and the deprecated alias 'repo-tools depgraph' warns and continues.
 Exit codes: 0 on success. 1 on an unknown or invalid flag (nothing is written),
 when the root is not a directory, when the repository has no source file or a
 language the engine cannot read (no output folder is made), when the
---api-entry file does not exist, when --strict-census or --strict-orphans
+--api-entry file does not exist, when a source file on disk is not in the
+census and --census-ok is not given (nothing is written), when --strict-orphans
 fails, when --check-census or --check-duplicates fails, when a mode reads a
 file that does not exist, or when an extension does not load or a hook throws.
 `;
@@ -197,6 +206,16 @@ function censusGaps(root: string, graph: RepoGraph): string[] {
   return walkedSourceFiles(root, graph.language as Language).filter((p) => !census.has(p));
 }
 
+/** One line per gap file, at most CENSUS_GAP_LIST_LIMIT of them; the rest are counted. */
+function gapList(gaps: string[]): string {
+  const shown = gaps
+    .slice(0, CENSUS_GAP_LIST_LIMIT)
+    .map((p) => `  - ${p}\n`)
+    .join("");
+  const rest = gaps.length - CENSUS_GAP_LIST_LIMIT;
+  return rest > 0 ? `${shown}  and ${rest} more\n` : shown;
+}
+
 /** The pipeline: every report, then the census gates and the report hooks. */
 async function runPipeline(
   root: string,
@@ -224,6 +243,17 @@ async function runPipeline(
         "--api-surface",
       ),
     );
+  }
+  // The census is read before the first write. A gap makes the counts wrong, so map refuses to
+  // write anything unless --census-ok is given.
+  const gaps = censusGaps(root, graph);
+  if (gaps.length > 0 && !options.censusOk) {
+    const strict = options.strictCensus ? " (--strict-census)" : "";
+    io.stderr(
+      `census FAILED${strict}: ${gaps.length} source file(s) on disk are not in the census (untracked and not ignored):\n${gapList(gaps)}` +
+        "Nothing was written. Run git add for each file, or pass --census-ok to write the values without them.\n",
+    );
+    return 1;
   }
   if (!existsSync(outDir)) {
     mkdirSync(outDir, { recursive: true });
@@ -291,7 +321,6 @@ async function runPipeline(
   const orphans = sortCodeUnits(
     [...graph.files.values()].filter((n) => n.disposition === "orphan").map((n) => n.path),
   );
-  const gaps = censusGaps(root, graph);
   let failed = false;
   if (orphans.length > 0) {
     const text = `${orphans.length} orphaned source file(s), reachable from nothing:\n${orphans
@@ -305,18 +334,12 @@ async function runPipeline(
     }
   }
   if (gaps.length > 0) {
-    const text = `${gaps.length} source file(s) on disk are not in the census (untracked or ignored):\n${gaps
-      .map((p) => `  - ${p}`)
-      .join("\n")}\n`;
-    if (options.strictCensus) {
-      io.stderr(`census FAILED (--strict-census): ${text}`);
-      failed = true;
-    } else {
-      io.stderr(`Warning: ${text}`);
-    }
+    io.stderr(
+      `Warning: the counts exclude ${gaps.length} untracked source file(s) (--census-ok):\n${gapList(gaps)}`,
+    );
   }
   if (failed) return 1;
-  log(`census passed: ${graph.files.size} files`);
+  if (gaps.length === 0) log(`census passed: ${graph.files.size} files`);
   const core: unknown = JSON.parse(readFileSync(corePath, "utf8"));
   await runHook(extensions, "report", reportContext(root, config, outDir, core));
   return 0;

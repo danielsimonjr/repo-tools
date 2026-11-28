@@ -74,7 +74,8 @@ into the output folder. The census is the set of source files that git tracks.
 | `--api-entry=<path>` | The entry file of the public surface. The default is `src/index.ts`. |
 | `--stability-tags=<a,b>` | Whole-word JSDoc stability tags. The default is `public,internal,experimental,beta,alpha`. |
 | `--strict-orphans` | Exit 1 when an orphaned source file exists. |
-| `--strict-census` | Exit 1 when a source file on disk is not in the census. |
+| `--strict-census` | Exit 1 when a source file on disk is not in the census (untracked and not ignored). This is the default. It cannot be combined with `--census-ok`. |
+| `--census-ok` | Writes the values although a source file on disk is not in the census. The output names the excluded files. Without it, map exits 1 and writes nothing. |
 | `--no-extensions` | Loads no extension. |
 | `--check-census` | Compares the committed `file-inventory.json` with the census. Writes nothing. |
 | `--check-duplicates` | Writes the reports, then exits 1 when a true duplicate is not in the baseline. TypeScript only. |
@@ -414,7 +415,7 @@ A document that the gate reads ends with a `## Verification` section. The sectio
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 324 | dependency-graph.json |
+| totalSourceFiles | 326 | dependency-graph.json |
 ```
 
 The gate reads the `Claim` and `Value` columns. The `Source` column is for the reader. A claim name
@@ -428,7 +429,7 @@ Regenerate: `repo-tools map . --out=docs/architecture` · Check: `repo-tools che
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 324 | dependency-graph.json |
-| totalTypeScriptFiles | 324 | dependency-graph.json |
+| totalSourceFiles | 326 | dependency-graph.json |
+| totalTypeScriptFiles | 326 | dependency-graph.json |
 | totalModules | 4 | dependency-graph.json |
-| totalExports | 802 | dependency-graph.json |
+| totalExports | 803 | dependency-graph.json |

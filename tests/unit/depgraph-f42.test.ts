@@ -8,7 +8,7 @@
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { makeTree, removeTrees, runDepgraph } from "./tree.ts";
 
@@ -39,13 +39,14 @@ function withGap(): string {
   return root;
 }
 
-describe("F42: a census gap warns unless --strict-census", () => {
-  test("by default the gap is a warning and the run exits 0", async () => {
-    const result = await runDepgraph(withGap());
-    expect(result.code).toBe(0);
-    expect(result.stderr).toContain("Warning");
+describe("F42: a census gap refuses the write unless --census-ok", () => {
+  test("by default the gap fails the run before any write", async () => {
+    const root = withGap();
+    const result = await runDepgraph(root);
+    expect(result.code).toBe(1);
     expect(result.stderr).toContain("not in the census");
     expect(result.stderr).toContain("lib/extra.ts");
+    expect(existsSync(join(root, "docs/architecture/dependency-graph.json"))).toBe(false);
   });
 
   test("--strict-census makes the gap fail the run", async () => {
@@ -57,7 +58,7 @@ describe("F42: a census gap warns unless --strict-census", () => {
 
   test("--check-census fails when the committed inventory differs from the census", async () => {
     const root = withGap();
-    await runDepgraph(root);
+    await runDepgraph(root, ["--census-ok"]);
     const path = join(root, "docs/architecture/file-inventory.json");
     const inventory = JSON.parse(readFileSync(path, "utf8")) as { files: { file: string }[] };
     inventory.files = inventory.files.filter((f) => f.file !== "src/index.ts");

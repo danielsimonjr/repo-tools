@@ -8,7 +8,7 @@ This report lists each source file that the map census finds, with a disposition
 
 **Language**: typescript
 
-**Total files**: 324
+**Total files**: 326
 
 ## Disposition counts
 
@@ -18,12 +18,12 @@ This report lists each source file that the map census finds, with a disposition
 | `build-entry` | 1 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
 | `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
-| `test` | 213 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
+| `test` | 215 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
 | `tool` | 12 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 1 | A `*.config.*` file of TypeScript or JavaScript. |
 | `example` | 0 | A file in `examples/` or `docs/`. |
 | `bench` | 0 | A file in `bench/` or `benchmarks/`, or a `*.bench.*` file. |
-| **Total** | **324** | |
+| **Total** | **326** | |
 
 ## Per-area counts
 
@@ -31,14 +31,14 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --: |
 | `config` | 1 |
 | `src` | 98 |
-| `tests` | 213 |
+| `tests` | 215 |
 | `tools` | 12 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 226 |
+| `(root)` | 228 |
 | `@danielsimonjr/repo-tools` | 98 |
 
 ## All files
@@ -49,7 +49,7 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/design-refs.ts` | (root) | tools | tool | 125 |
 | `scripts/docs-compare.ts` | (root) | tools | tool | 554 |
 | `scripts/fix-ledger-audit.ts` | (root) | tools | tool | 657 |
-| `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 660 |
+| `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 666 |
 | `scripts/lockcheck.ts` | (root) | tools | tool | 128 |
 | `scripts/privacy-check.ts` | (root) | tools | tool | 562 |
 | `scripts/privacy-hash.ts` | (root) | tools | tool | 53 |
@@ -81,7 +81,7 @@ This report lists each source file that the map census finds, with a disposition
 | `src/config.ts` | @danielsimonjr/repo-tools | src | reachable | 481 |
 | `src/depgraph/analysis.ts` | @danielsimonjr/repo-tools | src | reachable | 385 |
 | `src/depgraph/api-surface.ts` | @danielsimonjr/repo-tools | src | reachable | 800 |
-| `src/depgraph/args.ts` | @danielsimonjr/repo-tools | src | reachable | 243 |
+| `src/depgraph/args.ts` | @danielsimonjr/repo-tools | src | reachable | 250 |
 | `src/depgraph/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 280 |
 | `src/depgraph/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 114 |
 | `src/depgraph/description.ts` | @danielsimonjr/repo-tools | src | reachable | 76 |
@@ -125,10 +125,10 @@ This report lists each source file that the map census finds, with a disposition
 | `src/io.ts` | @danielsimonjr/repo-tools | src | reachable | 47 |
 | `src/map/adapter.ts` | @danielsimonjr/repo-tools | src | reachable | 166 |
 | `src/map/artifacts.ts` | @danielsimonjr/repo-tools | src | reachable | 702 |
-| `src/map/command.ts` | @danielsimonjr/repo-tools | src | reachable | 444 |
+| `src/map/command.ts` | @danielsimonjr/repo-tools | src | reachable | 467 |
 | `src/map/coverage.ts` | @danielsimonjr/repo-tools | src | reachable | 85 |
 | `src/map/cycles.ts` | @danielsimonjr/repo-tools | src | reachable | 178 |
-| `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 463 |
+| `src/map/discovery.ts` | @danielsimonjr/repo-tools | src | reachable | 493 |
 | `src/map/grammars.ts` | @danielsimonjr/repo-tools | src | reachable | 120 |
 | `src/map/graph.ts` | @danielsimonjr/repo-tools | src | reachable | 659 |
 | `src/map/layers.ts` | @danielsimonjr/repo-tools | src | reachable | 76 |
@@ -235,6 +235,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-analysis.test.ts` | (root) | tests | test | 187 |
 | `tests/unit/depgraph-api-surface.test.ts` | (root) | tests | test | 142 |
 | `tests/unit/depgraph-args.test.ts` | (root) | tests | test | 65 |
+| `tests/unit/depgraph-census-refusal.test.ts` | (root) | tests | test | 186 |
 | `tests/unit/depgraph-config-wiring.test.ts` | (root) | tests | test | 266 |
 | `tests/unit/depgraph-duplicate-gate.test.ts` | (root) | tests | test | 246 |
 | `tests/unit/depgraph-duplicates.test.ts` | (root) | tests | test | 293 |
@@ -276,7 +277,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-f4.test.ts` | (root) | tests | test | 34 |
 | `tests/unit/depgraph-f40.test.ts` | (root) | tests | test | 47 |
 | `tests/unit/depgraph-f41.test.ts` | (root) | tests | test | 45 |
-| `tests/unit/depgraph-f42.test.ts` | (root) | tests | test | 70 |
+| `tests/unit/depgraph-f42.test.ts` | (root) | tests | test | 71 |
 | `tests/unit/depgraph-f43.test.ts` | (root) | tests | test | 173 |
 | `tests/unit/depgraph-f44.test.ts` | (root) | tests | test | 34 |
 | `tests/unit/depgraph-f5.test.ts` | (root) | tests | test | 31 |
@@ -289,14 +290,14 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-parse.test.ts` | (root) | tests | test | 64 |
 | `tests/unit/depgraph-paths.test.ts` | (root) | tests | test | 27 |
 | `tests/unit/depgraph-r1.test.ts` | (root) | tests | test | 51 |
-| `tests/unit/depgraph-report.test.ts` | (root) | tests | test | 256 |
+| `tests/unit/depgraph-report.test.ts` | (root) | tests | test | 257 |
 | `tests/unit/depgraph-scan.test.ts` | (root) | tests | test | 177 |
 | `tests/unit/depgraph-tsx.test.ts` | (root) | tests | test | 52 |
 | `tests/unit/design-refs.test.ts` | (root) | tests | test | 148 |
 | `tests/unit/docs-cfamily.test.ts` | (root) | tests | test | 498 |
 | `tests/unit/docs-command.test.ts` | (root) | tests | test | 553 |
 | `tests/unit/docs-comments.test.ts` | (root) | tests | test | 92 |
-| `tests/unit/docs-compare.test.ts` | (root) | tests | test | 395 |
+| `tests/unit/docs-compare.test.ts` | (root) | tests | test | 414 |
 | `tests/unit/docs-csharp.test.ts` | (root) | tests | test | 194 |
 | `tests/unit/docs-discovery.test.ts` | (root) | tests | test | 235 |
 | `tests/unit/docs-go.test.ts` | (root) | tests | test | 195 |
@@ -316,6 +317,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/docs-typescript.test.ts` | (root) | tests | test | 606 |
 | `tests/unit/dynamic-imports.ts` | (root) | tests | test | 25 |
 | `tests/unit/entry-roots-build-configs.test.ts` | (root) | tests | test | 115 |
+| `tests/unit/entry-roots-noemit.test.ts` | (root) | tests | test | 84 |
 | `tests/unit/fix-ledger-audit.test.ts` | (root) | tests | test | 382 |
 | `tests/unit/golden-depgraph.test.ts` | (root) | tests | test | 20 |
 | `tests/unit/io.test.ts` | (root) | tests | test | 32 |
