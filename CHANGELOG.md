@@ -6,6 +6,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Fixed
+
+- `bun run audit:ledger -- --only F42` exits 0. Two of its three reverts were caught by a test of
+  another file, so the audit counted them as gaps. Those reverts now name the census-refusal test file
+  as their own lock.
+
 ## [2.7.0] - 2026-11-28
 
 ### Changed

@@ -370,7 +370,10 @@ export const MUTATIONS: Mutation[] = [
       "",
     ),
   ),
-  fix(
+  // The census-gap tests of `map` (and of the shared flag parser) live in this file, not in the
+  // depgraph-f42 file, so each of the two mutations below names it as its own lock.
+  fixIn(
+    ["tests/unit/depgraph-census-refusal.test.ts"],
     "F42",
     "A source file on disk that the census does not list gives no warning.",
     at(COMMAND, "  if (gaps.length > 0) {", "  if (gaps.length > 0 && false) {"),
@@ -380,7 +383,8 @@ export const MUTATIONS: Mutation[] = [
     "A census gap does not refuse the write of the values.",
     at(COMMAND, "  if (gaps.length > 0 && !options.censusOk) {", "  if (false) {"),
   ),
-  fix(
+  fixIn(
+    ["tests/unit/depgraph-census-refusal.test.ts"],
     "F42",
     "--strict-census and --census-ok do not conflict.",
     at(ARGS, "  if (options.strictCensus && options.censusOk) {", "  if (false) {"),
