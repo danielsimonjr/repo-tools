@@ -8,6 +8,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ### Changed
 
+- The CI test job has a `timeout-minutes` limit of 6. A lost runner fails in minutes. The tag run of
+  2.7.0 lost the macOS test job for 45 minutes before it failed.
 - `repo-tools docs check` on this repository reads a root `.code-docs.json` that excludes
   `tests/fixtures/` and `tests/golden/`. Those folders hold deliberate MUST issues for the docs gate.
   The whole-tree gate now passes (0 MUST issues). A unit test runs the same gate on this repository.
