@@ -9,7 +9,7 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 97 |
-| Total Test Files | 154 |
+| Total Test Files | 155 |
 | Source Files with Tests | 80 |
 | Source Files without Tests | 17 |
 | Coverage (raw, direct-import) | **82.5%** |
@@ -169,6 +169,7 @@ The following 17 source files are not directly imported by any test file:
 | `unit/chunk-review-2.test.ts` | 1 files |
 | `unit/chunk-review.test.ts` | 1 files |
 | `unit/chunk.test.ts` | 3 files |
+| `unit/ci-workflow.test.ts` | 0 files |
 | `unit/cli.test.ts` | 2 files |
 | `unit/clones-command.test.ts` | 0 files |
 | `unit/clones-detect.test.ts` | 2 files |

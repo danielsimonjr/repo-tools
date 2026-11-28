@@ -6,9 +6,9 @@
 
 ## Summary
 
-- **Files with no in-repo importer**: 2
-- **Dormant files**: 2
-  - **Orphaned (reachable from nothing)**: 2
+- **Files with no in-repo importer**: 1
+- **Dormant files**: 1
+  - **Orphaned (reachable from nothing)**: 1
   - **Test-only (only a test reaches them)**: 0
 - **Potentially unused exports**: 120
   - **Unreferenced anywhere**: 3
@@ -28,7 +28,6 @@
 Source files that no root and no test reaches. Verify each one before you delete it.
 
 - `src/assets.d.ts`
-- `src/bin.ts`
 
 ## Dormant files: test-only
 
@@ -41,7 +40,6 @@ _None._
 No file of this repository imports these files. Do not use the list as a deletion list.
 
 - `src/assets.d.ts`
-- `src/bin.ts`
 
 ## Exports unreferenced anywhere
 

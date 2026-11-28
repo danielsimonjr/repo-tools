@@ -3,7 +3,7 @@
     "name": "@danielsimonjr/repo-tools",
     "schemaVersion": "2.0.0",
     "language": "typescript",
-    "totalFiles": 326,
+    "totalFiles": 327,
     "totalModules": 4,
     "totalExports": 803
   },
@@ -5595,6 +5595,18 @@
         ],
         "exports": []
       },
+      "tests/unit/ci-workflow.test.ts": {
+        "externalDependencies": [
+          "bun:test",
+          "js-yaml"
+        ],
+        "nodeDependencies": [
+          "node:fs",
+          "node:path"
+        ],
+        "internalDependencies": [],
+        "exports": []
+      },
       "tests/unit/cli.test.ts": {
         "externalDependencies": [
           "bun:test"
@@ -8461,7 +8473,9 @@
         "externalDependencies": [
           "bun:test"
         ],
-        "nodeDependencies": [],
+        "nodeDependencies": [
+          "node:path"
+        ],
         "internalDependencies": [
           {
             "file": "src/depgraph/roots.ts",
@@ -10159,20 +10173,20 @@
     }
   },
   "statistics": {
-    "totalTypeScriptFiles": 326,
-    "totalSourceFiles": 326,
+    "totalTypeScriptFiles": 327,
+    "totalSourceFiles": 327,
     "totalModules": 4,
-    "totalLinesOfCode": 52540,
+    "totalLinesOfCode": 52585,
     "totalExports": 803,
-    "entryRoots": 1,
-    "reachableFiles": 96,
-    "dormantFiles": 2,
-    "orphanedFiles": 2,
+    "entryRoots": 2,
+    "reachableFiles": 97,
+    "dormantFiles": 1,
+    "orphanedFiles": 1,
     "testOnlyFiles": 0,
     "runtimeCircularDeps": 1,
     "typeOnlyCircularDeps": 4,
     "totalTypeOnlyImports": 82,
-    "noImporterFileCount": 2,
+    "noImporterFileCount": 1,
     "unusedExportsCount": 120,
     "circularDepsTruncated": false,
     "runtimeCyclicComponents": 1,
@@ -10189,13 +10203,13 @@
   },
   "reachability": {
     "roots": [
-      "src/cli.ts"
-    ],
-    "reachableCount": 96,
-    "dormantCount": 2,
-    "orphaned": [
-      "src/assets.d.ts",
+      "src/cli.ts",
       "src/bin.ts"
+    ],
+    "reachableCount": 97,
+    "dormantCount": 1,
+    "orphaned": [
+      "src/assets.d.ts"
     ],
     "testOnly": []
   },

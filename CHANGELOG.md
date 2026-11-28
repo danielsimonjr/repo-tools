@@ -6,6 +6,22 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- The CI test job has a `timeout-minutes` limit of 6. A lost runner fails in minutes. The tag run of
+  2.7.0 lost the macOS test job for 45 minutes before it failed.
+- `repo-tools docs check` on this repository reads a root `.code-docs.json` that excludes
+  `tests/fixtures/` and `tests/golden/`. Those folders hold deliberate MUST issues for the docs gate.
+  The whole-tree gate now passes (0 MUST issues). A unit test runs the same gate on this repository.
+- `bun run cli` runs the process entry `src/bin.ts` from source. The script makes `map` read the
+  entry as a root, so it no longer reports `src/bin.ts` as an orphan.
+
+### Fixed
+
+- `bun run audit:ledger -- --only F42` exits 0. Two of its three reverts were caught by a test of
+  another file, so the audit counted them as gaps. Those reverts now name the census-refusal test file
+  as their own lock.
+
 ## [2.7.0] - 2026-11-28
 
 ### Changed

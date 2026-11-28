@@ -1,0 +1,12 @@
+{
+  "exclude": [
+    {
+      "path": "tests/fixtures/",
+      "reason": "test inputs that hold deliberate MUST issues for the docs gate"
+    },
+    {
+      "path": "tests/golden/",
+      "reason": "golden outputs and their sources that hold deliberate MUST issues"
+    }
+  ]
+}
