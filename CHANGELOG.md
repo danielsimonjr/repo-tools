@@ -6,6 +6,12 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+### Changed
+
+- `repo-tools docs check` on this repository reads a root `.code-docs.json` that excludes
+  `tests/fixtures/` and `tests/golden/`. Those folders hold deliberate MUST issues for the docs gate.
+  The whole-tree gate now passes (0 MUST issues). A unit test runs the same gate on this repository.
+
 ### Fixed
 
 - `bun run audit:ledger -- --only F42` exits 0. Two of its three reverts were caught by a test of

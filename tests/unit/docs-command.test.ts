@@ -225,6 +225,14 @@ describe("docs check: the gate on the whole repository", () => {
     expect(run.code).toBe(0);
     expect(run.out).toContain("-- 1 file(s) excluded by .code-docs.json: gen/ (generated)");
   });
+
+  // The repo's own gate: its fixtures and golden files hold deliberate MUST issues.
+  test("the whole-tree gate of this repository passes with its own .code-docs.json", async () => {
+    const run = await cli(["docs", "check", join(import.meta.dir, "../..")]);
+    expect(run.out).toContain("excluded by .code-docs.json: tests/fixtures/");
+    expect(run.out).toContain("tests/golden/");
+    expect(run.code).toBe(0);
+  }, 120_000);
 });
 
 describe("docs check --paths: the gate on the changed files", () => {
