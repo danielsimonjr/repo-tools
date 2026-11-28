@@ -6,6 +6,8 @@ All notable changes to this project are recorded in this file. The format follow
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-11-28
+
 ### Changed
 
 - `map` refuses to write the Verification values while a source file on disk is not in the census
