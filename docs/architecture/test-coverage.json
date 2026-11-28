@@ -1,7 +1,7 @@
 {
   "metadata": {
     "totalSourceFiles": 97,
-    "totalTestFiles": 154,
+    "totalTestFiles": 155,
     "testedCount": 80,
     "untestedCount": 17,
     "coveragePercent": "82.5",
@@ -605,6 +605,7 @@
       "src/cli.ts",
       "src/io-types.ts"
     ],
+    "tests/unit/ci-workflow.test.ts": [],
     "tests/unit/cli.test.ts": [
       "src/cli.ts",
       "src/io-types.ts"

@@ -11,7 +11,7 @@
     "unreferencedAnywhereCount": 3,
     "referencedInModuleCount": 117,
     "unclassifiedExportCount": 0,
-    "noImporterFileCount": 2
+    "noImporterFileCount": 1
   },
   "unreferencedAnywhere": {
     "src/depgraph/types.ts": [
@@ -268,7 +268,6 @@
   },
   "unclassifiedExports": {},
   "noImporterFiles": [
-    "src/assets.d.ts",
-    "src/bin.ts"
+    "src/assets.d.ts"
   ]
 }

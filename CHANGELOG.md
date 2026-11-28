@@ -13,6 +13,8 @@ All notable changes to this project are recorded in this file. The format follow
 - `repo-tools docs check` on this repository reads a root `.code-docs.json` that excludes
   `tests/fixtures/` and `tests/golden/`. Those folders hold deliberate MUST issues for the docs gate.
   The whole-tree gate now passes (0 MUST issues). A unit test runs the same gate on this repository.
+- `bun run cli` runs the process entry `src/bin.ts` from source. The script makes `map` read the
+  entry as a root, so it no longer reports `src/bin.ts` as an orphan.
 
 ### Fixed
 

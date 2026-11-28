@@ -8,22 +8,22 @@ This report lists each source file that the map census finds, with a disposition
 
 **Language**: typescript
 
-**Total files**: 326
+**Total files**: 327
 
 ## Disposition counts
 
 | Disposition | Count | Meaning |
 | --- | --: | --- |
 | `reachable` | 95 | A `src`-area file that an entry root reaches. |
-| `build-entry` | 1 | A `src`-area file that is an entry root. |
+| `build-entry` | 2 | A `src`-area file that is an entry root. |
 | `test-only` | 0 | A `src`-area file that only a test reaches. |
-| `orphan` | 2 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
-| `test` | 215 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
+| `orphan` | 1 | A `src`-area file that nothing reaches. Delete it, or wire it to a root. |
+| `test` | 216 | A file in a `test/` or `tests/` folder, or a `*.test.ts` or `*.spec.ts` file. |
 | `tool` | 12 | A file in a `tools/` or `scripts/` folder outside `src/`. |
 | `config` | 1 | A `*.config.*` file of TypeScript or JavaScript. |
 | `example` | 0 | A file in `examples/` or `docs/`. |
 | `bench` | 0 | A file in `bench/` or `benchmarks/`, or a `*.bench.*` file. |
-| **Total** | **326** | |
+| **Total** | **327** | |
 
 ## Per-area counts
 
@@ -31,14 +31,14 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --: |
 | `config` | 1 |
 | `src` | 98 |
-| `tests` | 215 |
+| `tests` | 216 |
 | `tools` | 12 |
 
 ## Per-package counts
 
 | Package | Files |
 | --- | --: |
-| `(root)` | 228 |
+| `(root)` | 229 |
 | `@danielsimonjr/repo-tools` | 98 |
 
 ## All files
@@ -49,7 +49,7 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/design-refs.ts` | (root) | tools | tool | 125 |
 | `scripts/docs-compare.ts` | (root) | tools | tool | 554 |
 | `scripts/fix-ledger-audit.ts` | (root) | tools | tool | 657 |
-| `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 666 |
+| `scripts/fix-ledger-mutations.ts` | (root) | tools | tool | 670 |
 | `scripts/lockcheck.ts` | (root) | tools | tool | 128 |
 | `scripts/privacy-check.ts` | (root) | tools | tool | 562 |
 | `scripts/privacy-hash.ts` | (root) | tools | tool | 53 |
@@ -58,7 +58,7 @@ This report lists each source file that the map census finds, with a disposition
 | `scripts/update-docs-goldens.ts` | (root) | tools | tool | 107 |
 | `scripts/update-map-goldens.ts` | (root) | tools | tool | 83 |
 | `src/assets.d.ts` | @danielsimonjr/repo-tools | src | orphan | 5 |
-| `src/bin.ts` | @danielsimonjr/repo-tools | src | orphan | 8 |
+| `src/bin.ts` | @danielsimonjr/repo-tools | src | build-entry | 8 |
 | `src/check/claims.ts` | @danielsimonjr/repo-tools | src | reachable | 122 |
 | `src/check/docs.ts` | @danielsimonjr/repo-tools | src | reachable | 45 |
 | `src/check/index.ts` | @danielsimonjr/repo-tools | src | reachable | 151 |
@@ -224,6 +224,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/chunk-review-2.test.ts` | (root) | tests | test | 348 |
 | `tests/unit/chunk-review.test.ts` | (root) | tests | test | 376 |
 | `tests/unit/chunk.test.ts` | (root) | tests | test | 322 |
+| `tests/unit/ci-workflow.test.ts` | (root) | tests | test | 24 |
 | `tests/unit/cli.test.ts` | (root) | tests | test | 93 |
 | `tests/unit/clones-command.test.ts` | (root) | tests | test | 493 |
 | `tests/unit/clones-detect.test.ts` | (root) | tests | test | 211 |
@@ -295,7 +296,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/depgraph-tsx.test.ts` | (root) | tests | test | 52 |
 | `tests/unit/design-refs.test.ts` | (root) | tests | test | 148 |
 | `tests/unit/docs-cfamily.test.ts` | (root) | tests | test | 498 |
-| `tests/unit/docs-command.test.ts` | (root) | tests | test | 553 |
+| `tests/unit/docs-command.test.ts` | (root) | tests | test | 561 |
 | `tests/unit/docs-comments.test.ts` | (root) | tests | test | 92 |
 | `tests/unit/docs-compare.test.ts` | (root) | tests | test | 414 |
 | `tests/unit/docs-csharp.test.ts` | (root) | tests | test | 194 |
@@ -316,7 +317,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/unit/docs-styles.test.ts` | (root) | tests | test | 328 |
 | `tests/unit/docs-typescript.test.ts` | (root) | tests | test | 606 |
 | `tests/unit/dynamic-imports.ts` | (root) | tests | test | 25 |
-| `tests/unit/entry-roots-build-configs.test.ts` | (root) | tests | test | 115 |
+| `tests/unit/entry-roots-build-configs.test.ts` | (root) | tests | test | 124 |
 | `tests/unit/entry-roots-noemit.test.ts` | (root) | tests | test | 84 |
 | `tests/unit/fix-ledger-audit.test.ts` | (root) | tests | test | 382 |
 | `tests/unit/golden-depgraph.test.ts` | (root) | tests | test | 20 |

@@ -1,11 +1,11 @@
 {
-  "totalFiles": 326,
+  "totalFiles": 327,
   "byDisposition": {
     "reachable": 95,
-    "build-entry": 1,
+    "build-entry": 2,
     "test-only": 0,
-    "orphan": 2,
-    "test": 215,
+    "orphan": 1,
+    "test": 216,
     "tool": 12,
     "config": 1,
     "bench": 0,
@@ -14,11 +14,11 @@
   "byArea": {
     "tools": 12,
     "src": 98,
-    "tests": 215,
+    "tests": 216,
     "config": 1
   },
   "byPackage": {
-    "(root)": 228,
+    "(root)": 229,
     "@danielsimonjr/repo-tools": 98
   },
   "files": [
@@ -55,7 +55,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 666
+      "loc": 670
     },
     {
       "file": "scripts/lockcheck.ts",
@@ -117,7 +117,7 @@
       "file": "src/bin.ts",
       "package": "@danielsimonjr/repo-tools",
       "area": "src",
-      "disposition": "orphan",
+      "disposition": "build-entry",
       "loc": 8
     },
     {
@@ -1276,6 +1276,13 @@
       "loc": 322
     },
     {
+      "file": "tests/unit/ci-workflow.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 24
+    },
+    {
       "file": "tests/unit/cli.test.ts",
       "package": "(root)",
       "area": "tests",
@@ -1777,7 +1784,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 553
+      "loc": 561
     },
     {
       "file": "tests/unit/docs-comments.test.ts",
@@ -1924,7 +1931,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 115
+      "loc": 124
     },
     {
       "file": "tests/unit/entry-roots-noemit.test.ts",

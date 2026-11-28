@@ -5,6 +5,7 @@
  * `dist-cli/` and its renderer from `src/index.html`.
  */
 import { afterAll, describe, expect, test } from "bun:test";
+import { join } from "node:path";
 import {
   configReferencedEntries,
   htmlReferencedEntries,
@@ -111,5 +112,13 @@ describe("entry roots from build configs", () => {
       "test/e2e/global-setup.ts",
       "test/setup.ts",
     ]);
+  });
+});
+
+describe("entry roots of this repository", () => {
+  // The process entry is run by a root script, so map reads it as a root and not as an orphan.
+  test("src/bin.ts is a root through the `cli` script", async () => {
+    const graph = await buildGraph(join(import.meta.dir, "../.."));
+    expect(graph.roots).toContain("src/bin.ts");
   });
 });
